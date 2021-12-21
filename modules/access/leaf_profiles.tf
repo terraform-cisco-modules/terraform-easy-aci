@@ -1,0 +1,216 @@
+#------------------------------------------
+# Create Leaf 
+#  - Leaf Profiles
+#  - Interface Profiles
+#    - Interface Selectors
+#  - Leaf Policy Groups
+#------------------------------------------
+
+variable "leaf_profiles" {
+  default = {
+    "default" = {
+      alias             = ""
+      description       = ""
+      external_pool_id  = "0"
+      name              = "**REQUIRED**"
+      leaf_policy_group = "**REQUIRED**"
+      node_type         = "unspecified"
+      pod_id            = "1"
+      serial            = "**REQUIRED**"
+      tags              = ""
+      interfaces = {
+        "default" = {
+          interface_description  = ""
+          interface_policy_group = ""
+          port_type              = "access"
+          selector_description   = ""
+          sub_port               = false
+        }
+      }
+    }
+  }
+  description = <<-EOT
+  key - Node ID of the Leaf
+    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    * external_pool_id:
+    * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
+    * interfaces:
+      - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular leaf port or X/X/X for a breakout sub port.
+        * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+        * interface_policy_group: Name of the Interface Policy Group
+        * port_type: The type of Policy to Apply to the Port.
+          - access: Access Port Policy Group
+          - breakout: Breakout Port Policy Group
+          - port-channel: Port-Channel Port Policy Group
+          - vpc: Virtual Port-Channel Port Policy Group
+        * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+        * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
+    * node_type:
+      - leaf
+      - remote-leaf-wan
+      - spine
+      - tier-2-leaf
+      - virtual-leaf
+    * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+    * serial: Manufacturing Serial Number of the Switch.
+    * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  EOT
+  type = map(object(
+    {
+      alias             = optional(string)
+      description       = optional(string)
+      external_pool_id  = optional(string)
+      name              = string
+      leaf_policy_group = string
+      node_type         = optional(string)
+      pod_id            = optional(string)
+      serial            = string
+      tags              = optional(string)
+      interfaces = map(object(
+        {
+          interface_description  = optional(string)
+          interface_policy_group = optional(string)
+          port_type              = optional(string)
+          selector_description   = optional(string)
+          sub_port               = optional(bool)
+        }
+      ))
+    }
+  ))
+}
+
+
+/*
+API Information:
+ - Class: "infraAccPortP"
+ - Distinguished Name: "uni/infra/accportprof-{name}"
+GUI Location:
+ - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {name}
+*/
+resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
+  for_each    = local.leaf_profiles
+  annotation  = each.value.tags
+  description = each.value.description
+  name        = each.value.name
+  name_alias  = each.value.alias
+}
+
+
+/*
+API Information:
+ - Class: "infraHPortS"
+ - Distinguished Name: "uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-range"
+GUI Location:
+ - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+*/
+resource "aci_access_port_selector" "leaf_interface_selectors" {
+  depends_on = [
+    aci_leaf_interface_profile.leaf_interface_profiles
+  ]
+  for_each                  = local.leaf_interface_selectors
+  leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.name].id
+  description               = each.value.selector_description
+  name                      = each.key
+  access_port_selector_type = "range"
+  relation_infra_rs_acc_base_grp = length(
+    regexall("access", each.value.port_type)
+    ) && each.value.policy_group != "" ? "uni/infra/funcprof/accportgrp-${each.value.policy_group}" : length(
+    regexall("breakout", each.value.port_type)
+    ) && each.value.policy_group != "" ? "uni/infra/funcprof/brkoutportgrp-${each.value.policy_group}" : length(
+    regexall("(port-channel|vpc)", each.value.port_type)
+  ) && each.value.policy_group != "" ? "uni/infra/funcprof/accbundle-${each.value.policy_group}" : ""
+}
+
+
+/*
+API Information:
+ - Class: "infraPortBlk"
+ - Distinguished Name: " uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-range/portblk-{interface_selector}"
+GUI Location:
+ - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+*/
+resource "aci_access_port_block" "leaf_port_blocks" {
+  depends_on = [
+    aci_leaf_interface_profile.leaf_interface_profiles,
+    aci_access_port_selector.leaf_interface_selectors
+  ]
+  for_each                = local.leaf_port_blocks
+  access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
+  description             = each.value.interface_description
+  from_card               = each.value.module
+  from_port               = each.value.port
+  name                    = each.key
+  to_card                 = each.value.module
+  to_port                 = each.value.port
+}
+
+
+/*
+API Information:
+ - Class: "infraPortBlk"
+ - Distinguished Name: " uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-{selector_type}/portblk-{interface_selector}"
+GUI Location:
+ - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+*/
+resource "aci_access_sub_port_block" "leaf_port_subblocks" {
+  depends_on = [
+    aci_leaf_interface_profile.leaf_interface_profiles,
+    aci_access_port_selector.leaf_interface_selectors
+  ]
+  for_each                = local.leaf_port_subblocks
+  access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
+  description             = each.value.interface_description
+  from_card               = each.value.module
+  from_port               = each.value.port
+  from_sub_port           = each.value.sub_port
+  name                    = each.key
+  to_card                 = each.value.module
+  to_port                 = each.value.port
+  to_sub_port             = each.value.sub_port
+}
+
+
+/*
+API Information:
+ - Class: "infraLeafS"
+ - Distinguished Name: "uni/infra/nprof-{Name}"
+GUI Location:
+ - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {Name}
+*/
+resource "aci_leaf_profile" "leaf_profiles" {
+  depends_on = [
+    aci_leaf_interface_profile.leaf_interface_profiles
+  ]
+  for_each    = local.leaf_profiles
+  annotation  = each.value.tags
+  description = each.value.description
+  name        = each.value.name
+  name_alias  = each.value.alias
+  relation_infra_rs_acc_port_p = [
+    aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
+  ]
+}
+
+
+/*
+API Information:
+ - Class: "infraLeafS"
+ - Class: "infraRsAccNodePGrp"
+ - Distinguished Name: "uni/infra/nprof-{name}/leaves-{selector_name}-typ-range"
+GUI Location:
+ - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
+*/
+resource "aci_leaf_selector" "leaf_selectors" {
+  depends_on = [
+    aci_leaf_profile.leaf_profiles,
+    aci_access_switch_policy_group.leaf_policy_groups
+  ]
+  leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
+  name                             = each.value.name
+  switch_association_type          = "range"
+  annotation                       = each.value.tags
+  description                      = each.value.description
+  name_alias                       = each.value.alias
+  relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.policy_group].id
+}
