@@ -1,34 +1,35 @@
-variable "aciCertName" {
-    default = ""
-    description = ""
-    sensitive = true
-    type = string
+terraform {
+  experiments = [module_variable_optional_attrs]
 }
 
-variable "aciPass" {
-    default = ""
-    description = ""
-    sensitive = true
-    type = string
+variable "certName" {
+  default     = ""
+  description = "Cisco ACI Certificate Name for SSL Based Authentication"
+  sensitive   = true
+  type        = string
 }
 
-variable "aciPrivateKey" {
-    default = ""
-    description = ""
-    sensitive = true
-    type = string
+variable "apicPass" {
+  default     = ""
+  description = "Password for User based Authentication."
+  sensitive   = true
+  type        = string
 }
 
-variable "aciUrl" {
-    default = ""
-    description = ""
-    sensitive = true
-    type = string
+variable "privateKey" {
+  default     = ""
+  description = "Cisco ACI Private Key for SSL Based Authentication."
+  sensitive   = true
+  type        = string
 }
 
-variable "aciUser" {
-    default = ""
-    description = ""
-    sensitive = true
-    type = string
+variable "apicUrl" {
+  description = "Cisco APIC URL.  In Example http://apic.example.com"
+  type        = string
+}
+
+variable "apicUser" {
+  default     = ""
+  description = "Username for User based Authentication."
+  type        = string
 }

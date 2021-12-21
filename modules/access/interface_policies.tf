@@ -7,7 +7,7 @@ variable "interface_policies" {
     "default" = {
       cdp_interface_policies = {
         "default" = {
-          admin_state = "disabled"
+          admin_state = "enabled"
           alias       = ""
           description = ""
         }
@@ -28,47 +28,47 @@ variable "interface_policies" {
         "default" = {
           alias            = ""
           description      = ""
-          qinq             = optional(string)
-          reflective_relay = optional(string)
-          vlan_scope       = optional(string)
+          qinq             = "disabled"
+          reflective_relay = "disabled"
+          vlan_scope       = "global"
         }
       }
       lacp_interface_policies = {
         "default" = {
           alias                     = ""
           description               = ""
-          fast_select_standby_ports = optional(bool)
-          graceful_convergence      = optional(bool)
-          load_defer_member_ports   = optional(bool)
-          maximum_number_of_links   = optional(string)
-          minimum_number_of_links   = optional(string)
-          mode                      = optional(string)
-          suspend_individual_port   = optional(bool)
-          symmetric_hashing         = optional(bool)
+          fast_select_standby_ports = true
+          graceful_convergence      = true
+          load_defer_member_ports   = false
+          maximum_number_of_links   = "16"
+          minimum_number_of_links   = "1"
+          mode                      = "off"
+          suspend_individual_port   = true
+          symmetric_hashing         = false
         }
       }
       link_level_policies = {
         "default" = {
           alias                       = ""
-          auto_negotiation            = optional(string)
+          auto_negotiation            = "on"
           description                 = ""
-          forwarding_error_correction = optional(string)
-          link_debounce_interval      = optional(string)
-          speed                       = optional(string)
+          forwarding_error_correction = "inherit"
+          link_debounce_interval      = "100"
+          speed                       = "inherit"
         }
       }
       lldp_interface_policies = {
         "default" = {
           alias          = ""
           description    = ""
-          receive_state  = optional(string)
+          receive_state  = "enabled"
           tags           = ""
-          transmit_state = optional(string)
+          transmit_state = "enabled"
         }
       }
       mcp_interface_policies = {
         "default" = {
-          admin_state = optional(string)
+          admin_state = "enabled"
           alias       = ""
           description = ""
           tags        = ""
@@ -78,16 +78,16 @@ variable "interface_policies" {
         "default" = {
           alias                 = ""
           description           = ""
-          maximum_endpoints     = optional(string)
-          port_security_timeout = optional(string)
+          maximum_endpoints     = "0"
+          port_security_timeout = "60"
           tags                  = ""
         }
       }
       spanning_tree_interface_policies = {
         "default" = {
           alias               = ""
-          bpdu_filter_enabled = optional(string)
-          bpdu_guard_enabled  = optional(string)
+          bpdu_filter_enabled = false
+          bpdu_guard_enabled  = false
           description         = ""
           tags                = ""
         }
