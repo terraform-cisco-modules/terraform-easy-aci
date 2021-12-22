@@ -54,8 +54,8 @@ resource "aci_spine_port_policy_group" "spine_port_policy_groups" {
   # class: infraAttEntityP
   # DN: "uni/infra/attentp-{aep_policy}"
   relation_infra_rs_att_ent_p = length(
-    regexall("[a-zA-Z0-9]", coalesce(each.value.eap_policy, "_EMPTY"))
-  ) > 0 ? aci_attachable_access_entity_profile.aep_policies[each.value.aep_policy].id : ""
+    regexall("[a-zA-Z0-9]", coalesce(each.value.aaep_policy, "_EMPTY"))
+  ) > 0 ? aci_attachable_access_entity_profile.aaep_policies[each.value.aaep_policy].id : ""
   # class: cdpIfPol
   # DN: "uni/infra/cdpIfP-{cdp_policy}"
   relation_infra_rs_cdp_if_pol = length(
