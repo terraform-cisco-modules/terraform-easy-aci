@@ -4,13 +4,13 @@
 #______________________________________________
 
 variable "cdp_interface_policies" {
-    default = {
-      "default" = {
-        admin_state = "enabled"
-        alias       = ""
-        description = ""
-      }
+  default = {
+    "default" = {
+      admin_state = "enabled"
+      alias       = ""
+      description = ""
     }
+  }
   description = <<-EOT
   Key: Name of the CDP Interface Policy.
   * admin_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.
@@ -352,8 +352,8 @@ variable "spanning_tree_interface_policies" {
   default = {
     "default" = {
       alias               = ""
-      bpdu_filter_enabled = false
-      bpdu_guard_enabled  = false
+      bpdu_filter_enabled = "no"
+      bpdu_guard_enabled  = "no"
       description         = ""
       tags                = ""
     }
@@ -570,7 +570,7 @@ GUI Location:
 */
 resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies" {
   for_each    = local.spanning_tree_interface_policies
-  ctrl        = [each.value.interface_controls]
+  ctrl        = each.value.control
   annotation  = each.value.tags
   description = each.value.description
   name        = each.key

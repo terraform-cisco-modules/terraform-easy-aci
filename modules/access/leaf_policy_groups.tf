@@ -5,32 +5,35 @@
 variable "leaf_policy_groups" {
   default = {
     "default" = {
-      bfd_ipv4_policy              = "default"
-      bfd_ipv6_policy              = "default"
-      bfd_multihop_ipv4_policy     = "default"
-      bfd_multihop_ipv6_policy     = "default"
-      cdp_policy                   = "default"
-      copp_leaf_policy             = "default"
-      copp_pre_filter              = "default"
-      description                  = ""
-      dot1x_authentication_policy  = "default"
-      equipment_flash_config       = "default"
-      fast_link_failover_policy    = "default"
-      fibre_channel_node_policy    = "default"
-      fibre_channel_san_policy     = "default"
-      forward_scale_profile_policy = "default"
-      lldp_policy                  = "default"
-      monitoring_policy            = "default"
-      netflow_node_policy          = "default"
-      ptp_node_policy              = "default"
-      poe_node_policy              = "default"
-      spanning_tree_policy         = "default"
-      synce_node_policy            = "default"
-      usb_configuration_policy     = "default"
+      alias                          = ""
+      bfd_ipv4_policy                = "default"
+      bfd_ipv6_policy                = "default"
+      bfd_multihop_ipv4_policy       = "default"
+      bfd_multihop_ipv6_policy       = "default"
+      cdp_policy                     = "default"
+      copp_leaf_policy               = "default"
+      copp_pre_filter                = "default"
+      description                    = ""
+      dot1x_authentication_policy    = "default"
+      equipment_flash_config         = "default"
+      fast_link_failover_policy      = "default"
+      fibre_channel_node_policy      = "default"
+      fibre_channel_san_policy       = "default"
+      forward_scale_profile_policy   = "default"
+      lldp_policy                    = "default"
+      monitoring_policy              = "default"
+      netflow_node_policy            = "default"
+      ptp_node_policy                = "default"
+      poe_node_policy                = "default"
+      spanning_tree_interface_policy = "default"
+      synce_node_policy              = "default"
+      tags                           = ""
+      usb_configuration_policy       = "default"
     }
   }
   description = <<-EOT
   key - Name of the Leaf Policy Group.
+    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
     * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
     * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
     * bfd_multihop_ipv4_policy: The BFD multihop IPv4 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv4 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
@@ -55,34 +58,37 @@ variable "leaf_policy_groups" {
     * netflow_node_policy: The NetFlow node policy name.  The node-level policy deploys two different NetFlow timers that specify the rate at which flow records are sent to the external collector.
     * ptp_node_policy: The PTP node policy name.  The Precision Time Protocol (PTP) synchronizes distributed clocks in a system using Ethernet networks.
     * poe_node_policy: The PoE node policy name.  PoE node policies control the overall power setting for the switch.
-    * spanning_tree_policy: The spanning tree policy name.  A spanning tree protocol (STP) policy prevents loops caused by redundant paths in your network.
+    * spanning_tree_interface_policy: The spanning tree policy name.  A spanning tree protocol (STP) policy prevents loops caused by redundant paths in your network.
     * synce_node_policy: The SyncE Node policy name.  Synchronous Ethernet (SyncE) provides high-quality clock synchronization over Ethernet ports by using known common precision frequency references.
+    * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
     * usb_configuration_policy: The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
   EOT
   type = map(object(
     {
-      bfd_ipv4_policy              = optional(string)
-      bfd_ipv6_policy              = optional(string)
-      bfd_multihop_ipv4_policy     = optional(string)
-      bfd_multihop_ipv6_policy     = optional(string)
-      cdp_policy                   = optional(string)
-      copp_leaf_policy             = optional(string)
-      copp_pre_filter              = optional(string)
-      description                  = optional(string)
-      dot1x_authentication_policy  = optional(string)
-      equipment_flash_config       = optional(string)
-      fast_link_failover_policy    = optional(string)
-      fibre_channel_node_policy    = optional(string)
-      fibre_channel_san_policy     = optional(string)
-      forward_scale_profile_policy = optional(string)
-      lldp_policy                  = optional(string)
-      monitoring_policy            = optional(string)
-      netflow_node_policy          = optional(string)
-      ptp_node_policy              = optional(string)
-      poe_node_policy              = optional(string)
-      spanning_tree_policy         = optional(string)
-      synce_node_policy            = optional(string)
-      usb_configuration_policy     = optional(string)
+      alias                          = optional(string)
+      bfd_ipv4_policy                = optional(string)
+      bfd_ipv6_policy                = optional(string)
+      bfd_multihop_ipv4_policy       = optional(string)
+      bfd_multihop_ipv6_policy       = optional(string)
+      cdp_policy                     = optional(string)
+      copp_leaf_policy               = optional(string)
+      copp_pre_filter                = optional(string)
+      description                    = optional(string)
+      dot1x_authentication_policy    = optional(string)
+      equipment_flash_config         = optional(string)
+      fast_link_failover_policy      = optional(string)
+      fibre_channel_node_policy      = optional(string)
+      fibre_channel_san_policy       = optional(string)
+      forward_scale_profile_policy   = optional(string)
+      lldp_policy                    = optional(string)
+      monitoring_policy              = optional(string)
+      netflow_node_policy            = optional(string)
+      ptp_node_policy                = optional(string)
+      poe_node_policy                = optional(string)
+      spanning_tree_interface_policy = optional(string)
+      synce_node_policy              = optional(string)
+      tags                           = optional(string)
+      usb_configuration_policy       = optional(string)
     }
   ))
 }

@@ -62,8 +62,8 @@ variable "vlan_pools" {
   ))
 }
 
-resource "aci_vlan_pool" "vlan_pool" {
-  for_each    = local.vlan_pool
+resource "aci_vlan_pool" "vlan_pools" {
+  for_each    = local.vlan_pools
   alloc_mode  = each.value.allocation_mode
   description = each.value.description
   name        = each.key
@@ -72,7 +72,7 @@ resource "aci_vlan_pool" "vlan_pool" {
 
 resource "aci_ranges" "vlans" {
   depends_on = [
-    aci_vlan_pool.vlan_pool
+    aci_vlan_pool.vlan_pools
   ]
   for_each     = local.vlan_ranges
   description  = each.value.description
@@ -80,5 +80,5 @@ resource "aci_ranges" "vlans" {
   from         = "vlan-${each.value.vlan}"
   to           = "vlan-${each.value.vlan}"
   role         = each.value.role
-  vlan_pool_dn = aci_vlan_pool.vlan_pool[each.value.name].id
+  vlan_pool_dn = aci_vlan_pool.vlan_pools[each.value.name].id
 }
