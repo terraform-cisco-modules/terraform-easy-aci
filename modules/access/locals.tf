@@ -1,16 +1,87 @@
 locals {
   #__________________________________________________________
   #
+  # Domain Variables
+  #__________________________________________________________
+
+  layer3_domains = {
+    for k, v in var.layer3_domains : k => {
+      alias     = v.alias != null ? v.alias : ""
+      tags      = v.tags != null ? v.tags : ""
+      vlan_pool = v.vlan_pool
+    }
+  }
+
+  physical_domains = {
+    for k, v in var.layer3_domains : k => {
+      alias     = v.alias != null ? v.alias : ""
+      tags      = v.tags != null ? v.tags : ""
+      vlan_pool = v.vlan_pool
+    }
+  }
+
+  vmm_domains = {
+    for k, v in var.vmm_domains : k => {
+      alias                          = v.alias != null ? v.alias : ""
+      access_mode                    = v.access_mode != null ? v.access_mode : "read-write"
+      arp_learning                   = v.arp_learning != null ? v.arp_learning : "disabled"
+      cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+      configure_infra_port_groups    = v.configure_infra_port_groups != null ? v.configure_infra_port_groups : ""
+      control                        = v.control != null ? v.control : "epDpVerify"
+      delimiter                      = v.delimiter != null ? v.delimiter : ""
+      enable_tag_collection          = v.enable_tag_collection != null ? v.enable_tag_collection : "no"
+      encapsulation                  = v.encapsulation != null ? v.encapsulation : "vlan"
+      endpoint_inventory_type        = v.endpoint_inventory_type != null ? v.endpoint_inventory_type : "on-link"
+      endpoint_retention_time        = v.endpoint_retention_time != null ? v.endpoint_retention_time : "0"
+      enforcement                    = v.enforcement != null ? v.enforcement : "hw"
+      enhanced_lag_policy            = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
+      firewall_policy                = v.firewall_policy != null ? v.firewall_policy : ""
+      host_availability_monitor      = v.host_availability_monitor != null ? v.host_availability_monitor : "no"
+      lacp_interface_policy          = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
+      lldp_interface_policy          = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+      multicast_address              = v.multicast_address != null ? v.multicast_address : ""
+      multicast_pool                 = v.multicast_pool != null ? v.multicast_pool : ""
+      mtu_policy                     = v.mtu_policy != null ? v.mtu_policy : "default"
+      preferred_encapsulation        = v.preferred_encapsulation != null ? v.preferred_encapsulation : "unspecified"
+      provider_type                  = v.provider_type != null ? v.provider_type : "VMware"
+      spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      tags                           = v.tags != null ? v.tags : ""
+      virtual_switch_type            = v.virtual_switch_type != null ? v.virtual_switch_type : "default"
+      vlan_pool                      = v.vlan_pool != null ? v.vlan_pool : ""
+    }
+  }
+
+
+  #__________________________________________________________
+  #
   # Global Policies Variables
   #__________________________________________________________
 
-  aaep_policies = {
+  aaep_policies_loop_1 = {
     for k, v in var.aaep_policies : k => {
       alias            = v.alias != null ? v.alias : ""
       description      = v.description != null ? v.description : ""
       layer3_domains   = v.layer3_domains != null ? v.layer3_domains : []
       physical_domains = v.physical_domains != null ? v.physical_domains : []
-      virtual_domains  = v.virtual_domains != null ? v.virtual_domains : []
+      vmm_domains      = v.vmm_domains != null ? v.vmm_domains : []
+    }
+  }
+
+  aaep_policies_loop_2 = {
+    for k, v in local.aaep_policies_loop_1 : k => {
+      alias            = v.alias != null ? v.alias : ""
+      description      = v.description != null ? v.description : ""
+      layer3_domains   = [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"]]
+      physical_domains = [for s in v.physical_domains : aci_physical_domain.physical_domains["${s}"]]
+      vmm_domains      = [for s in v.vmm_domains : aci_vmm_domain.vmm_domains["${s}"]]
+    }
+  }
+
+  aaep_policies = {
+    for k, v in local.aaep_policies_loop_2 : k => {
+      alias       = v.alias != null ? v.alias : ""
+      description = v.description != null ? v.description : ""
+      domains     = compact(concat(v.layer3_domains, v.physical_domains, v.vmm_domains))
     }
   }
 
@@ -249,6 +320,7 @@ locals {
       role              = v.role != null ? v.role : "unspecified"
       serial            = v.serial
       tags              = v.tags != null ? v.tags : ""
+      two_slot_leaf     = v.two_slot_leaf != null ? v.two_slot_leaf : false
     }
   }
 
@@ -259,34 +331,34 @@ locals {
         interface_policy_group = v.interface_policy_group != null ? v.interface_policy_group : ""
         key1                   = key
         key2                   = k
-        interface_name = v.sub_port == true && var.two_slot_leafs == true && length(
+        interface_name = v.sub_port == true && value.two_slot_leaf == true && length(
           regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-00${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && var.two_slot_leafs == true && length(
+          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
           regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-0${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && var.two_slot_leafs == true && length(
+          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
           regexall("^\\d{3}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == false && var.two_slot_leafs == true && length(
+          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
           regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-00${element(split("/", k), 1
-          )}" : v.sub_port == false && var.two_slot_leafs == true && length(
+          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
           regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-0${element(split("/", k), 1
-          )}" : v.sub_port == false && var.two_slot_leafs == true && length(
+          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
           regexall("^\\d{3}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-${element(split("/", k), 1
-          )}" : v.sub_port == true && var.two_slot_leafs == false && length(
+          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
           regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-0${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && var.two_slot_leafs == false && length(
+          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
           regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == false && var.two_slot_leafs == false && length(
+          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
           regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-0${element(split("/", k), 1
-          )}" : v.sub_port == false && var.two_slot_leafs == false && length(
+          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
           regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
             )}-${element(split("/", k), 1
         )}" : ""
@@ -368,10 +440,12 @@ locals {
   spine_interface_selectors_loop_1 = flatten([
     for key, value in local.spine_profiles : [
       for k, v in value.interfaces : {
-        interface_description  = v.interface_description != null ? v.interface_description : ""
-        interface_policy_group = v.interface_policy_group != null ? v.interface_policy_group : "default"
-        key1                   = key
-        key2                   = k
+        interface_description = v.interface_description != null ? v.interface_description : ""
+        interface_policy_group = coalesce(
+          v.interface_policy_group, "EMPTY"
+        ) != "EMPTY" ? v.interface_policy_group : "default"
+        key1 = key
+        key2 = k
         interface_name = length(
           regexall("^\\d{1}$", element(split("/", k), 1))
           ) > 0 ? "Eth${element(split("/", k), 0)}-0${element(split("/", k), 1)}" : length(
@@ -398,6 +472,8 @@ locals {
   # VLAN Pools Variables
   #__________________________________________________________
 
+  # This first loop is to handle optional attributes and return 
+  # default values if the user doesn't enter a value.
   vlan_pools = {
     for k, v in var.vlan_pools : k => {
       alias           = v.alias != null ? v.alias : ""
@@ -407,15 +483,125 @@ locals {
     }
   }
 
+  /*
+  Loop 1 is to determine if the vlan_range is:
+  * A Single number 1
+  * A Range of numbers 1-5
+  * A List of numbers 1-5,10-15
+  And then to return these values as a list
+  */
+  vlan_ranges_loop_1 = flatten([
+    for key, value in local.vlan_pools : [
+      for k, v in value.encap_blocks : {
+        allocation_mode = v.allocation_mode != null ? v.allocation_mode : "inherit"
+        description     = v.description != null ? v.description : ""
+        key1            = key
+        key2            = k
+        role            = v.role != null ? v.role : "external"
+        vlan_split = length(regexall("-", v.vlan_range)) > 0 ? tolist(split(",", v.vlan_range)) : length(
+          regexall(",", v.vlan_range)) > 0 ? tolist(split(",", v.vlan_range)
+        ) : [v.vlan_range]
+        vlan_range = v.vlan_range
+      }
+    ]
+  ])
 
-  vlan_ranges = {
-    for k, v in local.vlan_pools : k => {
-      alias           = v.alias != null ? v.alias : ""
-      allocation_mode = v.allocation_mode != null ? v.allocation_mode : "dynamic"
-      description     = v.description != null ? v.description : ""
-      encap_blocks    = v.encap_blocks != null ? v.encap_blocks : {}
+  # Loop 2 takes a list that contains a "-" or a "," and expands those values
+  # into a full list.  So [1-5] becomes [1, 2, 3, 4, 5]
+  vlan_ranges_loop_2 = {
+    for k, v in local.vlan_ranges_loop_1 : "${v.key1}_${v.key2}" => {
+      allocation_mode = v.allocation_mode
+      description     = v.description
+      key1            = v.key1
+      key2            = v.key2
+      role            = v.role
+      vlan_list = length(regexall("(,|-)", jsonencode(v.vlan_range))) > 0 ? flatten([
+        for s in v.vlan_split : length(regexall("-", s)) > 0 ? [for v in range(tonumber(
+          element(split("-", s), 0)), (tonumber(element(split("-", s), 1)) + 1)
+        ) : tonumber(v)] : [s]
+      ]) : v.vlan_split
     }
   }
+
+  # Loop 3 will take the vlan_list created in Loop 2 and expand this
+  # out to a map of objects per vlan.
+  vlan_ranges_loop_3 = flatten([
+    for k, v in local.vlan_ranges_loop_2 : [
+      for s in v.vlan_list : {
+        allocation_mode = v.allocation_mode
+        description     = v.description
+        key1            = v.key1
+        role            = v.role
+        vlan            = s
+      }
+    ]
+  ])
+
+  # And lastly loop3's list is converted back to a map of objects
+  vlan_ranges = { for k, v in local.vlan_ranges_loop_3 : "${v.key1}_${v.vlan}" => v }
+
+  #__________________________________________________________
+  #
+  # Leaf Policy Group Variables
+  #__________________________________________________________
+
+  vmm_credential_loop_1 = flatten([
+    for key, value in var.virtual_networking : [
+      for k, v in value.vmm_credentials : {
+        vmm_domain  = value.vmm_domain
+        key1        = key
+        key2        = k
+        description = v.description != null ? v.description : ""
+        password    = v.password != null ? v.password : 1
+        username    = v.username != null ? v.username : "**REQUIRED**"
+      }
+    ]
+  ])
+
+  vmm_credentials = { for k, v in local.vmm_credential_loop_1 : "${v.key1}_${v.key_2}" => v }
+
+  vmm_controller_loop_1 = flatten([
+    for key, value in var.virtual_networking : [
+      for k, v in value.vmm_controller : {
+        vmm_domain             = value.vmm_domain
+        key1                   = key
+        key2                   = k
+        tags                   = v.tags != null ? v.tags : ""
+        datacenter             = v.datacenter != null ? v.datacenter : "**REQUIRED**"
+        dvs_version            = v.dvs_version != null ? v.dvs_version : "unmanaged"
+        hostname               = v.hostname != null ? v.hostname : "**REQUIRED**"
+        management_epg         = v.management_epg != null ? v.management_epg : ""
+        monitoring_policy      = v.monitoring_policy != null ? v.monitoring_policy : "default"
+        policy_scope           = v.policy_scope != null ? v.policy_scope : "vm"
+        port                   = v.port != null ? v.port : "0"
+        sequence_number        = v.sequence_number != null ? v.sequence_number : "0"
+        stats_collection       = v.stats_collection != null ? v.stats_collection : "disabled"
+        trigger_inventory_sync = v.trigger_inventory_sync != null ? v.trigger_inventory_sync : "untriggered"
+        virtual_switch_type    = v.virtual_switch_type != null ? v.virtual_switch_type : "default"
+      }
+    ]
+  ])
+
+  vmm_controllers = { for k, v in local.vmm_controller_loop_1 : "${v.key1}_${v.key_2}" => v }
+
+
+  vswitch_policies_loop_1 = flatten([
+    for key, value in var.virtual_networking : [
+      for k, v in value.vswitch_policy : {
+        vmm_domain            = value.vmm_domain
+        key1                  = key
+        key2                  = k
+        active_flow_timeout   = v.active_flow_timeout != null ? v.active_flow_timeout : "60"
+        alias                 = v.alias != null ? v.alias : ""
+        idle_flow_timeout     = v.idle_flow_timeout != null ? v.idle_flow_timeout : "15"
+        sample_rate           = v.sample_rate != null ? v.sample_rate : "0"
+        netflow_export_policy = v.netflow_export_policy != null ? v.netflow_export_policy : ""
+        tags                  = v.tags != null ? v.tags : ""
+      }
+    ]
+  ])
+
+  vswitch_policies = { for k, v in local.vswitch_policies_loop_1 : "${v.key1}_${v.key_2}" => v }
 
   # End of Local Loops
 }

@@ -1,16 +1,13 @@
-#------------------------------------------
-# Create Spine 
-#  - Spine Profiles
-#  - Interface Profiles
-#    - Interface Selectors
-#  - Spine Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Spine Profile Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "spine_profiles" {
   default = {
     "default" = {
-      alias              = ""
-      description        = ""
+      alias       = ""
+      description = ""
       interfaces = {
         "default" = {
           interface_description  = ""
@@ -41,8 +38,8 @@ variable "spine_profiles" {
   EOT
   type = map(object(
     {
-      alias              = optional(string)
-      description        = optional(string)
+      alias       = optional(string)
+      description = optional(string)
       interfaces = map(object(
         {
           interface_description  = optional(string)
@@ -62,12 +59,14 @@ variable "spine_profiles" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraSpAccPortP"
  - Distinguished Name: "uni/infra/spaccportprof-{name}"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Spine Interfaces > Profiles > {name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spine_interface_profile" "spine_interface_profiles" {
   for_each    = local.spine_profiles
@@ -78,62 +77,57 @@ resource "aci_spine_interface_profile" "spine_interface_profiles" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraHPortS"
  - Distinguished Name: "uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-range"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Spine Interfaces > Profiles > {interface_profile}:{interface_selector}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_rest" "spine_interface_selectors" {
+  provider = netascode
   depends_on = [
     aci_spine_interface_profile.spine_interface_profiles
   ]
   for_each   = local.spine_interface_selectors
-  path       = "/api/node/mo/uni/infra/spaccportprof-${each.value.name}/shports-${each.value.name}-typ-range.json"
+  dn         = "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.interface_name}-typ-range"
   class_name = "infraSHPortS"
-  payload    = <<EOF
-{
-    "infraSHPortS": {
-        "attributes": {
-            "descr": "${each.value.selector_description}",
-            "dn": "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.name}-typ-range",
-            "name": "${each.value.interface_name}",
-        },
-        "children": [
-            {
-                "infraPortBlk": {
-                    "attributes": {
-                        "descr": "${each.value.interface_description}",
-                        "dn": "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.name}-typ-range/portblk-${each.value.interface_name}",
-                        "fromCard": "${each.value.module}",
-                        "fromPort": "${each.value.port}",
-                        "toCard": "${each.value.module}",
-                        "toPort": "${each.value.port}",
-                        "name": "${each.value.interface_name}",
-                    }
-                }
-            },
-            {
-                "infraRsSpAccGrp": {
-                    "attributes": {
-                        "tDn": "uni/infra/funcprof/spaccportgrp-${each.value.interface_policy_group}"
-                    }
-                }
-            }
-        ]
+  content = {
+    name  = each.value.interface_name
+    descr = each.value.selector_description
+  }
+  child {
+    rn         = "portblk-${each.value.interface_name}"
+    class_name = "infraPortBlk"
+    content = {
+      fromCard = each.value.module
+      fromPort = each.value.port
+      toCard   = each.value.module
+      toPort   = each.value.port
+      name     = each.value.interface_name
+
     }
-}
-    EOF
+  }
+  child {
+    rn         = "spaccportgrp-${each.value.interface_policy_group}"
+    class_name = "infraRsSpAccGrp"
+    content = {
+      tDn = "uni/infra/funcprof/spaccportgrp-${each.value.interface_policy_group}"
+    }
+  }
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraSpineS"
  - Distinguished Name: "uni/infra/nprof-{Name}"
 GUI Location:
  - Fabric > Access Policies > Switches > Spine Switches > Profiles > {Name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spine_profile" "spine_profiles" {
   depends_on = [
@@ -150,46 +144,51 @@ resource "aci_spine_profile" "spine_profiles" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraSpineS"
  - Distinguished Name: "uni/infra/spprof-{name}/spines-{name}-typ-range"
 GUI Location:
  - Fabric > Access Policies > Switches > Spine Switches > Profiles > {name}: Spine Selectors [{name}]
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spine_switch_association" "spine_profiles" {
   depends_on = [
     aci_spine_profile.spine_profiles,
     aci_spine_switch_policy_group.spine_policy_groups
   ]
-  for_each         = local.spine_profiles
-  spine_profile_dn = aci_spine_profile.spine_profiles[each.key].id
-  # description                             = each.value.description
+  for_each                               = local.spine_profiles
+  spine_profile_dn                       = aci_spine_profile.spine_profiles[each.key].id
+  description                            = each.value.description
   name                                   = each.value.name
   name_alias                             = each.value.alias
   relation_infra_rs_spine_acc_node_p_grp = aci_spine_switch_policy_group.spine_policy_groups[each.value.spine_policy_group].id
   spine_switch_association_type          = "range"
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "infraNodeBlk"
+ - Distinguished Name: "uni/infra/spprof-{name}/spines-{name}-typ-range/nodeblk-blk{node_id}-{node_id}"
+GUI Location:
+ - Fabric > Access Policies > Switches > Spine Switches > Profiles > {name}: Spine Selectors [{name}]
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_rest" "spine_profile_node_blocks" {
+  provider = netascode
   depends_on = [
     aci_spine_profile.spine_profiles,
     aci_spine_switch_association.spine_profiles
   ]
   for_each   = local.spine_profiles
-  path       = "/api/node/mo/uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}.json"
+  dn         = "uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
-  payload    = <<EOF
-{
-    "infraNodeBlk": {
-        "attributes": {
-            "dn": "uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}",
-            "from_": "${each.key}",
-            "to_": "${each.key}",
-            "name": "blk${each.key}-${each.key}",
-        },
-        "children": []
-    }
-}
-  EOF
+  content = {
+    from_ = each.key
+    to_   = each.key
+    name  = "blk${each.key}-${each.key}"
+  }
 }

@@ -1,7 +1,8 @@
-#------------------------------------------
-# Create Spine Port Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Spine Interface Policy Group Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "spine_interface_policy_groups" {
   default = {
     "default" = {
@@ -34,12 +35,14 @@ variable "spine_interface_policy_groups" {
   ))
 }
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraSpAccPortGrp"
  - Distinguished Name: "uni/infra/funcprof/spaccportgrp-{name}"
 GUI Location:
  - Fabric > Interfaces > Spine Interfaces > Policy Groups > {name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spine_port_policy_group" "spine_interface_policy_groups" {
   depends_on = [

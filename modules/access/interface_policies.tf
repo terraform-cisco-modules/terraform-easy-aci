@@ -1,8 +1,8 @@
-#______________________________________________
-#
-# CDP Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+CDP Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "cdp_interface_policies" {
   default = {
     "default" = {
@@ -27,11 +27,29 @@ variable "cdp_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# Fibre-Channel Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "cdpIfPol"
+ - Distinguished Name: "uni/infra/cdpIfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_cdp_interface_policy" "cdp_interface_policies" {
+  for_each    = local.cdp_interface_policies
+  admin_st    = each.value.admin_state
+  description = each.value.description
+  name        = each.key
+  name_alias  = each.value.alias
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Fibre-Channel Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "fc_interface_policies" {
   default = {
     "default" = {
@@ -87,11 +105,34 @@ variable "fc_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# L2 Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "fcIfPol"
+ - Distinguished Name: "uni/infra/fcIfPol-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Fibre Channel Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_interface_fc_policy" "fc_interface_policies" {
+  for_each     = local.fc_interface_policies
+  automaxspeed = each.value.auto_max_speed
+  description  = each.value.description
+  fill_pattern = each.value.fill_pattern
+  name         = each.key
+  name_alias   = each.value.alias
+  port_mode    = each.value.port_mode
+  rx_bb_credit = each.value.receive_buffer_credit
+  speed        = each.value.speed
+  trunk_mode   = each.value.trunk_mode
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+L2 Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "l2_interface_policies" {
   default = {
     "default" = {
@@ -129,11 +170,31 @@ variable "l2_interface_policies" {
   ))
 }
 
-#______________________________________________
-#
-# LACP Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "l2IfPol"
+ - Distinguished Name: "uni/infra/l2IfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > L2 Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_l2_interface_policy" "l2_interface_policies" {
+  for_each    = local.l2_interface_policies
+  description = each.value.description
+  name        = each.key
+  name_alias  = each.value.alias
+  qinq        = each.value.qinq
+  vepa        = each.value.reflective_relay
+  vlan_scope  = each.value.vlan_scope
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+LACP Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "lacp_interface_policies" {
   default = {
     "default" = {
@@ -184,11 +245,32 @@ variable "lacp_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# Link Level Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "lacpLagPol"
+ - Distinguished Name: "uni/infra/lacplagp-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Port Channel : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_lacp_policy" "lacp_interface_policies" {
+  for_each    = local.lacp_interface_policies
+  ctrl        = [each.value.control]
+  description = each.value.description
+  max_links   = each.value.maximum_number_of_links
+  min_links   = each.value.minimum_number_of_links
+  name        = each.key
+  name_alias  = each.value.alias
+  mode        = each.value.mode
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Link Level Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "link_level_policies" {
   default = {
     "default" = {
@@ -242,11 +324,32 @@ variable "link_level_policies" {
 }
 
 
-#______________________________________________
-#
-# LLDP Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "fabricHIfPol"
+ - Distinguished Name: "uni/infra/hintfpol-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Link Level : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_fabric_if_pol" "link_level_policies" {
+  for_each      = local.link_level_policies
+  auto_neg      = each.value.auto_negotiation
+  description   = each.value.description
+  fec_mode      = each.value.forwarding_error_correction
+  link_debounce = each.value.link_debounce_interval
+  name          = each.key
+  name_alias    = each.value.alias
+  speed         = each.value.speed
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+LLDP Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "lldp_interface_policies" {
   default = {
     "default" = {
@@ -277,11 +380,31 @@ variable "lldp_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# MCP Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "lldpIfPol"
+ - Distinguished Name: "uni/infra/lldpIfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > LLDP Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_lldp_interface_policy" "lldp_interface_policies" {
+  for_each    = local.lldp_interface_policies
+  admin_rx_st = each.value.receive_state
+  admin_tx_st = each.value.transmit_state
+  annotation  = each.value.tags
+  description = each.value.description
+  name        = each.key
+  name_alias  = each.value.alias
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+MCP Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "mcp_interface_policies" {
   default = {
     "default" = {
@@ -309,11 +432,30 @@ variable "mcp_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# Port Security Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "mcpIfPol"
+ - Distinguished Name: "uni/infra/mcpIfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > MCP Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_miscabling_protocol_interface_policy" "mcp_interface_policies" {
+  for_each    = local.mcp_interface_policies
+  annotation  = each.value.tags
+  admin_st    = each.value.admin_state
+  description = each.value.description
+  name        = each.key
+  name_alias  = each.value.alias
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Port Security Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "port_security_policies" {
   default = {
     "default" = {
@@ -343,11 +485,32 @@ variable "port_security_policies" {
   ))
 }
 
-#______________________________________________
-#
-# Spanning-Tree Interface Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "l2PortSecurityPol"
+ - Distinguished Name: "uni/infra/portsecurityP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Port Security : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_port_security_policy" "port_security_policies" {
+  for_each    = local.port_security_policies
+  annotation  = each.value.tags
+  description = each.value.description
+  maximum     = each.value.maximum_endpoints
+  name        = each.key
+  name_alias  = each.value.alias
+  timeout     = each.value.port_security_timeout
+  violation   = "protect"
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Spanning-Tree Interface Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "spanning_tree_interface_policies" {
   default = {
     "default" = {
@@ -378,195 +541,14 @@ variable "spanning_tree_interface_policies" {
 }
 
 
-#______________________________________________
-#
-# Create CDP Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "cdpIfPol"
- - Distinguished Name: "uni/infra/cdpIfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
-*/
-resource "aci_cdp_interface_policy" "cdp_interface_policies" {
-  for_each    = local.cdp_interface_policies
-  admin_st    = each.value.admin_state
-  description = each.value.description
-  name        = each.key
-  name_alias  = each.value.alias
-}
+/*_____________________________________________________________________________________________________________________
 
-
-#______________________________________________
-#
-# Create Fibre-Channel Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "fcIfPol"
- - Distinguished Name: "uni/infra/fcIfPol-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > Fibre Channel Interface : {name}
-*/
-resource "aci_interface_fc_policy" "fc_interface_policies" {
-  for_each     = local.fc_interface_policies
-  automaxspeed = each.value.auto_max_speed
-  description  = each.value.description
-  fill_pattern = each.value.fill_pattern
-  name         = each.key
-  name_alias   = each.value.alias
-  port_mode    = each.value.port_mode
-  rx_bb_credit = each.value.receive_buffer_credit
-  speed        = each.value.speed
-  trunk_mode   = each.value.trunk_mode
-}
-
-
-#______________________________________________
-#
-# Create L2 Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "l2IfPol"
- - Distinguished Name: "uni/infra/l2IfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > L2 Interface : {name}
-*/
-resource "aci_l2_interface_policy" "l2_interface_policies" {
-  for_each    = local.l2_interface_policies
-  description = each.value.description
-  name        = each.key
-  name_alias  = each.value.alias
-  qinq        = each.value.qinq
-  vepa        = each.value.reflective_relay
-  vlan_scope  = each.value.vlan_scope
-}
-
-
-#______________________________________________
-#
-# Create LACP Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "lacpLagPol"
- - Distinguished Name: "uni/infra/lacplagp-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > Port Channel : {name}
-*/
-resource "aci_lacp_policy" "lacp_interface_policies" {
-  for_each    = local.lacp_interface_policies
-  ctrl        = [each.value.control]
-  description = each.value.description
-  max_links   = each.value.maximum_number_of_links
-  min_links   = each.value.minimum_number_of_links
-  name        = each.key
-  name_alias  = each.value.alias
-  mode        = each.value.mode
-}
-
-
-#______________________________________________
-#
-# Create Link Level Policies
-#______________________________________________
-/*
-API Information:
- - Class: "fabricHIfPol"
- - Distinguished Name: "uni/infra/hintfpol-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > Link Level : {name}
-*/
-resource "aci_fabric_if_pol" "link_level_policies" {
-  for_each      = local.link_level_policies
-  auto_neg      = each.value.auto_negotiation
-  description   = each.value.description
-  fec_mode      = each.value.forwarding_error_correction
-  link_debounce = each.value.link_debounce_interval
-  name          = each.key
-  name_alias    = each.value.alias
-  speed         = each.value.speed
-}
-
-
-#______________________________________________
-#
-# Create LLDP Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "lldpIfPol"
- - Distinguished Name: "uni/infra/lldpIfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > LLDP Interface : {name}
-*/
-resource "aci_lldp_interface_policy" "lldp_interface_policies" {
-  for_each    = local.lldp_interface_policies
-  admin_rx_st = each.value.receive_state
-  admin_tx_st = each.value.transmit_state
-  annotation  = each.value.tags
-  description = each.value.description
-  name        = each.key
-  name_alias  = each.value.alias
-}
-
-
-#______________________________________________
-#
-# Create Mis-Cabling Protocol Interface Policies
-#______________________________________________
-/*
-API Information:
- - Class: "mcpIfPol"
- - Distinguished Name: "uni/infra/mcpIfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > MCP Interface : {name}
-*/
-resource "aci_miscabling_protocol_interface_policy" "mcp_interface_policies" {
-  for_each    = local.mcp_interface_policies
-  annotation  = each.value.tags
-  admin_st    = each.value.admin_state
-  description = each.value.description
-  name        = each.key
-  name_alias  = each.value.alias
-}
-
-
-#______________________________________________
-#
-# Create Port Security Policies
-#______________________________________________
-/*
-API Information:
- - Class: "l2PortSecurityPol"
- - Distinguished Name: "uni/infra/portsecurityP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > Port Security : {name}
-*/
-resource "aci_port_security_policy" "port_security_policies" {
-  for_each    = local.port_security_policies
-  annotation  = each.value.tags
-  description = each.value.description
-  maximum     = each.value.maximum_endpoints
-  name        = each.key
-  name_alias  = each.value.alias
-  timeout     = each.value.port_security_timeout
-  violation   = "protect"
-}
-
-
-#______________________________________________
-#
-# Create Spanning-Tree Interface Policies
-#______________________________________________
-/*
 API Information:
  - Class: "stpIfPol"
  - Distinguished Name: "uni/infra/ifPol-{name}"
 GUI Location:
  - Fabric > Access Policies > Policies > Interface > Spanning Tree Interface : {name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies" {
   for_each    = local.spanning_tree_interface_policies

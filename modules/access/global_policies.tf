@@ -1,8 +1,13 @@
-#______________________________________________
-#
-# AAEP Policy Variables
-#______________________________________________
+/*
+- This Resource File will create Recommended Default Policies Based on the Best Practice Wizard and additional Best Practices
+*/
 
+
+/*_____________________________________________________________________________________________________________________
+
+AAEP Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "aaep_policies" {
   default = {
     "default" = {
@@ -10,8 +15,7 @@ variable "aaep_policies" {
       description      = ""
       layer3_domains   = []
       physical_domains = []
-      redhat_domains   = []
-      vmware_domains   = []
+      vmm_domains      = []
     }
   }
   description = <<-EOT
@@ -20,28 +24,47 @@ variable "aaep_policies" {
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * layer3_domains: A List of Layer3 Domains to Attach to this AAEP Policy.
   * physical_domains: A List of Physical Domains to Attach to this AAEP Policy.
-  * redhat_domains: A List of Redhat Domains to Attach to this AAEP Policy.
-  * vmware_domains: A List of VMware Domains to Attach to this AAEP Policy.
+  * vmm_domains: A List of Virtual Domains to Attach to this AAEP Policy.
   EOT
   type = map(object(
     {
-      admin_state      = optional(string)
       alias            = optional(string)
       description      = optional(string)
       layer3_domains   = optional(list(string))
       physical_domains = optional(list(string))
-      redhat_domains   = optional(list(string))
-      vmware_domains   = optional(list(string))
+      vmm_domains      = optional(list(string))
     }
   ))
 }
 
 
-#______________________________________________
-#
-# Error Disabled Recovery Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "infraAttEntityP"
+ - Distinguished Name: "uni/infra/attentp-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_attachable_access_entity_profile" "aaep_policies" {
+  depends_on = [
+    # aci_l3_domain_profile.layer3_domains,
+    # aci_physical_domain.physical_domains,
+    # aci_vmm_domain.vmm_domains
+  ]
+  for_each                = local.aaep_policies
+  description             = each.value.description
+  name                    = each.key
+  relation_infra_rs_dom_p = each.value.domains
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Error Disabled Recovery Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "error_disabled_recovery_policy" {
   default = {
     "default" = {
@@ -136,11 +159,11 @@ variable "error_disabled_recovery_policy" {
 }
 
 
-#______________________________________________
-#
-# MCP Instance Policy Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
+MCP Instance Policy Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "mcp_instance_policy" {
   default = {
     "default" = {
@@ -186,92 +209,14 @@ variable "mcp_instance_policy" {
 }
 
 
-#______________________________________________
-#
-# Global QoS Class Variables
-#______________________________________________
+/*_____________________________________________________________________________________________________________________
 
-variable "global_qos_class" {
-  default = {
-    "default" = {
-      alias                             = ""
-      description                       = ""
-      elephant_trap_age_period          = "0"
-      elephant_trap_bandwidth_threshold = "0"
-      elephant_trap_byte_count          = "0"
-      elephant_trap_state               = "no"
-      fabric_flush_interval             = "500"
-      fabric_flush_state                = "no"
-      micro_burst_spine_queues          = "0"
-      micro_burst_leaf_queues           = "0"
-      preserve_cos                      = true
-      tags                              = ""
-    }
-  }
-  description = <<-EOT
-  Key: Name of the Layer2 Interface Policy.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * qinq: (Default value is "disabled").  To enable or disable an interface for Dot1q Tunnel or Q-in-Q encapsulation modes, select one of the following:
-    - corePort: Configure this core-switch interface to be included in a Dot1q Tunnel.  You can configure multiple corePorts, for multiple customers, to be used in a Dot1q Tunnel.
-    - disabled: Disable this interface to be used in a Dot1q Tunnel.
-    - doubleQtagPort: Configure this interface to be used for Q-in-Q encapsulated traffic.
-    - edgePort: Configure this edge-switch interface (for a single customer) to be included in a Dot1q Tunnel.
-  * reflective_relay: (Default value is "disabled").  Enable or disable reflective relay for ports that consume the policy.
-  * vlan_scope: (Default value is "global").  The layer 2 interface VLAN scope. The scope can be:
-    - global: Sets the VLAN encapsulation value to map only to a single EPG per leaf.
-    - portlocal: Allows allocation of separate (Port, Vlan) translation entries in both ingress and egress directions. This configuration is not valid when the EPGs belong to a single bridge domain.
-    VLAN Scope is not supported if edgePort is selected in the QinQ field.
-    Note:  Changing the VLAN scope from Global to Port Local or Port Local to Global will cause the ports where this policy is applied to flap and traffic will be disrupted.
-  EOT
-  type = map(object(
-    {
-      alias                             = optional(string)
-      description                       = optional(string)
-      elephant_trap_age_period          = optional(string)
-      elephant_trap_bandwidth_threshold = optional(string)
-      elephant_trap_byte_count          = optional(string)
-      elephant_trap_state               = optional(string)
-      fabric_flush_interval             = optional(string)
-      fabric_flush_state                = optional(string)
-      micro_burst_spine_queues          = optional(string)
-      micro_burst_leaf_queues           = optional(string)
-      preserve_cos                      = optional(bool)
-      tags                              = optional(string)
-    }
-  ))
-}
-
-
-#------------------------------------------
-# Create Attachable Access Entity Profiles
-#------------------------------------------
-
-/*
-API Information:
- - Class: "infraAttEntityP"
- - Distinguished Name: "uni/infra/attentp-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {name}
-*/
-resource "aci_attachable_access_entity_profile" "aaep_policies" {
-  depends_on = [
-    # aci_l3_domain_profile.layer3_domains,
-    # aci_physical_domain.physical_domains,
-    # aci_vmm_domain.vmm_domains
-  ]
-  for_each                = local.aaep_policies
-  description             = each.value.description
-  name                    = each.key
-  relation_infra_rs_dom_p = each.value.domains
-}
-
-/*
 API Information:
  - Class: "edrErrDisRecoverPol"
  - Distinguished Named "uni/infra/edrErrDisRecoverPol-default"
 GUI Location:
  - Fabric > Access Policies > Policies > Global > Error Disabled Recovery Policy
+_______________________________________________________________________________________________________________________
 */
 resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   for_each            = local.error_disabled_recovery_policy
@@ -377,16 +322,72 @@ resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   }
 }
 
-/*
-- This Resource File will create Recommended Default Policies Based on the Best Practice Wizard and additional Best Practices
-*/
 
-/*
+/*_____________________________________________________________________________________________________________________
+
+Global QoS Class Variables
+_______________________________________________________________________________________________________________________
+*/
+variable "global_qos_class" {
+  default = {
+    "default" = {
+      alias                             = ""
+      description                       = ""
+      elephant_trap_age_period          = "0"
+      elephant_trap_bandwidth_threshold = "0"
+      elephant_trap_byte_count          = "0"
+      elephant_trap_state               = "no"
+      fabric_flush_interval             = "500"
+      fabric_flush_state                = "no"
+      micro_burst_spine_queues          = "0"
+      micro_burst_leaf_queues           = "0"
+      preserve_cos                      = true
+      tags                              = ""
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Layer2 Interface Policy.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * qinq: (Default value is "disabled").  To enable or disable an interface for Dot1q Tunnel or Q-in-Q encapsulation modes, select one of the following:
+    - corePort: Configure this core-switch interface to be included in a Dot1q Tunnel.  You can configure multiple corePorts, for multiple customers, to be used in a Dot1q Tunnel.
+    - disabled: Disable this interface to be used in a Dot1q Tunnel.
+    - doubleQtagPort: Configure this interface to be used for Q-in-Q encapsulated traffic.
+    - edgePort: Configure this edge-switch interface (for a single customer) to be included in a Dot1q Tunnel.
+  * reflective_relay: (Default value is "disabled").  Enable or disable reflective relay for ports that consume the policy.
+  * vlan_scope: (Default value is "global").  The layer 2 interface VLAN scope. The scope can be:
+    - global: Sets the VLAN encapsulation value to map only to a single EPG per leaf.
+    - portlocal: Allows allocation of separate (Port, Vlan) translation entries in both ingress and egress directions. This configuration is not valid when the EPGs belong to a single bridge domain.
+    VLAN Scope is not supported if edgePort is selected in the QinQ field.
+    Note:  Changing the VLAN scope from Global to Port Local or Port Local to Global will cause the ports where this policy is applied to flap and traffic will be disrupted.
+  EOT
+  type = map(object(
+    {
+      alias                             = optional(string)
+      description                       = optional(string)
+      elephant_trap_age_period          = optional(string)
+      elephant_trap_bandwidth_threshold = optional(string)
+      elephant_trap_byte_count          = optional(string)
+      elephant_trap_state               = optional(string)
+      fabric_flush_interval             = optional(string)
+      fabric_flush_state                = optional(string)
+      micro_burst_spine_queues          = optional(string)
+      micro_burst_leaf_queues           = optional(string)
+      preserve_cos                      = optional(bool)
+      tags                              = optional(string)
+    }
+  ))
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "mcpInstPol"
  - Distinguished Named "uni/infra/mcpInstP-default"
 GUI Location:
  - Fabric > Access Policies > Policies > Global > MCP Instance Policy Default
+_______________________________________________________________________________________________________________________
 */
 resource "aci_mcp_instance_policy" "mcp_instance_policy" {
   for_each         = local.mcp_instance_policy
@@ -404,7 +405,8 @@ resource "aci_mcp_instance_policy" "mcp_instance_policy" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "qosInstPol"
  - Distinguished Name: "uni/infra/qosinst-default"

@@ -45,12 +45,3 @@ variable "apic_version" {
   description = "The Version of ACI Running in the Environment."
   type        = string
 }
-
-variable "two_slot_leafs" {
-  default     = true
-  description = <<-EOT
-  Flag to Tell the Switch to Account for Leaf Switches in the Fabric with More than 99 Ports.
-  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
-  EOT
-  type        = bool
-}

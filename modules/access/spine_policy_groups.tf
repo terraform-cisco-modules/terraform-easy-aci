@@ -1,7 +1,8 @@
-#------------------------------------------
-# Create Spine Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Spine Policy Group Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "spine_policy_groups" {
   default = {
     "default" = {
@@ -45,7 +46,10 @@ variable "spine_policy_groups" {
     }
   ))
 }
-/*
+
+
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraSpineAccNodePGrp"
  - Distinguished Name: "uni/infra/funcprof/spaccnodepgrp-{name}"
@@ -70,6 +74,7 @@ CoPP Pre-Filter
 LLDP Policy
  - Class: "lldpIfPol"
  - Distinguished Name: "uni/infra/lldpIfP-{lldp_policy}"
+_______________________________________________________________________________________________________________________
 */
 resource "aci_spine_switch_policy_group" "spine_policy_groups" {
   depends_on = [

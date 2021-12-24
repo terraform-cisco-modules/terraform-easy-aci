@@ -1,9 +1,11 @@
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "fabricNode"
  - Distinguished Name: "topology/pod-{pod_id}/node-{node_id}"
 GUI Location:
  - Fabric > Access Policies > Inventory > Fabric Membership:[Registered Nodes or Nodes Pending Registration]
+_______________________________________________________________________________________________________________________
 */
 resource "aci_fabric_node_member" "fabric_node_members" {
   for_each    = local.fabric_node_members

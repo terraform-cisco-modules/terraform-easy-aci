@@ -1,15 +1,8 @@
-#------------------------------------------
-# Create VLAN Pools
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
-/*
-API Information:
- - Class: "fvnsVlanInstP"
- - Distinguished name: "uni/infra/vlanns-[{name}]-{allocation_mode}"
-GUI Location:
- - Fabric > Access Policies > Pools > VLAN:[{name}]
+VLAN pool Variables
+_______________________________________________________________________________________________________________________
 */
-
 variable "vlan_pools" {
   default = {
     "default" = {
@@ -62,6 +55,16 @@ variable "vlan_pools" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "fvnsVlanInstP"
+ - Distinguished name: "uni/infra/vlanns-[{name}]-{allocation_mode}"
+GUI Location:
+ - Fabric > Access Policies > Pools > VLAN:[{name}]
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_vlan_pool" "vlan_pools" {
   for_each    = local.vlan_pools
   alloc_mode  = each.value.allocation_mode
@@ -80,5 +83,5 @@ resource "aci_ranges" "vlans" {
   from         = "vlan-${each.value.vlan}"
   to           = "vlan-${each.value.vlan}"
   role         = each.value.role
-  vlan_pool_dn = aci_vlan_pool.vlan_pools[each.value.name].id
+  vlan_pool_dn = aci_vlan_pool.vlan_pools[each.value.key1].id
 }

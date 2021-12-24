@@ -1,7 +1,8 @@
-#------------------------------------------
-# Create Leaf Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Leaf Policy Group Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "leaf_policy_groups" {
   default = {
     "default" = {
@@ -92,7 +93,10 @@ variable "leaf_policy_groups" {
     }
   ))
 }
-/*
+
+
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraAccNodePGrp"
  - Distinguished Name: "uni/infra/funcprof/accnodepgrp-{name}"
@@ -153,12 +157,12 @@ PoE Node Policy
 Spanning Tree Policy (MSTP)
  - Class: "stpInstPol"
  - Distinguished Name: "uni/infra/mstpInstPol-{spanning_tree_policy}"
+_______________________________________________________________________________________________________________________
 */
 resource "aci_access_switch_policy_group" "leaf_policy_groups" {
   depends_on = [
     aci_cdp_interface_policy.cdp_interface_policies,
     aci_lldp_interface_policy.lldp_interface_policies,
-    aci_spanning_tree_interface_policy.spanning_tree_interface_policies
   ]
   for_each                                               = local.leaf_policy_groups
   annotation                                             = each.value.tags
@@ -178,7 +182,7 @@ resource "aci_access_switch_policy_group" "leaf_policy_groups" {
   relation_infra_rs_leaf_p_grp_to_cdp_if_pol             = aci_cdp_interface_policy.cdp_interface_policies[each.value.cdp_policy].id
   relation_infra_rs_leaf_p_grp_to_lldp_if_pol            = aci_lldp_interface_policy.lldp_interface_policies[each.value.lldp_policy].id
   relation_infra_rs_mon_node_infra_pol                   = "uni/infra/moninfra-${each.value.monitoring_policy}"
-  relation_infra_rs_mst_inst_pol                         = aci_spanning_tree_interface_policy.spanning_tree_interface_policies[each.value.spanning_tree_interface_policy].id
+  relation_infra_rs_mst_inst_pol                         = "uni/infra/mstpInstPol-${each.value.spanning_tree_interface_policy}"
   relation_infra_rs_netflow_node_pol                     = "uni/infra/nodepol-${each.value.netflow_node_policy}"
   relation_infra_rs_poe_inst_pol                         = "uni/infra/poeInstP-${each.value.poe_node_policy}"
   relation_infra_rs_topoctrl_fast_link_failover_inst_pol = "uni/infra/fastlinkfailoverinstpol-${each.value.fast_link_failover_policy}"

@@ -1,17 +1,14 @@
-#------------------------------------------
-# Create Leaf 
-#  - Leaf Profiles
-#  - Interface Profiles
-#    - Interface Selectors
-#  - Leaf Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Leaf Profile Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "leaf_profiles" {
   default = {
     "default" = {
-      alias             = ""
-      description       = ""
-      external_pool_id  = "0"
+      alias            = ""
+      description      = ""
+      external_pool_id = "0"
       interfaces = {
         "default" = {
           interface_description  = ""
@@ -28,6 +25,7 @@ variable "leaf_profiles" {
       role              = "leaf"
       serial            = "**REQUIRED**"
       tags              = ""
+      two_slot_leaf     = false
     }
   }
   description = <<-EOT
@@ -56,12 +54,13 @@ variable "leaf_profiles" {
     * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
     * serial: Manufacturing Serial Number of the Switch.
     * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+    * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
   type = map(object(
     {
-      alias             = optional(string)
-      description       = optional(string)
-      external_pool_id  = optional(string)
+      alias            = optional(string)
+      description      = optional(string)
+      external_pool_id = optional(string)
       interfaces = map(object(
         {
           interface_description  = optional(string)
@@ -78,17 +77,20 @@ variable "leaf_profiles" {
       role              = optional(string)
       serial            = string
       tags              = optional(string)
+      two_slot_leaf     = optional(bool)
     }
   ))
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraAccPortP"
  - Distinguished Name: "uni/infra/accportprof-{name}"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
   for_each    = local.leaf_profiles
@@ -99,12 +101,14 @@ resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraHPortS"
  - Distinguished Name: "uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-range"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_access_port_selector" "leaf_interface_selectors" {
   depends_on = [
@@ -125,12 +129,14 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraPortBlk"
  - Distinguished Name: " uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-range/portblk-{interface_selector}"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_access_port_block" "leaf_port_blocks" {
   depends_on = [
@@ -142,18 +148,20 @@ resource "aci_access_port_block" "leaf_port_blocks" {
   description             = each.value.interface_description
   from_card               = each.value.module
   from_port               = each.value.port
-  name                    = each.key
+  name                    = each.value.interface_name
   to_card                 = each.value.module
   to_port                 = each.value.port
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraPortBlk"
  - Distinguished Name: " uni/infra/accportprof-{interface_profile}/hports-{interface_selector}-typ-{selector_type}/portblk-{interface_selector}"
 GUI Location:
  - Fabric > Access Policies > Interfaces > Leaf Interfaces > Profiles > {interface_profile}:{interface_selector}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_access_sub_port_block" "leaf_port_subblocks" {
   depends_on = [
@@ -166,19 +174,21 @@ resource "aci_access_sub_port_block" "leaf_port_subblocks" {
   from_card               = each.value.module
   from_port               = each.value.port
   from_sub_port           = each.value.sub_port
-  name                    = each.key
+  name                    = each.value.interface_name
   to_card                 = each.value.module
   to_port                 = each.value.port
   to_sub_port             = each.value.sub_port
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraLeafS"
  - Distinguished Name: "uni/infra/nprof-{Name}"
 GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {Name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_leaf_profile" "leaf_profiles" {
   depends_on = [
@@ -195,13 +205,15 @@ resource "aci_leaf_profile" "leaf_profiles" {
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraLeafS"
  - Class: "infraRsAccNodePGrp"
  - Distinguished Name: "uni/infra/nprof-{name}/leaves-{selector_name}-typ-range"
 GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_leaf_selector" "leaf_selectors" {
   depends_on = [
