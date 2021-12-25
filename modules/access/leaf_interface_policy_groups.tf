@@ -2,6 +2,74 @@
 # Create Access Port Policy Groups
 #------------------------------------------
 
+variable "leaf_port_group_access" {
+  default = {
+    "default" = {
+      alias                              = ""
+      aaep_policy                        = ""
+      cdp_interface_policy               = ""
+      copp_interface_policy              = ""
+      data_plane_policing_policy         = ""
+      data_plane_policing_policy_egress  = ""
+      data_plane_policing_policy_ingress = ""
+      description                        = ""
+      dot1x_port_policy                  = ""
+      dwdm_policy                        = ""
+      fc_interface_policy                = ""
+      l2_interface_policy                = ""
+      link_level_policy                  = ""
+      lldp_interface_policy              = ""
+      macsec_policy                      = ""
+      mcp_interface_policy               = ""
+      monitoring_policy                  = ""
+      netflow_policy                     = []
+      port_security_policy               = ""
+      priority_flow_control_policy       = ""
+      slow_drain_policy                  = ""
+      span_destination_groups            = ""
+      span_source_groups                 = ""
+      spanning_tree_interface_policy     = ""
+      storm_control_policy               = ""
+      tags                               = ""
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Attachable Access Entity Profile Policy.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  EOT
+  type = map(object(
+    {
+      alias                              = optional(string)
+      aaep_policy                        = optional(string)
+      cdp_interface_policy               = optional(string)
+      copp_interface_policy              = optional(string)
+      data_plane_policing_policy         = optional(string)
+      data_plane_policing_policy_egress  = optional(string)
+      data_plane_policing_policy_ingress = optional(string)
+      description                        = optional(string)
+      dot1x_port_policy                  = optional(string)
+      dwdm_policy                        = optional(string)
+      fc_interface_policy                = optional(string)
+      l2_interface_policy                = optional(string)
+      link_level_policy                  = optional(string)
+      lldp_interface_policy              = optional(string)
+      macsec_policy                      = optional(string)
+      mcp_interface_policy               = optional(string)
+      monitoring_policy                  = optional(string)
+      netflow_policy                     = optional(list(string))
+      port_security_policy               = optional(string)
+      priority_flow_control_policy       = optional(string)
+      slow_drain_policy                  = optional(string)
+      span_destination_groups            = optional(string)
+      span_source_groups                 = optional(string)
+      spanning_tree_interface_policy     = optional(string)
+      storm_control_policy               = optional(string)
+      tags                               = optional(string)
+    }
+  ))
+}
 /*
 API Information:
  - Class: "infraAccPortGrp"
@@ -21,6 +89,7 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
     aci_port_security_policy.port_security_policies,
     aci_spanning_tree_interface_policy.spanning_tree_interface_policies
   ]
+  for_each    = local.leaf_port_group_access
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -63,7 +132,7 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   # DN: "uni/infra/portauthpol-{dot1x_port_policy}"
   relation_infra_rs_l2_port_auth_pol = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.dot1x_port_policy, "_EMPTY"))
-  ) > 0 ? "uni/infra/portauthpol-${dot1x_port_policy}" : ""
+  ) > 0 ? "uni/infra/portauthpol-${each.value.dot1x_port_policy}" : ""
   # class: l2PortSecurityPol
   # DN: "uni/infra/portsecurityP-{port_security_policy}"
   relation_infra_rs_l2_port_security_pol = length(
@@ -91,15 +160,15 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   ) > 0 ? "uni/fabric/monfab-${each.value.monitoring_policy}" : ""
   # class: netflowMonitorPol
   # DN: "uni/infra/monitorpol-{netflow_policy}"
-  relation_infra_rs_netflow_monitor_pol = length(
-    each.value.netflow_policy
-  ) > 0 ? [for s in each.value.netflow_policy : "uni/infra/monitorpol-${s}"] : []
+  # relation_infra_rs_netflow_monitor_pol = length(
+  #   each.value.netflow_policy
+  # ) > 0 ? [for s in each.value.netflow_policy : "uni/infra/monitorpol-${s}"] : []
   # **There is no default Policy**
   # class: poeIfPol
   # DN: "uni/infra/poeIfP-{poe_policy}"
   relation_infra_rs_poe_if_pol = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.poe_policy, "_EMPTY"))
-  ) > 0 ? ["uni/infra/poeIfP-${each.value.poe_policy}"] : []
+  ) > 0 ? "uni/infra/poeIfP-${each.value.poe_policy}" : ""
   # class: qosDppPol
   # DN: "uni/infra/qosdpppol-{{qosDppPol}}"
   relation_infra_rs_qos_dpp_if_pol = length(
@@ -129,12 +198,12 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   # DN: "uni/infra/vdestgrp-{span_destination_groups}"
   relation_infra_rs_span_v_dest_grp = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.span_destination_groups, "_EMPTY"))
-  ) > 0 ? "uni/infra/vdestgrp-${each.value.span_destination_groups}" : ""
+  ) > 0 ? ["uni/infra/vdestgrp-${each.value.span_destination_groups}"] : []
   # class: spanVSrcGrp
   # DN: "uni/infra/vsrcgrp-{span_source_groups}"
   relation_infra_rs_span_v_src_grp = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.span_source_groups, "_EMPTY"))
-  ) > 0 ? "uni/infra/vsrcgrp-${each.value.span_source_groups}" : ""
+  ) > 0 ? ["uni/infra/vsrcgrp-${each.value.span_source_groups}"] : []
   # class: stormctrlIfPol
   # DN: "uni/infra/stormctrlifp-{storm_control_policy}"
   relation_infra_rs_stormctrl_if_pol = length(
@@ -145,6 +214,31 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   relation_infra_rs_stp_if_pol = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.spanning_tree_interface_policy, "_EMPTY"))
   ) > 0 ? aci_spanning_tree_interface_policy.spanning_tree_interface_policies[each.value.spanning_tree_interface_policy].id : ""
+}
+
+variable "leaf_port_group_breakout" {
+  default = {
+    "default" = {
+      alias        = ""
+      breakout_map = "10g-4x"
+      description  = ""
+      tags         = ""
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Attachable Access Entity Profile Policy.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  EOT
+  type = map(object(
+    {
+      alias        = optional(string)
+      breakout_map = optional(string)
+      description  = optional(string)
+      tags         = optional(string)
+    }
+  ))
 }
 
 #------------------------------------------
@@ -159,12 +253,78 @@ GUI Location:
  - Fabric > Access Policies > Interface > Leaf Interfaces > Policy Groups > Leaf Breakout Port Group:{{Name}}
 */
 resource "aci_leaf_breakout_port_group" "policy_groups" {
+  for_each    = local.leaf_port_group_breakout
+  annotation  = each.value.tags
   brkout_map  = each.value.breakout_map
   description = each.value.description
-  name        = each.value.name
+  name        = each.key
+  name_alias  = each.value.alias
 }
 
 
+variable "leaf_port_group_bundle" {
+  default = {
+    "default" = {
+      alias                              = ""
+      aaep_policy                        = ""
+      cdp_interface_policy               = ""
+      copp_interface_policy              = ""
+      data_plane_policing_policy         = ""
+      data_plane_policing_policy_egress  = ""
+      data_plane_policing_policy_ingress = ""
+      description                        = ""
+      fc_interface_policy                = ""
+      lacp_interface_policy              = ""
+      lag_type                           = ""
+      l2_interface_policy                = ""
+      lldp_interface_policy              = ""
+      macsec_policy                      = ""
+      mcp_interface_policy               = ""
+      monitoring_policy                  = ""
+      port_security_policy               = ""
+      priority_flow_control_policy       = ""
+      slow_drain_policy                  = ""
+      span_destination_groups            = ""
+      span_source_groups                 = ""
+      storm_control_policy               = ""
+      tags                               = ""
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Attachable Access Entity Profile Policy.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  EOT
+  type = map(object(
+    {
+      alias                              = optional(string)
+      aaep_policy                        = optional(string)
+      cdp_interface_policy               = optional(string)
+      copp_interface_policy              = optional(string)
+      data_plane_policing_policy         = optional(string)
+      data_plane_policing_policy_egress  = optional(string)
+      data_plane_policing_policy_ingress = optional(string)
+      description                        = optional(string)
+      fc_interface_policy                = optional(string)
+      l2_interface_policy                = optional(string)
+      lacp_interface_policy              = optional(string)
+      lag_type                           = optional(string)
+      lldp_interface_policy              = optional(string)
+      macsec_policy                      = optional(string)
+      mcp_interface_policy               = optional(string)
+      monitoring_policy                  = optional(string)
+      port_security_policy               = optional(string)
+      priority_flow_control_policy       = optional(string)
+      slow_drain_policy                  = optional(string)
+      span_destination_groups            = optional(string)
+      span_source_groups                 = optional(string)
+      spanning_tree_interface_policy     = optional(string)
+      storm_control_policy               = optional(string)
+      tags                               = optional(string)
+    }
+  ))
+}
 #------------------------------------------------
 # Create Bundle (port-channel|vpc) Policy Groups
 #------------------------------------------------
@@ -189,10 +349,11 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
     aci_port_security_policy.port_security_policies,
     aci_spanning_tree_interface_policy.spanning_tree_interface_policies
   ]
-  description = "{{Description}}"
-  lag_t       = "{{Lag_Type}}"
-  name        = "{{Name}}"
-  name_alias  = "{{Alias}}"
+  for_each    = local.leaf_port_group_bundle
+  description = each.value.description
+  lag_t       = each.value.lag_type
+  name        = each.key
+  name_alias  = each.value.alias
   # class: infraAttEntityP
   # DN: "uni/infra/attentp-{aaep_policy}"
   relation_infra_rs_att_ent_p = length(
@@ -248,11 +409,6 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
   relation_infra_rs_mon_if_infra_pol = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.monitoring_policy, "_EMPTY"))
   ) > 0 ? "uni/fabric/monfab-${each.value.monitoring_policy}" : ""
-  # class: netflowMonitorPol
-  # DN: "uni/infra/monitorpol-{netflow_policy}"
-  relation_infra_rs_netflow_monitor_pol = length(
-    each.value.netflow_policy
-  ) > 0 ? [for s in each.value.netflow_policy : "uni/infra/monitorpol-${s}"] : []
   # **There is no default Policy**
   # class: qosDppPol
   # DN: "uni/infra/qosdpppol-{{qosDppPol}}"
@@ -283,12 +439,12 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
   # DN: "uni/infra/vdestgrp-{span_destination_groups}"
   relation_infra_rs_span_v_dest_grp = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.span_destination_groups, "_EMPTY"))
-  ) > 0 ? "uni/infra/vdestgrp-${each.value.span_destination_groups}" : ""
+  ) > 0 ? ["uni/infra/vdestgrp-${each.value.span_destination_groups}"] : []
   # class: spanVSrcGrp
   # DN: "uni/infra/vsrcgrp-{span_source_groups}"
   relation_infra_rs_span_v_src_grp = length(
     regexall("[a-zA-Z0-9]", coalesce(each.value.span_source_groups, "_EMPTY"))
-  ) > 0 ? "uni/infra/vsrcgrp-${each.value.span_source_groups}" : ""
+  ) > 0 ? ["uni/infra/vsrcgrp-${each.value.span_source_groups}"] : []
   # class: stormctrlIfPol
   # DN: "uni/infra/stormctrlifp-{storm_control_policy}"
   relation_infra_rs_stormctrl_if_pol = length(

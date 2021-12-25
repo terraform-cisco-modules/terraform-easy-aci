@@ -269,6 +269,84 @@ locals {
 
   #__________________________________________________________
   #
+  # Leaf Interface Policy Group Variables
+  #__________________________________________________________
+
+  leaf_port_group_access = {
+    for k, v in var.leaf_port_group_access : k => {
+      alias                              = v.alias != null ? v.alias : ""
+      aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
+      cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+      copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
+      data_plane_policing_policy         = v.data_plane_policing_policy != null ? v.data_plane_policing_policy : ""
+      data_plane_policing_policy_egress  = v.data_plane_policing_policy_egress != null ? v.data_plane_policing_policy_egress : ""
+      data_plane_policing_policy_ingress = v.data_plane_policing_policy_ingress != null ? v.data_plane_policing_policy_ingress : ""
+      description                        = v.description != null ? v.description : ""
+      dot1x_port_policy                  = v.dot1x_port_policy != null ? v.dot1x_port_policy : ""
+      dwdm_policy                        = v.dwdm_policy != null ? v.dwdm_policy : ""
+      fc_interface_policy                = v.fc_interface_policy != null ? v.fc_interface_policy : ""
+      l2_interface_policy                = v.l2_interface_policy != null ? v.l2_interface_policy : ""
+      link_level_policy                  = v.link_level_policy != null ? v.link_level_policy : ""
+      lldp_interface_policy              = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+      macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
+      mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
+      monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
+      netflow_policy                     = v.netflow_policy != null ? v.netflow_policy : []
+      port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
+      priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
+      slow_drain_policy                  = v.slow_drain_policy != null ? v.slow_drain_policy : ""
+      span_destination_groups            = v.span_destination_groups != null ? v.span_destination_groups : ""
+      span_source_groups                 = v.span_source_groups != null ? v.span_source_groups : ""
+      spanning_tree_interface_policy     = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      storm_control_policy               = v.storm_control_policy != null ? v.storm_control_policy : ""
+      tags                               = v.tags != null ? v.tags : ""
+    }
+  }
+
+
+  leaf_port_group_breakout = {
+    for k, v in var.leaf_port_group_breakout : k => {
+      alias        = v.alias != null ? v.alias : ""
+      breakout_map = v.breakout_map != null ? v.breakout_map : "10g-4x"
+      description  = v.description != null ? v.description : ""
+      tags         = v.tags != null ? v.tags : ""
+    }
+  }
+
+
+  leaf_port_group_bundle = {
+    for k, v in var.leaf_port_group_bundle : k => {
+      alias                              = v.alias != null ? v.alias : ""
+      aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
+      cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+      copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
+      data_plane_policing_policy         = v.data_plane_policing_policy != null ? v.data_plane_policing_policy : ""
+      data_plane_policing_policy_egress  = v.data_plane_policing_policy_egress != null ? v.data_plane_policing_policy_egress : ""
+      data_plane_policing_policy_ingress = v.data_plane_policing_policy_ingress != null ? v.data_plane_policing_policy_ingress : ""
+      description                        = v.description != null ? v.description : ""
+      dot1x_port_policy                  = v.dot1x_port_policy != null ? v.dot1x_port_policy : ""
+      dwdm_policy                        = v.dwdm_policy != null ? v.dwdm_policy : ""
+      fc_interface_policy                = v.fc_interface_policy != null ? v.fc_interface_policy : ""
+      l2_interface_policy                = v.l2_interface_policy != null ? v.l2_interface_policy : ""
+      link_level_policy                  = v.link_level_policy != null ? v.link_level_policy : ""
+      lldp_interface_policy              = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+      macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
+      mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
+      monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
+      port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
+      priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
+      slow_drain_policy                  = v.slow_drain_policy != null ? v.slow_drain_policy : ""
+      span_destination_groups            = v.span_destination_groups != null ? v.span_destination_groups : ""
+      span_source_groups                 = v.span_source_groups != null ? v.span_source_groups : ""
+      spanning_tree_interface_policy     = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      storm_control_policy               = v.storm_control_policy != null ? v.storm_control_policy : ""
+      tags                               = v.tags != null ? v.tags : ""
+    }
+  }
+
+
+  #__________________________________________________________
+  #
   # Leaf Policy Group Variables
   #__________________________________________________________
 

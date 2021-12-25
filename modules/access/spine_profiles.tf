@@ -111,7 +111,7 @@ resource "aci_rest" "spine_interface_selectors" {
     }
   }
   child {
-    rn         = "spaccportgrp-${each.value.interface_policy_group}"
+    rn         = "rsspAccGrp"
     class_name = "infraRsSpAccGrp"
     content = {
       tDn = "uni/infra/funcprof/spaccportgrp-${each.value.interface_policy_group}"
