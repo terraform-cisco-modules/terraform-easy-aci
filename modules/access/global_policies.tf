@@ -97,7 +97,7 @@ variable "error_disabled_recovery_policy" {
     }
   }
   description = <<-EOT
-  Key: Name of the Fibre-Channel Interface Policy.
+  Key: Unique Identifier for the Map of Objects.  Not used in assignment.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * arp_inspection                    = "yes"
@@ -154,56 +154,6 @@ variable "error_disabled_recovery_policy" {
       tags                              = optional(string)
       unidirection_link_detection       = optional(string)
       unknown                           = optional(string)
-    }
-  ))
-}
-
-
-/*_____________________________________________________________________________________________________________________
-
-MCP Instance Policy Variables
-_______________________________________________________________________________________________________________________
-*/
-variable "mcp_instance_policy" {
-  default = {
-    "default" = {
-      admin_state                       = "enabled"
-      alias                             = ""
-      description                       = ""
-      tags                              = ""
-      enable_mcp_pdu_per_vlan           = true
-      initial_delay                     = "180"
-      loop_detect_multiplication_factor = "3"
-      loop_protect_action               = "yes"
-      transmission_frequency_seconds    = "2"
-      transmission_frequency_msec       = "0"
-    }
-  }
-  description = <<-EOT
-  Key: Name of the Layer2 Interface Policy.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * admin_state                       = "enabled"
-  * tags                              = ""
-  * enable_mcp_pdu_per_vlan           = true
-  * initial_delay                     = "180"
-  * loop_detect_multiplication_factor = "3"
-  * loop_protect_action               = "yes"
-  * transmission_frequency_seconds    = "2"
-  * transmission_frequency_msec       = "0"
-  EOT
-  type = map(object(
-    {
-      alias                             = optional(string)
-      description                       = optional(string)
-      admin_state                       = optional(string)
-      tags                              = optional(string)
-      enable_mcp_pdu_per_vlan           = bool
-      initial_delay                     = optional(string)
-      loop_detect_multiplication_factor = optional(string)
-      loop_protect_action               = optional(string)
-      transmission_frequency_seconds    = optional(string)
-      transmission_frequency_msec       = optional(string)
     }
   ))
 }
@@ -325,6 +275,81 @@ resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
 
 /*_____________________________________________________________________________________________________________________
 
+MCP Instance Policy Variables
+_______________________________________________________________________________________________________________________
+*/
+variable "mcp_instance_policy" {
+  default = {
+    "default" = {
+      admin_state                       = "enabled"
+      alias                             = ""
+      description                       = ""
+      tags                              = ""
+      enable_mcp_pdu_per_vlan           = true
+      initial_delay                     = "180"
+      loop_detect_multiplication_factor = "3"
+      loop_protect_action               = "yes"
+      transmission_frequency_seconds    = "2"
+      transmission_frequency_msec       = "0"
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Layer2 Interface Policy.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * admin_state                       = "enabled"
+  * tags                              = ""
+  * enable_mcp_pdu_per_vlan           = true
+  * initial_delay                     = "180"
+  * loop_detect_multiplication_factor = "3"
+  * loop_protect_action               = "yes"
+  * transmission_frequency_seconds    = "2"
+  * transmission_frequency_msec       = "0"
+  EOT
+  type = map(object(
+    {
+      alias                             = optional(string)
+      description                       = optional(string)
+      admin_state                       = optional(string)
+      tags                              = optional(string)
+      enable_mcp_pdu_per_vlan           = bool
+      initial_delay                     = optional(string)
+      loop_detect_multiplication_factor = optional(string)
+      loop_protect_action               = optional(string)
+      transmission_frequency_seconds    = optional(string)
+      transmission_frequency_msec       = optional(string)
+    }
+  ))
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "mcpInstPol"
+ - Distinguished Named "uni/infra/mcpInstP-default"
+GUI Location:
+ - Fabric > Access Policies > Policies > Global > MCP Instance Policy Default
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_mcp_instance_policy" "mcp_instance_policy" {
+  for_each         = local.mcp_instance_policy
+  admin_st         = each.value.admin_state
+  annotation       = each.value.tags
+  ctrl             = [each.value.controls]
+  description      = each.value.description
+  init_delay_time  = each.value.initial_delay
+  key              = var.mcp_instance_key
+  loop_detect_mult = each.value.loop_detect_multiplication_factor
+  loop_protect_act = each.value.loop_protect_action
+  name_alias       = each.value.alias
+  tx_freq          = each.value.transmission_frequency_seconds
+  tx_freq_msec     = each.value.transmission_frequency_msec
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
 Global QoS Class Variables
 _______________________________________________________________________________________________________________________
 */
@@ -377,31 +402,6 @@ variable "global_qos_class" {
       tags                              = optional(string)
     }
   ))
-}
-
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "mcpInstPol"
- - Distinguished Named "uni/infra/mcpInstP-default"
-GUI Location:
- - Fabric > Access Policies > Policies > Global > MCP Instance Policy Default
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_mcp_instance_policy" "mcp_instance_policy" {
-  for_each         = local.mcp_instance_policy
-  admin_st         = each.value.admin_state
-  annotation       = each.value.tags
-  ctrl             = [each.value.controls]
-  description      = each.value.description
-  init_delay_time  = each.value.initial_delay
-  key              = var.mcp_instance_key
-  loop_detect_mult = each.value.loop_detect_multiplication_factor
-  loop_protect_act = each.value.loop_protect_action
-  name_alias       = each.value.alias
-  tx_freq          = each.value.transmission_frequency_seconds
-  tx_freq_msec     = each.value.transmission_frequency_msec
 }
 
 
