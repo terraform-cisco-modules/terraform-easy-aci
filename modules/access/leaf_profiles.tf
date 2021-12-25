@@ -112,7 +112,10 @@ ________________________________________________________________________________
 */
 resource "aci_access_port_selector" "leaf_interface_selectors" {
   depends_on = [
-    aci_leaf_interface_profile.leaf_interface_profiles
+    aci_leaf_interface_profile.leaf_interface_profiles,
+    aci_leaf_access_port_policy_group.policy_groups,
+    aci_leaf_breakout_port_group.policy_groups,
+    aci_leaf_access_bundle_policy_group.policy_groups
   ]
   for_each                  = local.leaf_interface_selectors
   leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.key1].id
@@ -121,11 +124,13 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   access_port_selector_type = "range"
   relation_infra_rs_acc_base_grp = length(
     regexall("access", each.value.port_type)
-    ) > 0 && each.value.interface_policy_group != "" ? "uni/infra/funcprof/accportgrp-${each.value.interface_policy_group}" : length(
-    regexall("breakout", each.value.port_type)
-    ) > 0 && each.value.interface_policy_group != "" ? "uni/infra/funcprof/brkoutportgrp-${each.value.interface_policy_group}" : length(
-    regexall("(port-channel|vpc)", each.value.port_type)
-  ) > 0 && each.value.interface_policy_group != "" ? "uni/infra/funcprof/accbundle-${each.value.interface_policy_group}" : ""
+    ) > 0 && each.value.interface_policy_group != "" ? aci_leaf_access_port_policy_group.policy_groups[
+    each.value.interface_policy_group].id : length(regexall("breakout", each.value.port_type)
+    ) > 0 && each.value.interface_policy_group != "" ? aci_leaf_breakout_port_group.policy_groups[
+    each.value.interface_policy_group].id : length(regexall("(port-channel|vpc)", each.value.port_type)
+    ) > 0 && each.value.interface_policy_group != "" ? aci_leaf_access_bundle_policy_group.policy_groups[
+    each.value.interface_policy_group
+  ].id : ""
 }
 
 
