@@ -18,8 +18,9 @@ variable "leaf_profiles" {
           sub_port               = false
         }
       }
-      name              = "**REQUIRED**"
       leaf_policy_group = "**REQUIRED**"
+      monitoring_policy = "default"
+      name              = "**REQUIRED**"
       node_type         = "unspecified"
       pod_id            = "1"
       role              = "leaf"
@@ -44,6 +45,7 @@ variable "leaf_profiles" {
           - vpc: Virtual Port-Channel Port Policy Group
         * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
         * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
+    * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
     * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
     * node_type:
       - leaf
@@ -70,8 +72,9 @@ variable "leaf_profiles" {
           sub_port               = optional(bool)
         }
       ))
-      name              = string
       leaf_policy_group = string
+      monitoring_policy = optional(string)
+      name              = string
       node_type         = optional(string)
       pod_id            = optional(string)
       role              = optional(string)
@@ -204,11 +207,24 @@ resource "aci_leaf_profile" "leaf_profiles" {
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
-  relation_infra_rs_acc_port_p = [
-    aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
-  ]
+  # relation_infra_rs_acc_port_p = [
+  #   aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
+  # ]
 }
 
+resource "aci_rest" "leaf_profile_to_leaf_interface_profile" {
+  provider = netascode
+  depends_on = [
+    aci_leaf_interface_profile.leaf_interface_profiles,
+    aci_leaf_profile.leaf_profiles
+  ]
+  for_each   = local.leaf_profiles
+  dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/rsaccPortP-[${aci_leaf_interface_profile.leaf_interface_profiles[each.key].id}]"
+  class_name = "infraRsAccPortP"
+  content = {
+    tDn = aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
+  }
+}
 
 /*_____________________________________________________________________________________________________________________
 
@@ -220,17 +236,56 @@ GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_leaf_selector" "leaf_selectors" {
+# resource "aci_leaf_selector" "leaf_selectors" {
+#   depends_on = [
+#     aci_leaf_profile.leaf_profiles,
+#     aci_access_switch_policy_group.leaf_policy_groups
+#   ]
+#   for_each                         = local.leaf_profiles
+#   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
+#   name                             = each.value.name
+#   switch_association_type          = "range"
+#   annotation                       = each.value.tags
+#   description                      = each.value.description
+#   name_alias                       = each.value.alias
+#   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
+# }
+
+resource "aci_rest" "leaf_selectors" {
+  provider = netascode
   depends_on = [
     aci_leaf_profile.leaf_profiles,
     aci_access_switch_policy_group.leaf_policy_groups
   ]
-  for_each                         = local.leaf_profiles
-  leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
-  name                             = each.value.name
-  switch_association_type          = "range"
-  annotation                       = each.value.tags
-  description                      = each.value.description
-  name_alias                       = each.value.alias
-  relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
+  for_each   = local.leaf_profiles
+  dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/leaves-${each.value.name}-typ-range"
+  class_name = "infraLeafS"
+  content = {
+    # annotation = each.value.tags
+    descr     = each.value.description
+    name      = each.value.name
+    nameAlias = each.value.alias
+  }
+}
+
+resource "aci_rest" "leaf_profile_policy_group" {
+  provider   = netascode
+  for_each   = local.leaf_profiles
+  dn         = "${aci_rest.leaf_selectors[each.key].dn}/rsaccNodePGrp"
+  class_name = "infraRsAccNodePGrp"
+  content = {
+    tDn = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
+  }
+}
+
+resource "aci_rest" "leaf_profile_blocks" {
+  provider   = netascode
+  for_each   = local.leaf_profiles
+  dn         = "${aci_rest.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
+  class_name = "infraNodeBlk"
+  content = {
+    name  = "blk${each.key}-${each.key}"
+    from_ = each.key
+    to_   = each.key
+  }
 }

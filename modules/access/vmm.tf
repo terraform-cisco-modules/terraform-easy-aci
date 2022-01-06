@@ -92,9 +92,9 @@ variable "virtual_networking" {
           hostname               = string
           management_epg         = optional(string)
           monitoring_policy      = optional(string)
+          policy_scope           = optional(string)
           port                   = optional(string)
           sequence_number        = optional(string)
-          scope                  = optional(string)
           stats_collection       = optional(string)
           tags                   = optional(string)
           trigger_inventory_sync = optional(string)

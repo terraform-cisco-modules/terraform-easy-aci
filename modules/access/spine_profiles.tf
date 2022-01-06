@@ -15,6 +15,7 @@ variable "spine_profiles" {
           selector_description   = ""
         }
       }
+      monitoring_policy  = "default"
       name               = "**REQUIRED**"
       spine_policy_group = "**REQUIRED**"
       pod_id             = "1"
@@ -31,6 +32,7 @@ variable "spine_profiles" {
         * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
         * interface_policy_group: Name of the Interface Policy Group
         * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
     * name: Hostname of the Spine plus Name of the Spine Profile, Spine Interface Profile, and Spine Profile Selector.
     * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
     * serial: Manufacturing Serial Number of the Switch.
@@ -48,6 +50,7 @@ variable "spine_profiles" {
           selector_description   = optional(string)
         }
       ))
+      monitoring_policy  = optional(string)
       name               = string
       spine_policy_group = string
       node_type          = optional(string)
@@ -107,7 +110,6 @@ resource "aci_rest" "spine_interface_selectors" {
       toCard   = each.value.module
       toPort   = each.value.port
       name     = each.value.interface_name
-
     }
   }
   child {

@@ -391,8 +391,9 @@ locals {
       description       = v.description != null ? v.description : ""
       external_pool_id  = v.external_pool_id != null ? v.external_pool_id : "0"
       interfaces        = v.interfaces != null ? v.interfaces : {}
-      name              = v.name
       leaf_policy_group = v.leaf_policy_group
+      monitoring_policy = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
+      name              = v.name
       node_type         = v.node_type != null ? v.node_type : "unspecified"
       pod_id            = v.pod_id != null ? v.pod_id : "1"
       role              = v.role != null ? v.role : "unspecified"
@@ -505,6 +506,7 @@ locals {
       description        = v.description != null ? v.description : ""
       external_pool_id   = ""
       interfaces         = v.interfaces != null ? v.interfaces : {}
+      monitoring_policy  = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
       name               = v.name
       node_type          = "unspecified"
       pod_id             = v.pod_id != null ? v.pod_id : "1"
@@ -542,7 +544,7 @@ locals {
     for k, v in local.spine_interface_selectors_loop_1 : "${v.key1}_${v.key2}" => v
   }
 
-  fabric_node_members = merge(local.leaf_profiles, local.spine_profiles)
+  fabric_membership = merge(local.leaf_profiles, local.spine_profiles)
 
 
   #__________________________________________________________
@@ -620,7 +622,7 @@ locals {
 
   #__________________________________________________________
   #
-  # Leaf Policy Group Variables
+  # Virtual Networking Managed Variables
   #__________________________________________________________
 
   vmm_credential_loop_1 = flatten([
@@ -680,6 +682,30 @@ locals {
   ])
 
   vswitch_policies = { for k, v in local.vswitch_policies_loop_1 : "${v.key1}_${v.key_2}" => v }
+
+
+  #__________________________________________________________
+  #
+  # Virtual Networking Managed Variables
+  #__________________________________________________________
+
+  vpc_domain_policies = {
+    for k, v in var.vpc_domain_policies : k => {
+      alias         = v.alias != null ? v.alias : ""
+      dead_interval = v.dead_interval != null ? v.dead_interval : "200"
+      description   = v.description != null ? v.description : ""
+      tags          = v.tags != null ? v.tags : ""
+    }
+  }
+  vpc_domains = {
+    for k, v in var.vpc_domains : k => {
+      domain_id         = v.domain_id
+      switch_1          = v.switch_1
+      switch_2          = v.switch_2
+      tags              = v.tags != null ? v.tags : ""
+      vpc_domain_policy = v.vpc_domain_policy != null ? v.vpc_domain_policy : "default"
+    }
+  }
 
   # End of Local Loops
 }
