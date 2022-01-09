@@ -31,32 +31,32 @@ variable "leaf_profiles" {
   }
   description = <<-EOT
   key - Node ID of the Leaf
-    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-    * external_pool_id:
-    * interfaces:
-      - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular leaf port or X/X/X for a breakout sub port.
-        * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-        * interface_policy_group: Name of the Interface Policy Group
-        * port_type: The type of Policy to Apply to the Port.
-          - access: Access Port Policy Group
-          - breakout: Breakout Port Policy Group
-          - port-channel: Port-Channel Port Policy Group
-          - vpc: Virtual Port-Channel Port Policy Group
-        * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-        * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
-    * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
-    * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
-    * node_type:
-      - leaf
-      - remote-leaf-wan
-      - spine
-      - tier-2-leaf
-      - virtual-leaf
-    * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
-    * serial: Manufacturing Serial Number of the Switch.
-    * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-    * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * external_pool_id:
+  * interfaces:
+    - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular leaf port or X/X/X for a breakout sub port.
+      * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      * interface_policy_group: Name of the Interface Policy Group
+      * port_type: The type of Policy to Apply to the Port.
+        - access: Access Port Policy Group
+        - breakout: Breakout Port Policy Group
+        - port-channel: Port-Channel Port Policy Group
+        - vpc: Virtual Port-Channel Port Policy Group
+      * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
+  * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
+  * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
+  * node_type:
+    - leaf
+    - remote-leaf-wan
+    - spine
+    - tier-2-leaf
+    - virtual-leaf
+  * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+  * serial: Manufacturing Serial Number of the Switch.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
   type = map(object(
     {
@@ -236,21 +236,6 @@ GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
 _______________________________________________________________________________________________________________________
 */
-# resource "aci_leaf_selector" "leaf_selectors" {
-#   depends_on = [
-#     aci_leaf_profile.leaf_profiles,
-#     aci_access_switch_policy_group.leaf_policy_groups
-#   ]
-#   for_each                         = local.leaf_profiles
-#   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
-#   name                             = each.value.name
-#   switch_association_type          = "range"
-#   annotation                       = each.value.tags
-#   description                      = each.value.description
-#   name_alias                       = each.value.alias
-#   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
-# }
-
 resource "aci_rest" "leaf_selectors" {
   provider = netascode
   depends_on = [
@@ -289,3 +274,18 @@ resource "aci_rest" "leaf_profile_blocks" {
     to_   = each.key
   }
 }
+
+# resource "aci_leaf_selector" "leaf_selectors" {
+#   depends_on = [
+#     aci_leaf_profile.leaf_profiles,
+#     aci_access_switch_policy_group.leaf_policy_groups
+#   ]
+#   for_each                         = local.leaf_profiles
+#   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
+#   name                             = each.value.name
+#   switch_association_type          = "range"
+#   annotation                       = each.value.tags
+#   description                      = each.value.description
+#   name_alias                       = each.value.alias
+#   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
+# }

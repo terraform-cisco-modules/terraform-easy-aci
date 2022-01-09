@@ -1,0 +1,180 @@
+variable "dns_profiles" {
+  default = {
+    default = {
+      description           = ""
+      dns_domains           = []
+      dns_providers         = []
+      ip_version_preference = "IPv4"
+      management_epg        = "default"
+      management_epg_type   = "oob"
+    }
+  }
+  type = map(object(
+    {
+      description = optional(string)
+      dns_domains = optional(list(object(
+        {
+          domain         = string
+          default_domain = optional(string)
+          description    = optional(string)
+        }
+      )))
+      dns_providers = optional(list(object(
+        {
+          description  = optional(string)
+          dns_provider = string
+          preferred    = optional(string)
+        }
+      )))
+      ip_version_preference = optional(string)
+      management_epg        = optional(string)
+      management_epg_type   = optional(string)
+    }
+  ))
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "dnsProfile"
+ - Distinguished Name: "uni/fabric/dnsp-{name}"
+GUI Location:
+ - Fabric > Fabric Policies > Policies > Global > DNS Profiles > default: Management EPG
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "dns_profiles" {
+  provider   = netascode
+  for_each   = local.dns_profiles
+  dn         = "/api/node/mo/uni/fabric/dnsp-${each.key}"
+  class_name = "dnsProfile"
+  content = {
+    descr           = each.value.description
+    IPVerPreference = each.value.ip_version_preference
+    name            = each.key
+  }
+  child {
+    rn         = "rsProfileToEpg"
+    class_name = "dnsRsProfileToEpg"
+    content = {
+      tDn = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
+    }
+  }
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "dnsProv"
+ - Distinguished Name: "uni/fabric/dnsp-{name}/prov-[{dns_provider}]"
+GUI Location:
+ - Fabric > Fabric Policies > Policies > Global > DNS Profiles > {name}: DNS Providers
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "dns_providers" {
+  provider = netascode
+  depends_on = [
+    aci_rest.dns_profiles
+  ]
+  for_each   = local.dns_providers
+  dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]"
+  class_name = "dnsProv"
+  content = {
+    addr      = each.value.dns_provider
+    preferred = each.value.preferred
+  }
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "dnsDomain"
+ - Distinguished Name: "uni/fabric/dnsp-{name}/dom-[{domain}]"
+GUI Location:
+ - Fabric > Fabric Policies > Policies > Global > DNS Profiles > {name}: DNS Domains
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "dns_domains" {
+  provider = netascode
+  depends_on = [
+    aci_rest.dns_profiles
+  ]
+  for_each   = local.dns_domains
+  dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]"
+  class_name = "dnsDomain"
+  content = {
+    descr     = each.value.description
+    isDefault = each.value.default_domain
+    name      = each.value.domain
+  }
+}
+
+
+# resource "aci_rest" "dns_profiles" {
+#   for_each   = local.dns_profiles
+#   path       = "/api/node/mo/uni/fabric/dnsp-${each.key}.json"
+#   class_name = "dnsProfile"
+#   payload    = <<EOF
+# {
+#   "dnsProfile": {
+#     "attributes": {
+#       "IPVerPreference": "${each.value.ip_version_preference}",
+#       "descr": "${each.value.description}",
+#       "dn": "uni/fabric/dnsp-${each.key}",
+#       "name": "${each.key}"
+#     },
+#     "children": [
+#       {
+#         "dnsRsProfileToEpg": {
+#           "attributes": {
+#             "tDn": "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
+#           }
+#         }
+#       },
+#     ]
+#   }
+# }
+#   EOF
+# }
+# resource "aci_rest" "dns_providers" {
+#   depends_on = [
+#     aci_rest.dns_profiles
+#   ]
+#   for_each   = local.dns_providers
+#   path       = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}].json"
+#   class_name = "dnsProv"
+#   payload    = <<EOF
+# {
+#   "dnsProv": {
+#     "attributes": {
+#       "addr": "${each.value.dns_provider}",
+#       "dn": "uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]",
+#       "preferred": "${each.value.preferred}",
+#     },
+#     "children": []
+#   }
+# }
+#   EOF
+# }
+# resource "aci_rest" "dns_domains" {
+#   depends_on = [
+#     aci_rest.dns_profiles
+#   ]
+#   for_each   = local.dns_domains
+#   path       = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}].json"
+#   class_name = "dnsDomain"
+#   payload    = <<EOF
+# {
+#   "dnsDomain": {
+#     "attributes": {
+#       "descr": "${each.value.description}"
+#       "dn": "uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]",
+#       "isDefault": "${each.value.default}",
+#       "name": "${each.value.domain}"
+#     },
+#     "children": []
+#   }
+# }
+#     EOF
+# }

@@ -29,4 +29,3 @@ provider "netascode" {
   username    = var.apicUser
   insecure    = true
 }
-
