@@ -4,12 +4,16 @@ locals {
   # BGP Variables
   #__________________________________________________________
 
-  bgp_route_reflectors = {
-    for k, v in var.bgp_route_reflectors : k => {
-      node_id = v.node_id != null ? v.node_id : 101
-      pod_id  = v.pod_id != null ? v.pod_id : 1
-    }
-  }
+  bgp_route_reflectors_loop = flatten([
+    for k, v in var.bgp_route_reflectors: [
+      for s in v.node_list: { 
+        node_id = s
+        pod_id  = k
+      }
+    ]
+  ])
+
+  bgp_route_reflectors = { for k, v in local.bgp_route_reflectors_loop : "${v.pod_id}_${v.node_id}" => v }
 
   #__________________________________________________________
   #

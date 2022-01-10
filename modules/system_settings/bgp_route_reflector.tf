@@ -7,19 +7,16 @@ variable "autonomous_system_number" {
 variable "bgp_route_reflectors" {
   default = {
     "default" = {
-      node_id = 101
-      pod_id  = 1
+      node_list = [101,102]
     }
   }
   description = <<-EOT
-  Key - Unique ID
+  Key - Pod Identifier
   * node_id: Node Identifier for the Spine.
-  * pod_id: Pod Identifier the Spine is Located in.
   EOT
   type = map(object(
     {
-      node_id = number
-      pod_id  = optional(number)
+      node_list = list(string)
     }
   ))
 }
