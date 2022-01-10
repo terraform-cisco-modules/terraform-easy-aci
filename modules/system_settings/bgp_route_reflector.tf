@@ -4,10 +4,24 @@ variable "autonomous_system_number" {
   type        = number
 }
 
-variable "route_reflector_nodes" {
-  default     = [101, 102]
-  description = "List of Spine ID's to configure as Route Reflectors."
-  type        = list(string)
+variable "bgp_route_reflectors" {
+  default = {
+    "default" = {
+      node_id = 101
+      pod_id  = 1
+    }
+  }
+  description = <<-EOT
+  Key - Unique ID
+  * node_id: Node Identifier for the Spine.
+  * pod_id: Pod Identifier the Spine is Located in.
+  EOT
+  type = map(object(
+    {
+      node_id = number
+      pod_id  = optional(number)
+    }
+  ))
 }
 /*_____________________________________________________________________________________________________________________
 
@@ -38,10 +52,11 @@ ________________________________________________________________________________
 */
 resource "aci_rest" "bgp_route_reflectors" {
   provider   = netascode
-  for_each   = toset(var.route_reflector_nodes)
-  dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value}"
+  for_each   = local.bgp_route_reflectors
+  dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value.node_id}"
   class_name = "bgpRRNodePEp"
   content = {
-    id = each.value
+    id    = each.value.node_id
+    podId = each.value.pod_id
   }
 }

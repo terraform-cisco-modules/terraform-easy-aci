@@ -1,6 +1,18 @@
 locals {
   #__________________________________________________________
   #
+  # BGP Variables
+  #__________________________________________________________
+
+  bgp_route_reflectors = {
+    for k, v in var.bgp_route_reflectors : k => {
+      node_id = v.node_id != null ? v.node_id : 101
+      pod_id  = v.pod_id != null ? v.pod_id : 1
+    }
+  }
+
+  #__________________________________________________________
+  #
   # Endpoint Control Variables
   #__________________________________________________________
 

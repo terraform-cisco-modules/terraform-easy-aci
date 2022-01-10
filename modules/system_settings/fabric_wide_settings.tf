@@ -51,23 +51,24 @@ ________________________________________________________________________________
 */
 resource "aci_rest" "fabric_wide_settings" {
   provider   = netascode
-  for_each   = { for k, v in local.fabric_wide_settings: k => v if length(regexall("(^[3-4]\\..*|^5.[0-1].*|^5.2\\([0-2].*\\))", var.apic_version)) > 0 }
+  for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("(^[3-4]\\..*|^5.[0-1].*|^5.2\\([0-2].*\\))", var.apic_version)) > 0 }
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
   content = {
-    domainValidation               = each.value.enforce_domain_validation
-    enforceSubnetCheck             = each.value.enforce_subnet_check
-    opflexpAuthenticateClients     = each.value.spine_opflex_client_authentication
-    reallocateGipo           = each.value.reallocate_gipo
-    restrictInfraVLANTraffic = each.value.restrict_infra_vlan_traffic
-    unicastXrEpLearnDisable  = each.value.disable_remote_ep_learning
-    validateOverlappingVlans = each.value.enforce_epg_vlan_validation
+    domainValidation           = each.value.enforce_domain_validation
+    enforceSubnetCheck         = each.value.enforce_subnet_check
+    opflexpAuthenticateClients = each.value.spine_opflex_client_authentication
+    opflexpUseSsl              = each.value.spine_ssl_opflex
+    reallocateGipo             = each.value.reallocate_gipo
+    restrictInfraVLANTraffic   = each.value.restrict_infra_vlan_traffic
+    unicastXrEpLearnDisable    = each.value.disable_remote_ep_learning
+    validateOverlappingVlans   = each.value.enforce_epg_vlan_validation
   }
 }
 
 resource "aci_rest" "fabric_wide_settings_5_2_3" {
   provider   = netascode
-  for_each   = { for k, v in local.fabric_wide_settings: k => v if length(regexall("5.2(3[a-z])", var.apic_version)) > 0 }
+  for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("5.2(3[a-z])", var.apic_version)) > 0 }
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
   content = {
