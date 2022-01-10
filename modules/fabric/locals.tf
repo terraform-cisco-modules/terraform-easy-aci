@@ -454,18 +454,18 @@ locals {
         authentication_key       = v.authentication_key != null ? v.authentication_key : 0
         authentication_keys      = value.authentication_keys
         description              = v.description != null ? v.description : ""
+        hostname                 = v.hostname
         management_epg           = v.management_epg != null ? v.management_epg : "default"
         management_epg_type      = v.management_epg_type != null ? v.management_epg_type : "oob"
         maximum_polling_interval = v.maximum_polling_interval != null ? v.maximum_polling_interval : 6
         minimum_polling_interval = v.minimum_polling_interval != null ? v.minimum_polling_interval : 4
         key1                     = key
-        ntp_server               = v.ntp_server
         preferred                = v.preferred != null ? v.preferred : "no"
       }
     ]
   ])
 
-  ntp_servers = { for k, v in local.ntp_servers_loop : "${v.key1}_${v.ntp_server}" => v }
+  ntp_servers = { for k, v in local.ntp_servers_loop : "${v.key1}_${v.hostname}" => v }
 
   #__________________________________________________________
   #
@@ -596,6 +596,10 @@ locals {
       description            = v.description != null ? v.description : ""
       destinations           = v.destinations
       from_email             = v.from_email != null ? v.from_email : ""
+      include_a              = v.include_types[0]["audit_logs"]
+      include_e              = v.include_types[0]["events"]
+      include_f              = v.include_types[0]["faults"]
+      include_s              = v.include_types[0]["session_logs"]
       phone_contact          = v.phone_contact != null ? v.phone_contact : ""
       port_number            = v.port_number != null ? v.port_number : 25
       reply_to_email         = v.reply_to_email != null ? v.reply_to_email : ""
@@ -646,6 +650,10 @@ locals {
       communities        = v.communities != null ? v.communities : []
       contact            = v.contact != null ? v.contact : ""
       description        = v.description != null ? v.description : ""
+      include_a          = v.include_types[0]["audit_logs"]
+      include_e          = v.include_types[0]["events"]
+      include_f          = v.include_types[0]["faults"]
+      include_s          = v.include_types[0]["session_logs"]
       location           = v.location != null ? v.location : ""
       snmp_client_groups = v.snmp_client_groups
       trap_destinations  = v.trap_destinations != null ? v.trap_destinations : []
@@ -732,6 +740,7 @@ locals {
 
   syslog = {
     for k, v in var.syslog : k => {
+      admin_state                    = v.admin_state != null ? v.admin_state : "enabled"
       description                    = v.description != null ? v.description : ""
       console_admin_state            = v.console_destination[0]["admin_state"] != null ? v.console_destination[0]["admin_state"] : "enabled"
       console_severity               = v.console_destination[0]["severity"] != null ? v.console_destination[0]["severity"] : "warnings"

@@ -1,3 +1,14 @@
+variable "autonomous_system_number" {
+  default     = 65000
+  description = "BGP Autonomous System Number."
+  type        = number
+}
+
+variable "route_reflector_nodes" {
+  default     = [101, 102]
+  description = "List of Spine ID's to configure as Route Reflectors."
+  type        = list(string)
+}
 /*_____________________________________________________________________________________________________________________
 
 API Information:
@@ -7,20 +18,13 @@ GUI Location:
  - System > System Settings > BGP Route Reflector: {BGP_ASN}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "BGP_ASN_{BGP_ASN}" {
-  path       = "/api/node/mo/uni/fabric/bgpInstP-default/as.json"
+resource "aci_rest" "bgp_asn" {
+  provider   = netascode
+  dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
-  payload    = <<EOF
-{
-  "bgpAsP": {
-    "attributes": {
-      "dn": "uni/fabric/bgpInstP-default/as",
-      "asn": "{BGP_ASN}"
-    },
-    "children": []
+  content = {
+    asn = var.autonomous_system_number
   }
-}
-  EOF
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -32,19 +36,12 @@ GUI Location:
  - System > System Settings > BGP Route Reflector: Route Reflector Nodes
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "BGP_Route_Reflector_{Node_ID}" {
-  path       = "/api/node/mo/uni/fabric/bgpInstP-default/rr/node-{Node_ID}.json"
+resource "aci_rest" "bgp_route_reflectors" {
+  provider   = netascode
+  for_each   = toset(var.route_reflector_nodes)
+  dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value}"
   class_name = "bgpRRNodePEp"
-  payload    = <<EOF
-{
-  "bgpRRNodePEp": {
-    "attributes": {
-      "dn": "uni/fabric/bgpInstP-default/rr/node-{Node_ID}",
-      "id": "{Node_ID}",
-      "rn": "node-{Node_ID}"
-    },
-    "children": []
+  content = {
+    id = each.value
   }
-}
-  EOF
 }

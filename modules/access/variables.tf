@@ -41,7 +41,7 @@ variable "mcp_instance_key" {
 }
 
 variable "apic_version" {
-  default     = "5"
+  default     = "5.2(1g)"
   description = "The Version of ACI Running in the Environment."
   type        = string
 }

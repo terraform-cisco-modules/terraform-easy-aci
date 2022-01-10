@@ -14,7 +14,50 @@ variable "date_and_time" {
     }
   }
   description = <<-EOT
-  * time_zone: Valid Timezones:
+  * administrative_state: The NTP protocol can be enabled or disabled. If enabled, the system uses the NTP protocol. The NTP protocol can be either of the following:
+    - enabled: NTP protocol is enabled.
+    - disabled: NTP protocol is disabled.
+  * authentication_keys: List of NTP Authentication keys; when performing NTP Authentication.
+    - authentication_type: The authentication key type can be:
+      * md5: Use HMAC MD5 algorithm for authentication
+      * sha1: (Default) Use HMAC SHA1 algorithm for authentication
+    - key_id: The user-configured NTP client authentication key name. The NTP client authentication key is for authenticating time synchronization. This name can be between 1 and 65335. Note that you cannot change this name after the object has been saved.
+    - trusted: The trust status of the authentication key. This indicates if the NTP authentication key is trusted. The trust states of the NTP authentication key follows:
+      * no: The authentication key is not trusted.
+      * yes: (Default) The authentication key is trusted.
+  * description:  Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * display_format: The date/time display format selector. The display format can be UTC or local. The date/time display format can be either of the following:
+    - utc: Date/time is displayed in UTC.
+    - local: Date/time is displayed in local time.
+  * master_mode: Enables the designated NTP server to provide undisciplined local clock time to downstream clients with a configured stratum number. For example, a leaf switch that is acting as the NTP server can provide undisciplined local clock time to leaf switches acting as clients.  The options are:
+    - enabled: The designated NTP server provides undisciplined local clock time
+    - disabled: The designated NTP server does not provide undisciplined local clock time (default)
+    Notes:
+    - Master Mode is only applicable when the server clock is undisciplined.
+    - The default master mode stratum number is 8.
+  * ntp_servers: List of NTP Servers.
+    - authentication_key: key_id of the Authentication key.
+    - description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    - hostname: Hostname/IP Address of the NTP Server
+    - management_epg: Name of the Management EPG
+    - management_epg_type: Type of EPG.  Options are:
+      * inb: for Inband EPGs.
+      * oob: For Out-of-Band EPGs.
+    - maximum_polling_interval: Default is 6.  The maximum NTP default polling value. This default is set in terms of seconds. The maximum interval range is from 4 to 16.
+    - minimum_polling_interval: Default is 4.  The minimum NTP default polling value. This default is set in terms of seconds. The minimum interval range is from 4 to 16.
+    - preferred: Indicates if the NTP server is preferred. Multiple preferred servers can be configured. The NTP server preference states include the following:
+      * no: The NTP server is not preferred.
+      * yes: The NTP server is preferred.
+  * offset_state: The display of the offset can be enabled or disabled. This enables you to view the difference between the local time and the reference time. 
+  * server_state: Enables switches to act as NTP servers to provide NTP time information to downstream clients. The options are:
+   - enabled: Switch, while being acting as a client, serves the time as server to other clients.
+   - disabled: Switch acts as a client to an NTP server
+    Notes: To support the server functionality, it is always recommended to have a peer setup for the server. This enables the server to provide a consistent time to the clients.
+    - Do not configure the node in the same fabric as the peer of the server.
+    - The NTP server sends time info with a stratum number, an increment to the system peer's stratum number, to switches that are synched to the upstream server.
+    - The server sends time info with stratum 16 if the switch clock is not synched to the upstream server. Clients are not able to sync to this server.
+  * stratum_value: Specifies the stratum level from which NTP clients get their time synchronized. The range is from 1 to 15.  The default master mode stratum number is 8.
+  * time_zone: The time zone selection. This enables you to select a time zone for your fabric.  Valid Timezones:
     - Africa/Abidjan
     - Africa/Accra
     - Africa/Addis_Ababa
@@ -449,11 +492,11 @@ variable "date_and_time" {
         {
           authentication_key       = optional(number)
           description              = optional(string)
+          hostname                 = string
           management_epg           = optional(string)
           management_epg_type      = optional(string)
           maximum_polling_interval = optional(number)
           minimum_polling_interval = optional(number)
-          ntp_server               = string
           preferred                = optional(string)
         }
       )))
@@ -523,27 +566,7 @@ resource "aci_rest" "date_and_time" {
     StratumValue = each.value.stratum_value
   }
 }
-# resource "aci_rest" "date_and_time" {
-#   for_each   = local.date_and_time
-#   path       = "/api/node/mo/uni/fabric/time-${each.key}.json"
-#   class_name = "datetimePol"
-#   payload    = <<EOF
-# {
-#   "datetimePol": {
-#     "attributes": {
-#       "adminSt": "${each.value.administrative_state}",
-#       "authSt": "${each.value.authentication_state}",
-#       "descr": "${each.value.description}",
-#       "dn": "uni/fabric/time-${each.key}",
-#       "masterMode": "${each.value.master_mode}",
-#       "name": "${each.key}",
-#       "serverState": "${each.value.server_state}",
-#       "StratumValue": "${each.value.stratum_value}"
-#     }
-#   }
-# }
-#   EOF
-# }
+
 
 /*_____________________________________________________________________________________________________________________
 
@@ -572,26 +595,7 @@ resource "aci_rest" "ntp_authentication_keys" {
     keyType = each.value.authentication_type
   }
 }
-# resource "aci_rest" "ntp_authentication_keys" {
-#   depends_on = [
-#     aci_rest.date_and_time
-#   ]
-#   for_each   = local.ntp_authentication_keys
-#   path       = "/api/node/mo/uni/fabric/time-${each.value.key1}/ntpauth-${each.value.key_id}.json"
-#   class_name = "datetimeNtpAuthKey"
-#   payload    = <<EOF
-# {
-#   "datetimeNtpAuthKey": {
-#     "attributes": {
-#       "dn": "uni/fabric/time-${each.value.key1}/ntpauth-${each.value.key_id}",
-#       "id": "${each.value.key_id}",
-#       "key": "${var.sensitive_var}",
-#       "keyType": "${each.value.authentication_type}"
-#     },
-#   }
-# }
-#   EOF
-# }
+
 
 /*_____________________________________________________________________________________________________________________
 
@@ -625,39 +629,6 @@ resource "aci_rest" "ntp_servers" {
   }
 }
 
-# resource "aci_rest" "ntp_servers" {
-#   depends_on = [
-#     aci_rest.date_and_time
-#   ]
-#   for_each   = local.ntp_servers
-#   path       = "/api/node/mo/uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}.json"
-#   class_name = "datetimeNtpProv"
-#   payload    = <<EOF
-# {
-#   "datetimeNtpProv": {
-#     "attributes": {
-#       "descr": "${each.value.description}",
-#       "dn": "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}",
-#       "keyId": "${each.value.authentication_key}",
-#       "maxPoll": "${each.value.maximum_polling_interval}",
-#       "minPoll": "${each.value.minimum_polling_interval}",
-#       "name": "${each.value.ntp_server}",
-#       "preferred": "${each.value.preferred}",
-#       "trueChimer": "disabled",
-#     },
-#     "children": [
-#       {
-#         "datetimeRsNtpProvToEpg": {
-#           "attributes": {
-#             "tDn": "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
-#           }
-#         }
-#       }
-#     ]
-#   }
-# }
-#     EOF
-# }
 
 /*_____________________________________________________________________________________________________________________
 

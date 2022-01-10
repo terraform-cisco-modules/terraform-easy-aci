@@ -15,9 +15,16 @@ variable "smart_callhome" {
           rfc_compliant = "no"
         }
       ]
-      from_email     = ""
+      from_email = ""
+      include_types = [
+        {
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+        }
+      ]
       phone_contact  = ""
-      port_number    = 25
       reply_to_email = ""
       site_id        = ""
       street_address = ""
@@ -25,6 +32,7 @@ variable "smart_callhome" {
         {
           management_epg      = "default"
           management_epg_type = "oob" # inb|oob
+          port_number         = 25
           secure_smtp         = "no"
           smtp_server         = "relay.example.com"
           username            = ""
@@ -48,9 +56,16 @@ variable "smart_callhome" {
           rfc_compliant = optional(string)
         }
       ))
-      from_email     = optional(string)
+      from_email = optional(string)
+      include_types = list(object(
+        {
+          audit_logs   = bool
+          events       = bool
+          faults       = bool
+          session_logs = bool
+        }
+      ))
       phone_contact  = optional(string)
-      port_number    = optional(number)
       reply_to_email = optional(string)
       site_id        = optional(string)
       street_address = optional(string)
@@ -58,6 +73,7 @@ variable "smart_callhome" {
         {
           management_epg      = optional(string)
           management_epg_type = optional(string)
+          port_number         = optional(number)
           secure_smtp         = optional(string)
           smtp_server         = string
           username            = optional(string)
@@ -134,63 +150,6 @@ resource "aci_rest" "smart_callhome_smtp_servers" {
   }
 }
 
-# resource "aci_rest" "smart_callhome_destination_groups" {
-#   for_each   = local.smart_callhome_destination_groups
-#   path       = "/api/node/mo/uni/fabric/smartgroup-${each.key}.json"
-#   class_name = "callhomeSmartGroup"
-#   payload    = <<EOF
-# {
-#   "callhomeSmartGroup": {
-#     "attributes": {
-#       "descr": "${each.value.description}",
-#       "dn": "uni/fabric/smartgroup-${each.key}",
-#       "name": "${each.key}",
-#     },
-#     "children": [
-#       {
-#         "callhomeProf": {
-#           "attributes": {
-#             "addr": "${each.value.street_address}",
-#             "contract": "${each.value.contract_id}",
-#             "contact": "${each.value.contact_information}",
-#             "customer": "${each.value.customer_id}",
-#             "dn": "uni/fabric/smartgroup-${each.key}/prof",
-#             "email": "${each.value.customer_contact_email}",
-#             "from": "${each.value.from_email}",
-#             "replyTo": "${each.value.reply_to_email}",
-#             "phone": "${each.value.phone_contact}",
-#             "port": "${each.value.port_number}",
-#             "site": "${each.value.site_id}",
-#             "rn": "prof"
-#           },
-#           "children": [
-#             {
-#               "callhomeSmtpServer": {
-#                 "attributes": {
-#                   "dn": "uni/fabric/smartgroup-${each.key}/prof/smtp",
-#                   "host": "${each.value.smtp_server}",
-#                   "rn": "smtp"
-#                 },
-#                 "children": [
-#                   {
-#                     "fileRsARemoteHostToEpg": {
-#                       "attributes": {
-#                         "tDn": "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
-#                       },
-#                       "children": []
-#                     }
-#                   }
-#                 ]
-#               }
-#             }
-#           ]
-#         }
-#       }
-#     ]
-#   }
-# }
-#   EOF
-# }
 
 /*_____________________________________________________________________________________________________________________
 
@@ -217,28 +176,7 @@ resource "aci_rest" "smart_callhome_destinations" {
     rfcCompliant = each.value.rfc_compliant
   }
 }
-# resource "aci_rest" "smart_callhome_destinations" {
-#   depends_on = [
-#     aci_rest.smart_callhome_destination_groups
-#   ]
-#   path       = "/api/node/mo/uni/fabric/smartgroup-${each.key}.json"
-#   class_name = "callhomeSmartDest"
-#   payload    = <<EOF
-# {
-#   "callhomeSmartDest": {
-#     "attributes": {
-#       "adminState": "${each.value.admin_state}"
-#       "dn": "uni/fabric/smartgroup-${each.key}/smartdest-${each.value.receiver}",
-#       "email": "${each.value.email}",
-#       "format": "${each.value.format}",
-#       "name": "${each.value.receiver}",
-#       "rfcCompliant": "${each.value.rfc_compliant}",
-#     },
-#     "children": []
-#   }
-# }
-#   EOF
-# }
+
 
 /*_____________________________________________________________________________________________________________________
 
@@ -258,6 +196,16 @@ resource "aci_rest" "smart_callhome_source" {
   dn         = "uni/fabric/moncommon/smartchsrc"
   class_name = "callhomeSmartSrc"
   content = {
+    incl = alltrue(
+      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      ) ? "all" : anytrue(
+      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      ) ? replace(trim(join(",", concat([
+        length(regexall(true, each.value.include_a)) > 0 ? "audit" : ""], [
+        length(regexall(true, each.value.include_e)) > 0 ? "events" : ""], [
+        length(regexall(true, each.value.include_f)) > 0 ? "faults" : ""], [
+        length(regexall(true, each.value.include_s)) > 0 ? "session" : ""]
+    )), ","), ",,", ",") : "none"
   }
   child {
     rn         = "rssmartdestGroup"
@@ -267,30 +215,3 @@ resource "aci_rest" "smart_callhome_source" {
     }
   }
 }
-
-# resource "aci_rest" "smart_callhome_sources" {
-#   depends_on = [
-#     aci_rest.smart_callhome_destination_groups
-#   ]
-#   path       = "/api/node/mo/uni/infra/moninfra-default/smartchsrc.json"
-#   class_name = "callhomeSmartSrc"
-#   payload    = <<EOF
-# {
-#   "callhomeSmartSrc": {
-#     "attributes": {
-#       "dn": "uni/infra/moninfra-default/smartchsrc",
-#     },
-#     "children": [
-#       {
-#         "callhomeRsSmartdestGroup": {
-#           "attributes": {
-#             "tDn": "uni/fabric/smartgroup-{DestGrp_Name}"
-#           },
-#           "children": []
-#         }
-#       }
-#     ]
-#   }
-# }
-#   EOF
-# }
