@@ -10,11 +10,11 @@ GUI Location:
  - Admin > Firmware > Nodes > {Maintenance Group Name}
 */
 resource "aci_maintenance_group_node" "maintenance_group_nodes" {
-    depends_on  = [
-        aci_pod_maintenance_group.maintenance_groups
-    ]
-    pod_maintenance_group_dn = aci_pod_maintenance_group.maintenance_groups[each.value.maintenance_group].id
-    name                     = "blk${each.value.node_id}-${each.value.node_id}"
-    from_                    = each.value.node_id
-    to_                      = each.value.node_id
+  depends_on = [
+    aci_pod_maintenance_group.maintenance_groups
+  ]
+  pod_maintenance_group_dn = aci_pod_maintenance_group.maintenance_groups[each.value.maintenance_group].id
+  name                     = "blk${each.value.node_id}-${each.value.node_id}"
+  from_                    = each.value.node_id
+  to_                      = each.value.node_id
 }
