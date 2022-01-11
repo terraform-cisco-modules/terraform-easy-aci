@@ -16,6 +16,7 @@ variable "fabric_wide_settings" {
       }]
       spine_opflex_client_authentication = "yes"
       spine_ssl_opflex                   = "yes"
+      tags                               = ""
     }
   }
   type = map(object(
@@ -37,6 +38,7 @@ variable "fabric_wide_settings" {
       ))
       spine_opflex_client_authentication = optional(string)
       spine_ssl_opflex                   = optional(string)
+      tags                               = optional(string)
     }
   ))
 }
@@ -73,10 +75,10 @@ resource "aci_rest" "fabric_wide_settings_5_2_3" {
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
   content = {
-    # disableEpDampening = 	each.value. # disable_ep_dampening
-    # enableMoStreaming = 	each.value.
+    # disableEpDampening     = 	each.value. # disable_ep_dampening
+    # enableMoStreaming      = 	each.value.
     # enableRemoteLeafDirect = 	each.value.
-    # policySyncNodeBringup = 	each.value.
+    # policySyncNodeBringup  = 	each.value.
     domainValidation               = each.value.enforce_domain_validation
     enforceSubnetCheck             = each.value.enforce_subnet_check
     leafOpflexpAuthenticateClients = each.value.leaf_opflex_client_authentication
