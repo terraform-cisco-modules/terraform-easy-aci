@@ -9,6 +9,7 @@ locals {
       for s in v.node_list : {
         node_id = s
         pod_id  = k
+        tags    = v.tags != null ? v.tags : ""
       }
     ]
   ])
@@ -36,6 +37,7 @@ locals {
         key1                      = key
         loop_detection_interval   = v.loop_detection_interval != null ? v.loop_detection_interval : 60
         loop_detection_multiplier = v.loop_detection_multiplier != null ? v.loop_detection_multiplier : 4
+        tags                      = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -47,6 +49,7 @@ locals {
       for k, v in value.ip_aging : {
         administrative_state = v.administrative_state != null ? v.administrative_state : "enabled"
         key1                 = key
+        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -61,6 +64,7 @@ locals {
         hold_interval        = v.hold_interval != null ? v.hold_interval : 1800
         rouge_interval       = v.rouge_interval != null ? v.rouge_interval : 30
         rouge_multiplier     = v.rouge_multiplier != null ? v.rouge_multiplier : 6
+        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -88,6 +92,7 @@ locals {
       ssl_opflex_version1_2              = v.ssl_opflex_versions[0].TLSv1_2
       spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : "yes"
       spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : "yes"
+      tags                               = v.tags != null ? v.tags : ""
     }
   }
 
@@ -120,6 +125,7 @@ locals {
       sfp_computation_frequency_initial_wait_interval = v.sfp_computation_frequency_initial_wait_interval != null ? v.sfp_computation_frequency_initial_wait_interval : 50
       sfp_computation_frequency_maximum_wait_interval = v.sfp_computation_frequency_maximum_wait_interval != null ? v.sfp_computation_frequency_maximum_wait_interval : 50
       sfp_computation_frequency_second_wait_interval  = v.sfp_computation_frequency_second_wait_interval != null ? v.sfp_computation_frequency_second_wait_interval : 50
+      tags                                            = v.tags != null ? v.tags : ""
     }
   }
 

@@ -10,6 +10,7 @@ variable "isis_policy" {
       sfp_computation_frequency_initial_wait_interval = 50
       sfp_computation_frequency_maximum_wait_interval = 50
       sfp_computation_frequency_second_wait_interval  = 50
+      tags                                            = ""
     }
   }
   type = map(object(
@@ -23,6 +24,7 @@ variable "isis_policy" {
       sfp_computation_frequency_initial_wait_interval = optional(number)
       sfp_computation_frequency_maximum_wait_interval = optional(number)
       sfp_computation_frequency_second_wait_interval  = optional(number)
+      tags                                            = optional(string)
     }
   ))
 }

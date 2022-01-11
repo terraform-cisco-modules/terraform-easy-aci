@@ -323,6 +323,12 @@ variable "mcp_instance_policy" {
   ))
 }
 
+variable "mcp_instance_key" {
+  description = "The key or password to uniquely identify the MCP packets within this fabric."
+  sensitive   = true
+  type        = string
+}
+
 
 /*_____________________________________________________________________________________________________________________
 

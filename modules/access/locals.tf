@@ -63,6 +63,7 @@ locals {
       description      = v.description != null ? v.description : ""
       layer3_domains   = v.layer3_domains != null ? v.layer3_domains : []
       physical_domains = v.physical_domains != null ? v.physical_domains : []
+      tags             = v.tags != null ? v.tags : ""
       vmm_domains      = v.vmm_domains != null ? v.vmm_domains : []
     }
   }
@@ -73,6 +74,7 @@ locals {
       description      = v.description != null ? v.description : ""
       layer3_domains   = [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"]]
       physical_domains = [for s in v.physical_domains : aci_physical_domain.physical_domains["${s}"]]
+      tags             = v.tags != null ? v.tags : ""
       vmm_domains      = [for s in v.vmm_domains : aci_vmm_domain.vmm_domains["${s}"]]
     }
   }
@@ -82,6 +84,7 @@ locals {
       alias       = v.alias != null ? v.alias : ""
       description = v.description != null ? v.description : ""
       domains     = compact(concat(v.layer3_domains, v.physical_domains, v.vmm_domains))
+      tags        = v.tags != null ? v.tags : ""
     }
   }
 
@@ -130,6 +133,7 @@ locals {
       loop_protect_action               = "yes"
       transmission_frequency_seconds    = "2"
       transmission_frequency_msec       = "0"
+      tags                              = v.tags != null ? v.tags : ""
     }
   }
 
@@ -162,6 +166,7 @@ locals {
       admin_state = v.admin_state != null ? v.admin_state : "enabled"
       alias       = v.alias != null ? v.alias : ""
       description = v.description != null ? v.description : ""
+      tags        = v.tags != null ? v.tags : ""
     }
   }
 
@@ -175,6 +180,7 @@ locals {
       port_mode             = v.port_mode != null ? v.port_mode : "f"
       receive_buffer_credit = v.receive_buffer_credit != null ? v.receive_buffer_credit : "64"
       speed                 = v.speed != null ? v.speed : "auto"
+      tags                  = v.tags != null ? v.tags : ""
       trunk_mode            = v.trunk_mode != null ? v.trunk_mode : "trunk-off"
     }
   }
@@ -186,6 +192,7 @@ locals {
       description      = v.description != null ? v.description : ""
       qinq             = v.qinq != null ? v.qinq : "disabled"
       reflective_relay = v.reflective_relay != null ? v.reflective_relay : "disabled"
+      tags             = v.tags != null ? v.tags : ""
       vlan_scope       = v.vlan_scope != null ? v.vlan_scope : "global"
     }
   }
@@ -203,6 +210,7 @@ locals {
       mode                      = v.mode != null ? v.mode : "off"
       suspend_individual_port   = v.suspend_individual_port != null ? v.suspend_individual_port : true
       symmetric_hashing         = v.symmetric_hashing != null ? v.symmetric_hashing : false
+      tags                      = v.tags != null ? v.tags : ""
     }
   }
 
@@ -215,6 +223,7 @@ locals {
       forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
       link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : "100"
       speed                       = v.speed != null ? v.speed : "inherit"
+      tags                        = v.tags != null ? v.tags : ""
     }
   }
 
@@ -447,6 +456,7 @@ locals {
         port_type            = v.port_type != null ? v.port_type : "access"
         selector_description = v.selector_description != null ? v.selector_description : ""
         sub_port             = v.sub_port != false ? element(split("/", k), 2) : ""
+        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -470,6 +480,7 @@ locals {
       description       = v.description != null ? v.description : ""
       link_level_policy = v.link_level_policy != null ? v.link_level_policy : "default"
       macsec_policy     = v.macsec_policy != null ? v.macsec_policy : "default"
+      tags              = v.tags != null ? v.tags : ""
     }
   }
 
@@ -536,6 +547,7 @@ locals {
         port                 = element(split("/", k), 1)
         port_type            = v.port_type != null ? v.port_type : "access"
         selector_description = v.selector_description != null ? v.selector_description : ""
+        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -560,6 +572,7 @@ locals {
       allocation_mode = v.allocation_mode != null ? v.allocation_mode : "dynamic"
       description     = v.description != null ? v.description : ""
       encap_blocks    = v.encap_blocks != null ? v.encap_blocks : {}
+      tags            = v.tags != null ? v.tags : ""
     }
   }
 
@@ -578,6 +591,7 @@ locals {
         key1            = key
         key2            = k
         role            = v.role != null ? v.role : "external"
+        tags            = value.tags
         vlan_split = length(regexall("-", v.vlan_range)) > 0 ? tolist(split(",", v.vlan_range)) : length(
           regexall(",", v.vlan_range)) > 0 ? tolist(split(",", v.vlan_range)
         ) : [v.vlan_range]
@@ -595,6 +609,7 @@ locals {
       key1            = v.key1
       key2            = v.key2
       role            = v.role
+      tags            = v.tags
       vlan_list = length(regexall("(,|-)", jsonencode(v.vlan_range))) > 0 ? flatten([
         for s in v.vlan_split : length(regexall("-", s)) > 0 ? [for v in range(tonumber(
           element(split("-", s), 0)), (tonumber(element(split("-", s), 1)) + 1)
@@ -612,6 +627,7 @@ locals {
         description     = v.description
         key1            = v.key1
         role            = v.role
+        tags            = v.tags
         vlan            = s
       }
     ]

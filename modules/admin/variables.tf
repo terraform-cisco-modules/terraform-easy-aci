@@ -27,6 +27,12 @@ variable "apicUser" {
   type        = string
 }
 
+variable "apic_version" {
+  default     = "5.2(1g)"
+  description = "The Version of ACI Running in the Environment."
+  type        = string
+}
+
 variable "privateKey" {
   default     = ""
   description = "Cisco ACI Private Key for SSL Based Authentication."

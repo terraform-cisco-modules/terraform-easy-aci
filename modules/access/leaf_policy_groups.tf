@@ -164,15 +164,19 @@ resource "aci_access_switch_policy_group" "leaf_policy_groups" {
     aci_cdp_interface_policy.cdp_interface_policies,
     aci_lldp_interface_policy.lldp_interface_policies,
   ]
-  for_each                                               = local.leaf_policy_groups
-  annotation                                             = each.value.tags != "" ? each.value.tags : var.tags
-  description                                            = each.value.description
-  name                                                   = each.key
-  name_alias                                             = each.value.alias
-  relation_infra_rs_bfd_ipv4_inst_pol                    = "uni/infra/bfdIpv4Inst-${each.value.bfd_ipv4_policy}"
-  relation_infra_rs_bfd_ipv6_inst_pol                    = "uni/infra/bfdIpv6Inst-${each.value.bfd_ipv6_policy}"
-  relation_infra_rs_bfd_mh_ipv4_inst_pol                 = var.apic_version > 4 ? "uni/infra/bfdMhIpv4Inst-${each.value.bfd_multihop_ipv4_policy}" : ""
-  relation_infra_rs_bfd_mh_ipv6_inst_pol                 = var.apic_version > 4 ? "uni/infra/bfdMhIpv6Inst-${each.value.bfd_multihop_ipv6_policy}" : ""
+  for_each                            = local.leaf_policy_groups
+  annotation                          = each.value.tags != "" ? each.value.tags : var.tags
+  description                         = each.value.description
+  name                                = each.key
+  name_alias                          = each.value.alias
+  relation_infra_rs_bfd_ipv4_inst_pol = "uni/infra/bfdIpv4Inst-${each.value.bfd_ipv4_policy}"
+  relation_infra_rs_bfd_ipv6_inst_pol = "uni/infra/bfdIpv6Inst-${each.value.bfd_ipv6_policy}"
+  relation_infra_rs_bfd_mh_ipv4_inst_pol = length(regexall(
+    "^5", var.apic_version)
+  ) > 0 ? "uni/infra/bfdMhIpv4Inst-${each.value.bfd_multihop_ipv4_policy}" : ""
+  relation_infra_rs_bfd_mh_ipv6_inst_pol = length(regexall(
+    "^5", var.apic_version)
+  ) > 0 ? "uni/infra/bfdMhIpv6Inst-${each.value.bfd_multihop_ipv6_policy}" : ""
   relation_infra_rs_equipment_flash_config_pol           = "uni/infra/flashconfigpol-${each.value.equipment_flash_config}"
   relation_infra_rs_fc_fabric_pol                        = "uni/infra/fcfabricpol-${each.value.fibre_channel_san_policy}"
   relation_infra_rs_fc_inst_pol                          = "uni/infra/fcinstpol-${each.value.fibre_channel_node_policy}"

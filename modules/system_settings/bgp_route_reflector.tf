@@ -8,6 +8,7 @@ variable "bgp_route_reflectors" {
   default = {
     "default" = {
       node_list = [101, 102]
+      tags      = ""
     }
   }
   description = <<-EOT
@@ -17,6 +18,7 @@ variable "bgp_route_reflectors" {
   type = map(object(
     {
       node_list = list(string)
+      tags      = optional(string)
     }
   ))
 }
@@ -34,7 +36,7 @@ resource "aci_rest" "bgp_asn" {
   dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = var.tags
     asn        = var.autonomous_system_number
   }
 }

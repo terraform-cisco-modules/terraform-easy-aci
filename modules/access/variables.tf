@@ -16,13 +16,6 @@ variable "apicPass" {
   type        = string
 }
 
-variable "privateKey" {
-  default     = ""
-  description = "Cisco ACI Private Key for SSL Based Authentication."
-  sensitive   = true
-  type        = string
-}
-
 variable "apicUrl" {
   description = "Cisco APIC URL.  In Example http://apic.example.com"
   type        = string
@@ -34,14 +27,21 @@ variable "apicUser" {
   type        = string
 }
 
-variable "mcp_instance_key" {
-  description = "The key or password to uniquely identify the MCP packets within this fabric."
+variable "apic_version" {
+  default     = "5.2(1g)"
+  description = "The Version of ACI Running in the Environment."
+  type        = string
+}
+
+variable "privateKey" {
+  default     = ""
+  description = "Cisco ACI Private Key for SSL Based Authentication."
   sensitive   = true
   type        = string
 }
 
-variable "apic_version" {
-  default     = "5.2(1g)"
-  description = "The Version of ACI Running in the Environment."
+variable "tags" {
+  default     = ""
+  description = "workspace tag value."
   type        = string
 }

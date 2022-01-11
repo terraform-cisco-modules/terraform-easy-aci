@@ -9,6 +9,7 @@ variable "cdp_interface_policies" {
       admin_state = "enabled"
       alias       = ""
       description = ""
+      tags        = ""
     }
   }
   description = <<-EOT
@@ -16,12 +17,14 @@ variable "cdp_interface_policies" {
   * admin_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       admin_state = optional(string)
       alias       = optional(string)
       description = optional(string)
+      tags        = optional(string)
     }
   ))
 }
@@ -62,6 +65,7 @@ variable "fc_interface_policies" {
       receive_buffer_credit = "64"
       speed                 = "auto"
       trunk_mode            = "trunk-off"
+      tags                  = ""
     }
   }
   description = <<-EOT
@@ -85,6 +89,7 @@ variable "fc_interface_policies" {
     - 8G
     - 16G
     - 32G
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * trunk_mode: (Default value is "trunk-off").  Trunking on/off for native FC ports. Allowed values are:
     - un-init
     - trunk-off
@@ -100,6 +105,7 @@ variable "fc_interface_policies" {
       port_mode             = optional(string)
       receive_buffer_credit = optional(string)
       speed                 = optional(string)
+      tags                  = optional(string)
       trunk_mode            = optional(string)
     }
   ))
@@ -143,6 +149,7 @@ variable "l2_interface_policies" {
       qinq             = "disabled"
       reflective_relay = "disabled"
       vlan_scope       = "global"
+      tags             = ""
     }
   }
   description = <<-EOT
@@ -155,6 +162,7 @@ variable "l2_interface_policies" {
     - doubleQtagPort: Configure this interface to be used for Q-in-Q encapsulated traffic.
     - edgePort: Configure this edge-switch interface (for a single customer) to be included in a Dot1q Tunnel.
   * reflective_relay: (Default value is "disabled").  Enable or disable reflective relay for ports that consume the policy.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_scope: (Default value is "global").  The layer 2 interface VLAN scope. The scope can be:
     - global: Sets the VLAN encapsulation value to map only to a single EPG per leaf.
     - portlocal: Allows allocation of separate (Port, Vlan) translation entries in both ingress and egress directions. This configuration is not valid when the EPGs belong to a single bridge domain.
@@ -167,6 +175,7 @@ variable "l2_interface_policies" {
       description      = optional(string)
       qinq             = optional(string)
       reflective_relay = optional(string)
+      tags             = optional(string)
       vlan_scope       = optional(string)
     }
   ))
@@ -211,6 +220,7 @@ variable "lacp_interface_policies" {
       mode                      = "off"
       suspend_individual_port   = true
       symmetric_hashing         = false
+      tags                      = ""
     }
   }
   description = <<-EOT
@@ -230,19 +240,21 @@ variable "lacp_interface_policies" {
     - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
   * suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
   * symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       alias                     = optional(string)
+      description               = optional(string)
       fast_select_standby_ports = optional(bool)
       graceful_convergence      = optional(bool)
       load_defer_member_ports   = optional(bool)
-      suspend_individual_port   = optional(bool)
-      symmetric_hashing         = optional(bool)
-      description               = optional(string)
       maximum_number_of_links   = optional(string)
       minimum_number_of_links   = optional(string)
       mode                      = optional(string)
+      suspend_individual_port   = optional(bool)
+      symmetric_hashing         = optional(bool)
+      tags                      = optional(string)
     }
   ))
 }
@@ -284,6 +296,7 @@ variable "link_level_policies" {
       forwarding_error_correction = "inherit"
       link_debounce_interval      = "100"
       speed                       = "inherit"
+      tags                        = ""
     }
   }
   description = <<-EOT
@@ -314,6 +327,7 @@ variable "link_level_policies" {
     - 200G
     - 400G
     * inherit
+  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
@@ -323,6 +337,7 @@ variable "link_level_policies" {
       forwarding_error_correction = optional(string)
       link_debounce_interval      = optional(string)
       speed                       = optional(string)
+      tags                        = optional(string)
     }
   ))
 }

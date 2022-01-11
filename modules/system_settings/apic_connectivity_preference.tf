@@ -18,6 +18,6 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_mgmt_preference" "apic_connectivity_preference" {
-  annotation     = each.value.tags != "" ? each.value.tags : var.tags
+  annotation     = var.tags
   interface_pref = var.apic_connectivity_preference
 }

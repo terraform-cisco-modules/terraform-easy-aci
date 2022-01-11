@@ -19,6 +19,7 @@ variable "endpoint_controls" {
         rouge_interval       = 30
         rouge_multiplier     = 6
       }]
+      tags = ""
     }
   }
   description = <<-EOT
@@ -59,6 +60,7 @@ variable "endpoint_controls" {
           rouge_multiplier     = optional(number)
         }
       ))
+      tags = optional(string)
     }
   ))
 }
