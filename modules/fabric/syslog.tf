@@ -102,6 +102,7 @@ resource "aci_rest" "syslog_destination_groups" {
   dn         = "uni/fabric/slgroup-${each.key}"
   class_name = "syslogGroup"
   content = {
+    annotation          = each.value.tags != "" ? each.value.tags : var.tags
     descr               = each.value.description
     format              = each.value.format
     includeMilliSeconds = each.value.show_milliseconds_in_timestamp
@@ -155,6 +156,7 @@ resource "aci_rest" "syslog_remote_destinations" {
   dn         = "uni/fabric/slgroup-${each.value.key1}/rdst-${each.value.host}"
   class_name = "syslogRemoteDest"
   content = {
+    annotation         = each.value.tags != "" ? each.value.tags : var.tags
     adminState         = each.value.admin_state
     forwardingFacility = each.value.forwarding_facility
     host               = each.value.host
@@ -192,6 +194,7 @@ resource "aci_rest" "syslog_sources" {
   dn         = "uni/fabric/moncommon/slsrc-${each.key}"
   class_name = "syslogSrc"
   content = {
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(

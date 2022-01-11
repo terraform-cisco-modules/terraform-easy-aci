@@ -56,8 +56,9 @@ resource "aci_rest" "pod_policy_groups" {
   dn         = "uni/fabric/funcprof/podpgrp-${each.key}"
   class_name = "fabricPodPGrp"
   content = {
-    descr = each.value.description
-    name  = each.key
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    descr      = each.value.description
+    name       = each.key
   }
   child {
     rn         = "rsTimePol"
@@ -175,7 +176,7 @@ resource "aci_rest" "pod_profiles" {
   dn         = "uni/fabric/podprof-${each.key}"
   class_name = "fabricPodP"
   content = {
-    annotation = each.value.tags
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     descr      = each.value.description
     name       = each.key
     nameAlias  = each.value.alias
@@ -201,8 +202,9 @@ resource "aci_rest" "pod_profile_selectors_all" {
   dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-ALL"
   class_name = "fabricPodS"
   content = {
-    name = each.value.name
-    type = each.value.pod_selector_type
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    name       = each.value.name
+    type       = each.value.pod_selector_type
   }
   child {
     rn         = "rspodPGrp"
@@ -232,8 +234,9 @@ resource "aci_rest" "pod_profile_selectors_range" {
   dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-range"
   class_name = "fabricPodS"
   content = {
-    name = each.value.name
-    type = each.value.pod_selector_type
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    name       = each.value.name
+    type       = each.value.pod_selector_type
   }
   child {
     rn = length(

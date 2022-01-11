@@ -105,8 +105,9 @@ resource "aci_rest" "smart_callhome_destination_groups" {
   dn         = "uni/fabric/smartgroup-${each.key}"
   class_name = "callhomeSmartGroup"
   content = {
-    descr = each.value.description
-    name  = each.key
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    descr      = each.value.description
+    name       = each.key
   }
   child {
     rn         = "prof"
@@ -114,6 +115,7 @@ resource "aci_rest" "smart_callhome_destination_groups" {
     content = {
       addr       = each.value.street_address
       adminState = each.value.admin_state
+      annotation = each.value.tags != "" ? each.value.tags : var.tags
       contract   = each.value.contract_id
       contact    = each.value.contact_information
       customer   = each.value.customer_id
@@ -139,7 +141,8 @@ resource "aci_rest" "smart_callhome_smtp_servers" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
   class_name = "callhomeSmtpServer"
   content = {
-    host = each.value.smtp_server
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    host       = each.value.smtp_server
   }
   child {
     rn         = "rsARemoteHostToEpg"
@@ -169,6 +172,7 @@ resource "aci_rest" "smart_callhome_destinations" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
   class_name = "callhomeSmartDest"
   content = {
+    annotation   = each.value.tags != "" ? each.value.tags : var.tags
     adminState   = each.value.admin_state
     email        = each.value.email
     format       = each.value.format
@@ -196,6 +200,7 @@ resource "aci_rest" "smart_callhome_source" {
   dn         = "uni/fabric/moncommon/smartchsrc"
   class_name = "callhomeSmartSrc"
   content = {
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(

@@ -16,7 +16,7 @@ variable "tacacs" {
           key                 = 1
           management_epg      = "default"
           management_epg_type = "oob"
-          order = 0
+          order               = 0
         }
       ]
       port    = 49
@@ -78,7 +78,7 @@ variable "tacacs" {
           key                 = optional(number)
           management_epg      = optional(string)
           management_epg_type = optional(string)
-          order = number
+          order               = number
         }
       ))
       port    = optional(number)
@@ -175,7 +175,7 @@ GUI Location:
 */
 resource "aci_tacacs_accounting" "tacacs_accounting" {
   for_each    = local.tacacs
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = "${each.key} Accounting"
   name        = each.key
 }
@@ -193,7 +193,7 @@ resource "aci_tacacs_accounting_destination" "tacacs_accounting_destinations" {
   ]
   for_each      = local.tacacs_hosts
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = "${each.value.host} Accounting Destination."
   host          = each.value.host
   key = length(regexall(
@@ -218,7 +218,7 @@ GUI Location:
 resource "aci_tacacs_provider" "tacacs_providers" {
   for_each      = local.tacacs_hosts
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.tacacs_key_5 : length(regexall(
@@ -249,8 +249,9 @@ GUI Location:
  - Admin > AAA > Authentication:AAA > Login Domain
 */
 resource "aci_tacacs_provider_group" "tacacs_provider_groups" {
-  for_each = local.tacacs
-  name     = each.key
+  for_each   = local.tacacs
+  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  name       = each.key
 }
 
 /*
@@ -265,7 +266,7 @@ resource "aci_tacacs_source" "tacacs_sources" {
     aci_tacacs_accounting.tacacs_accounting
   ]
   for_each   = local.tacacs
-  annotation = each.value.tags
+  annotation = each.value.tags != "" ? each.value.tags : var.tags
   incl = compact(concat([
     length(regexall(true, each.value.accounting_a)) > 0 ? "audit" : ""], [
     length(regexall(true, each.value.accounting_e)) > 0 ? "events" : ""], [
@@ -282,7 +283,7 @@ resource "aci_login_domain" "login_domain_tacacs" {
     aci_tacacs_provider.tacacs_providers
   ]
   for_each       = local.tacacs
-  annotation     = each.value.tags
+  annotation     = each.value.tags != "" ? each.value.tags : var.tags
   description    = "${each.key} Login Domain."
   name           = each.key
   realm          = "tacacs"
@@ -296,7 +297,7 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_tacacs" {
     aci_tacacs_provider_group.tacacs_provider_groups
   ]
   for_each    = local.tacacs_hosts
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = "${each.value.host} Login Domain Provider."
   name        = each.value.host
   order       = each.value.order

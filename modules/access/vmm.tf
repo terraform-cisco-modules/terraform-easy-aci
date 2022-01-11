@@ -165,11 +165,10 @@ resource "aci_vmm_credential" "vmm_credentials" {
     aci_vmm_domain.vmm_domains
   ]
   for_each      = local.vmm_credentials
-  vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
-  name          = "${each.key}-creds"
-  annotation    = ""
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = each.value.description
-  name_alias    = ""
+  name          = "${each.key}-creds"
+  vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
   pwd = length(
     regexall(5, coalesce(each.value.password, 10))
     ) > 0 ? var.vmm_password_5 : length(
@@ -199,7 +198,7 @@ resource "aci_vmm_controller" "vmm_controllers" {
   for_each                        = local.vmm_controllers
   vmm_domain_dn                   = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
   name                            = "${each.key}-controller"
-  annotation                      = each.value.tags
+  annotation                      = each.value.tags != "" ? each.value.tags : var.tags
   dvs_version                     = each.value.dvs_version
   host_or_ip                      = each.value.hostname
   inventory_trig_st               = each.value.trigger_inventory_sync
@@ -231,7 +230,7 @@ resource "aci_vswitch_policy" "vswitch_policies" {
   ]
   for_each      = local.vswitch_policies
   vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
-  annotation    = each.value.tags
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = each.value.description
   name_alias    = each.value.alias
   relation_vmm_rs_vswitch_exporter_pol {

@@ -73,7 +73,7 @@ ________________________________________________________________________________
 */
 resource "aci_spine_interface_profile" "spine_interface_profiles" {
   for_each    = local.spine_profiles
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -98,8 +98,9 @@ resource "aci_rest" "spine_interface_selectors" {
   dn         = "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.interface_name}-typ-range"
   class_name = "infraSHPortS"
   content = {
-    name  = each.value.interface_name
-    descr = each.value.selector_description
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    name       = each.value.interface_name
+    descr      = each.value.selector_description
   }
   child {
     rn         = "portblk-${each.value.interface_name}"
@@ -136,7 +137,7 @@ resource "aci_spine_profile" "spine_profiles" {
     aci_spine_interface_profile.spine_interface_profiles
   ]
   for_each    = local.spine_profiles
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -161,6 +162,7 @@ resource "aci_spine_switch_association" "spine_profiles" {
     aci_spine_switch_policy_group.spine_policy_groups
   ]
   for_each                               = local.spine_profiles
+  annotation                             = each.value.tags != "" ? each.value.tags : var.tags
   spine_profile_dn                       = aci_spine_profile.spine_profiles[each.key].id
   description                            = each.value.description
   name                                   = each.value.name
@@ -189,8 +191,9 @@ resource "aci_rest" "spine_profile_node_blocks" {
   dn         = "uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    from_ = each.key
-    to_   = each.key
-    name  = "blk${each.key}-${each.key}"
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    from_      = each.key
+    to_        = each.key
+    name       = "blk${each.key}-${each.key}"
   }
 }

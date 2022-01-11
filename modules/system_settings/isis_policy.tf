@@ -38,6 +38,7 @@ ________________________________________________________________________________
 */
 resource "aci_isis_domain_policy" "isis_policy" {
   for_each            = local.isis_policy
+  annotation          = each.value.tags != "" ? each.value.tags : var.tags
   lsp_fast_flood      = each.value.lsp_fast_flood_mode
   lsp_gen_init_intvl  = each.value.lsp_generation_initial_wait_interval
   lsp_gen_max_intvl   = each.value.lsp_generation_maximum_wait_interval

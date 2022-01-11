@@ -54,6 +54,7 @@ resource "aci_attachable_access_entity_profile" "aaep_policies" {
     # aci_vmm_domain.vmm_domains
   ]
   for_each                = local.aaep_policies
+  annotation              = each.value.tags != "" ? each.value.tags : var.tags
   description             = each.value.description
   name                    = each.key
   relation_infra_rs_dom_p = each.value.domains
@@ -170,7 +171,7 @@ ________________________________________________________________________________
 */
 resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   for_each            = local.error_disabled_recovery_policy
-  annotation          = each.value.tags
+  annotation          = each.value.tags != "" ? each.value.tags : var.tags
   description         = each.value.description
   err_dis_recov_intvl = each.value.error_disable_recovery_interval
   name_alias          = each.value.alias
@@ -335,7 +336,7 @@ ________________________________________________________________________________
 resource "aci_mcp_instance_policy" "mcp_instance_policy" {
   for_each         = local.mcp_instance_policy
   admin_st         = each.value.admin_state
-  annotation       = each.value.tags
+  annotation       = each.value.tags != "" ? each.value.tags : var.tags
   ctrl             = [each.value.controls]
   description      = each.value.description
   init_delay_time  = each.value.initial_delay
@@ -416,7 +417,7 @@ GUI Location:
 */
 resource "aci_qos_instance_policy" "global_qos_class" {
   for_each              = local.global_qos_class
-  annotation            = each.value.tags
+  annotation            = each.value.tags != "" ? each.value.tags : var.tags
   ctrl                  = each.value.control
   description           = each.value.description
   etrap_age_timer       = each.value.elephant_trap_age_period

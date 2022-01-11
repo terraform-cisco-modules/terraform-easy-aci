@@ -40,7 +40,7 @@ GUI Location:
 */
 resource "aci_vpc_domain_policy" "vpc_domain_policies" {
   for_each    = local.vpc_domain_policies
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   dead_intvl  = each.value.dead_interval
   description = each.value.description
   name        = each.key
@@ -96,7 +96,7 @@ resource "aci_vpc_explicit_protection_group" "vpc_domains" {
     aci_vpc_domain_policy.vpc_domain_policies
   ]
   for_each                         = local.vpc_domains
-  annotation                       = each.value.tags
+  annotation                       = each.value.tags != "" ? each.value.tags : var.tags
   name                             = each.key
   switch1                          = each.value.switch_1
   switch2                          = each.value.switch_2

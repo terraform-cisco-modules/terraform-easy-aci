@@ -97,7 +97,7 @@ ________________________________________________________________________________
 */
 resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
   for_each    = local.leaf_profiles
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -122,6 +122,7 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   ]
   for_each                  = local.leaf_interface_selectors
   leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.key1].id
+  annotation                = each.value.tags != "" ? each.value.tags : var.tags
   description               = each.value.selector_description
   name                      = each.value.interface_name
   access_port_selector_type = "range"
@@ -153,6 +154,7 @@ resource "aci_access_port_block" "leaf_port_blocks" {
   ]
   for_each                = { for k, v in local.leaf_interface_selectors : k => v if v.sub_port == "" }
   access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
+  annotation              = each.value.tags != "" ? each.value.tags : var.tags
   description             = each.value.interface_description
   from_card               = each.value.module
   from_port               = each.value.port
@@ -178,6 +180,7 @@ resource "aci_access_sub_port_block" "leaf_port_subblocks" {
   ]
   for_each                = { for k, v in local.leaf_interface_selectors : k => v if v.sub_port != "" }
   access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
+  annotation              = each.value.tags != "" ? each.value.tags : var.tags
   description             = each.value.interface_description
   from_card               = each.value.module
   from_port               = each.value.port
@@ -203,7 +206,7 @@ resource "aci_leaf_profile" "leaf_profiles" {
     aci_leaf_interface_profile.leaf_interface_profiles
   ]
   for_each    = local.leaf_profiles
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -246,10 +249,10 @@ resource "aci_rest" "leaf_selectors" {
   dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/leaves-${each.value.name}-typ-range"
   class_name = "infraLeafS"
   content = {
-    # annotation = each.value.tags
-    descr     = each.value.description
-    name      = each.value.name
-    nameAlias = each.value.alias
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    descr      = each.value.description
+    name       = each.value.name
+    nameAlias  = each.value.alias
   }
 }
 
@@ -269,9 +272,10 @@ resource "aci_rest" "leaf_profile_blocks" {
   dn         = "${aci_rest.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    name  = "blk${each.key}-${each.key}"
-    from_ = each.key
-    to_   = each.key
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    name       = "blk${each.key}-${each.key}"
+    from_      = each.key
+    to_        = each.key
   }
 }
 

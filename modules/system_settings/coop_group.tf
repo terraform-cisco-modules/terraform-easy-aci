@@ -19,5 +19,6 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_coop_policy" "coop_group_policy" {
-  type = var.coop_group_policy
+  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  type       = var.coop_group_policy
 }

@@ -43,7 +43,7 @@ ________________________________________________________________________________
 */
 resource "aci_fabric_node_control" "fabric_node_controls" {
   for_each    = local.fabric_node_controls
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   control     = each.value.enable_dom
   description = each.value.description
   feature_sel = each.value.feature_selections

@@ -165,7 +165,7 @@ resource "aci_access_switch_policy_group" "leaf_policy_groups" {
     aci_lldp_interface_policy.lldp_interface_policies,
   ]
   for_each                                               = local.leaf_policy_groups
-  annotation                                             = each.value.tags
+  annotation                                             = each.value.tags != "" ? each.value.tags : var.tags
   description                                            = each.value.description
   name                                                   = each.key
   name_alias                                             = each.value.alias

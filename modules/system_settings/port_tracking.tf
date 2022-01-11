@@ -29,7 +29,7 @@ ________________________________________________________________________________
 */
 resource "aci_port_tracking" "port_tracking" {
   for_each           = local.port_tracking
-  annotation         = each.value.tags
+  annotation         = each.value.tags != "" ? each.value.tags : var.tags
   admin_st           = each.value.port_tracking_state
   delay              = each.value.delay_restore_timer
   include_apic_ports = each.value.include_apic_ports

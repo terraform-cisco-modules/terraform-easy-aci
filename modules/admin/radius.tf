@@ -8,7 +8,7 @@ variable "radius" {
           key                 = 1
           management_epg      = "default"
           management_epg_type = "oob"
-          order = 5
+          order               = 5
         }
       ]
       port    = 1812
@@ -59,7 +59,7 @@ variable "radius" {
           key                 = optional(number)
           management_epg      = optional(string)
           management_epg_type = optional(string)
-          order = number
+          order               = number
         }
       ))
       port    = optional(number)
@@ -159,7 +159,7 @@ resource "aci_radius_provider" "radius_providers" {
   for_each      = { for k, v in local.radius_hosts : k => v if length(regexall("duo|radius", v.type)) > 0 }
   auth_port     = each.value.port
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.radius_key_5 : length(regexall(
@@ -186,7 +186,7 @@ resource "aci_rsa_provider" "rsa_providers" {
   for_each      = { for k, v in local.radius_hosts : k => v if length(regexall("rsa", v.type)) > 0 }
   auth_port     = each.value.port
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags
+  annotation    = each.value.tags != "" ? each.value.tags : var.tags
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.radius_key_5 : length(regexall(
@@ -216,15 +216,17 @@ GUI Location:
  - Admin > AAA > Authentication:AAA > Login Domain
 */
 resource "aci_radius_provider_group" "radius_provider_groups" {
-  for_each = { for k, v in local.radius: k => v if length(regexall("(radius|rsa)", v.type)) > 0 }
-  name     = each.key
+  for_each   = { for k, v in local.radius : k => v if length(regexall("(radius|rsa)", v.type)) > 0 }
+  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  name       = each.key
 }
 
 resource "aci_duo_provider_group" "duo_provider_groups" {
-  for_each = { for k, v in local.radius: k => v if v.type == "duo" }
-  name     = each.key
-  auth_choice = "CiscoAVPair"
-  provider_type = "radius"
+  for_each             = { for k, v in local.radius : k => v if v.type == "duo" }
+  annotation           = each.value.tags != "" ? each.value.tags : var.tags
+  name                 = each.key
+  auth_choice          = "CiscoAVPair"
+  provider_type        = "radius"
   sec_fac_auth_methods = ["auto"]
 }
 
@@ -234,7 +236,7 @@ resource "aci_login_domain" "login_domain" {
     aci_rsa_provider.rsa_providers
   ]
   for_each       = local.radius
-  annotation     = each.value.tags
+  annotation     = each.value.tags != "" ? each.value.tags : var.tags
   description    = "${each.key} Login Domain."
   name           = each.key
   realm          = each.value.type == "rsa" ? "rsa" : "radius"
@@ -247,13 +249,13 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_radius" {
     aci_radius_provider_group.radius_provider_groups
   ]
   for_each    = local.radius_hosts
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = "${each.value.host} Login Domain Provider."
   name        = each.value.host
   order       = each.value.order
   parent_dn = length(regexall(
     "duo", each.value.type)
-  ) > 0 ? aci_duo_provider_group.duo_provider_groups[each.value.key1].id : length(regexall(
+    ) > 0 ? aci_duo_provider_group.duo_provider_groups[each.value.key1].id : length(regexall(
     "(radius|rsa)", each.value.type)
   ) > 0 ? aci_radius_provider_group.radius_provider_groups[each.value.key1].id : ""
 }

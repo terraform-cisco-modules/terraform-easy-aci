@@ -38,7 +38,7 @@ ________________________________________________________________________________
 */
 resource "aci_l3_interface_policy" "l3_interface" {
   for_each    = local.l3_interface
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   bfd_isis    = each.value.bfd_isis_policy_configuration
   description = each.value.description
   name        = "default"

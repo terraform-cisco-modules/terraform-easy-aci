@@ -5,8 +5,8 @@ locals {
   #__________________________________________________________
 
   bgp_route_reflectors_loop = flatten([
-    for k, v in var.bgp_route_reflectors: [
-      for s in v.node_list: { 
+    for k, v in var.bgp_route_reflectors : [
+      for s in v.node_list : {
         node_id = s
         pod_id  = k
       }

@@ -29,7 +29,7 @@ locals {
         key1                   = keys
         management_epg         = v.management_epg != null ? v.management_epg : "default"
         management_epg_type    = v.management_epg_type != null ? v.management_epg_type : "oob"
-        order = v.order
+        order                  = v.order
         server_monitoring      = values.server_monitoring[0]["admin_state"] != null ? values.server_monitoring[0]["admin_state"] : "disabled"
         password               = values.server_monitoring[0]["password"] != null ? values.server_monitoring[0]["password"] : ""
         tags                   = values.tags
@@ -99,7 +99,7 @@ locals {
         key1                   = keys
         management_epg         = v.management_epg != null ? v.management_epg : "default"
         management_epg_type    = v.management_epg_type != null ? v.management_epg_type : "oob"
-        order = v.order
+        order                  = v.order
         server_monitoring      = values.server_monitoring[0]["admin_state"] != null ? values.server_monitoring[0]["admin_state"] : "disabled"
         password               = values.server_monitoring[0]["password"] != null ? values.server_monitoring[0]["password"] : ""
         tags                   = values.tags

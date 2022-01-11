@@ -40,7 +40,7 @@ resource "aci_l3_domain_profile" "layer3_domains" {
     aci_vlan_pool.vlan_pools
   ]
   for_each                  = local.layer3_domains
-  annotation                = each.value.tags
+  annotation                = each.value.tags != "" ? each.value.tags : var.tags
   name                      = each.key
   name_alias                = each.value.alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
@@ -89,7 +89,7 @@ resource "aci_physical_domain" "physical_domains" {
     aci_vlan_pool.vlan_pools
   ]
   for_each                  = local.physical_domains
-  annotation                = each.value.tags
+  annotation                = each.value.tags != "" ? each.value.tags : var.tags
   name                      = each.key
   name_alias                = each.value.alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
@@ -190,7 +190,7 @@ resource "aci_vmm_domain" "vmm_domains" {
   ]
   for_each                              = local.vmm_domains
   access_mode                           = each.value.access_mode
-  annotation                            = each.value.tags
+  annotation                            = each.value.tags != "" ? each.value.tags : var.tags
   arp_learning                          = each.value.arp_learning
   config_infra_pg                       = each.value.configure_infra_port_groups
   ctrl_knob                             = each.value.control

@@ -558,6 +558,7 @@ resource "aci_rest" "date_and_time" {
   dn         = "/api/node/mo/uni/fabric/time-${each.key}"
   class_name = "datetimePol"
   content = {
+    annotation   = each.value.tags != "" ? each.value.tags : var.tags
     adminSt      = each.value.administrative_state
     authSt       = length(each.value.authentication_keys) > 0 ? "enabled" : "disabled"
     descr        = each.value.description
@@ -586,7 +587,8 @@ resource "aci_rest" "ntp_authentication_keys" {
   dn         = "uni/fabric/time-${each.value.key1}/ntpauth-${each.value.key_id}"
   class_name = "datetimeNtpAuthKey"
   content = {
-    id = each.value.key_id
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    id         = each.value.key_id
     key = length(regexall(
       5, each.value.key_id)) > 0 ? var.ntp_key_5 : length(regexall(
       4, each.value.key_id)) > 0 ? var.ntp_key_4 : length(regexall(
@@ -612,6 +614,7 @@ resource "aci_rest" "ntp_servers" {
   dn         = "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}"
   class_name = "datetimeNtpProv"
   content = {
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     descr      = each.value.description
     keyId      = length(each.value.authentication_keys) > 0 ? each.value.authentication_key : 0
     maxPoll    = each.value.maximum_polling_interval
@@ -645,6 +648,7 @@ resource "aci_rest" "date_and_time_format" {
   dn         = "uni/fabric/format-default"
   class_name = "datetimeFormat"
   content = {
+    annotation    = each.value.tags != "" ? each.value.tags : var.tags
     displayFormat = each.value.display_format
     showOffset    = each.value.offset_state
     tz            = each.value.time_zone

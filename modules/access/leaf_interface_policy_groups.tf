@@ -90,6 +90,7 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
     aci_spanning_tree_interface_policy.spanning_tree_interface_policies
   ]
   for_each    = local.leaf_port_group_access
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -254,7 +255,7 @@ GUI Location:
 */
 resource "aci_leaf_breakout_port_group" "policy_groups" {
   for_each    = local.leaf_port_group_breakout
-  annotation  = each.value.tags
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   brkout_map  = each.value.breakout_map
   description = each.value.description
   name        = each.key
@@ -350,6 +351,7 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
     aci_spanning_tree_interface_policy.spanning_tree_interface_policies
   ]
   for_each    = local.leaf_port_group_bundle
+  annotation  = each.value.tags != "" ? each.value.tags : var.tags
   description = each.value.description
   lag_t       = each.value.lag_type
   name        = each.key

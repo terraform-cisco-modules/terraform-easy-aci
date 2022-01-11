@@ -75,6 +75,7 @@ ________________________________________________________________________________
 resource "aci_endpoint_controls" "rouge_endpoint_control" {
   for_each              = local.rouge_ep_control
   admin_st              = each.value.administrative_state
+  annotation            = each.value.tags != "" ? each.value.tags : var.tags
   hold_intvl            = each.value.hold_interval
   rogue_ep_detect_intvl = each.value.rouge_interval
   rogue_ep_detect_mult  = each.value.rouge_multiplier
@@ -90,8 +91,9 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_endpoint_ip_aging_profile" "ip_aging" {
-  for_each = local.ip_aging
-  admin_st = each.value.administrative_state
+  for_each   = local.ip_aging
+  admin_st   = each.value.administrative_state
+  annotation = each.value.tags != "" ? each.value.tags : var.tags
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -111,6 +113,7 @@ resource "aci_rest" "ep_loop_protection" {
   content = {
     action          = each.value.action
     adminSt         = each.value.administrative_state
+    annotation      = each.value.tags != "" ? each.value.tags : var.tags
     loopDetectIntvl = each.value.loop_detection_interval
     loopDetectMult  = each.value.loop_detection_multiplier
   }

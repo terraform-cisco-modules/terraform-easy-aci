@@ -55,6 +55,7 @@ resource "aci_rest" "fabric_wide_settings" {
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
   content = {
+    annotation                 = each.value.tags != "" ? each.value.tags : var.tags
     domainValidation           = each.value.enforce_domain_validation
     enforceSubnetCheck         = each.value.enforce_subnet_check
     opflexpAuthenticateClients = each.value.spine_opflex_client_authentication

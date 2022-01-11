@@ -58,7 +58,7 @@ GUI Location:
 */
 resource "aci_global_security" "security" {
   for_each                   = local.security
-  annotation                 = each.value.tags
+  annotation                 = each.value.tags != "" ? each.value.tags : var.tags
   block_duration             = each.value.lockout_duration
   change_count               = each.value.password_changes_within_interval
   change_during_interval     = each.value.password_change_interval_enforce
@@ -76,20 +76,3 @@ resource "aci_global_security" "security" {
   webtoken_timeout_seconds   = each.value.web_token_timeout
   # relation_aaa_rs_to_user_ep = aci_global_security.example2.id
 }
-
-# resource "aci_rest" "global_security" {
-#   provider = netascode
-#   for_each   = local.security
-#   dn         = "uni/userext"
-#   class_name = "aaaUserEp"
-#   content = {
-#     pwdStrengthCheck = each.value.password_strength_check
-#   }
-#   child {
-#     rn         = "rsepg"
-#     class_name = "aaaPwdProfile"
-#     content = {
-#       tDn = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
-#     }
-#   }
-# }

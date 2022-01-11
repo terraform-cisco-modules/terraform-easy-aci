@@ -206,11 +206,12 @@ resource "aci_rest" "snmp_policies" {
   dn         = "uni/fabric/snmppol-${each.key}"
   class_name = "snmpPol"
   content = {
-    adminSt = each.value.admin_state
-    contact = each.value.contact
-    descr   = each.value.description
-    loc     = each.value.location
-    name    = each.key
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    adminSt    = each.value.admin_state
+    contact    = each.value.contact
+    descr      = each.value.description
+    loc        = each.value.location
+    name       = each.key
   }
 }
 
@@ -233,8 +234,9 @@ resource "aci_rest" "snmp_client_groups" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.name}"
   class_name = "snmpClientGrpP"
   content = {
-    descr = each.value.description
-    name  = each.value.name
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    descr      = each.value.description
+    name       = each.value.name
   }
   child {
     rn         = "rsepg"
@@ -265,8 +267,9 @@ resource "aci_rest" "snmp_client_group_clients" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.key2}/client-[${each.value.address}]"
   class_name = "snmpClientP"
   content = {
-    addr = each.value.address
-    name = each.value.name
+    addr       = each.value.address
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    name       = each.value.name
   }
 }
 
@@ -289,8 +292,9 @@ resource "aci_rest" "snmp_policies_communities" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/community-[${each.value.community_variable}]"
   class_name = "snmpCommunityP"
   content = {
-    descr = each.value.description
-    name  = each.value.community_variable
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    descr      = each.value.description
+    name       = each.value.community_variable
     # name    = length(regexall(
     #   5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
     #   4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
@@ -318,6 +322,7 @@ resource "aci_rest" "snmp_policies_users" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/user-[${each.value.username}]"
   class_name = "snmpUserP"
   content = {
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     authKey = length(regexall(
       5, each.value.authorization_key)) > 0 ? var.snmp_authorization_key_5 : length(regexall(
       4, each.value.authorization_key)) > 0 ? var.snmp_authorization_key_4 : length(regexall(
@@ -375,8 +380,9 @@ resource "aci_rest" "snmp_trap_destinations" {
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
   class_name = "snmpTrapDest"
   content = {
-    host = each.value.host
-    port = each.value.port
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    host       = each.value.host
+    port       = each.value.port
     secName = each.value.version != "v3" && length(regexall(
       5, each.value.community)) > 0 ? var.snmp_community_5 : each.value.version != "v3" && length(regexall(
       4, each.value.community)) > 0 ? var.snmp_community_4 : each.value.version != "v3" && length(regexall(
@@ -414,8 +420,9 @@ resource "aci_rest" "snmp_policies_trap_servers" {
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapfwdserver-[${each.value.host}]"
   class_name = "snmpTrapFwdServerP"
   content = {
-    addr = each.value.host
-    port = each.value.port
+    addr       = each.value.host
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    port       = each.value.port
   }
 }
 
@@ -435,6 +442,7 @@ resource "aci_rest" "snmp_trap_source" {
   dn         = "uni/fabric/moncommon/snmpsrc-${each.key}"
   class_name = "snmpSrc"
   content = {
+    annotation = each.value.tags != "" ? each.value.tags : var.tags
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(
