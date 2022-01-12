@@ -2,17 +2,6 @@
 
 ## Use this module to create Tenant Policies in the APIC Controller and Nexus Dashboard Orchestrator.
 
-## Usage
-
-```hcl
-module "access" {
-
-  source = "terraform-cisco-modules/aci//modules/access"
-
-  # omitted...
-}
-```
-
 This module will create the following Access Policies in an the Controller:
 
 * Tenant
