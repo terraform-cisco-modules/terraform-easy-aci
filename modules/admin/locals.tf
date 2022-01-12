@@ -1,6 +1,41 @@
 locals {
   #__________________________________________________________
   #
+  # Authentication Variables
+  #__________________________________________________________
+
+  authentication_properties = {
+    for k, v in var.authentication : k => {
+      icmp_reachable_providers_only = v.icmp_reachability[0]["reachable_providers_only"] != null ? v.icmp_reachability[0]["reachable_providers_only"] : true
+      retries                       = v.icmp_reachability[0]["retries"] != null ? v.icmp_reachability[0]["retries"] : 1
+      timeout                       = v.icmp_reachability[0]["timeout"] != null ? v.icmp_reachability[0]["timeout"] : 5
+      remote_user_login_policy      = v.remote_user_login_policy != null ? v.remote_user_login_policy : "no-login"
+      tags                          = v.tags != null ? v.tags : ""
+    }
+  }
+
+  console_authentication = {
+    for k, v in var.authentication : k => {
+      provider_group = v.console_authentication[0]["provider_group"] != null ? v.console_authentication[0]["provider_group"] : ""
+      realm          = v.console_authentication[0]["realm"] != null ? v.console_authentication[0]["realm"] : "local"
+      realm_sub_type = v.console_authentication[0]["realm_sub_type"] != null ? v.console_authentication[0]["realm_sub_type"] : "default"
+      tags           = v.tags != null ? v.tags : ""
+    }
+  }
+
+  default_authentication = {
+    for k, v in var.authentication : k => {
+      fallback_check = v.default_authentication[0]["fallback_check"] != null ? v.default_authentication[0]["fallback_check"] : false
+      provider_group = v.default_authentication[0]["provider_group"] != null ? v.default_authentication[0]["provider_group"] : ""
+      realm          = v.default_authentication[0]["realm"] != null ? v.default_authentication[0]["realm"] : "local"
+      realm_sub_type = v.default_authentication[0]["realm_sub_type"] != null ? v.default_authentication[0]["realm_sub_type"] : "default"
+      tags           = v.tags != null ? v.tags : ""
+    }
+  }
+
+
+  #__________________________________________________________
+  #
   # RADIUS Variables
   #__________________________________________________________
 
