@@ -1,7 +1,7 @@
 resource "aci_saml_provider" "example" {
   annotation                = "orchestrator:terraform"
   description               = "From Terraform"
-  entity_id                 = "entity_id_example" 
+  entity_id                 = "entity_id_example"
   gui_banner_message        = "gui_banner_message_example"
   https_proxy               = "https_proxy_example"
   id_p                      = "adfs"

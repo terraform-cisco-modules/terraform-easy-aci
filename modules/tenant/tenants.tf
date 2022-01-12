@@ -70,10 +70,10 @@ resource "mso_tenant" "ndo_cisco_tenants" {
 output "tenants" {
   value = {
     apic_tenants = var.tenants != {} ? { for v in sort(
-    keys(aci_tenant.apic_tenants)
+      keys(aci_tenant.apic_tenants)
     ) : v => aci_tenant.apic_tenants[v].id } : {}
     ndo_cisco_tenants = var.tenants != {} ? { for v in sort(
-    keys(mso_tenant.ndo_cisco_tenants)
+      keys(mso_tenant.ndo_cisco_tenants)
     ) : v => mso_tenant.ndo_cisco_tenants[v].id } : {}
   }
 }
