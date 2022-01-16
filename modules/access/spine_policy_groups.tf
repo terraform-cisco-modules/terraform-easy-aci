@@ -7,6 +7,7 @@ variable "spine_policy_groups" {
   default = {
     "default" = {
       alias                    = ""
+      annotation               = ""
       bfd_ipv4_policy          = "default"
       bfd_ipv6_policy          = "default"
       cdp_policy               = "default"
@@ -14,26 +15,26 @@ variable "spine_policy_groups" {
       copp_spine_policy        = "default"
       description              = ""
       lldp_policy              = "default"
-      tags                     = ""
       usb_configuration_policy = "default"
     }
   }
   description = <<-EOT
   key - Name of the Leaf Policy Group.
-    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-    * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-    * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-    * cdp_policy: The CDP policy name.  CDP is used to obtain protocol addresses of neighboring devices and discover those devices. CDP is also be used to display information about the interfaces connecting to the neighboring devices. CDP is media- and protocol-independent, and runs on all Cisco-manufactured equipments including routers, bridges, access servers, and switches.
-    * copp_pre_filter: The CoPP Pre-Filter name.  A CoPP prefilter profile is used on spine and leaf switches to filter access to authentication services based on specified sources and TCP ports to protect against DDoS attacks. When deployed on a switch, control plane traffic is denied by default. Only the traffic specified in the CoPP prefilter profile is permitted.
-    * copp_spine_policy: The Spine CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
-    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-    * lldp_policy: The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
-    * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-    * usb_configuration_policy: The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
+  * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
+  * cdp_policy: The CDP policy name.  CDP is used to obtain protocol addresses of neighboring devices and discover those devices. CDP is also be used to display information about the interfaces connecting to the neighboring devices. CDP is media- and protocol-independent, and runs on all Cisco-manufactured equipments including routers, bridges, access servers, and switches.
+  * copp_pre_filter: The CoPP Pre-Filter name.  A CoPP prefilter profile is used on spine and leaf switches to filter access to authentication services based on specified sources and TCP ports to protect against DDoS attacks. When deployed on a switch, control plane traffic is denied by default. Only the traffic specified in the CoPP prefilter profile is permitted.
+  * copp_spine_policy: The Spine CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * lldp_policy: The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
+  * usb_configuration_policy: The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
   EOT
   type = map(object(
     {
       alias                    = optional(string)
+      annotation               = optional(string)
       bfd_ipv4_policy          = optional(string)
       bfd_ipv6_policy          = optional(string)
       cdp_policy               = optional(string)
@@ -41,7 +42,6 @@ variable "spine_policy_groups" {
       copp_spine_policy        = optional(string)
       description              = optional(string)
       lldp_policy              = optional(string)
-      tags                     = optional(string)
       usb_configuration_policy = optional(string)
     }
   ))
@@ -82,7 +82,7 @@ resource "aci_spine_switch_policy_group" "spine_policy_groups" {
     aci_lldp_interface_policy.lldp_interface_policies
   ]
   for_each                                     = local.spine_policy_groups
-  annotation                                   = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                                   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                                  = each.value.description
   name                                         = each.key
   name_alias                                   = each.value.alias

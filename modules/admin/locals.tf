@@ -6,30 +6,30 @@ locals {
 
   authentication_properties = {
     for k, v in var.authentication : k => {
+      annotation                    = v.annotation != null ? v.annotation : ""
       icmp_reachable_providers_only = v.icmp_reachability[0]["reachable_providers_only"] != null ? v.icmp_reachability[0]["reachable_providers_only"] : true
       retries                       = v.icmp_reachability[0]["retries"] != null ? v.icmp_reachability[0]["retries"] : 1
       timeout                       = v.icmp_reachability[0]["timeout"] != null ? v.icmp_reachability[0]["timeout"] : 5
       remote_user_login_policy      = v.remote_user_login_policy != null ? v.remote_user_login_policy : "no-login"
-      tags                          = v.tags != null ? v.tags : ""
     }
   }
 
   console_authentication = {
     for k, v in var.authentication : k => {
+      annotation     = v.annotation != null ? v.annotation : ""
       provider_group = v.console_authentication[0]["provider_group"] != null ? v.console_authentication[0]["provider_group"] : ""
       realm          = v.console_authentication[0]["realm"] != null ? v.console_authentication[0]["realm"] : "local"
       realm_sub_type = v.console_authentication[0]["realm_sub_type"] != null ? v.console_authentication[0]["realm_sub_type"] : "default"
-      tags           = v.tags != null ? v.tags : ""
     }
   }
 
   default_authentication = {
     for k, v in var.authentication : k => {
+      annotation     = v.annotation != null ? v.annotation : ""
       fallback_check = v.default_authentication[0]["fallback_check"] != null ? v.default_authentication[0]["fallback_check"] : false
       provider_group = v.default_authentication[0]["provider_group"] != null ? v.default_authentication[0]["provider_group"] : ""
       realm          = v.default_authentication[0]["realm"] != null ? v.default_authentication[0]["realm"] : "local"
       realm_sub_type = v.default_authentication[0]["realm_sub_type"] != null ? v.default_authentication[0]["realm_sub_type"] : "default"
-      tags           = v.tags != null ? v.tags : ""
     }
   }
 
@@ -41,13 +41,13 @@ locals {
 
   radius = {
     for k, v in var.radius : k => {
+      annotation             = v.annotation != null ? v.annotation : ""
       authorization_protocol = v.authorization_protocol != null ? v.authorization_protocol : "pap"
       hosts                  = v.hosts
       port                   = v.port != null ? v.port : 49
       retries                = v.retries != null ? v.retries : 1
       server_monitoring      = v.server_monitoring != null ? v.server_monitoring : []
       timeout                = v.timeout != null ? v.timeout : 5
-      tags                   = v.tags != null ? v.tags : ""
       type                   = v.type != null ? v.type : "radius"
     }
   }
@@ -55,6 +55,7 @@ locals {
   radius_hosts_loop = flatten([
     for keys, values in local.radius : [
       for k, v in values.hosts : {
+        annotation             = values.annotation
         authorization_protocol = values.authorization_protocol
         port                   = values.port
         retries                = values.retries
@@ -67,7 +68,6 @@ locals {
         order                  = v.order
         server_monitoring      = values.server_monitoring[0]["admin_state"] != null ? values.server_monitoring[0]["admin_state"] : "disabled"
         password               = values.server_monitoring[0]["password"] != null ? values.server_monitoring[0]["password"] : ""
-        tags                   = values.tags
         type                   = values.type
         username               = values.server_monitoring[0]["username"] != null ? values.server_monitoring[0]["username"] : "default"
       }
@@ -83,6 +83,7 @@ locals {
 
   security = {
     for k, v in var.security : k => {
+      annotation                       = v.annotation != null ? v.annotation : ""
       enable_lockout                   = v.lockout_user[0]["enable_lockout"] != null ? v.lockout_user[0]["enable_lockout"] : "disable"
       lockout_duration                 = v.lockout_user[0]["lockout_duration"] != null ? v.lockout_user[0]["lockout_duration"] : 60
       max_failed_attempts              = v.lockout_user[0]["max_failed_attempts"] != null ? v.lockout_user[0]["max_failed_attempts"] : 5
@@ -97,7 +98,6 @@ locals {
       user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
       web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
       web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600
-      tags                             = v.tags != null ? v.tags : ""
     }
   }
 
@@ -112,19 +112,20 @@ locals {
       accounting_e           = v.accounting_include[0]["events"] != null ? v.accounting_include[0]["events"] : false
       accounting_f           = v.accounting_include[0]["faults"] != null ? v.accounting_include[0]["faults"] : false
       accounting_s           = v.accounting_include[0]["session_logs"] != null ? v.accounting_include[0]["session_logs"] : true
+      annotation             = v.annotation != null ? v.annotation : ""
       authorization_protocol = v.authorization_protocol != null ? v.authorization_protocol : "pap"
       hosts                  = v.hosts
       port                   = v.port != null ? v.port : 49
       retries                = v.retries != null ? v.retries : 1
       server_monitoring      = v.server_monitoring != null ? v.server_monitoring : []
       timeout                = v.timeout != null ? v.timeout : 5
-      tags                   = v.tags != null ? v.tags : ""
     }
   }
 
   tacacs_hosts_loop = flatten([
     for keys, values in local.tacacs : [
       for k, v in values.hosts : {
+        annotation             = values.annotation
         authorization_protocol = values.authorization_protocol
         port                   = values.port
         retries                = values.retries
@@ -137,7 +138,6 @@ locals {
         order                  = v.order
         server_monitoring      = values.server_monitoring[0]["admin_state"] != null ? values.server_monitoring[0]["admin_state"] : "disabled"
         password               = values.server_monitoring[0]["password"] != null ? values.server_monitoring[0]["password"] : ""
-        tags                   = values.tags
         username               = values.server_monitoring[0]["username"] != null ? values.server_monitoring[0]["username"] : "default"
       }
     ]

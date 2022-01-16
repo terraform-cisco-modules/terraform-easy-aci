@@ -9,6 +9,7 @@ variable "tacacs" {
           session_logs = true
         }
       ]
+      annotation             = ""
       authorization_protocol = "pap"
       hosts = [
         {
@@ -28,7 +29,6 @@ variable "tacacs" {
           username    = "default"
         }
       ]
-      tags    = ""
       timeout = 5
     }
   }
@@ -39,6 +39,7 @@ variable "tacacs" {
     - events
     - faults
     - session_logs (included by default)
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * authorization_protocol: The TACACS+ authentication protocol. The protocol can be:
     - chap
     - mschap
@@ -58,7 +59,6 @@ variable "tacacs" {
       * disabled (default)
     - password: a number between 1 and 5 to identify the variable tacacs_monitoring_password to use.
     - username: The username to assign to the server monitoring configuration.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * timeout: The period of time (in seconds) the device will wait for a response from the daemon before it times out and declares an error. The range is from 1 to 60 seconds. The default is 5 seconds. If set to 0, the AAA provider timeout is used.
   EOT
   type = map(object(
@@ -71,6 +71,7 @@ variable "tacacs" {
           session_logs = optional(bool)
         }
       )))
+      annotation             = optional(string)
       authorization_protocol = optional(string)
       hosts = list(object(
         {
@@ -90,7 +91,6 @@ variable "tacacs" {
           username    = optional(string)
         }
       )))
-      tags    = optional(string)
       timeout = optional(number)
     }
   ))
@@ -175,7 +175,7 @@ GUI Location:
 */
 resource "aci_tacacs_accounting" "tacacs_accounting" {
   for_each    = local.tacacs
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = "${each.key} Accounting"
   name        = each.key
 }
@@ -193,7 +193,7 @@ resource "aci_tacacs_accounting_destination" "tacacs_accounting_destinations" {
   ]
   for_each      = local.tacacs_hosts
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags != "" ? each.value.tags : var.tags
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = "${each.value.host} Accounting Destination."
   host          = each.value.host
   key = length(regexall(
@@ -218,7 +218,7 @@ GUI Location:
 resource "aci_tacacs_provider" "tacacs_providers" {
   for_each      = local.tacacs_hosts
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags != "" ? each.value.tags : var.tags
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.tacacs_key_5 : length(regexall(
@@ -250,7 +250,7 @@ GUI Location:
 */
 resource "aci_tacacs_provider_group" "tacacs_provider_groups" {
   for_each   = local.tacacs
-  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   name       = each.key
 }
 
@@ -266,7 +266,7 @@ resource "aci_tacacs_source" "tacacs_sources" {
     aci_tacacs_accounting.tacacs_accounting
   ]
   for_each   = local.tacacs
-  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   incl = compact(concat([
     length(regexall(true, each.value.accounting_a)) > 0 ? "audit" : ""], [
     length(regexall(true, each.value.accounting_e)) > 0 ? "events" : ""], [
@@ -283,7 +283,7 @@ resource "aci_login_domain" "login_domain_tacacs" {
     aci_tacacs_provider.tacacs_providers
   ]
   for_each       = local.tacacs
-  annotation     = each.value.tags != "" ? each.value.tags : var.tags
+  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = "${each.key} Login Domain."
   name           = each.key
   realm          = "tacacs"
@@ -297,7 +297,7 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_tacacs" {
     aci_tacacs_provider_group.tacacs_provider_groups
   ]
   for_each    = local.tacacs_hosts
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = "${each.value.host} Login Domain Provider."
   name        = each.value.host
   order       = each.value.order

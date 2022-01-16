@@ -7,9 +7,9 @@ locals {
   bgp_route_reflectors_loop = flatten([
     for k, v in var.bgp_route_reflectors : [
       for s in v.node_list : {
-        node_id = s
-        pod_id  = k
-        tags    = v.tags != null ? v.tags : ""
+        annotation = v.annotation != null ? v.annotation : ""
+        node_id    = s
+        pod_id     = k
       }
     ]
   ])
@@ -34,10 +34,10 @@ locals {
           ))), ","
         ) : ""
         administrative_state      = v.administrative_state != null ? v.administrative_state : "enabled"
+        annotation                = value.annotation != null ? value.annotation : ""
         key1                      = key
         loop_detection_interval   = v.loop_detection_interval != null ? v.loop_detection_interval : 60
         loop_detection_multiplier = v.loop_detection_multiplier != null ? v.loop_detection_multiplier : 4
-        tags                      = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -48,8 +48,8 @@ locals {
     for key, value in var.endpoint_controls : [
       for k, v in value.ip_aging : {
         administrative_state = v.administrative_state != null ? v.administrative_state : "enabled"
+        annotation           = value.annotation != null ? value.annotation : ""
         key1                 = key
-        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -60,11 +60,11 @@ locals {
     for key, value in var.endpoint_controls : [
       for k, v in value.rouge_ep_control : {
         administrative_state = v.administrative_state != null ? v.administrative_state : "enabled"
+        annotation           = value.annotation != null ? value.annotation : ""
         key1                 = key
         hold_interval        = v.hold_interval != null ? v.hold_interval : 1800
         rouge_interval       = v.rouge_interval != null ? v.rouge_interval : 30
         rouge_multiplier     = v.rouge_multiplier != null ? v.rouge_multiplier : 6
-        tags                 = value.tags != null ? value.tags : ""
       }
     ]
   ])
@@ -79,6 +79,7 @@ locals {
 
   fabric_wide_settings = {
     for k, v in var.fabric_wide_settings : k => {
+      annotation                         = v.annotation != null ? v.annotation : ""
       disable_remote_ep_learning         = v.disable_remote_ep_learning != null ? v.disable_remote_ep_learning : "yes"
       enforce_domain_validation          = v.enforce_domain_validation != null ? v.enforce_domain_validation : "yes"
       enforce_epg_vlan_validation        = v.enforce_epg_vlan_validation != null ? v.enforce_epg_vlan_validation : "no"
@@ -92,7 +93,6 @@ locals {
       ssl_opflex_version1_2              = v.ssl_opflex_versions[0].TLSv1_2
       spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : "yes"
       spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : "yes"
-      tags                               = v.tags != null ? v.tags : ""
     }
   }
 
@@ -116,6 +116,7 @@ locals {
 
   isis_policy = {
     for k, v in var.isis_policy : k => {
+      annotation                                      = v.annotation != null ? v.annotation : ""
       isis_mtu                                        = v.isis_mtu != null ? v.isis_mtu : 1492
       isis_metric_for_redistributed_routes            = v.isis_metric_for_redistributed_routes != null ? v.isis_metric_for_redistributed_routes : 63
       lsp_fast_flood_mode                             = v.lsp_fast_flood_mode != null ? v.lsp_fast_flood_mode : "enabled"
@@ -125,7 +126,6 @@ locals {
       sfp_computation_frequency_initial_wait_interval = v.sfp_computation_frequency_initial_wait_interval != null ? v.sfp_computation_frequency_initial_wait_interval : 50
       sfp_computation_frequency_maximum_wait_interval = v.sfp_computation_frequency_maximum_wait_interval != null ? v.sfp_computation_frequency_maximum_wait_interval : 50
       sfp_computation_frequency_second_wait_interval  = v.sfp_computation_frequency_second_wait_interval != null ? v.sfp_computation_frequency_second_wait_interval : 50
-      tags                                            = v.tags != null ? v.tags : ""
     }
   }
 
@@ -136,11 +136,11 @@ locals {
 
   port_tracking = {
     for k, v in var.port_tracking : k => {
+      annotation             = v.annotation != null ? v.annotation : ""
       delay_restore_timer    = v.delay_restore_timer != null ? v.delay_restore_timer : 120
       include_apic_ports     = v.include_apic_ports != null ? v.include_apic_ports : "no"
       number_of_active_ports = v.number_of_active_ports != null ? v.number_of_active_ports : 0
       port_tracking_state    = v.port_tracking_state != null ? v.port_tracking_state : "on"
-      tags                   = v.tags != null ? v.tags : ""
     }
   }
 

@@ -517,10 +517,10 @@ locals {
   fabric_node_controls = {
     for k, v in var.fabric_node_controls : k => {
       alias              = v.alias != null ? v.alias : ""
+      annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
       enable_dom         = v.enable_dom != null ? v.enable_dom : "Dom"
       feature_selections = v.feature_selections != null ? v.feature_selections : "telemetry"
-      tags               = v.tags != null ? v.tags : ""
     }
   }
 
@@ -532,9 +532,9 @@ locals {
   l3_interface = {
     for k, v in var.l3_interface : k => {
       alias                         = v.alias != null ? v.alias : ""
+      annotation                    = v.annotation != null ? v.annotation : ""
       description                   = v.description != null ? v.description : ""
       bfd_isis_policy_configuration = v.bfd_isis_policy_configuration != null ? v.bfd_isis_policy_configuration : "enabled"
-      tags                          = v.tags != null ? v.tags : ""
     }
   }
 
@@ -546,6 +546,7 @@ locals {
   pod_policy_groups = {
     for k, v in var.pod_policy_groups : k => {
       alias                      = v.alias != null ? v.alias : ""
+      annotation                 = v.annotation != null ? v.annotation : ""
       bgp_route_reflector_policy = v.bgp_route_reflector_policy != null ? v.bgp_route_reflector_policy : "default"
       coop_group_policy          = v.coop_group_policy != null ? v.coop_group_policy : "default"
       date_time_policy           = v.date_time_policy != null ? v.date_time_policy : "default"
@@ -554,22 +555,22 @@ locals {
       macsec_policy              = v.macsec_policy != null ? v.macsec_policy : "default"
       management_access_policy   = v.management_access_policy != null ? v.management_access_policy : "default"
       snmp_policy                = v.snmp_policy != null ? v.snmp_policy : "default"
-      tags                       = v.tags != null ? v.tags : ""
     }
   }
 
   pod_profiles = {
     for k, v in var.pod_profiles : k => {
       alias         = v.alias != null ? v.alias : ""
+      annotation    = v.annotation != null ? v.annotation : ""
       description   = v.description != null ? v.description : ""
       pod_selectors = v.pod_selectors
-      tags          = v.tags != null ? v.tags : ""
     }
   }
 
   pod_profile_selectors_loop = flatten([
     for key, value in local.pod_profiles : [
       for k, v in value.pod_selectors : {
+        annotation        = v.annotation != null ? v.annotation : ""
         key1              = key
         name              = v.name != null ? v.name : "default"
         pod_selector_type = v.pod_selector_type != null ? v.pod_selector_type : "ALL"
@@ -589,6 +590,7 @@ locals {
   smart_callhome = {
     for k, v in var.smart_callhome : k => {
       admin_state            = v.admin_state != null ? v.admin_state : "enabled"
+      annotation             = v.annotation != null ? v.annotation : ""
       contact_information    = v.contact_information != null ? v.contact_information : ""
       contract_id            = v.contract_id != null ? v.contract_id : ""
       customer_contact_email = v.customer_contact_email != null ? v.customer_contact_email : ""
@@ -647,6 +649,7 @@ locals {
   snmp_policies = {
     for k, v in var.snmp_policies : k => {
       admin_state        = v.admin_state != null ? v.admin_state : "enabled"
+      annotation         = v.annotation != null ? v.annotation : ""
       communities        = v.communities != null ? v.communities : []
       contact            = v.contact != null ? v.contact : ""
       description        = v.description != null ? v.description : ""
@@ -741,6 +744,7 @@ locals {
   syslog = {
     for k, v in var.syslog : k => {
       admin_state                    = v.admin_state != null ? v.admin_state : "enabled"
+      annotation                     = v.annotation != null ? v.annotation : ""
       description                    = v.description != null ? v.description : ""
       console_admin_state            = v.console_destination[0]["admin_state"] != null ? v.console_destination[0]["admin_state"] : "enabled"
       console_severity               = v.console_destination[0]["severity"] != null ? v.console_destination[0]["severity"] : "warnings"
@@ -762,6 +766,7 @@ locals {
     for key, value in local.syslog : [
       for k, v in value.remote_destinations : {
         admin_state         = v.admin_state != null ? v.admin_state : "enabled"
+        annotation          = v.annotation != null ? v.annotation : ""
         forwarding_facility = v.forwarding_facility != null ? v.forwarding_facility : "local7"
         host                = v.host != null ? v.host : "host.example.com"
         key1                = key

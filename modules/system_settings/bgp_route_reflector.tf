@@ -7,8 +7,8 @@ variable "autonomous_system_number" {
 variable "bgp_route_reflectors" {
   default = {
     "default" = {
-      node_list = [101, 102]
-      tags      = ""
+      annotation = ""
+      node_list  = [101, 102]
     }
   }
   description = <<-EOT
@@ -17,8 +17,8 @@ variable "bgp_route_reflectors" {
   EOT
   type = map(object(
     {
-      node_list = list(string)
-      tags      = optional(string)
+      annotation = optional(string)
+      node_list  = list(string)
     }
   ))
 }
@@ -36,7 +36,7 @@ resource "aci_rest" "bgp_asn" {
   dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
   content = {
-    annotation = var.tags
+    annotation = var.annotation
     asn        = var.autonomous_system_number
   }
 }
@@ -56,7 +56,7 @@ resource "aci_rest" "bgp_route_reflectors" {
   dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value.node_id}"
   class_name = "bgpRRNodePEp"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     id         = each.value.node_id
     podId      = each.value.pod_id
   }

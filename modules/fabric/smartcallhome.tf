@@ -2,6 +2,7 @@ variable "smart_callhome" {
   default = {
     "default" = {
       admin_state            = "enabled"
+      annotation             = ""
       contact_information    = ""
       contract_id            = ""
       customer_contact_email = ""
@@ -43,6 +44,7 @@ variable "smart_callhome" {
   type = map(object(
     {
       admin_state            = optional(string)
+      annotation             = optional(string)
       contact_information    = optional(string)
       contract_id            = optional(string)
       customer_contact_email = optional(string)
@@ -105,7 +107,7 @@ resource "aci_rest" "smart_callhome_destination_groups" {
   dn         = "uni/fabric/smartgroup-${each.key}"
   class_name = "callhomeSmartGroup"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.key
   }
@@ -115,7 +117,7 @@ resource "aci_rest" "smart_callhome_destination_groups" {
     content = {
       addr       = each.value.street_address
       adminState = each.value.admin_state
-      annotation = each.value.tags != "" ? each.value.tags : var.tags
+      annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
       contract   = each.value.contract_id
       contact    = each.value.contact_information
       customer   = each.value.customer_id
@@ -141,7 +143,7 @@ resource "aci_rest" "smart_callhome_smtp_servers" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
   class_name = "callhomeSmtpServer"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     host       = each.value.smtp_server
   }
   child {
@@ -172,7 +174,7 @@ resource "aci_rest" "smart_callhome_destinations" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
   class_name = "callhomeSmartDest"
   content = {
-    annotation   = each.value.tags != "" ? each.value.tags : var.tags
+    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminState   = each.value.admin_state
     email        = each.value.email
     format       = each.value.format
@@ -200,7 +202,7 @@ resource "aci_rest" "smart_callhome_source" {
   dn         = "uni/fabric/moncommon/smartchsrc"
   class_name = "callhomeSmartSrc"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(

@@ -1,6 +1,7 @@
 variable "radius" {
   default = {
     "default" = {
+      annotation             = ""
       authorization_protocol = "pap"
       hosts = [
         {
@@ -20,13 +21,13 @@ variable "radius" {
           username    = "default"
         }
       ]
-      tags    = ""
       timeout = 5
       type    = "radius"
     }
   }
   description = <<-EOT
   Key: Name of the RADIUS Login Domain.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * authorization_protocol: The RADIUS authentication protocol. The protocol can be:
     - chap
     - mschap
@@ -46,12 +47,12 @@ variable "radius" {
       * disabled (default)
     - password: a number between 1 and 5 to identify the variable radius_monitoring_password to use.
     - username: The username to assign to the server monitoring configuration.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * type: Type of object RADIUS Provider. Allowed values are "duo" and "radius".
   * timeout: The period of time (in seconds) the device will wait for a response from the daemon before it times out and declares an error. The range is from 1 to 60 seconds. The default is 5 seconds. If set to 0, the AAA provider timeout is used.
   EOT
   type = map(object(
     {
+      annotation             = optional(string)
       authorization_protocol = optional(string)
       hosts = list(object(
         {
@@ -71,7 +72,6 @@ variable "radius" {
           username    = optional(string)
         }
       )))
-      tags    = optional(string)
       timeout = optional(number)
       type    = optional(string)
     }
@@ -159,7 +159,7 @@ resource "aci_radius_provider" "radius_providers" {
   for_each      = { for k, v in local.radius_hosts : k => v if length(regexall("duo|radius", v.type)) > 0 }
   auth_port     = each.value.port
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags != "" ? each.value.tags : var.tags
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.radius_key_5 : length(regexall(
@@ -186,7 +186,7 @@ resource "aci_rsa_provider" "rsa_providers" {
   for_each      = { for k, v in local.radius_hosts : k => v if length(regexall("rsa", v.type)) > 0 }
   auth_port     = each.value.port
   auth_protocol = each.value.authorization_protocol
-  annotation    = each.value.tags != "" ? each.value.tags : var.tags
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = "${each.value.host} Provider."
   key = length(regexall(
     5, each.value.key)) > 0 ? var.radius_key_5 : length(regexall(
@@ -217,13 +217,13 @@ GUI Location:
 */
 resource "aci_radius_provider_group" "radius_provider_groups" {
   for_each   = { for k, v in local.radius : k => v if length(regexall("(radius|rsa)", v.type)) > 0 }
-  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   name       = each.key
 }
 
 resource "aci_duo_provider_group" "duo_provider_groups" {
   for_each             = { for k, v in local.radius : k => v if v.type == "duo" }
-  annotation           = each.value.tags != "" ? each.value.tags : var.tags
+  annotation           = each.value.annotation != "" ? each.value.annotation : var.annotation
   name                 = each.key
   auth_choice          = "CiscoAVPair"
   provider_type        = "radius"
@@ -236,7 +236,7 @@ resource "aci_login_domain" "login_domain" {
     aci_rsa_provider.rsa_providers
   ]
   for_each       = local.radius
-  annotation     = each.value.tags != "" ? each.value.tags : var.tags
+  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = "${each.key} Login Domain."
   name           = each.key
   realm          = each.value.type == "rsa" ? "rsa" : "radius"
@@ -249,7 +249,7 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_radius" {
     aci_radius_provider_group.radius_provider_groups
   ]
   for_each    = local.radius_hosts
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = "${each.value.host} Login Domain Provider."
   name        = each.value.host
   order       = each.value.order

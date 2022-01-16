@@ -1,6 +1,7 @@
 variable "security" {
   default = {
     "default" = {
+      annotation = ""
       lockout_user = [
         {
           enable_lockout             = "disable"
@@ -19,13 +20,13 @@ variable "security" {
       user_passwords_to_store_count    = 5
       web_session_idle_timeout         = 1200
       web_token_timeout                = 600
-      tags                             = ""
     }
   }
   description = <<-EOT
   EOT
   type = map(object(
     {
+      annotation = optional(string)
       lockout_user = list(object(
         {
           enable_lockout             = optional(string)
@@ -44,7 +45,6 @@ variable "security" {
       user_passwords_to_store_count    = optional(number)
       web_session_idle_timeout         = optional(number)
       web_token_timeout                = optional(number)
-      tags                             = optional(string)
 
     }
   ))
@@ -58,7 +58,7 @@ GUI Location:
 */
 resource "aci_global_security" "security" {
   for_each                   = local.security
-  annotation                 = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
   block_duration             = each.value.lockout_duration
   change_count               = each.value.password_changes_within_interval
   change_during_interval     = each.value.password_change_interval_enforce

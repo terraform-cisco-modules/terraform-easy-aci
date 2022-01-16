@@ -9,7 +9,7 @@ variable "cdp_interface_policies" {
       admin_state = "enabled"
       alias       = ""
       description = ""
-      tags        = ""
+      annotation  = ""
     }
   }
   description = <<-EOT
@@ -17,14 +17,14 @@ variable "cdp_interface_policies" {
   * admin_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       admin_state = optional(string)
       alias       = optional(string)
       description = optional(string)
-      tags        = optional(string)
+      annotation  = optional(string)
     }
   ))
 }
@@ -41,7 +41,7 @@ ________________________________________________________________________________
 */
 resource "aci_cdp_interface_policy" "cdp_interface_policies" {
   for_each    = local.cdp_interface_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   admin_st    = each.value.admin_state
   description = each.value.description
   name        = each.key
@@ -65,7 +65,7 @@ variable "fc_interface_policies" {
       receive_buffer_credit = "64"
       speed                 = "auto"
       trunk_mode            = "trunk-off"
-      tags                  = ""
+      annotation            = ""
     }
   }
   description = <<-EOT
@@ -89,7 +89,7 @@ variable "fc_interface_policies" {
     - 8G
     - 16G
     - 32G
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * trunk_mode: (Default value is "trunk-off").  Trunking on/off for native FC ports. Allowed values are:
     - un-init
     - trunk-off
@@ -105,7 +105,7 @@ variable "fc_interface_policies" {
       port_mode             = optional(string)
       receive_buffer_credit = optional(string)
       speed                 = optional(string)
-      tags                  = optional(string)
+      annotation            = optional(string)
       trunk_mode            = optional(string)
     }
   ))
@@ -123,7 +123,7 @@ ________________________________________________________________________________
 */
 resource "aci_interface_fc_policy" "fc_interface_policies" {
   for_each     = local.fc_interface_policies
-  annotation   = each.value.tags != "" ? each.value.tags : var.tags
+  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   automaxspeed = each.value.auto_max_speed
   description  = each.value.description
   fill_pattern = each.value.fill_pattern
@@ -149,7 +149,7 @@ variable "l2_interface_policies" {
       qinq             = "disabled"
       reflective_relay = "disabled"
       vlan_scope       = "global"
-      tags             = ""
+      annotation       = ""
     }
   }
   description = <<-EOT
@@ -162,7 +162,7 @@ variable "l2_interface_policies" {
     - doubleQtagPort: Configure this interface to be used for Q-in-Q encapsulated traffic.
     - edgePort: Configure this edge-switch interface (for a single customer) to be included in a Dot1q Tunnel.
   * reflective_relay: (Default value is "disabled").  Enable or disable reflective relay for ports that consume the policy.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_scope: (Default value is "global").  The layer 2 interface VLAN scope. The scope can be:
     - global: Sets the VLAN encapsulation value to map only to a single EPG per leaf.
     - portlocal: Allows allocation of separate (Port, Vlan) translation entries in both ingress and egress directions. This configuration is not valid when the EPGs belong to a single bridge domain.
@@ -175,7 +175,7 @@ variable "l2_interface_policies" {
       description      = optional(string)
       qinq             = optional(string)
       reflective_relay = optional(string)
-      tags             = optional(string)
+      annotation       = optional(string)
       vlan_scope       = optional(string)
     }
   ))
@@ -192,7 +192,7 @@ ________________________________________________________________________________
 */
 resource "aci_l2_interface_policy" "l2_interface_policies" {
   for_each    = local.l2_interface_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -220,7 +220,7 @@ variable "lacp_interface_policies" {
       mode                      = "off"
       suspend_individual_port   = true
       symmetric_hashing         = false
-      tags                      = ""
+      annotation                = ""
     }
   }
   description = <<-EOT
@@ -240,7 +240,7 @@ variable "lacp_interface_policies" {
     - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
   * suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
   * symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
@@ -254,7 +254,7 @@ variable "lacp_interface_policies" {
       mode                      = optional(string)
       suspend_individual_port   = optional(bool)
       symmetric_hashing         = optional(bool)
-      tags                      = optional(string)
+      annotation                = optional(string)
     }
   ))
 }
@@ -271,7 +271,7 @@ ________________________________________________________________________________
 */
 resource "aci_lacp_policy" "lacp_interface_policies" {
   for_each    = local.lacp_interface_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl        = [each.value.control]
   description = each.value.description
   max_links   = each.value.maximum_number_of_links
@@ -296,7 +296,7 @@ variable "link_level_policies" {
       forwarding_error_correction = "inherit"
       link_debounce_interval      = "100"
       speed                       = "inherit"
-      tags                        = ""
+      annotation                  = ""
     }
   }
   description = <<-EOT
@@ -327,7 +327,7 @@ variable "link_level_policies" {
     - 200G
     - 400G
     * inherit
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
@@ -337,7 +337,7 @@ variable "link_level_policies" {
       forwarding_error_correction = optional(string)
       link_debounce_interval      = optional(string)
       speed                       = optional(string)
-      tags                        = optional(string)
+      annotation                  = optional(string)
     }
   ))
 }
@@ -354,7 +354,7 @@ ________________________________________________________________________________
 */
 resource "aci_fabric_if_pol" "link_level_policies" {
   for_each      = local.link_level_policies
-  annotation    = each.value.tags != "" ? each.value.tags : var.tags
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   auto_neg      = each.value.auto_negotiation
   description   = each.value.description
   fec_mode      = each.value.forwarding_error_correction
@@ -376,7 +376,7 @@ variable "lldp_interface_policies" {
       alias          = ""
       description    = ""
       receive_state  = "enabled"
-      tags           = ""
+      annotation     = ""
       transmit_state = "enabled"
     }
   }
@@ -385,7 +385,7 @@ variable "lldp_interface_policies" {
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * receive_state: (Default value is "enabled").  The reception of LLDP packets on an interface. 
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * transmit_state: (Default value is "enabled").  The transmission of LLDP packets on an interface. 
   EOT
   type = map(object(
@@ -393,7 +393,7 @@ variable "lldp_interface_policies" {
       alias          = optional(string)
       description    = optional(string)
       receive_state  = optional(string)
-      tags           = optional(string)
+      annotation     = optional(string)
       transmit_state = optional(string)
     }
   ))
@@ -413,7 +413,7 @@ resource "aci_lldp_interface_policy" "lldp_interface_policies" {
   for_each    = local.lldp_interface_policies
   admin_rx_st = each.value.receive_state
   admin_tx_st = each.value.transmit_state
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -431,7 +431,7 @@ variable "mcp_interface_policies" {
       admin_state = "enabled"
       alias       = ""
       description = ""
-      tags        = ""
+      annotation  = ""
     }
   }
   description = <<-EOT
@@ -439,14 +439,14 @@ variable "mcp_interface_policies" {
   * admin_state: (Default value is "enabled").  The administrative state of the MCP interface policy. The state can be:
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       admin_state = optional(string)
       alias       = optional(string)
       description = optional(string)
-      tags        = optional(string)
+      annotation  = optional(string)
     }
   ))
 }
@@ -463,7 +463,7 @@ ________________________________________________________________________________
 */
 resource "aci_miscabling_protocol_interface_policy" "mcp_interface_policies" {
   for_each    = local.mcp_interface_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   admin_st    = each.value.admin_state
   description = each.value.description
   name        = each.key
@@ -483,7 +483,7 @@ variable "port_security_policies" {
       description           = ""
       maximum_endpoints     = "0"
       port_security_timeout = "60"
-      tags                  = ""
+      annotation            = ""
     }
   }
   description = <<-EOT
@@ -492,7 +492,7 @@ variable "port_security_policies" {
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * maximum_endpoints: (Default value is "0").  The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
   * port_security_timeout: (Default value is "60").  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
@@ -500,7 +500,7 @@ variable "port_security_policies" {
       description           = optional(string)
       maximum_endpoints     = optional(string)
       port_security_timeout = optional(string)
-      tags                  = optional(string)
+      annotation            = optional(string)
     }
   ))
 }
@@ -516,7 +516,7 @@ ________________________________________________________________________________
 */
 resource "aci_port_security_policy" "port_security_policies" {
   for_each    = local.port_security_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   maximum     = each.value.maximum_endpoints
   name        = each.key
@@ -535,27 +535,27 @@ variable "spanning_tree_interface_policies" {
   default = {
     "default" = {
       alias               = ""
+      annotation          = ""
       bpdu_filter_enabled = "no"
       bpdu_guard_enabled  = "no"
       description         = ""
-      tags                = ""
     }
   }
   description = <<-EOT
   Key: Name of the Spanning-Tree Interface Policy.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bpdu_filter_enabled: (Default value is false).  The interface level control that enables the BPDU filter for extended chassis ports.
   * bpdu_guard_enabled: (Default value is false).  The interface level control that enables the BPDU guard for extended chassis ports.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       alias               = optional(string)
+      annotation          = optional(string)
       bpdu_filter_enabled = optional(string)
       bpdu_guard_enabled  = optional(string)
       description         = optional(string)
-      tags                = optional(string)
     }
   ))
 }
@@ -572,7 +572,7 @@ ________________________________________________________________________________
 */
 resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies" {
   for_each    = local.spanning_tree_interface_policies
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl        = each.value.control
   description = each.value.description
   name        = each.key

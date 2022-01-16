@@ -7,6 +7,7 @@ variable "leaf_profiles" {
   default = {
     "default" = {
       alias            = ""
+      annotation       = ""
       description      = ""
       external_pool_id = "0"
       interfaces = {
@@ -25,13 +26,13 @@ variable "leaf_profiles" {
       pod_id            = "1"
       role              = "leaf"
       serial            = "**REQUIRED**"
-      tags              = ""
       two_slot_leaf     = false
     }
   }
   description = <<-EOT
   key - Node ID of the Leaf
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * external_pool_id:
   * interfaces:
@@ -55,12 +56,12 @@ variable "leaf_profiles" {
     - virtual-leaf
   * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
   * serial: Manufacturing Serial Number of the Switch.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
   type = map(object(
     {
       alias            = optional(string)
+      annotation       = optional(string)
       description      = optional(string)
       external_pool_id = optional(string)
       interfaces = map(object(
@@ -79,7 +80,6 @@ variable "leaf_profiles" {
       pod_id            = optional(string)
       role              = optional(string)
       serial            = string
-      tags              = optional(string)
       two_slot_leaf     = optional(bool)
     }
   ))
@@ -97,7 +97,7 @@ ________________________________________________________________________________
 */
 resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
   for_each    = local.leaf_profiles
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -122,7 +122,7 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   ]
   for_each                  = local.leaf_interface_selectors
   leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.key1].id
-  annotation                = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
   description               = each.value.selector_description
   name                      = each.value.interface_name
   access_port_selector_type = "range"
@@ -154,7 +154,7 @@ resource "aci_access_port_block" "leaf_port_blocks" {
   ]
   for_each                = { for k, v in local.leaf_interface_selectors : k => v if v.sub_port == "" }
   access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
-  annotation              = each.value.tags != "" ? each.value.tags : var.tags
+  annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
   description             = each.value.interface_description
   from_card               = each.value.module
   from_port               = each.value.port
@@ -180,7 +180,7 @@ resource "aci_access_sub_port_block" "leaf_port_subblocks" {
   ]
   for_each                = { for k, v in local.leaf_interface_selectors : k => v if v.sub_port != "" }
   access_port_selector_dn = aci_access_port_selector.leaf_interface_selectors[each.key].id
-  annotation              = each.value.tags != "" ? each.value.tags : var.tags
+  annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
   description             = each.value.interface_description
   from_card               = each.value.module
   from_port               = each.value.port
@@ -206,7 +206,7 @@ resource "aci_leaf_profile" "leaf_profiles" {
     aci_leaf_interface_profile.leaf_interface_profiles
   ]
   for_each    = local.leaf_profiles
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -249,7 +249,7 @@ resource "aci_rest" "leaf_selectors" {
   dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/leaves-${each.value.name}-typ-range"
   class_name = "infraLeafS"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.value.name
     nameAlias  = each.value.alias
@@ -272,7 +272,7 @@ resource "aci_rest" "leaf_profile_blocks" {
   dn         = "${aci_rest.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = "blk${each.key}-${each.key}"
     from_      = each.key
     to_        = each.key
@@ -288,7 +288,7 @@ resource "aci_rest" "leaf_profile_blocks" {
 #   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
 #   name                             = each.value.name
 #   switch_association_type          = "range"
-#   annotation                       = each.value.tags
+#   annotation                       = each.value.annotation
 #   description                      = each.value.description
 #   name_alias                       = each.value.alias
 #   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id

@@ -1,6 +1,7 @@
 variable "fabric_wide_settings" {
   default = {
     "default" = {
+      annotation                        = ""
       disable_remote_ep_learning        = "yes"
       enforce_domain_validation         = "yes"
       enforce_epg_vlan_validation       = "no"
@@ -16,11 +17,11 @@ variable "fabric_wide_settings" {
       }]
       spine_opflex_client_authentication = "yes"
       spine_ssl_opflex                   = "yes"
-      tags                               = ""
     }
   }
   type = map(object(
     {
+      annotation                        = optional(string)
       disable_remote_ep_learning        = optional(string)
       enforce_domain_validation         = optional(string)
       enforce_epg_vlan_validation       = optional(string)
@@ -38,7 +39,6 @@ variable "fabric_wide_settings" {
       ))
       spine_opflex_client_authentication = optional(string)
       spine_ssl_opflex                   = optional(string)
-      tags                               = optional(string)
     }
   ))
 }
@@ -57,7 +57,7 @@ resource "aci_rest" "fabric_wide_settings" {
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
   content = {
-    annotation                 = each.value.tags != "" ? each.value.tags : var.tags
+    annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
     domainValidation           = each.value.enforce_domain_validation
     enforceSubnetCheck         = each.value.enforce_subnet_check
     opflexpAuthenticateClients = each.value.spine_opflex_client_authentication

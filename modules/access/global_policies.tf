@@ -54,10 +54,28 @@ resource "aci_attachable_access_entity_profile" "aaep_policies" {
     # aci_vmm_domain.vmm_domains
   ]
   for_each                = local.aaep_policies
-  annotation              = each.value.tags != "" ? each.value.tags : var.tags
+  annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
   description             = each.value.description
   name                    = each.key
   relation_infra_rs_dom_p = each.value.domains
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "infraAttEntityP"
+ - Distinguished Name: "uni/infra/attentp-{AAEP}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {AAEP}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_access_generic" "access_generic" {
+  depends_on = [
+    aci_attachable_access_entity_profile.aaep_policies
+  ]
+  for_each                            = local.aaep_policies
+  attachable_access_entity_profile_dn = aci_attachable_access_entity_profile.aaep_policies[each.key].id
+  name                                = "default"
 }
 
 
@@ -70,6 +88,7 @@ variable "error_disabled_recovery_policy" {
   default = {
     "default" = {
       alias                             = ""
+      annotation                        = ""
       arp_inspection                    = "yes"
       bpdu_guard                        = "yes"
       debug_1                           = "yes"
@@ -92,7 +111,6 @@ variable "error_disabled_recovery_policy" {
       storm_control                     = "yes"
       stp_inconsist_vpc_peerlink        = "yes"
       system_error_based                = "yes"
-      tags                              = ""
       unidirection_link_detection       = "yes"
       unknown                           = "yes"
     }
@@ -100,7 +118,7 @@ variable "error_disabled_recovery_policy" {
   description = <<-EOT
   Key: Unique Identifier for the Map of Objects.  Not used in assignment.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * annotation                              = ""
   * arp_inspection                    = "yes"
   * bpdu_guard                        = "yes"
   * debug_1                           = "yes"
@@ -108,7 +126,7 @@ variable "error_disabled_recovery_policy" {
   * debug_3                           = "yes"
   * debug_4                           = "yes"
   * debug_5                           = "yes"
-  * description                       = ""
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * dhcp_rate_limit                   = "yes"
   * ethernet_port_module              = "yes"
   * ip_address_conflict               = "yes"
@@ -123,13 +141,13 @@ variable "error_disabled_recovery_policy" {
   * storm_control                     = "yes"
   * stp_inconsist_vpc_peerlink        = "yes"
   * system_error_based                = "yes"
-  * tags                              = ""
   * unidirection_link_detection       = "yes"
   * unknown                           = "yes"
   EOT
   type = map(object(
     {
       alias                             = optional(string)
+      annotation                        = optional(string)
       arp_inspection                    = optional(string)
       bpdu_guard                        = optional(string)
       debug_1                           = optional(string)
@@ -152,7 +170,6 @@ variable "error_disabled_recovery_policy" {
       storm_control                     = optional(string)
       stp_inconsist_vpc_peerlink        = optional(string)
       system_error_based                = optional(string)
-      tags                              = optional(string)
       unidirection_link_detection       = optional(string)
       unknown                           = optional(string)
     }
@@ -171,7 +188,7 @@ ________________________________________________________________________________
 */
 resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   for_each            = local.error_disabled_recovery_policy
-  annotation          = each.value.tags != "" ? each.value.tags : var.tags
+  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   description         = each.value.description
   err_dis_recov_intvl = each.value.error_disable_recovery_interval
   name_alias          = each.value.alias
@@ -285,7 +302,7 @@ variable "mcp_instance_policy" {
       admin_state                       = "enabled"
       alias                             = ""
       description                       = ""
-      tags                              = ""
+      annotation                        = ""
       enable_mcp_pdu_per_vlan           = true
       initial_delay                     = "180"
       loop_detect_multiplication_factor = "3"
@@ -299,7 +316,7 @@ variable "mcp_instance_policy" {
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * admin_state                       = "enabled"
-  * tags                              = ""
+  * annotation                              = ""
   * enable_mcp_pdu_per_vlan           = true
   * initial_delay                     = "180"
   * loop_detect_multiplication_factor = "3"
@@ -312,7 +329,7 @@ variable "mcp_instance_policy" {
       alias                             = optional(string)
       description                       = optional(string)
       admin_state                       = optional(string)
-      tags                              = optional(string)
+      annotation                        = optional(string)
       enable_mcp_pdu_per_vlan           = bool
       initial_delay                     = optional(string)
       loop_detect_multiplication_factor = optional(string)
@@ -342,7 +359,7 @@ ________________________________________________________________________________
 resource "aci_mcp_instance_policy" "mcp_instance_policy" {
   for_each         = local.mcp_instance_policy
   admin_st         = each.value.admin_state
-  annotation       = each.value.tags != "" ? each.value.tags : var.tags
+  annotation       = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl             = [each.value.controls]
   description      = each.value.description
   init_delay_time  = each.value.initial_delay
@@ -374,7 +391,7 @@ variable "global_qos_class" {
       micro_burst_spine_queues          = "0"
       micro_burst_leaf_queues           = "0"
       preserve_cos                      = true
-      tags                              = ""
+      annotation                        = ""
     }
   }
   description = <<-EOT
@@ -406,7 +423,7 @@ variable "global_qos_class" {
       micro_burst_spine_queues          = optional(string)
       micro_burst_leaf_queues           = optional(string)
       preserve_cos                      = optional(bool)
-      tags                              = optional(string)
+      annotation                        = optional(string)
     }
   ))
 }
@@ -423,7 +440,7 @@ GUI Location:
 */
 resource "aci_qos_instance_policy" "global_qos_class" {
   for_each              = local.global_qos_class
-  annotation            = each.value.tags != "" ? each.value.tags : var.tags
+  annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl                  = each.value.control
   description           = each.value.description
   etrap_age_timer       = each.value.elephant_trap_age_period

@@ -40,7 +40,7 @@ variable "privateKey" {
   type        = string
 }
 
-variable "tags" {
+variable "annotation" {
   default     = ""
   description = "workspace tag value."
   type        = string

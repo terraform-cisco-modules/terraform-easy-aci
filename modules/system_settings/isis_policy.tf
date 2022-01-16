@@ -1,6 +1,7 @@
 variable "isis_policy" {
   default = {
     "default" = {
+      annotation                                      = ""
       isis_mtu                                        = 1492
       isis_metric_for_redistributed_routes            = 63
       lsp_fast_flood_mode                             = "enabled"
@@ -10,11 +11,11 @@ variable "isis_policy" {
       sfp_computation_frequency_initial_wait_interval = 50
       sfp_computation_frequency_maximum_wait_interval = 50
       sfp_computation_frequency_second_wait_interval  = 50
-      tags                                            = ""
     }
   }
   type = map(object(
     {
+      annotation                                      = optional(string)
       isis_mtu                                        = optional(number)
       isis_metric_for_redistributed_routes            = optional(number)
       lsp_fast_flood_mode                             = optional(string)
@@ -24,7 +25,6 @@ variable "isis_policy" {
       sfp_computation_frequency_initial_wait_interval = optional(number)
       sfp_computation_frequency_maximum_wait_interval = optional(number)
       sfp_computation_frequency_second_wait_interval  = optional(number)
-      tags                                            = optional(string)
     }
   ))
 }
@@ -40,7 +40,7 @@ ________________________________________________________________________________
 */
 resource "aci_isis_domain_policy" "isis_policy" {
   for_each            = local.isis_policy
-  annotation          = each.value.tags != "" ? each.value.tags : var.tags
+  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   lsp_fast_flood      = each.value.lsp_fast_flood_mode
   lsp_gen_init_intvl  = each.value.lsp_generation_initial_wait_interval
   lsp_gen_max_intvl   = each.value.lsp_generation_maximum_wait_interval

@@ -1,8 +1,9 @@
 variable "configuration_backups" {
-  defualt = {
+  default = {
     "default" = {
-      configuration_export = {
-        default = {
+      annotation = ""
+      configuration_export = [
+        {
           description           = ""
           format                = "json"
           include_secure_fields = "yes"
@@ -10,7 +11,7 @@ variable "configuration_backups" {
           remote_hosts          = ["fileserver.example.com"]
           snapshot              = "no"
         }
-      }
+      ]
       recurring_window = [{
         delay_between_node_upgrades = 0 # Only applicable if the maximum concurrent node count is 1.
         description                 = ""
@@ -42,24 +43,27 @@ variable "configuration_backups" {
   }
   type = map(object(
     {
-      configuration_export = [{
-        description           = optional(string)
-        format                = optional(string)
-        include_secure_fields = optional(string)
-        max_snapshot_count    = optional(number)
-        remote_hosts          = list(string)
-        snapshot              = optional(string)
-      }]
+      annotation = optional(string)
+      configuration_export = list(object(
+        {
+          description           = optional(string)
+          format                = optional(string)
+          include_secure_fields = optional(string)
+          max_snapshot_count    = optional(number)
+          remote_hosts          = list(string)
+          snapshot              = optional(string)
+        }
+      ))
       recurring_window = list(object(
         {
-          day                         = optional(string)
           delay_between_node_upgrades = optional(number)
           description                 = optional(string)
-          hour                        = optional(number)
           maximum_concurrent_nodes    = optional(string)
-          minute                      = optional(number)
           processing_break            = optional(string)
           processing_size_capacity    = optional(string)
+          scheduled_days              = optional(string)
+          scheduled_hour              = optional(number)
+          scheduled_minute            = optional(number)
           windows_type                = optional(string)
         }
       ))
@@ -67,7 +71,7 @@ variable "configuration_backups" {
         {
           authentication_type = optional(string)
           description         = optional(string)
-          hosts               = optional(string)
+          hosts               = list(string)
           management_epg      = optional(string)
           management_epg_type = optional(string)
           password            = optional(number)
@@ -79,7 +83,6 @@ variable "configuration_backups" {
           username            = optional(string)
         }
       ))
-      tags = optional(string)
     }
   ))
 }
@@ -165,7 +168,7 @@ resource "aci_recurring_window" "recurring_window" {
     aci_trigger_scheduler.trigger_schedulers
   ]
   scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
-  annotation   = each.value.tags                     #
+  annotation   = each.value.annotation               #
   concur_cap   = each.value.maximum_concurrent_nodes # "unlimited"
   day          = each.value.scheduled_days           # "every-day"
   hour         = each.value.scheduled_hour           # "0"
@@ -188,7 +191,7 @@ GUI Location:
  - Admin > Import/Export > Remote Locations:{Remote_Host}
 */
 resource "aci_file_remote_path" "export_remote_hosts" {
-  annotation                      = each.value.tags
+  annotation                      = each.value.annotation
   auth_type                       = each.value.authentication_type
   description                     = each.value.description
   host                            = each.value.host
@@ -226,7 +229,7 @@ resource "aci_configuration_export_policy" "configuration_export" {
     aci_trigger_scheduler.trigger_schedulers
   ]
   admin_st                              = each.value.start_now # triggered|untriggered
-  annotation                            = each.value.tags
+  annotation                            = each.value.annotation
   description                           = each.value.description
   format                                = each.value.format                # "json|xml"
   include_secure_fields                 = each.value.include_secure_fields # "yes"

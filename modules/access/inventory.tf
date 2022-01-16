@@ -13,7 +13,7 @@ resource "aci_rest" "fabric_membership" {
   dn         = "uni/controller/nodeidentpol/nodep-${each.value.serial}"
   class_name = "fabricNodeIdentP"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     extPoolId  = each.value.external_pool_id
     name       = each.value.name
     nodeId     = each.key

@@ -6,22 +6,22 @@ ________________________________________________________________________________
 variable "layer3_domains" {
   default = {
     "default" = {
-      alias     = ""
-      tags      = ""
-      vlan_pool = ""
+      alias      = ""
+      annotation = ""
+      vlan_pool  = ""
     }
   }
   description = <<-EOT
   Key: Name of the Layer 3 Domain.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
-      alias     = optional(string)
-      tags      = optional(string)
-      vlan_pool = string
+      alias      = optional(string)
+      annotation = optional(string)
+      vlan_pool  = string
     }
   ))
 }
@@ -40,7 +40,7 @@ resource "aci_l3_domain_profile" "layer3_domains" {
     aci_vlan_pool.vlan_pools
   ]
   for_each                  = local.layer3_domains
-  annotation                = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
   name                      = each.key
   name_alias                = each.value.alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
@@ -55,22 +55,22 @@ ________________________________________________________________________________
 variable "physical_domains" {
   default = {
     "default" = {
-      alias     = ""
-      tags      = ""
-      vlan_pool = ""
+      alias      = ""
+      annotation = ""
+      vlan_pool  = ""
     }
   }
   description = <<-EOT
   Key: Name of the Physical Domain.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
-      alias     = optional(string)
-      tags      = optional(string)
-      vlan_pool = string
+      alias      = optional(string)
+      annotation = optional(string)
+      vlan_pool  = string
     }
   ))
 }
@@ -89,7 +89,7 @@ resource "aci_physical_domain" "physical_domains" {
     aci_vlan_pool.vlan_pools
   ]
   for_each                  = local.physical_domains
-  annotation                = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
   name                      = each.key
   name_alias                = each.value.alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
@@ -104,8 +104,9 @@ ________________________________________________________________________________
 variable "vmm_domains" {
   default = {
     "default" = {
-      alias                          = ""
       access_mode                    = "read-write"
+      alias                          = ""
+      annotation                     = ""
       arp_learning                   = "disabled"
       cdp_interface_policy           = ""
       configure_infra_port_groups    = ""
@@ -127,7 +128,6 @@ variable "vmm_domains" {
       preferred_encapsulation        = "unspecified"
       provider_type                  = "VMware"
       spanning_tree_interface_policy = ""
-      tags                           = ""
       virtual_switch_type            = "default"
       vlan_pool                      = ""
     }
@@ -135,13 +135,14 @@ variable "vmm_domains" {
   description = <<-EOT
   Key: Name of the Virtual Machine Managed (VMM) Domain.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
-      alias                          = optional(string)
       access_mode                    = optional(string)
+      alias                          = optional(string)
+      annotation                     = optional(string)
       arp_learning                   = optional(string)
       cdp_interface_policy           = optional(string)
       configure_infra_port_groups    = optional(string)
@@ -163,7 +164,6 @@ variable "vmm_domains" {
       preferred_encapsulation        = optional(string)
       provider_type                  = optional(string)
       spanning_tree_interface_policy = optional(string)
-      tags                           = optional(string)
       virtual_switch_type            = optional(string)
       vlan_pool                      = optional(string)
       vxlan_pool                     = optional(string)
@@ -190,7 +190,7 @@ resource "aci_vmm_domain" "vmm_domains" {
   ]
   for_each                              = local.vmm_domains
   access_mode                           = each.value.access_mode
-  annotation                            = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                            = each.value.annotation != "" ? each.value.annotation : var.annotation
   arp_learning                          = each.value.arp_learning
   config_infra_pg                       = each.value.configure_infra_port_groups
   ctrl_knob                             = each.value.control

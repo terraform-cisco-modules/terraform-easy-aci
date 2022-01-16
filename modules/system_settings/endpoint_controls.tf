@@ -1,6 +1,7 @@
 variable "endpoint_controls" {
   default = {
     "default" = {
+      annotation = ""
       ep_loop_protection = [{
         action = [{
           bd_learn_disable = false
@@ -19,14 +20,13 @@ variable "endpoint_controls" {
         rouge_interval       = 30
         rouge_multiplier     = 6
       }]
-      tags = ""
     }
   }
   description = <<-EOT
   Key: Name of the APIC Connectivity Preference Map.  This should be default.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * type: COOP protocol is enhanced to support two ZMQ authentication modes:
     - compatible Type: COOP accepts both MD5 authenticated and non-authenticated ZMQ connections for message transportation.
     - strict: COOP allows MD5 authenticated ZMQ connections only.
@@ -34,6 +34,7 @@ variable "endpoint_controls" {
   EOT
   type = map(object(
     {
+      annotation = optional(string)
       ep_loop_protection = list(object(
         {
           action = list(object(
@@ -60,7 +61,6 @@ variable "endpoint_controls" {
           rouge_multiplier     = optional(number)
         }
       ))
-      tags = optional(string)
     }
   ))
 }
@@ -77,7 +77,7 @@ ________________________________________________________________________________
 resource "aci_endpoint_controls" "rouge_endpoint_control" {
   for_each              = local.rouge_ep_control
   admin_st              = each.value.administrative_state
-  annotation            = each.value.tags != "" ? each.value.tags : var.tags
+  annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
   hold_intvl            = each.value.hold_interval
   rogue_ep_detect_intvl = each.value.rouge_interval
   rogue_ep_detect_mult  = each.value.rouge_multiplier
@@ -95,7 +95,7 @@ ________________________________________________________________________________
 resource "aci_endpoint_ip_aging_profile" "ip_aging" {
   for_each   = local.ip_aging
   admin_st   = each.value.administrative_state
-  annotation = each.value.tags != "" ? each.value.tags : var.tags
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -115,7 +115,7 @@ resource "aci_rest" "ep_loop_protection" {
   content = {
     action          = each.value.action
     adminSt         = each.value.administrative_state
-    annotation      = each.value.tags != "" ? each.value.tags : var.tags
+    annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
     loopDetectIntvl = each.value.loop_detection_interval
     loopDetectMult  = each.value.loop_detection_multiplier
   }

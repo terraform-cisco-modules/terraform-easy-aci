@@ -1,6 +1,7 @@
 variable "date_and_time" {
   default = {
     default = {
+      annotation           = ""
       administrative_state = "enabled"
       authentication_keys  = []
       description          = ""
@@ -14,6 +15,7 @@ variable "date_and_time" {
     }
   }
   description = <<-EOT
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * administrative_state: The NTP protocol can be enabled or disabled. If enabled, the system uses the NTP protocol. The NTP protocol can be either of the following:
     - enabled: NTP protocol is enabled.
     - disabled: NTP protocol is disabled.
@@ -477,6 +479,7 @@ variable "date_and_time" {
   EOT
   type = map(object(
     {
+      annotation           = optional(string)
       administrative_state = optional(string)
       authentication_keys = optional(list(object(
         {
@@ -558,7 +561,7 @@ resource "aci_rest" "date_and_time" {
   dn         = "/api/node/mo/uni/fabric/time-${each.key}"
   class_name = "datetimePol"
   content = {
-    annotation   = each.value.tags != "" ? each.value.tags : var.tags
+    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminSt      = each.value.administrative_state
     authSt       = length(each.value.authentication_keys) > 0 ? "enabled" : "disabled"
     descr        = each.value.description
@@ -587,7 +590,7 @@ resource "aci_rest" "ntp_authentication_keys" {
   dn         = "uni/fabric/time-${each.value.key1}/ntpauth-${each.value.key_id}"
   class_name = "datetimeNtpAuthKey"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     id         = each.value.key_id
     key = length(regexall(
       5, each.value.key_id)) > 0 ? var.ntp_key_5 : length(regexall(
@@ -614,7 +617,7 @@ resource "aci_rest" "ntp_servers" {
   dn         = "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}"
   class_name = "datetimeNtpProv"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     keyId      = length(each.value.authentication_keys) > 0 ? each.value.authentication_key : 0
     maxPoll    = each.value.maximum_polling_interval
@@ -648,7 +651,7 @@ resource "aci_rest" "date_and_time_format" {
   dn         = "uni/fabric/format-default"
   class_name = "datetimeFormat"
   content = {
-    annotation    = each.value.tags != "" ? each.value.tags : var.tags
+    annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
     displayFormat = each.value.display_format
     showOffset    = each.value.offset_state
     tz            = each.value.time_zone

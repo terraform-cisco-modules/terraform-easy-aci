@@ -1,6 +1,7 @@
 variable "dns_profiles" {
   default = {
     default = {
+      annotation            = ""
       description           = ""
       dns_domains           = []
       dns_providers         = []
@@ -11,6 +12,7 @@ variable "dns_profiles" {
   }
   type = map(object(
     {
+      annotation  = optional(string)
       description = optional(string)
       dns_domains = optional(list(object(
         {
@@ -48,7 +50,7 @@ resource "aci_rest" "dns_profiles" {
   dn         = "/api/node/mo/uni/fabric/dnsp-${each.key}"
   class_name = "dnsProfile"
   content = {
-    annotation      = each.value.tags != "" ? each.value.tags : var.tags
+    annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr           = each.value.description
     IPVerPreference = each.value.ip_version_preference
     name            = each.key
@@ -82,7 +84,7 @@ resource "aci_rest" "dns_providers" {
   class_name = "dnsProv"
   content = {
     addr       = each.value.dns_provider
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     preferred  = each.value.preferred
   }
 }
@@ -106,7 +108,7 @@ resource "aci_rest" "dns_domains" {
   dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]"
   class_name = "dnsDomain"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     isDefault  = each.value.default_domain
     name       = each.value.domain

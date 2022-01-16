@@ -20,23 +20,23 @@ variable "spine_profiles" {
       spine_policy_group = "**REQUIRED**"
       pod_id             = "1"
       serial             = "**REQUIRED**"
-      tags               = ""
+      annotation         = ""
     }
   }
   description = <<-EOT
   key - Node ID of the Spine
-    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-    * interfaces:
-      - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular spine port or X/X/X for a breakout sub port.
-        * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-        * interface_policy_group: Name of the Interface Policy Group
-        * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-    * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
-    * name: Hostname of the Spine plus Name of the Spine Profile, Spine Interface Profile, and Spine Profile Selector.
-    * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
-    * serial: Manufacturing Serial Number of the Switch.
-    * tags: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * interfaces:
+    - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular spine port or X/X/X for a breakout sub port.
+      * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      * interface_policy_group: Name of the Interface Policy Group
+      * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
+  * name: Hostname of the Spine plus Name of the Spine Profile, Spine Interface Profile, and Spine Profile Selector.
+  * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+  * serial: Manufacturing Serial Number of the Switch.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   EOT
   type = map(object(
     {
@@ -56,7 +56,7 @@ variable "spine_profiles" {
       node_type          = optional(string)
       pod_id             = optional(string)
       serial             = string
-      tags               = optional(string)
+      annotation         = optional(string)
     }
   ))
 }
@@ -73,7 +73,7 @@ ________________________________________________________________________________
 */
 resource "aci_spine_interface_profile" "spine_interface_profiles" {
   for_each    = local.spine_profiles
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -98,7 +98,7 @@ resource "aci_rest" "spine_interface_selectors" {
   dn         = "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.interface_name}-typ-range"
   class_name = "infraSHPortS"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = each.value.interface_name
     descr      = each.value.selector_description
   }
@@ -137,7 +137,7 @@ resource "aci_spine_profile" "spine_profiles" {
     aci_spine_interface_profile.spine_interface_profiles
   ]
   for_each    = local.spine_profiles
-  annotation  = each.value.tags != "" ? each.value.tags : var.tags
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
@@ -162,7 +162,7 @@ resource "aci_spine_switch_association" "spine_profiles" {
     aci_spine_switch_policy_group.spine_policy_groups
   ]
   for_each                               = local.spine_profiles
-  annotation                             = each.value.tags != "" ? each.value.tags : var.tags
+  annotation                             = each.value.annotation != "" ? each.value.annotation : var.annotation
   spine_profile_dn                       = aci_spine_profile.spine_profiles[each.key].id
   description                            = each.value.description
   name                                   = each.value.name
@@ -191,7 +191,7 @@ resource "aci_rest" "spine_profile_node_blocks" {
   dn         = "uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    annotation = each.value.tags != "" ? each.value.tags : var.tags
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     from_      = each.key
     to_        = each.key
     name       = "blk${each.key}-${each.key}"
