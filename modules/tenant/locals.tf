@@ -1,23 +1,160 @@
 locals {
+  # Terraform Cloud Remote Resources - Policies
+  rs_contracts          = {}
+  rs_filters            = {}
+  rs_mso_filter_entries = {}
+  rs_schemas            = {}
+  # rs_schemas  = lookup(data.terraform_remote_state.policies.outputs, "adapter_configuration_policies", {})
+
   #__________________________________________________________
   #
-  # Tenant Variables
+  # Contract Variables
   #__________________________________________________________
 
-  tenants = {
-    for k, v in var.tenants : k => {
-      alias             = v.alias != null ? v.alias : ""
-      description       = v.description != null ? v.description : ""
-      monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
-      name              = v.name != null ? v.name : "common"
-      sites             = v.sites != null ? v.sites : []
-      annotation        = v.annotation != null ? v.annotation : ""
-      type              = v.type != null ? v.type : "apic"
-      users             = v.users != null ? v.users : []
-      vendor            = v.vendor != null ? v.vendor : "cisco"
+  contracts = {
+    for k, v in var.contracts : k => {
+      alias                = v.alias != null ? v.alias : ""
+      annotation           = v.annotation != null ? v.annotation : ""
+      contract_type        = v.contract_type != null ? v.contract_type : "standard"
+      consumer_match_type  = v.consumer_match_type != null ? v.consumer_match_type : "AtleastOne"
+      description          = v.description != null ? v.description : ""
+      filters              = v.filters != null ? v.filters : []
+      log_packets          = v.log_packets != null ? v.log_packets : false
+      qos_class            = v.qos_class != null ? v.qos_class : "unspecified"
+      provider_match_type  = v.provider_match_type != null ? v.provider_match_type : "AtleastOne"
+      reverse_filter_ports = v.reverse_filter_ports != null ? v.reverse_filter_ports : true
+      schema               = v.schema != null ? v.schema : "common"
+      scope                = v.scope != null ? v.scope : "context"
+      tags                 = v.tags != null ? v.tags : []
+      target_dscp          = v.target_dscp != null ? v.target_dscp : "unspecified"
+      template             = v.template != null ? v.template : "common"
+      tenant               = v.tenant != null ? v.tenant : "common"
+      type                 = v.type != null ? v.type : "apic"
     }
   }
 
+
+  apic_contract_filters_loop = flatten([
+    for key, value in local.contracts : [
+      for k, v in value.filters : {
+        contract = key
+        filter = length(regexall(
+          v.tenant, value.tenant)
+        ) > 0 ? aci_filter.filters[v.name].id : local.rs_filters[v.name].id
+        name = v.name
+      }
+    ] if value.type == "apic"
+  ])
+
+  apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${v.name}" => v }
+
+  contract_subjects = {
+    for k, v in local.contracts : k => {
+      alias                = v.alias
+      annotation           = v.annotation
+      contract_type        = v.contract_type
+      consumer_match_type  = v.consumer_match_type
+      description          = v.description
+      filters              = [for key, value in local.apic_contract_filters : value.filter if value.contract == k]
+      log_packets          = v.log_packets != null ? v.log_packets : false
+      qos_class            = v.qos_class
+      provider_match_type  = v.provider_match_type
+      reverse_filter_ports = v.reverse_filter_ports
+      schema               = v.schema
+      scope                = v.scope
+      tags                 = v.tags
+      target_dscp          = v.target_dscp
+      template             = v.template
+      tenant               = v.tenant
+      type                 = v.type
+    }
+  }
+
+  contract_tags_loop = flatten([
+    for key, value in local.vrfs : [
+      for k, v in value.tags : {
+        key      = value.key
+        value    = v.value
+        type     = value.type
+        contract = key
+      }
+    ]
+  ])
+
+  contract_tags = { for k, v in local.contract_tags_loop : "${v.contract}_${v.key}" => v }
+
+  #__________________________________________________________
+  #
+  # Endpoint Retention Policy Variables
+  #__________________________________________________________
+
+  endpoint_retention_policies = {
+    for k, v in var.endpoint_retention_policies : k => {
+      annotation                     = v.annotation != null ? v.annotation : ""
+      bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
+      bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
+      description                    = v.description != null ? v.description : ""
+      hold_interval                  = v.hold_interval != null ? v.hold_interval : 300
+      local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : 900
+      move_frequency                 = v.move_frequency != null ? v.move_frequency : 256
+      remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : 900
+      tenant                         = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Filter Variables
+  #__________________________________________________________
+
+  filters = {
+    for k, v in var.filters : k => {
+      alias          = v.alias != null ? v.alias : ""
+      annotation     = v.annotation != null ? v.annotation : ""
+      description    = v.description != null ? v.description : ""
+      filter_entries = v.filter_entries != null ? v.filter_entries : []
+      schema         = v.schema != null ? v.schema : "common"
+      template       = v.template != null ? v.template : "common"
+      tenant         = v.tenant != null ? v.tenant : "common"
+      type           = v.type != null ? v.type : "apic"
+    }
+  }
+
+  filter_entries_loop = flatten([
+    for key, value in local.filters : [
+      for k, v in value.filter_entries : {
+        alias                 = v.alias != null ? v.alias : ""
+        annotation            = v.annotation != null ? v.annotation : ""
+        arp_flag              = v.arp_flag != null ? v.arp_flag : "unspecified"
+        description           = v.description != null ? v.description : ""
+        destination_port_from = v.destination_port_from != null ? v.destination_port_from : "unspecified"
+        destination_port_to   = v.destination_port_to != null ? v.destination_port_to : "unspecified"
+        ethertype             = v.ethertype != null ? v.ethertype : "unspecified"
+        filter_name           = key
+        icmpv4_type           = v.icmpv4_type != null ? v.icmpv4_type : "unspecified"
+        icmpv6_type           = v.icmpv6_type != null ? v.icmpv6_type : "unspecified"
+        ip_protocol           = v.ip_protocol != null ? v.ip_protocol : "unspecified"
+        match_dscp            = v.match_dscp != null ? v.match_dscp : "unspecified"
+        match_only_fragments  = v.match_only_fragments != null ? v.match_only_fragments : false
+        name                  = v.name != null ? v.name : "default"
+        source_port_from      = v.source_port_from != null ? v.source_port_from : "unspecified"
+        source_port_to        = v.source_port_to != null ? v.source_port_to : "unspecified"
+        schema                = value.schema
+        stateful              = v.stateful != null ? v.stateful : false
+        tcp_ack               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["acknowledgement"] : false
+        tcp_est               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["established"] : false
+        tcp_fin               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["finish"] : false
+        tcp_rst               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["reset"] : false
+        tcp_syn               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["synchronize"] : false
+        template              = value.template
+        tenant                = value.tenant
+        type                  = value.type
+      }
+    ]
+  ])
+
+  filter_entries = { for k, v in local.filter_entries_loop : "${v.filter_name}_${v.name}" => v }
 
   #__________________________________________________________
   #
@@ -35,11 +172,12 @@ locals {
   schema_templates_loop = flatten([
     for key, value in local.schemas : [
       for k, v in value.templates : {
-        name   = v.name
-        key1   = key
-        schema = key
-        sites  = v.sites
-        tenant = value.tenant
+        name             = v.name
+        key1             = key
+        primary_template = value.primary_template
+        schema           = key
+        sites            = v.sites
+        tenant           = value.tenant
       }
     ]
   ])
@@ -50,13 +188,116 @@ locals {
   templates_sites_loop = flatten([
     for k, v in local.schema_templates : [
       for s in v.sites : {
-        name = v.name
-        key1 = v.key1
-        site = s
+        name   = v.name
+        key1   = v.key1
+        schema = v.schema
+        site   = s
       }
     ]
   ])
 
   template_sites = { for k, v in local.templates_sites_loop : "${v.key1}_${v.site}" => v }
+
+  #__________________________________________________________
+  #
+  # Tenant Variables
+  #__________________________________________________________
+
+  tenants = {
+    for k, v in var.tenants : k => {
+      alias             = v.alias != null ? v.alias : ""
+      description       = v.description != null ? v.description : ""
+      monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
+      sites             = v.sites != null ? v.sites : []
+      annotation        = v.annotation != null ? v.annotation : ""
+      type              = v.type != null ? v.type : "apic"
+      users             = v.users != null ? v.users : []
+      vendor            = v.vendor != null ? v.vendor : "cisco"
+    }
+  }
+
+  #__________________________________________________________
+  #
+  # VRF Variables
+  #__________________________________________________________
+
+  vrfs = {
+    for k, v in var.vrfs : k => {
+      alias                           = v.alias != null ? v.alias : ""
+      annotation                      = v.annotation != null ? v.annotation : ""
+      bd_enforcement_status           = v.bd_enforcement_status != null ? v.bd_enforcement_status : "no"
+      bgp_timers_per_address_family   = v.bgp_timers_per_address_family != null ? v.bgp_timers_per_address_family : []
+      bgp_timers                      = v.bgp_timers != null ? v.bgp_timers : "default"
+      communities                     = v.communities != null ? v.communities : []
+      contracts                       = v.contracts != null ? v.contracts : []
+      description                     = v.description != null ? v.description : ""
+      endpoint_retention_policy       = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : "default"
+      eigrp_timers_per_address_family = v.eigrp_timers_per_address_family != null ? v.eigrp_timers_per_address_family : []
+      ip_data_plane_learning          = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
+      layer3_multicast                = v.layer3_multicast != null ? v.layer3_multicast : true
+      level                           = v.level != null ? v.level : "template"
+      monitoring_policy               = v.monitoring_policy != null ? v.monitoring_policy : ""
+      ospf_timers_per_address_family  = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
+      ospf_timers                     = v.ospf_timers != null ? v.ospf_timers : "default"
+      policy_enforcement_direction    = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
+      policy_enforcement_preference   = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
+      preferred_group                 = v.preferred_group != null ? v.preferred_group : "disabled"
+      sites                           = v.sites != null ? v.sites : []
+      schema                          = v.schema != null ? v.schema : "common"
+      tags                            = v.tags != null ? v.tags : []
+      template                        = v.template != null ? v.template : ""
+      tenant                          = v.tenant != null ? v.tenant : "common"
+      transit_route_tag_policy        = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
+      type                            = v.type != null ? v.type : "apic"
+      vendor                          = v.vendor != null ? v.vendor : "cisco"
+    }
+  }
+
+  vrf_communities_loop = flatten([
+    for key, value in local.vrfs : [
+      for k, v in value.communities : {
+        annotation = value.annotation
+        community  = v.community
+        vrf        = key
+      }
+    ]
+  ])
+
+  vrf_communities = { for k, v in local.vrf_communities_loop : "${v.vrf}_${v.community}" => v }
+
+  vrf_tags_loop = flatten([
+    for key, value in local.vrfs : [
+      for k, v in value.tags : {
+        key   = value.key
+        value = v.value
+        type  = value.type
+        vrf   = key
+      }
+    ]
+  ])
+
+  vrf_tags = { for k, v in local.vrf_tags_loop : "${v.vrf}_${v.key}" => v }
+
+  vzany_contracts_loop = flatten([
+    for key, value in local.vrfs : [
+      for k, v in value.contracts : {
+        annotation        = value.annotation
+        contract          = v.name != null ? v.name : ""
+        contract_type     = v.type != null ? v.type : "consumer" # interface|provider
+        contract_schema   = v.schema != null ? v.schema : value.schema
+        contract_tenant   = v.tenant != null ? v.tenant : value.tenant
+        contract_template = v.template != null ? v.template : value.template
+        match_type        = v.match_type != null ? v.match_type : "AtleastOne"
+        qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
+        schema            = value.schema
+        template          = value.template
+        tenant            = value.tenant
+        type              = value.type
+        vrf               = key
+      }
+    ]
+  ])
+
+  vzany_contracts = { for k, v in local.vzany_contracts_loop : "${v.vrf}_${v.contract_type}" => v }
 
 }

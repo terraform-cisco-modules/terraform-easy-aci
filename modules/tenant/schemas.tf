@@ -40,24 +40,24 @@ resource "mso_schema_template" "templates" {
   depends_on = [
     mso_schema.schemas
   ]
-  for_each     = local.schema_templates
+  for_each     = { for k, v in local.schema_templates : k => v if v.name != v.primary_template }
   display_name = each.value.name
   name         = each.value.name
   schema_id    = mso_schema.schemas[each.value.schema].id
   tenant_id    = mso_tenant.tenants[each.value.tenant].id
 }
 
-# resource "mso_schema_site" "sites" {
-#   provider = mso
-#   depends_on = [
-#     mso_schema_template.templates
-#   ]
-#   for_each      = local.template_sites
-#   schema_id     = mso_schema.schemas[each.value.schema].id
-#   site_id       = data.mso_site.sites[each.value.site].id
-#   template_name = each.value.name
-# }
-# 
+resource "mso_schema_site" "sites" {
+  provider = mso
+  depends_on = [
+    mso_schema_template.templates
+  ]
+  for_each      = local.template_sites
+  schema_id     = mso_schema.schemas[each.value.schema].id
+  site_id       = data.mso_site.sites[each.value.site].id
+  template_name = each.value.name
+}
+
 output "schemas" {
   value = {
     schemas = var.schemas != {} ? { for v in sort(

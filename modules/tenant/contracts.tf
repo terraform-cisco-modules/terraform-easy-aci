@@ -1,62 +1,77 @@
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "vzFilter"
- - Distinguished Name: "uni/tn-{Tenant}/flt{filter}"
-GUI Location:
- - Tenants > {tenant} > Contracts > Filters: {filter}
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_filter" "filters" {
-  depends_on = [
-    aci_tenant.tenants
-  ]
-  for_each                       = local.filters
-  tenant_dn                      = aci_tenant.tenants[each.value.tenant].id
-  annotation                     = each.value.annotation
-  description                    = each.value.description
-  name                           = each.value.filter
-  name_alias                     = each.value.alias
-  relation_vz_rs_filt_graph_att  = ""
-  relation_vz_rs_fwd_r_flt_p_att = ""
-  relation_vz_rs_rev_r_flt_p_att = ""
+variable "contracts" {
+  default = {
+    "default" = {
+      alias               = ""
+      annotation          = ""
+      consumer_match_type = "AtleastOne"
+      contract_type       = "standard" # oob|taboo
+      description         = ""
+      filters = [
+        {
+          name     = "default"
+          tenant   = "common"
+          template = "common"
+        }
+      ]
+      log_packets          = false
+      qos_class            = "unspecified"
+      provider_match_type  = "AtleastOne"
+      reverse_filter_ports = true
+      schema               = "common"
+      scope                = "context" # application-profile|context|global|tenant
+      tags                 = []
+      target_dscp          = "unspecified"
+      template             = "common"
+      tenant               = "common"
+      type                 = "apic"
+    }
+  }
+  description = <<-EOT
+  Key: Name of the Contract.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * bgp_context_per_address_family: 
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * type: What is the type of controller.  Options are:
+    - apic: For APIC Controllers
+    - ndo: For Nexus Dashboard Orchestrator
+  EOT
+  type = map(object(
+    {
+      alias               = optional(string)
+      annotation          = optional(string)
+      alias               = optional(string)
+      annotation          = optional(string)
+      consumer_match_type = optional(string)
+      contract_type       = optional(string)
+      description         = optional(string)
+      filters = optional(list(object(
+        {
+          name     = optional(string)
+          tenant   = optional(string)
+          template = optional(string)
+        }
+      )))
+      log_packets          = optional(bool)
+      provider_match_type  = optional(string)
+      qos_class            = optional(string)
+      reverse_filter_ports = optional(bool)
+      schema               = optional(string)
+      scope                = optional(string)
+      qos_class            = optional(string)
+      tags = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
+      target_dscp = optional(string)
+      template    = optional(string)
+      tenant      = optional(string)
+      type        = optional(string)
+    }
+  ))
 }
-
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "vzEntry"
- - Distinguished Name: "uni/tn-{tenant}/flt{filter}/e-{filter_entry}"
-GUI Location:
- - Tenants > {tenant} > Contracts > Filters: {filter} > Filter Entry: {filter_entry}
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_filter_entry" "filter_entry" {
-  depends_on = [
-    aci_tenant.tenants,
-    aci_filter.filters
-  ]
-  for_each      = local.filter_entries
-  filter_dn     = aci_filter.filters[each.value.filter].id
-  description   = each.value.description
-  name          = each.value.name
-  name_alias    = each.value.alias
-  ether_t       = each.value.ethertype
-  prot          = each.value.ip_protocol
-  arp_opc       = each.value.arp_flag
-  icmpv4_t      = each.value.icmpv4_type
-  icmpv6_t      = each.value.icmpv6_type
-  match_dscp    = each.value.match_dscp
-  apply_to_frag = each.value.match_only_fragment
-  s_from_port   = each.value.source_port_from
-  s_to_port     = each.value.source_port_to
-  d_from_port   = each.value.destination_port_from
-  d_to_port     = each.value.destination_port_to
-  stateful      = each.value.stateful
-  tcp_rules     = each.value.tcp_session_rules
-}
-
 
 /*_____________________________________________________________________________________________________________________
 
@@ -97,7 +112,7 @@ resource "aci_contract" "contracts" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each    = { for k, v in local.contracts : k => v if contract_type == "standard" }
+  for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "standard" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   annotation  = each.value.annotation
   description = each.value.description
@@ -126,14 +141,14 @@ resource "aci_rest" "oob_contracts" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each   = { for k, v in local.contracts : k => v if contract_type == "oob" }
+  for_each   = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "oob" }
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}"
   class_name = "vzOOBBrCP"
   content = {
     annotation = each.value.annotation
     descr      = each.value.description
     name       = each.key
-    nameAlias  = ach.value.alias
+    nameAlias  = each.value.alias
     prio       = each.value.qos_class
     scope      = each.value.scope
     targetDscp = each.value.target_dscp
@@ -153,11 +168,11 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Taboos: {contract}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_taboo_contract" "taboo_contracts" {
+resource "aci_taboo_contract" "contracts" {
   depends_on = [
     aci_tenant.tenants,
   ]
-  for_each    = { for k, v in local.contracts : k => v if contract_type == "taboo" }
+  for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "taboo" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   annotation  = each.value.annotation
   description = each.value.description
@@ -165,7 +180,32 @@ resource "aci_taboo_contract" "taboo_contracts" {
   name_alias  = each.value.alias
 }
 
-
+resource "mso_schema_template_contract" "contracts" {
+  provider = mso
+  depends_on = [
+    mso_schema.schemas,
+  ]
+  for_each      = { for k, v in local.contracts : k => v if v.type == "ndo" }
+  schema_id     = mso_schema.schemas[each.value.schema].id
+  template_name = each.value.template
+  contract_name = each.key
+  display_name  = each.key
+  filter_type   = each.value.reverse_filter_ports == true ? "bothWay" : "oneWay"
+  scope         = each.value.scope
+  dynamic "filter_relationship" {
+    for_each = each.value.filters
+    content {
+      filter_schema_id = length(regexall(
+        filter_relationship.value.tenant, each.value.tenant)
+        ) > 0 ? mso_schema_template_filter_entry.filter_entries[filter_relationship.value.name].id : length(regexall(
+        "[[:alnum:]]", each.value.tenant)
+      ) > 0 ? local.rs_mso_filter_entries[filter_relationship.value.name].id : ""
+      filter_template_name = filter_relationship.value.template
+      filter_name          = filter_relationship.value.name
+    }
+  }
+  directives = each.value.log_packets == true ? ["log"] : ["none"]
+}
 /*_____________________________________________________________________________________________________________________
 
 # Out-of-Band Contract Subjects
@@ -194,27 +234,27 @@ resource "aci_contract_subject" "contract_subjects" {
   depends_on = [
     aci_contract.contracts,
     aci_rest.oob_contracts,
-    aci_taboo_contract.taboo_contracts,
+    aci_taboo_contract.contracts,
     aci_filter.filters,
   ]
-  for_each   = { for k, v in local.subjects : k => v }
+  for_each   = { for k, v in local.contract_subjects : k => v if v.type == "apic" }
   annotation = each.value.annotation
   contract_dn = length(regexall(
     "oob", each.value.contract_type)
-    ) > 0 ? aci_rest.oob_contracts[each.value.contract].id : length(regexall(
+    ) > 0 ? aci_rest.oob_contracts[each.key].id : length(regexall(
     "standard", each.value.contract_type)
-    ) > 0 ? aci_contract.contracts[each.value.contract].id : length(regexall(
+    ) > 0 ? aci_contract.contracts[each.key].id : length(regexall(
     "taboo", each.value.contract_type)
-  ) > 0 ? aci_taboo_contract.taboo_contracts[each.value.contract].id : ""
+  ) > 0 ? aci_taboo_contract.contracts[each.key].id : ""
   cons_match_t                 = each.value.consumer_match_type
   description                  = each.value.description
-  name                         = each.value.name
+  name                         = each.key
   name_alias                   = each.value.alias
-  prio                         = each.value.qos_priority
+  prio                         = each.value.qos_class
   prov_match_t                 = each.value.provider_match_type
-  rev_flt_ports                = each.value.reverse_filter_ports
+  rev_flt_ports                = each.value.reverse_filter_ports == true ? "yes" : "no"
   target_dscp                  = each.value.target_dscp
-  relation_vz_rs_subj_filt_att = each.value.filter_relationships
+  relation_vz_rs_subj_filt_att = each.value.filters
 }
 
 
@@ -247,3 +287,19 @@ ________________________________________________________________________________
 #   }
 # }
 
+output "contracts" {
+  value = {
+    apic_contracts = var.contracts != {} ? { for v in sort(
+      keys(aci_contract.contracts)
+    ) : v => aci_contract.contracts[v].id } : {}
+    apic_oob_contracts = var.contracts != {} ? { for v in sort(
+      keys(aci_rest.oob_contracts)
+    ) : v => aci_rest.oob_contracts[v].id } : {}
+    apic_taboo_contracts = var.contracts != {} ? { for v in sort(
+      keys(aci_taboo_contract.contracts)
+    ) : v => aci_taboo_contract.contracts[v].id } : {}
+    ndo_contracts = var.contracts != {} ? { for v in sort(
+      keys(mso_schema_template_contract.contracts)
+    ) : v => mso_schema_template_contract.contracts[v].id } : {}
+  }
+}

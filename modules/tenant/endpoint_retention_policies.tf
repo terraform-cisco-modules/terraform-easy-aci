@@ -1,13 +1,15 @@
-variable "end_point_retention_policy" {
+variable "endpoint_retention_policies" {
   default = {
     "default" = {
-      annotation                    = ""
-      bounce_entry_aging_interval   = 630
-      bounce_trigger                = "protocol"
-      description                   = ""
-      hold_interval                 = 300
-      local_endpoint_aging_interval = 900
-      move_frequency                = 256
+      annotation                     = ""
+      bounce_entry_aging_interval    = 630
+      bounce_trigger                 = "protocol"
+      description                    = ""
+      hold_interval                  = 300
+      local_endpoint_aging_interval  = 900
+      move_frequency                 = 256
+      remote_endpoint_aging_interval = 900
+      tenant                         = "common"
     }
   }
   description = <<-EOT
@@ -23,21 +25,26 @@ variable "end_point_retention_policy" {
     tenant_dn - (Required) Distinguished name of parent Tenant object.
     EOT
 }
-resource "aci_end_point_retention_policy" "end_point_retention_policy" {
+resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each            = local.endpoint_retention_policy
+  for_each            = local.endpoint_retention_policies
   annotation          = each.value.annotation
-  bounce_age_intvl    = each.value.bounce_entry_age_interval
-  bounce_trig         = each.value.bounce_entry_aging_interval
+  bounce_age_intvl    = each.value.bounce_entry_aging_interval
+  bounce_trig         = each.value.bounce_trigger
   description         = each.value.description
   hold_intvl          = each.value.hold_interval
   local_ep_age_intvl  = each.value.local_endpoint_aging_interval
   move_freq           = each.value.move_frequency
   name                = each.key
-  name_alias          = each.value.alias
+  name_alias          = ""
   remote_ep_age_intvl = each.value.remote_endpoint_aging_interval
   tenant_dn           = aci_tenant.tenants[each.value.tenant].id
 }
 
+output "endpoint_retention_policies" {
+  value = var.endpoint_retention_policies != {} ? { for v in sort(
+    keys(aci_end_point_retention_policy.endpoint_retention_policies)
+  ) : v => aci_end_point_retention_policy.endpoint_retention_policies[v].id } : {}
+}

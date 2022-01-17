@@ -1,66 +1,40 @@
 variable "vrfs" {
   default = {
     "default" = {
-      alias                 = ""
-      annotation            = ""
-      bd_enforcement_status = ""
-      bgp_context_per_address_family = [
-        {
-          address_family = ""
-          policy_name    = ""
-        }
-      ]
-      bgp_timers = "default"
-      communities = [
-        {
-          community = 0
-        }
-      ]
-      contracts = [
-        {
-          match_type = "AlteastOne"
-          name       = ""
-          qos_class  = "Unspecified"
-          template   = "common"
-          tenant     = "common"
-          type       = "consumer|interface|provider"
-        }
-      ]
-      description               = ""
-      endpoint_retention_policy = "default"
-      eigrp_context_per_address_family = [
-        {
-          address_family = ""
-          policy_name    = ""
-        }
-      ]
-      ip_data_plane_learning = "yes"
-      layer3_multicast       = true
-      level                  = "template"
-      monitoring_policy      = ""
-      ospf_context_per_address_family = [
-        {
-          address_family = ""
-          policy_name    = ""
-        }
-      ]
-      ospf_timers                   = "default"
-      policy_enforcement_direction  = ""
-      policy_enforcement_preference = ""
-      preferred_group               = "disabled"
-      sites                         = []
-      template                      = ""
-      tenant                        = "common"
-      transit_route_tag_policy      = ""
-      type                          = "apic"
-      vendor                        = "cisco"
-      vzany_match_type = "AtleastOne"
+      alias                           = ""
+      annotation                      = ""
+      bd_enforcement_status           = "no"
+      bgp_timers                      = "default"
+      bgp_timers_per_address_family   = []
+      communities                     = []
+      contracts                       = []
+      description                     = ""
+      eigrp_timers_per_address_family = []
+      endpoint_retention_policy       = "default"
+      ip_data_plane_learning          = "enabled"
+      layer3_multicast                = true
+      level                           = "template"
+      monitoring_policy               = ""
+      ospf_timers                     = "default"
+      ospf_timers_per_address_family  = []
+      policy_enforcement_direction    = "ingress"  # "egress"
+      policy_enforcement_preference   = "enforced" # unenforced
+      preferred_group                 = "disabled"
+      schema                          = "common"
+      sites                           = []
+      tags                            = []
+      template                        = ""
+      tenant                          = "common"
+      transit_route_tag_policy        = ""
+      type                            = "apic"
+      vendor                          = "cisco"
     }
   }
   description = <<-EOT
   Key: Name of the VRF.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * bgp_context_per_address_family: 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
@@ -75,13 +49,13 @@ variable "vrfs" {
       alias                 = optional(string)
       annotation            = optional(string)
       bd_enforcement_status = optional(string)
-      bgp_context_per_address_family = optional(map(string(
+      bgp_timers            = optional(string)
+      bgp_timers_per_address_family = optional(list(object(
         {
           address_family = optional(string)
-          policy_name    = string
+          policy         = string
         }
       )))
-      bgp_timers = optional(string)
       communities = optional(list(object(
         {
           community = number
@@ -89,45 +63,87 @@ variable "vrfs" {
       )))
       contracts = optional(list(object(
         {
+          match_type = optional(string)
           name       = string
           qos_class  = optional(string)
+          schema     = optional(string)
           template   = optional(string)
           tenant     = string
           type       = string
         }
       )))
       description = optional(string)
+      eigrp_timers_per_address_family = optional(list(object(
+        {
+          address_family = optional(string)
+          policy         = string
+        }
+      )))
       endpoint_retention_policy = optional(string)
-      eigrp_context_per_address_family = optional(map(string(
+      ip_data_plane_learning    = optional(string)
+      layer3_multicast          = optional(bool)
+      level                     = optional(string)
+      monitoring_policy         = optional(string)
+      ospf_timers               = optional(string)
+      ospf_timers_per_address_family = optional(list(object(
         {
           address_family = optional(string)
-          policy_name    = string
+          policy         = string
         }
       )))
-      ip_data_plane_learning = optional(string)
-      layer3_multicast       = optional(bool)
-      level                  = optional(string)
-      monitoring_policy      = optional(string)
-      name                   = string
-      ospf_context_per_address_family = optional(map(string(
-        {
-          address_family = optional(string)
-          policy_name    = string
-        }
-      )))
-      ospf_timers                   = optional(string)
       policy_enforcement_direction  = optional(string)
       policy_enforcement_preference = optional(string)
       preferred_group               = optional(string)
+      schema                        = optional(string)
       sites                         = optional(list(string))
-      template                      = optional(string)
-      tenant                        = optional(string)
-      transit_route_tag_policy      = optional(string)
-      type                          = optional(string)
-      vendor                        = optional(string)
-      vzany_match_type = optional(string)
+      tags = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
+      template                 = optional(string)
+      tenant                   = optional(string)
+      transit_route_tag_policy = optional(string)
+      type                     = optional(string)
+      vendor                   = optional(string)
     }
   ))
+}
+
+variable "snmp_community_1" {
+  default     = ""
+  description = "SNMP Community 1."
+  sensitive   = true
+  type        = string
+}
+
+variable "snmp_community_2" {
+  default     = ""
+  description = "SNMP Community 2."
+  sensitive   = true
+  type        = string
+}
+
+variable "snmp_community_3" {
+  default     = ""
+  description = "SNMP Community 3."
+  sensitive   = true
+  type        = string
+}
+
+variable "snmp_community_4" {
+  default     = ""
+  description = "SNMP Community 4."
+  sensitive   = true
+  type        = string
+}
+
+variable "snmp_community_5" {
+  default     = ""
+  description = "SNMP Community 5."
+  sensitive   = true
+  type        = string
 }
 
 
@@ -144,45 +160,74 @@ resource "aci_vrf" "vrfs" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each                     = { for k, v in local.vrfs : k => v if v.type == "apic" }
-  annotation                   = each.value.annotation
-  bd_enforced_enable           = each.value.bd_enforcement_status
-  description                  = each.value.description
-  ip_data_plane_learning       = each.value.ip_data_plane_learning
-  knw_mcast_act                = each.value.layer3_multicast == true ? "permit" : "deny"
-  name                         = each.key
-  name_alias                   = each.value.alias
-  pc_enf_dir                   = each.value.policy_enforcement_direction
-  pc_enf_pref                  = each.value.policy_enforcement_preference
-  relation_fv_rs_ctx_to_ep_ret = each.value.endpoint_retention_policy
-  relation_fv_rs_ctx_mon_pol   = each.value.monitoring_policy
-  relation_fv_rs_bgp_ctx_pol   = each.value.bgp_timers
+  for_each               = { for k, v in local.vrfs : k => v if v.type == "apic" }
+  annotation             = each.value.annotation
+  bd_enforced_enable     = each.value.bd_enforcement_status
+  description            = each.value.description
+  ip_data_plane_learning = each.value.ip_data_plane_learning
+  knw_mcast_act          = each.value.layer3_multicast == true ? "permit" : "deny"
+  name                   = each.key
+  name_alias             = each.value.alias
+  pc_enf_dir             = each.value.policy_enforcement_direction
+  pc_enf_pref            = each.value.policy_enforcement_preference
+  relation_fv_rs_ctx_to_ep_ret = length(regexall(
+    "[[:alnum:]]", each.value.endpoint_retention_policy)
+  ) > 0 ? aci_end_point_retention_policy.endpoint_retention_policies[each.value.endpoint_retention_policy].id : ""
+  relation_fv_rs_ctx_mon_pol = length(regexall(
+    "uni\\/tn\\-", each.value.monitoring_policy)
+    ) > 0 ? each.value.monitoring_policy : length(regexall(
+    "[[:alnum:]]", each.value.monitoring_policy)
+  ) > 0 ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
+  relation_fv_rs_bgp_ctx_pol = length(regexall(
+    "uni\\/tn\\-", each.value.bgp_timers)
+    ) > 0 ? each.value.bgp_timers : length(regexall(
+    "[[:alnum:]]", each.value.bgp_timers)
+  ) > 0 ? "uni/tn-common/bgpCtxP-${each.value.bgp_timers}" : ""
   dynamic "relation_fv_rs_ctx_to_bgp_ctx_af_pol" {
-    for_each = each.value.bgp_context_per_address_family
+    for_each = each.value.bgp_timers_per_address_family
     content {
-      af                     = each.value.address_family
-      tn_bgp_ctx_af_pol_name = each.value.polcy_name
+      af = "${each.value.address_family}-ucast"
+      tn_bgp_ctx_af_pol_name = length(regexall(
+        "uni\\/tn\\-", relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy)
+        ) > 0 ? relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy : length(regexall(
+        "[[:alnum:]]", relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy)
+      ) > 0 ? "uni/tn-common/bgpCtxAfP-${relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy}" : ""
     }
   }
   dynamic "relation_fv_rs_ctx_to_eigrp_ctx_af_pol" {
-    for_each = each.value.eigrp_context_per_address_family
+    for_each = each.value.eigrp_timers_per_address_family
     content {
-      af                       = each.value.address_family
-      tn_eigrp_ctx_af_pol_name = each.value.polcy_name
+      af = "${each.value.address_family}-ucast"
+      tn_eigrp_ctx_af_pol_name = length(regexall(
+        "uni\\/tn\\-", relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy)
+        ) > 0 ? relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy : length(regexall(
+        "[[:alnum:]]", relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy)
+      ) > 0 ? "uni/tn-common/eigrpCtxAfP-${relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy}" : ""
     }
   }
-  relation_fv_rs_ospf_ctx_pol = each.value.ospf_timers
+  relation_fv_rs_ospf_ctx_pol = length(regexall(
+    "uni\\/tn\\-", each.value.ospf_timers)
+    ) > 0 ? each.value.ospf_timers : length(regexall(
+    "[[:alnum:]]", each.value.ospf_timers)
+  ) > 0 ? "uni/tn-common/ospfCtxP-${each.value.ospf_timers}" : ""
   dynamic "relation_fv_rs_ctx_to_ospf_ctx_pol" {
-    for_each = each.value.ospf_context_per_address_family
+    for_each = each.value.ospf_timers_per_address_family
     content {
-      af                      = each.value.address_family
-      tn_ospf_ctx_af_pol_name = each.value.polcy_name
+      af = "${each.value.address_family}-ucast"
+      tn_ospf_ctx_pol_name = length(regexall(
+        "uni\\/tn\\-", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
+        ) > 0 ? relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy : length(regexall(
+        "[[:alnum:]]", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
+      ) > 0 ? "uni/tn-common/ospfCtxAfP-${relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy}" : ""
     }
   }
-  # relation_fv_rs_vrf_validation_pol       = "{l3extVrfValidationPol}"
-  relation_fv_rs_ctx_to_ext_route_tag_pol = each.value.transit_route_tag_policy
+  relation_fv_rs_ctx_to_ext_route_tag_pol = length(regexall(
+    "uni\\/tn\\-", each.value.transit_route_tag_policy)
+    ) > 0 ? each.value.transit_route_tag_policy : length(regexall(
+    "[[:alnum:]]", each.value.transit_route_tag_policy)
+  ) > 0 ? "uni/tn-common/rttag-${each.value.transit_route_tag_policy}" : ""
   # relation_fv_rs_ctx_mcast_to             = ["{vzFilter}"]
-  tenant_dn = aci_tenant.tenants[each.value.tenant]
+  tenant_dn = aci_tenant.tenants[each.value.tenant].id
 }
 
 resource "mso_schema_site_vrf" "vrfs" {
@@ -215,59 +260,6 @@ resource "mso_schema_template_vrf" "vrfs" {
 
 /*_____________________________________________________________________________________________________________________
 
-GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF} > EPG Collection for VRF: [Provided/Consumed Contracts]
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_any" "vzany_contracts" {
-  depends_on = [
-    aci_vrf.vrfs
-  ]
-  for_each                      = { for k, v in local.vzany_contracts : k => v if v.type == "apic" }
-  vrf_dn                        = aci_vrf.vrfs[each.value.vrf].id
-  description                   = each.value.description
-  match_t                       = each.value.match_type[each.value.consumed_contracts]
-  relation_vz_rs_any_to_cons    = length(each.value.consumed_contracts) > 0 
-  relation_vz_rs_any_to_cons_if = [each.value.contract_interfaces]
-  relation_vz_rs_any_to_prov    = [each.value.provided_contracts]
-}
-
-resource "mso_schema_template_vrf_contract" "vzany" {
-  depends_on = [
-    mso_schema_template_vrf.vrfs
-  ]
-  for_each          = { for k, v in local.vrfs_vzany : k => v if v.type == "ndo" && v.level == "template" }
-  schema_id         = mso_schema.schemas[each.value.schema].id
-  template_name     = each.value.template
-  vrf_name          = each.value.vrf
-  relationship_type = each.value.type
-  contract_name     = each.value.name
-  contract_schema_id = length(regexall(
-    each.value.tenant, each.value.contract_tenant)
-    ) > 0 ? mso_schema.schemas[each.value.schema].id : length(regexall(
-    "[[:alnum:]]+", each.value.contract_tenant)
-  ) > 0 ? local.common_schemas[each.value.schema].id : ""
-  contract_template_name = each.value.contract_template
-}
-
-/*_____________________________________________________________________________________________________________________
-
-GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF}: Policy >  Preferred Group
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_any" "vrf_preferred_group" {
-  depends_on = [
-    aci_vrf.vrfs
-  ]
-  for_each     = { for k, v in local.vrfs : k => v if v.preferred_group == "enabled" && v.type == "apic" }
-  vrf_dn       = aci_vrf.vrfs[each.value.vrf].id
-  description  = each.value.description
-  pref_gr_memb = "enabled"
-}
-
-/*_____________________________________________________________________________________________________________________
-
 API Information:
  - Class: "snmpCtxP"
  - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}/snmpctx"
@@ -282,7 +274,7 @@ resource "aci_vrf_snmp_context" "vrf_snmp_contexts" {
   for_each   = { for k, v in local.vrfs : k => v if v.type == "apic" }
   annotation = each.value.annotation
   name       = each.key
-  name_alias = each.value.alias
+  name_alias = ""
   vrf_dn     = aci_vrf.vrfs[each.key].id
 }
 
@@ -293,17 +285,108 @@ GUI Location:
 Tenants > {tenant} > Networking > VRFs > {vrf} > Create SNMP Context: Community Profiles
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vrf_snmp_context_community" "example" {
+resource "aci_vrf_snmp_context_community" "vrf_communities" {
   depends_on = [
     aci_vrf_snmp_context.vrf_snmp_contexts
   ]
-  for_each   = local.vrf_commmunities
+  for_each   = local.vrf_communities
   annotation = each.value.annotation
   name = length(regexall(
     5, each.value.community)) > 0 ? var.snmp_community_5 : length(regexall(
     4, each.value.community)) > 0 ? var.snmp_community_4 : length(regexall(
     3, each.value.community)) > 0 ? var.snmp_community_3 : length(regexall(
   2, each.value.community)) > 0 ? var.snmp_community_2 : var.snmp_community_1
-  name_alias          = each.value.alias
+  name_alias          = ""
   vrf_snmp_context_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
+/*_____________________________________________________________________________________________________________________
+
+GUI Location:
+ - Tenants > {Tenant} > Networking > VRFs > {VRF} > EPG Collection for VRF: [Provided/Consumed Contracts]
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "vzany_provider_contracts" {
+  provider   = netascode
+  for_each   = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type == "provider" }
+  dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}"
+  class_name = "vzRsAnyToProv"
+  content = {
+    tDn    = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
+    matchT = each.value.match_type
+    prio   = each.value.qos_class
+  }
+}
+
+resource "aci_rest" "vzany_contracts" {
+  provider = netascode
+  for_each = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type != "provider" }
+  dn = length(regexall(
+    "consumer", each.value.contract_type)
+    ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}" : length(regexall(
+    "interface", each.value.contract_type)
+  ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}" : ""
+  class_name = length(regexall(
+    "consumer", each.value.contract_type)
+    ) > 0 ? "vzRsAnyToCons" : length(regexall(
+    "interface", each.value.contract_type)
+  ) > 0 ? "vzRsAnyToConsIf" : ""
+  content = {
+    tDn  = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
+    prio = each.value.qos_class
+  }
+}
+
+resource "mso_schema_template_vrf_contract" "vzany_contracts" {
+  depends_on = [
+    mso_schema_template_vrf.vrfs
+  ]
+  for_each          = { for k, v in local.vzany_contracts : k => v if v.type == "ndo" && v.level == "template" }
+  schema_id         = mso_schema.schemas[each.value.schema].id
+  template_name     = each.value.template
+  vrf_name          = each.value.vrf
+  relationship_type = each.value.contract_type
+  contract_name     = each.value.contract
+  contract_schema_id = length(regexall(
+    each.value.tenant, each.value.contract_tenant)
+    ) > 0 ? mso_schema.schemas[each.value.contract_schema].id : length(regexall(
+    "[[:alnum:]]+", each.value.contract_tenant)
+  ) > 0 ? local.rs_schemas[each.value.contract_schema].id : ""
+  contract_template_name = each.value.contract_template
+}
+
+/*_____________________________________________________________________________________________________________________
+
+GUI Location:
+ - Tenants > {Tenant} > Networking > VRFs > {VRF}: Policy >  Preferred Group
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_any" "vrf_preferred_group" {
+  depends_on = [
+    aci_vrf.vrfs
+  ]
+  for_each     = { for k, v in local.vrfs : k => v if v.type == "apic" && v.preferred_group == "enabled" }
+  vrf_dn       = aci_vrf.vrfs[each.value.vrf].id
+  description  = each.value.description
+  pref_gr_memb = "enabled"
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAnnotation"
+ - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}/annotationKey-[{key}]"
+GUI Location:
+ - Tenants > {Tenant} > Networking > VRFs > {VRF}: {annotations}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "vrf_tags" {
+  provider   = netascode
+  for_each   = { for k, v in local.vrf_tags : k => v if v.type == "apic" }
+  dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/annotationKey-[${each.value.key}]"
+  class_name = "tagAnnotation"
+  content = {
+    key   = each.value.key
+    value = each.value.value
+  }
+}
+

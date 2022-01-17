@@ -57,48 +57,6 @@ resource "aci_tenant" "tenants" {
   relation_fv_rs_tenant_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }
 
-/*_____________________________________________________________________________________________________________________
-
-Assign the Default SNMP Monitoring Policy to the Mgmt VRF's
- - inb
- - oob
-API Information:
- - Class: "fvRsCtxMonPol"
- - Distinguished Name: "uni/tn-mgmt/ctx-{VRF Name}/rsCtxMonPol"
-GUI Location:
- - Tenants > mgmt > Networking > VRFs > {VRF Name}:Policy > Monitoring Policy
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_rest" "inb_vrf_snmp" {
-  path       = "/api/node/mo/uni/tn-mgmt/ctx-inb/rsCtxMonPol.json"
-  class_name = "fvRsCtxMonPol"
-  payload    = <<EOF
-{
-    "fvRsCtxMonPol": {
-        "attributes": {
-            "tnMonEPGPolName": "default",
-        },
-        "children": []
-    }
-}
-    EOF
-}
-
-resource "aci_rest" "oob_vrf_snmp" {
-  path       = "/api/node/mo/uni/tn-mgmt/ctx-oob/rsCtxMonPol.json"
-  class_name = "fvRsCtxMonPol"
-  payload    = <<EOF
-{
-    "fvRsCtxMonPol": {
-        "attributes": {
-            "tnMonEPGPolName": "default",
-        },
-        "children": []
-    }
-}
-    EOF
-}
-
 resource "mso_tenant" "tenants" {
   provider = mso
   depends_on = [
