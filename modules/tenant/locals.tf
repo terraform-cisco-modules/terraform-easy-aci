@@ -8,6 +8,26 @@ locals {
 
   #__________________________________________________________
   #
+  # Application Profile Variables
+  #__________________________________________________________
+
+  application_profiles = {
+    for k, v in var.application_profiles : k => {
+      alias                = v.alias != null ? v.alias : ""
+      annotation           = v.annotation != null ? v.annotation : ""
+      description          = v.description != null ? v.description : ""
+      monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      qos_class            = v.qos_class != null ? v.qos_class : "unspecified"
+      schema             = v.schema != null ? v.schema : "common"
+      template             = v.template != null ? v.template : "common"
+      tenant               = v.tenant != null ? v.tenant : "common"
+      type                 = v.type != null ? v.type : "apic"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
   # Contract Variables
   #__________________________________________________________
 

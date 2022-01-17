@@ -112,7 +112,7 @@ resource "aci_rest" "route_map_rules_match_prefix" {
   dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/dest-[${each.value.network}]"
   class_name = "rtctrlMatchRtDest"
   content = {
-    aggregate = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
+    aggregate  = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
     fromPfxLen = each.value.greater_than
     ip         = each.value.network
     toPfxLen   = each.value.less_than
