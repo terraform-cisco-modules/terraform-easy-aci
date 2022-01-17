@@ -59,14 +59,14 @@ variable "smart_callhome" {
         }
       ))
       from_email = optional(string)
-      include_types = list(object(
+      include_types = optional(list(object(
         {
-          audit_logs   = bool
-          events       = bool
-          faults       = bool
-          session_logs = bool
+          audit_logs   = optional(bool)
+          events       = optional(bool)
+          faults       = optional(bool)
+          session_logs = optional(bool)
         }
-      ))
+      )))
       phone_contact  = optional(string)
       reply_to_email = optional(string)
       site_id        = optional(string)

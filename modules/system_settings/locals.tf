@@ -24,15 +24,8 @@ locals {
   ep_loop_protection_loop = flatten([
     for key, value in var.endpoint_controls : [
       for k, v in value.ep_loop_protection : {
-        action = alltrue(
-          [v.action[0]["bd_learn_disable"], v.action[0]["port_disable"]]
-          ) ? "bd-learn-disable,port-disable" : anytrue(
-          [v.action[0]["bd_learn_disable"], v.action[0]["port_disable"]]
-          ) ? trim(join(",", compact(concat(
-            [length(regexall(true, v.action[0]["bd_learn_disable"])) > 0 ? "bd-learn-disable" : ""
-            ], [length(regexall(true, v.action[0]["port_disable"])) > 0 ? "port-disable" : ""]
-          ))), ","
-        ) : ""
+        action_bd                 = v.action != null ? lookup(v.action[0], "bd_learn_disable", false) : false
+        action_port               = v.action != null ? lookup(v.action[0], "port_disable", false) : false
         administrative_state      = v.administrative_state != null ? v.administrative_state : "enabled"
         annotation                = value.annotation != null ? value.annotation : ""
         key1                      = key
@@ -88,9 +81,9 @@ locals {
       leaf_ssl_opflex                    = v.leaf_ssl_opflex != null ? v.leaf_ssl_opflex : "yes"
       reallocate_gipo                    = v.reallocate_gipo != null ? v.reallocate_gipo : "no"
       restrict_infra_vlan_traffic        = v.restrict_infra_vlan_traffic != null ? v.restrict_infra_vlan_traffic : "no"
-      ssl_opflex_version1_0              = v.ssl_opflex_versions[0].TLSv1
-      ssl_opflex_version1_1              = v.ssl_opflex_versions[0].TLSv1_1
-      ssl_opflex_version1_2              = v.ssl_opflex_versions[0].TLSv1_2
+      ssl_opflex_version1_0              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1", false) : false
+      ssl_opflex_version1_1              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_1", false) : false
+      ssl_opflex_version1_2              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_2", true) : true
       spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : "yes"
       spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : "yes"
     }

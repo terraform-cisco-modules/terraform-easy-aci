@@ -90,6 +90,7 @@ locals {
 
   endpoint_retention_policies = {
     for k, v in var.endpoint_retention_policies : k => {
+      alias                          = v.alias != null ? v.alias : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
       bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
@@ -142,11 +143,11 @@ locals {
         source_port_to        = v.source_port_to != null ? v.source_port_to : "unspecified"
         schema                = value.schema
         stateful              = v.stateful != null ? v.stateful : false
-        tcp_ack               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["acknowledgement"] : false
-        tcp_est               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["established"] : false
-        tcp_fin               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["finish"] : false
-        tcp_rst               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["reset"] : false
-        tcp_syn               = v.tcp_session_rules != null ? v.tcp_session_rules[0]["synchronize"] : false
+        tcp_ack               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "acknowledgement", false) : false
+        tcp_est               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "established", false) : false
+        tcp_fin               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "finish", false) : false
+        tcp_rst               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "reset", false) : false
+        tcp_syn               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "synchronize", false) : false
         template              = value.template
         tenant                = value.tenant
         type                  = value.type
@@ -155,6 +156,177 @@ locals {
   ])
 
   filter_entries = { for k, v in local.filter_entries_loop : "${v.filter_name}_${v.name}" => v }
+
+  #__________________________________________________________
+  #
+  # Endpoint Retention Policy Variables
+  #__________________________________________________________
+
+  ospf_interface_policies = {
+    for k, v in var.ospf_interface_policies : k => {
+      adv_subnet          = v.interface_controls != null ? lookup(v.interface_controls[0], "advertise_subnet", false) : false
+      bfd                 = v.interface_controls != null ? lookup(v.interface_controls[0], "bfd", false) : false
+      mtu_ignore          = v.interface_controls != null ? lookup(v.interface_controls[0], "mtu_ignore", false) : false
+      passive             = v.interface_controls != null ? lookup(v.interface_controls[0], "passive_participation", false) : false
+      alias               = v.alias != null ? v.alias : ""
+      annotation          = v.annotation != null ? v.annotation : ""
+      cost_of_interface   = v.cost_of_interface != null ? v.cost_of_interface : 0
+      dead_interval       = v.dead_interval != null ? v.dead_interval : 40
+      description         = v.description != null ? v.description : ""
+      hello_interval      = v.hello_interval != null ? v.hello_interval : 10
+      network_type        = v.network_type != null ? v.network_type : "bcast"
+      priority            = v.priority != null ? v.priority : 1
+      retransmit_interval = v.retransmit_interval != null ? v.retransmit_interval : 5
+      transmit_delay      = v.transmit_delay != null ? v.transmit_delay : 1
+      tenant              = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Route Map Match Rule Variables
+  #__________________________________________________________
+
+  route_map_match_rules = {
+    for k, v in var.route_map_match_rules : k => {
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      rules       = v.rules != null ? v.rules : {}
+      tenant      = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  match_rule_rules_loop = flatten([
+    for key, value in local.route_map_match_rules : [
+      for k, v in value.rules : {
+        community      = v.community != null ? v.community : ""
+        community_type = v.community_type != null ? v.community_type : "regular"
+        description    = v.description != null ? v.description : ""
+        greater_than   = v.greater_than != null ? v.greater_than : 0
+        less_than      = v.less_than != null ? v.less_than : 0
+        network        = v.network != null ? v.network : "198.18.0.0/24"
+        regex          = v.regex != null ? v.regex : ""
+        match_rule     = key
+        type           = v.type != null ? v.type : v.type
+        tenant         = value.tenant
+      }
+    ]
+  ])
+
+  match_rule_rules = { for k, v in local.match_rule_rules_loop : "${v.match_rule}_${v.type}" => v }
+
+
+  #__________________________________________________________
+  #
+  # Route Map Set Rule Variables
+  #__________________________________________________________
+
+  route_map_set_rules = {
+    for k, v in var.route_map_set_rules : k => {
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      rules       = v.rules != null ? v.rules : []
+      tenant      = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  set_rule_rules_loop = flatten([
+    for key, value in local.route_map_set_rules : [
+      for k, v in value.rules : {
+        address           = v.address != null ? v.address : "198.18.0.1"
+        asns              = v.asns != null ? v.asns : []
+        asns_keys         = v.asns != null ? range(length(v.asns)) : []
+        communities       = v.communities != null ? v.communities : {}
+        criteria          = v.criteria != null ? v.criteria : "prepend"
+        half_life         = v.half_life != null ? v.half_life : 15
+        last_as_count     = v.last_as_count != null ? v.last_as_count : 0
+        max_suprress_time = v.max_suprress_time != null ? v.max_suprress_time : 60
+        metric            = v.metric != null ? v.metric : 100
+        metric_type       = v.metric_type != null ? v.metric_type : "ospf-type1"
+        preference        = v.preference != null ? v.preference : 100
+        reuse_limit       = v.reuse_limit != null ? v.reuse_limit : 750
+        set_rule          = key
+        suppress_limit    = v.suppress_limit != null ? v.suppress_limit : 2000
+        route_tag         = v.route_tag != null ? v.route_tag : 1
+        type              = v.type
+        weight            = v.weight != null ? v.weight : 0
+        tenant            = value.tenant
+      }
+    ]
+  ])
+
+  set_rule_rules = { for k, v in local.set_rule_rules_loop : "${v.set_rule}_${v.type}" => v }
+
+  set_rule_asn_rules = {
+    for k, v in local.set_rule_rules : k => {
+      autonomous_systems = {
+        for s in v.asns_keys : s => {
+          asn   = element(v.asns, s)
+          order = s
+        } if v.criteria == "prepend"
+      }
+      criteria      = v.criteria
+      last_as_count = v.criteria == "prepend-last-as" ? v.last_as_count : 0
+      set_rule      = v.set_rule
+      tenant        = v.tenant
+      type          = v.type
+    } if v.type == "set_as_path"
+  }
+
+  set_rule_communities_loop = flatten([
+    for key, value in local.set_rule_rules : [
+      for k, v in value.communities : {
+        community    = v.community
+        description  = v.description != null ? v.description : ""
+        index        = k
+        set_criteria = v.set_criteria != null ? v.set_criteria : "append"
+        set_rule     = value.set_rule
+        type         = value.type
+        tenant       = value.tenant
+      }
+    ]
+  ])
+
+  set_rule_communities = { for k, v in local.set_rule_communities_loop : "${v.set_rule}_${v.type}_${v.index}" => v }
+
+
+  #__________________________________________________________
+  #
+  # Route Maps Rule Variables
+  #__________________________________________________________
+
+  route_maps_for_route_control = {
+    for k, v in var.route_maps_for_route_control : k => {
+      alias              = v.alias != null ? v.alias : ""
+      annotation         = v.annotation != null ? v.annotation : ""
+      description        = v.description != null ? v.description : ""
+      match_rules        = v.match_rules != null ? v.match_rules : {}
+      route_map_continue = v.route_map_continue != null ? v.route_map_continue : "no"
+      tenant             = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  route_maps_context_rules_loop = flatten([
+    for key, value in local.route_maps_for_route_control : [
+      for k, v in value.match_rules : {
+        action      = v.action
+        annotation  = value.annotation
+        ctx_name    = k
+        description = v.description != null ? v.description : ""
+        name        = v.name
+        order       = v.order
+        route_map   = key
+        set_rule    = v.set_rule != null ? v.set_rule : ""
+        tenant      = value.tenant
+      }
+    ]
+  ])
+
+  route_maps_context_rules = { for k, v in local.route_maps_context_rules_loop : "${v.route_map}_${v.ctx_name}" => v }
+
 
   #__________________________________________________________
   #

@@ -1,28 +1,28 @@
 variable "l3outs" {
   default = {
     "default" = {
-      alias                     = ""
-      annotation                = ""
-      description               = ""
-      l3_domain = ""
-      level                     = "template"
+      alias       = ""
+      annotation  = ""
+      description = ""
+      l3_domain   = ""
+      level       = "template"
       node_profiles = [
         {
-          alias                     = ""
-          annotation                = ""
-          color_tag = "yellow-green"
-          description               = ""
+          alias       = ""
+          annotation  = ""
+          color_tag   = "yellow-green"
+          description = ""
           interface_profiles = [
             {
-              
+
               name = "defualt"
             }
           ]
           name = "default"
           nodes = [
             {
-              node_id = 101
-              router_id = "198.18.0.1"
+              node_id                   = 101
+              router_id                 = "198.18.0.1"
               use_router_id_as_loopback = "yes"
             }
           ]
@@ -35,14 +35,21 @@ variable "l3outs" {
           import = true
         }
       ]
-      target_dscp               = "unspecified"
-      sites                     = []
-      tags                      = []
-      template                  = ""
-      tenant                    = "common"
-      type                      = "apic"
-      vendor                    = "cisco"
-      vrf = "common"
+      route_control_for_dampening = [
+        {
+          address_family = "ipv4"
+          route_map      = "test2"
+          tenant         = "common"
+        }
+      ]
+      target_dscp = "unspecified"
+      sites       = []
+      tags        = []
+      template    = ""
+      tenant      = "common"
+      type        = "apic"
+      vendor      = "cisco"
+      vrf         = "common"
     }
   }
   description = <<-EOT
@@ -145,11 +152,9 @@ resource "aci_l3_outside" "l3outs" {
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each       = { for k, v in local.l3outs : k => v if v.type == "apic" }
-  tenant_dn      = aci_tenant.tenants[each.value.tenant].id
-  description    = each.value.description
-  name           = each.key
-  annotation     = each.value.annotation
+  for_each    = { for k, v in local.l3outs : k => v if v.type == "apic" }
+  annotation  = each.value.annotation
+  description = each.value.description
   enforce_rtctrl = alltrue(
     [each.value.export, each.value.import]
     ) ? "export,import" : anytrue(
@@ -158,8 +163,10 @@ resource "aci_l3_outside" "l3outs" {
       length(regexall(true, each.value.export)) > 0 ? "export" : ""], [
       length(regexall(true, each.value.import)) > 0 ? "import" : ""]
   )), ","), ",,", ",") : "export"
-  name_alias     = each.value.alias
-  target_dscp    = each.value.target_dscp
+  name        = each.key
+  name_alias  = each.value.alias
+  target_dscp = each.value.target_dscp
+  tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   relation_l3ext_rs_ectx = length(regexall(
     each.value.tenant, each.value.vrf_tenant)
     ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
@@ -168,8 +175,14 @@ resource "aci_l3_outside" "l3outs" {
   relation_l3ext_rs_l3_dom_att = length(regexall(
     "[[:alnum:]]+", each.value.l3_domain)
   ) > 0 ? local.l3_domains[each.value.l3_domain].id : ""
-  # relation_l3ext_rs_dampening_pol                  = ["{route_control_for_dampening}"]
-  # relation_l3ext_rs_interleak_pol                  = "{route_profile_for_interleak}"
+  dynamic "relation_l3ext_rs_dampening_pol" {
+    for_each = each.value.route_control_for_dampening
+    content {
+      af  = "${relation_l3ext_rs_dampening_pol.value.address_family}-ucast"
+      tDn = "uni/tn-${relation_l3ext_rs_dampening_pol.value.tenant}/prof-${relation_l3ext_rs_dampening_pol.value.route_map}"
+    }
+  }
+  relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
   # relation_l3ext_rs_out_to_bd_public_subnet_holder = ["{fvBDPublicSubnetHolder}"]
 }
 
@@ -190,9 +203,9 @@ resource "aci_logical_node_profile" "node_profiles" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each = local.node_profiles
+  for_each      = local.node_profiles
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
-  annotation     = each.value.annotation
+  annotation    = each.value.annotation
   description   = each.value.description
   name          = each.value.name
   name_alias    = each.value.alias
@@ -218,7 +231,7 @@ resource "aci_logical_node_to_fabric_node" "logical_node_to_fabric_nodes" {
   depends_on = [
     aci_logical_node_profile.node_profiles
   ]
-  for_each = local.node_profiles_nodes
+  for_each                = local.node_profiles_nodes
   logical_node_profile_dn = aci_logical_node_profile.node_profiles[each.value.name].id
   tdn                     = "topology/pod-${pod_id}/node-${node_id}"
   rtr_id                  = each.value.router_id
@@ -243,17 +256,17 @@ resource "aci_logical_interface_profile" "interface_profiles" {
   depends_on = [
     aci_logical_node_profile.node_profiles
   ]
-  logical_node_profile_dn                         = aci_logical_node_profile.node_profiles[each.value.node_profile].id
-  description                                     = each.value.description
-  name                                            = each.value.name
-  name_alias                                      = each.value.alias
-  prio                                            = each.value.qos_class
-  tag                                             = each.value.color_tag
-  relation_l3ext_rs_arp_if_pol                    = each.value.arp_policy
-  relation_l3ext_rs_egress_qos_dpp_pol            = each.value.egress_data_plane_policing
-  relation_l3ext_rs_ingress_qos_dpp_pol           = each.value.ingress_data_plane_policing
-  relation_l3ext_rs_l_if_p_cust_qos_pol           = each.value.custom_qos_policy
-  relation_l3ext_rs_nd_if_pol                     = each.value.nd_policy
+  logical_node_profile_dn               = aci_logical_node_profile.node_profiles[each.value.node_profile].id
+  description                           = each.value.description
+  name                                  = each.value.name
+  name_alias                            = each.value.alias
+  prio                                  = each.value.qos_class
+  tag                                   = each.value.color_tag
+  relation_l3ext_rs_arp_if_pol          = each.value.arp_policy
+  relation_l3ext_rs_egress_qos_dpp_pol  = each.value.egress_data_plane_policing
+  relation_l3ext_rs_ingress_qos_dpp_pol = each.value.ingress_data_plane_policing
+  relation_l3ext_rs_l_if_p_cust_qos_pol = each.value.custom_qos_policy
+  relation_l3ext_rs_nd_if_pol           = each.value.nd_policy
   relation_l3ext_rs_l_if_p_to_netflow_monitor_pol = length(
     each.value.netflow_policy
   ) > 0 ? [for s in each.value.netflow_policy : "uni/infra/monitorpol-${s}"] : []
@@ -285,23 +298,23 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
     aci_logical_interface_profile.logical_interface_profiles
   ]
   logical_interface_profile_dn = aci_logical_interface_profile.logical_interface_profiles[each.value.interface_profile].id
-  target_dn                    = length(regexall(
-  "ext-svi", each.value.interface_type)
-  ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${each.value.node1}-${each.value.node2}/pathep-[${each.value.policy_group}]" : length(regexall(
-  "[[:alnum:]]+", each.value.interface_type)
+  target_dn = length(regexall(
+    "ext-svi", each.value.interface_type)
+    ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${each.value.node1}-${each.value.node2}/pathep-[${each.value.policy_group}]" : length(regexall(
+    "[[:alnum:]]+", each.value.interface_type)
   ) > 0 ? "topology/pod-${each.value.pod}/paths-${each.value.node1}/pathep-[${each.value.interface}]" : ""
-  if_inst_t                    = each.value.interface_type
-  addr                         = each.value.primary_address
-  annotation                   = each.value.annotation
-  autostate                    = each.value.interface_type != "ext-svi" ? each.value.auto_state : ""
-  encap                        = each.value.vlan != "" ? "vlan-${vlan}" : ""
-  mode                         = each.value.vlan != "" ? each.value.mode : ""
-  encap_scope                  = each.value.vlan != "" ? each.value.encap_scope : ""
-  ipv6_dad                     = each.value.ipv6_dad
-  ll_addr                      = each.value.a_link_local_address
-  mac                          = each.value.mac_address
-  mtu                          = each.value.mtu != "" ? each.value.mtu : "inherit"
-  target_dscp                  = each.value.target_dscp
+  if_inst_t   = each.value.interface_type
+  addr        = each.value.primary_address
+  annotation  = each.value.annotation
+  autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : ""
+  encap       = each.value.vlan != "" ? "vlan-${vlan}" : ""
+  mode        = each.value.vlan != "" ? each.value.mode : ""
+  encap_scope = each.value.vlan != "" ? each.value.encap_scope : ""
+  ipv6_dad    = each.value.ipv6_dad
+  ll_addr     = each.value.a_link_local_address
+  mac         = each.value.mac_address
+  mtu         = each.value.mtu != "" ? each.value.mtu : "inherit"
+  target_dscp = each.value.target_dscp
 }
 
 
@@ -322,7 +335,7 @@ resource "aci_l3out_vpc_member" "l3out_vpc_member" {
   depends_on = [
     aci_l3out_path_attachment.l3out_path_attachments
   ]
-  for_each = local.vpc_addressing
+  for_each     = local.vpc_addressing
   addr         = each.value.primary_address
   description  = each.value.description
   ipv6_dad     = each.value.ipv6_dad
@@ -354,7 +367,7 @@ resource "aci_l3out_path_attachment_secondary_ip" "aci_l3out_path_attachment_sec
   depends_on = [
     aci_l3out_path_attachment.l3out_path_attachments
   ]
-  for_each = local.secondary_ips
+  for_each                 = local.secondary_ips
   l3out_path_attachment_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.l3out_path].id
   addr                     = each.value.secondary_ip_address
   annotation               = each.value.annotation
@@ -379,7 +392,7 @@ resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each = local.l3out_ospf_external_policies
+  for_each      = local.l3out_ospf_external_policies
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
   area_cost     = each.value.ospf_area_cost
   area_ctrl     = each.value.ospf_area_control
@@ -407,7 +420,7 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
     aci_ospf_interface_policy.ospf_interface_policies,
     local.ospf_interface_policies
   ]
-  for_each = local.ospf_interface_profiles
+  for_each                     = local.ospf_interface_profiles
   logical_interface_profile_dn = aci_logical_interface_profile.interface_profiles[each.value.interface_profile].id
   description                  = each.value.description
   auth_key = length(regexall(
@@ -442,7 +455,7 @@ resource "aci_external_network_instance_profile" "external_epgs" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each = local.external_epgs
+  for_each                                    = local.external_epgs
   l3_outside_dn                               = aci_l3_outside.l3outs[each.value.l3out].id
   annotation                                  = each.value.annotation
   description                                 = each.value.description
@@ -466,7 +479,7 @@ resource "aci_rest" "external_epg_intra_epg_contracts" {
   dn         = "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsintraEpg-${each.value.contract}"
   class_name = "fvRsIntraEpg"
   content = {
-    tDn    = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
+    tDn = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
   }
 }
 
@@ -477,23 +490,23 @@ resource "aci_rest" "external_epg_contracts" {
     "consumer", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rscons-${each.value.contract}" : length(regexall(
     "interface", each.value.contract_type)
-  ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsconsIf-${each.value.contract}" : length(regexall(
+    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsconsIf-${each.value.contract}" : length(regexall(
     "provider", each.value.contract_type)
-  ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsprov-${each.value.contract}" : length(regexall(
+    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsprov-${each.value.contract}" : length(regexall(
     "taboo", each.value.contract_type)
   ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsprotBy-${each.value.contract}" : ""
   class_name = length(regexall(
     "consumer", each.value.contract_type)
     ) > 0 ? "fvRsCons" : length(regexall(
     "interface", each.value.contract_type)
-  ) > 0 ? "vzRsAnyToConsIf" : length(regexall(
+    ) > 0 ? "vzRsAnyToConsIf" : length(regexall(
     "provider", each.value.contract_type)
-  ) > 0 ? "fvRsProv" : length(regexall(
+    ) > 0 ? "fvRsProv" : length(regexall(
     "taboo", each.value.contract_type)
   ) > 0 ? "fvRsProtBy" : ""
   content = {
-    tDn    = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
-    prio   = each.value.qos_class
+    tDn  = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
+    prio = each.value.qos_class
   }
 }
 
@@ -540,20 +553,20 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
   depends_on = [
     aci_external_network_instance_profile.external_epgs
   ]
-  for_each = { for k, v in local.external_epg_subnets: k => v if epg_type != "oob"}
+  for_each                             = { for k, v in local.external_epg_subnets : k => v if epg_type != "oob" }
   external_network_instance_profile_dn = aci_external_network_instance_profile.external_epgs[each.value.external_epg].id
   description                          = each.value.description
   ip                                   = each.value.subnet
   aggregate                            = each.value.aggregate
   scope                                = [each.value.scope]
-  dynamic relation_l3ext_rs_subnet_to_profile {
+  dynamic "relation_l3ext_rs_subnet_to_profile" {
     for_each = each.value.route_control_profiles
     content {
       tn_rtctrl_profile_dn = relation_l3ext_rs_subnet_to_profile.value.route_map
-      direction = relation_l3ext_rs_subnet_to_profile.value.direction
+      direction            = relation_l3ext_rs_subnet_to_profile.value.direction
     }
   }
-  relation_l3ext_rs_subnet_to_rt_summ  = each.value.route_summarization_prolicy
+  relation_l3ext_rs_subnet_to_rt_summ = each.value.route_summarization_prolicy
 }
 
 
@@ -575,7 +588,7 @@ resource "aci_rest" "oob_external_epg_subnets" {
   depends_on = [
     aci_rest.oob_external_epgs
   ]
-  for_each = { for k, v in local.external_epg_subnets: k => v if epg_type == "oob"}
+  for_each   = { for k, v in local.external_epg_subnets : k => v if epg_type == "oob" }
   dn         = "uni/tn-mgmt/extmgmt-default/instp-${each.value.epg}/subnet-[${each.value.subnet}]"
   class_name = "mgmtSubnet"
   content = {

@@ -288,7 +288,7 @@ resource "aci_rest" "leaf_profile_blocks" {
 #   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
 #   name                             = each.value.name
 #   switch_association_type          = "range"
-#   annotation                       = each.value.annotation
+#   annotation                       = each.value.annotation != "" ? each.value.annotation : var.annotation
 #   description                      = each.value.description
 #   name_alias                       = each.value.alias
 #   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id

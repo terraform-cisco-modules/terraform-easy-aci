@@ -114,7 +114,7 @@ resource "aci_contract" "contracts" {
   ]
   for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "standard" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
-  annotation  = each.value.annotation
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -145,7 +145,7 @@ resource "aci_rest" "oob_contracts" {
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}"
   class_name = "vzOOBBrCP"
   content = {
-    annotation = each.value.annotation
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.key
     nameAlias  = each.value.alias
@@ -174,7 +174,7 @@ resource "aci_taboo_contract" "contracts" {
   ]
   for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "taboo" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
-  annotation  = each.value.annotation
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
   name_alias  = each.value.alias
@@ -238,7 +238,7 @@ resource "aci_contract_subject" "contract_subjects" {
     aci_filter.filters,
   ]
   for_each   = { for k, v in local.contract_subjects : k => v if v.type == "apic" }
-  annotation = each.value.annotation
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   contract_dn = length(regexall(
     "oob", each.value.contract_type)
     ) > 0 ? aci_rest.oob_contracts[each.key].id : length(regexall(

@@ -30,13 +30,13 @@ variable "fabric_wide_settings" {
       leaf_ssl_opflex                   = optional(string)
       reallocate_gipo                   = optional(string)
       restrict_infra_vlan_traffic       = optional(string)
-      ssl_opflex_versions = list(object(
+      ssl_opflex_versions = optional(list(object(
         {
-          TLSv1   = bool
-          TLSv1_1 = bool
-          TLSv1_2 = bool
+          TLSv1   = optional(bool)
+          TLSv1_1 = optional(bool)
+          TLSv1_2 = optional(bool)
         }
-      ))
+      )))
       spine_opflex_client_authentication = optional(string)
       spine_ssl_opflex                   = optional(string)
     }

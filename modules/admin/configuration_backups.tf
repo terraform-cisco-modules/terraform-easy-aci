@@ -168,7 +168,7 @@ resource "aci_recurring_window" "recurring_window" {
     aci_trigger_scheduler.trigger_schedulers
   ]
   scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
-  annotation   = each.value.annotation               #
+  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   concur_cap   = each.value.maximum_concurrent_nodes # "unlimited"
   day          = each.value.scheduled_days           # "every-day"
   hour         = each.value.scheduled_hour           # "0"
@@ -191,7 +191,7 @@ GUI Location:
  - Admin > Import/Export > Remote Locations:{Remote_Host}
 */
 resource "aci_file_remote_path" "export_remote_hosts" {
-  annotation                      = each.value.annotation
+  annotation                      = each.value.annotation != "" ? each.value.annotation : var.annotation
   auth_type                       = each.value.authentication_type
   description                     = each.value.description
   host                            = each.value.host
@@ -229,7 +229,7 @@ resource "aci_configuration_export_policy" "configuration_export" {
     aci_trigger_scheduler.trigger_schedulers
   ]
   admin_st                              = each.value.start_now # triggered|untriggered
-  annotation                            = each.value.annotation
+  annotation                            = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                           = each.value.description
   format                                = each.value.format                # "json|xml"
   include_secure_fields                 = each.value.include_secure_fields # "yes"

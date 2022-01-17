@@ -18,7 +18,7 @@ variable "radius" {
         {
           admin_state = "disabled"
           password    = 0
-          username    = "default"
+          username    = "admin"
         }
       ]
       timeout = 5

@@ -37,12 +37,12 @@ variable "endpoint_controls" {
       annotation = optional(string)
       ep_loop_protection = list(object(
         {
-          action = list(object(
+          action = optional(list(object(
             {
-              bd_learn_disable = bool
-              port_disable     = bool
+              bd_learn_disable = optional(bool)
+              port_disable     = optional(bool)
             }
-          ))
+          )))
           administrative_state      = optional(string)
           loop_detection_interval   = optional(number)
           loop_detection_multiplier = optional(number)
@@ -113,7 +113,14 @@ resource "aci_rest" "ep_loop_protection" {
   dn         = "uni/infra/epLoopProtectP-default"
   class_name = "epLoopProtectP"
   content = {
-    action          = each.value.action
+    action = alltrue(
+      [each.value.action_bd, each.value.action_port]
+      ) ? "bd-learn-disable,port-disable" : anytrue(
+      [each.value.action_bd, each.value.action_port]
+      ) ? trim(join(",", compact(concat(
+        [length(regexall(true, each.value.action_bd)) > 0 ? "bd-learn-disable" : ""
+        ], [length(regexall(true, each.value.action_port)) > 0 ? "port-disable" : ""]
+    ))), ",") : ""
     adminSt         = each.value.administrative_state
     annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
     loopDetectIntvl = each.value.loop_detection_interval

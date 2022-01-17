@@ -161,7 +161,7 @@ resource "aci_vrf" "vrfs" {
     aci_tenant.tenants
   ]
   for_each               = { for k, v in local.vrfs : k => v if v.type == "apic" }
-  annotation             = each.value.annotation
+  annotation             = each.value.annotation != "" ? each.value.annotation : var.annotation
   bd_enforced_enable     = each.value.bd_enforcement_status
   description            = each.value.description
   ip_data_plane_learning = each.value.ip_data_plane_learning
@@ -186,7 +186,7 @@ resource "aci_vrf" "vrfs" {
   dynamic "relation_fv_rs_ctx_to_bgp_ctx_af_pol" {
     for_each = each.value.bgp_timers_per_address_family
     content {
-      af = "${each.value.address_family}-ucast"
+      af = "${relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.address_family}-ucast"
       tn_bgp_ctx_af_pol_name = length(regexall(
         "uni\\/tn\\-", relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy : length(regexall(
@@ -197,7 +197,7 @@ resource "aci_vrf" "vrfs" {
   dynamic "relation_fv_rs_ctx_to_eigrp_ctx_af_pol" {
     for_each = each.value.eigrp_timers_per_address_family
     content {
-      af = "${each.value.address_family}-ucast"
+      af = "${relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.address_family}-ucast"
       tn_eigrp_ctx_af_pol_name = length(regexall(
         "uni\\/tn\\-", relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy : length(regexall(
@@ -213,7 +213,7 @@ resource "aci_vrf" "vrfs" {
   dynamic "relation_fv_rs_ctx_to_ospf_ctx_pol" {
     for_each = each.value.ospf_timers_per_address_family
     content {
-      af = "${each.value.address_family}-ucast"
+      af = "${relation_fv_rs_ctx_to_ospf_ctx_pol.value.address_family}-ucast"
       tn_ospf_ctx_pol_name = length(regexall(
         "uni\\/tn\\-", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy : length(regexall(
@@ -272,7 +272,7 @@ resource "aci_vrf_snmp_context" "vrf_snmp_contexts" {
     aci_vrf.vrfs
   ]
   for_each   = { for k, v in local.vrfs : k => v if v.type == "apic" }
-  annotation = each.value.annotation
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   name       = each.key
   name_alias = ""
   vrf_dn     = aci_vrf.vrfs[each.key].id
@@ -290,7 +290,7 @@ resource "aci_vrf_snmp_context_community" "vrf_communities" {
     aci_vrf_snmp_context.vrf_snmp_contexts
   ]
   for_each   = local.vrf_communities
-  annotation = each.value.annotation
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   name = length(regexall(
     5, each.value.community)) > 0 ? var.snmp_community_5 : length(regexall(
     4, each.value.community)) > 0 ? var.snmp_community_4 : length(regexall(
