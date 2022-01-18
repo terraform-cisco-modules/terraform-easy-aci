@@ -36,7 +36,7 @@ resource "aci_rest" "bgp_asn" {
   dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
   content = {
-    annotation = var.annotation
+    # annotation = var.annotation
     asn        = var.autonomous_system_number
   }
 }
@@ -56,7 +56,7 @@ resource "aci_rest" "bgp_route_reflectors" {
   dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value.node_id}"
   class_name = "bgpRRNodePEp"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     id         = each.value.node_id
     podId      = each.value.pod_id
   }

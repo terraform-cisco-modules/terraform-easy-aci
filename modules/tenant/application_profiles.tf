@@ -8,7 +8,7 @@ variable "application_profiles" {
       qos_class         = "unspecified"
       schema            = ""
       template          = "common"
-      tenant = "common"
+      tenant            = "common"
       type              = "apic"
       vendor            = "cisco"
     }
@@ -35,7 +35,7 @@ variable "application_profiles" {
       qos_class         = optional(string)
       schema            = optional(string)
       template          = optional(string)
-      tenant = optional(string)
+      tenant            = optional(string)
       type              = optional(string)
       vendor            = optional(string)
     }
@@ -55,12 +55,12 @@ resource "aci_application_profile" "application_profiles" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = { for k, v in local.application_profiles: k => v if v.type == "apic"}
-  tenant_dn                  = aci_tenant.tenants[each.value.tenant].id
-  annotation                 = each.value.annotation
-  description                = each.value.description
-  name                       = each.key
-  name_alias                 = each.value.alias
-  prio                       = each.value.qos_class
+  for_each                  = { for k, v in local.application_profiles : k => v if v.type == "apic" }
+  tenant_dn                 = aci_tenant.tenants[each.value.tenant].id
+  annotation                = each.value.annotation
+  description               = each.value.description
+  name                      = each.key
+  name_alias                = each.value.alias
+  prio                      = each.value.qos_class
   relation_fv_rs_ap_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }

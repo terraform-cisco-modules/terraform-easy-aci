@@ -1,9 +1,12 @@
 locals {
   # Terraform Cloud Remote Resources - Policies
-  rs_contracts          = {}
-  rs_filters            = {}
-  rs_mso_filter_entries = {}
-  rs_schemas            = {}
+  rs_contracts               = {}
+  rs_filters                 = {}
+  rs_l3_domains              = {}
+  rs_mso_filter_entries      = {}
+  rs_ospf_interface_policies = {}
+  rs_schemas                 = {}
+  rs_vrfs                    = {}
   # rs_schemas  = lookup(data.terraform_remote_state.policies.outputs, "adapter_configuration_policies", {})
 
   #__________________________________________________________
@@ -13,15 +16,15 @@ locals {
 
   application_profiles = {
     for k, v in var.application_profiles : k => {
-      alias                = v.alias != null ? v.alias : ""
-      annotation           = v.annotation != null ? v.annotation : ""
-      description          = v.description != null ? v.description : ""
+      alias             = v.alias != null ? v.alias : ""
+      annotation        = v.annotation != null ? v.annotation : ""
+      description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
-      qos_class            = v.qos_class != null ? v.qos_class : "unspecified"
-      schema             = v.schema != null ? v.schema : "common"
-      template             = v.template != null ? v.template : "common"
-      tenant               = v.tenant != null ? v.tenant : "common"
-      type                 = v.type != null ? v.type : "apic"
+      qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
+      schema            = v.schema != null ? v.schema : "common"
+      template          = v.template != null ? v.template : "common"
+      tenant            = v.tenant != null ? v.tenant : "common"
+      type              = v.type != null ? v.type : "apic"
     }
   }
 
@@ -201,6 +204,37 @@ locals {
       tenant              = v.tenant != null ? v.tenant : "common"
     }
   }
+
+
+  #__________________________________________________________
+  #
+  # L3Out Variables
+  #__________________________________________________________
+
+  l3outs = {
+    for k, v in var.l3outs : k => {
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      # monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      # qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
+      schema   = v.schema != null ? v.schema : "common"
+      template = v.template != null ? v.template : "common"
+      tenant   = v.tenant != null ? v.tenant : "common"
+      type     = v.type != null ? v.type : "apic"
+    }
+  }
+
+  l3out_external_epgs           = {}
+  l3out_external_epg_subnets    = {}
+  l3out_interface_profiles      = {}
+  l3out_node_profiles           = {}
+  l3out_node_profiles_nodes     = {}
+  l3out_ospf_external_policies  = {}
+  l3out_ospf_interface_profiles = {}
+  l3out_path_attachments        = {}
+  l3out_paths_secondary_ips           = {}
+  l3out_paths_svi_addressing          = {}
 
 
   #__________________________________________________________

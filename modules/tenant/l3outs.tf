@@ -4,8 +4,53 @@ variable "l3outs" {
       alias       = ""
       annotation  = ""
       description = ""
-      l3_domain   = ""
-      level       = "template"
+      external_epgs = [
+        {
+          contract_exception_tag = 0
+          flood_on_encapsulation = "disabled"
+          match_type             = "AtleastOne"
+          name                   = "default"
+          preferred_group_member = "exclude"
+          qos_class              = "unspecified"
+          subnets = [
+            {
+              aggregate = [{
+                export_route_control = false
+                import_route_control = false
+                shared_route_control = false
+              }]
+              description = ""
+              scope = [{
+                export_route_control = false
+                import_route_control = false
+                import_security      = true
+                shared_route_control = false
+                shared_security      = false
+              }]
+              subnet = "0.0.0.0/1"
+            },
+            {
+              aggregate = [{
+                export_route_control = false
+                import_route_control = false
+                shared_route_control = false
+              }]
+              description = ""
+              scope = [{
+                export_route_control = false
+                import_route_control = false
+                import_security      = true
+                shared_route_control = false
+                shared_security      = false
+              }]
+              subnet = "128.0.0.0/1"
+            }
+          ]
+          target_dscp = "unspecified"
+        }
+      ]
+      l3_domain = ""
+      level     = "template"
       node_profiles = [
         {
           alias       = ""
@@ -14,14 +59,61 @@ variable "l3outs" {
           description = ""
           interface_profiles = [
             {
+              alias                       = ""
+              annotation                  = ""
+              arp_policy                  = ""
+              color_tag                   = "yellow-green"
+              custom_qos_policy           = ""
+              description                 = ""
+              egress_data_plane_policing  = ""
+              ingress_data_plane_policing = ""
+              name                        = "default"
+              netflow_policies            = []
+              nd_policy                   = ""
+              ospf_interface_profiles = [{
+                description           = ""
+                authentication_type   = ""
+                ospf_key              = 0
+                ospf_interface_policy = "default"
+              }]
+              path_attachments = [
+                {
+                  auto_state          = "disabled"
+                  encapsulation_scope = "local"
+                  vlan                = 1
+                  interface_type      = "l3-port" # ext-svi|l3-port|sub-interface
+                  ipv6_dad            = "enabled"
+                  link_local          = "::"
+                  mac_address         = "00:22:BD:F8:19:FF"
+                  mode                = "regular"
+                  mtu                 = "inherit" # 576 to 9216
+                  preferred_address   = "198.18.0.1/24"
+                  target_dscp         = "unspecified"
+                  secondary_addresses = []
+                  svi_addresses = [
+                    {
+                      link_local_address  = "::"
+                      preferred_address   = "198.18.0.1/24"
+                      secondary_addresses = []
+                      side                = "A"
+                    },
+                    {
+                      link_local_address  = "::"
+                      preferred_address   = "198.18.0.2/24"
+                      secondary_addresses = []
+                      side                = "B"
+                    }
+                  ]
 
-              name = "defualt"
+                }
+              ]
+              qos_class = "unspecified"
             }
           ]
           name = "default"
           nodes = [
             {
-              node_id                   = 101
+              node_id                   = 201
               router_id                 = "198.18.0.1"
               use_router_id_as_loopback = "yes"
             }
@@ -133,6 +225,42 @@ variable "l3outs" {
   ))
 }
 
+variable "ospf_key_1" {
+  default     = ""
+  description = "OSPF Key 1."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_2" {
+  default     = ""
+  description = "OSPF Key 2."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_3" {
+  default     = ""
+  description = "OSPF Key 3."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_4" {
+  default     = ""
+  description = "OSPF Key 4."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_5" {
+  default     = ""
+  description = "OSPF Key 5."
+  sensitive   = true
+  type        = string
+}
+
+
 #------------------------------------------------
 # Create L3Out
 #------------------------------------------------
@@ -148,7 +276,7 @@ ________________________________________________________________________________
 */
 resource "aci_l3_outside" "l3outs" {
   depends_on = [
-    local.l3_domains,
+    local.rs_l3_domains,
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
@@ -157,12 +285,12 @@ resource "aci_l3_outside" "l3outs" {
   description = each.value.description
   enforce_rtctrl = alltrue(
     [each.value.export, each.value.import]
-    ) ? "export,import" : anytrue(
+    ) ? ["export", "import"] : anytrue(
     [each.value.export, each.value.import]
-    ) ? replace(trim(join(",", concat([
+    ) ? concat([
       length(regexall(true, each.value.export)) > 0 ? "export" : ""], [
-      length(regexall(true, each.value.import)) > 0 ? "import" : ""]
-  )), ","), ",,", ",") : "export"
+    length(regexall(true, each.value.import)) > 0 ? "import" : ""]
+  ) : ["export"]
   name        = each.key
   name_alias  = each.value.alias
   target_dscp = each.value.target_dscp
@@ -171,18 +299,18 @@ resource "aci_l3_outside" "l3outs" {
     each.value.tenant, each.value.vrf_tenant)
     ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
     "[[:alnum:]]+", each.value.vrf_tenant)
-  ) > 0 ? local.common_vrfs[each.value.vrf].id : ""
+  ) > 0 ? local.rs_vrfs[each.value.vrf].id : ""
   relation_l3ext_rs_l3_dom_att = length(regexall(
     "[[:alnum:]]+", each.value.l3_domain)
-  ) > 0 ? local.l3_domains[each.value.l3_domain].id : ""
+  ) > 0 ? local.rs_l3_domains[each.value.l3_domain].id : ""
   dynamic "relation_l3ext_rs_dampening_pol" {
     for_each = each.value.route_control_for_dampening
     content {
-      af  = "${relation_l3ext_rs_dampening_pol.value.address_family}-ucast"
-      tDn = "uni/tn-${relation_l3ext_rs_dampening_pol.value.tenant}/prof-${relation_l3ext_rs_dampening_pol.value.route_map}"
+      af                     = "${relation_l3ext_rs_dampening_pol.value.address_family}-ucast"
+      tn_rtctrl_profile_name = "uni/tn-${relation_l3ext_rs_dampening_pol.value.tenant}/prof-${relation_l3ext_rs_dampening_pol.value.route_map}"
     }
   }
-  relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
+  # relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
   # relation_l3ext_rs_out_to_bd_public_subnet_holder = ["{fvBDPublicSubnetHolder}"]
 }
 
@@ -199,11 +327,11 @@ GUI Location:
 Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_logical_node_profile" "node_profiles" {
+resource "aci_logical_node_profile" "l3out_node_profiles" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each      = local.node_profiles
+  for_each      = local.l3out_node_profiles
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
   annotation    = each.value.annotation
   description   = each.value.description
@@ -227,13 +355,13 @@ GUI Location:
 Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}: Nodes > {node_id}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_logical_node_to_fabric_node" "logical_node_to_fabric_nodes" {
+resource "aci_logical_node_to_fabric_node" "l3out_node_profiles_nodes" {
   depends_on = [
-    aci_logical_node_profile.node_profiles
+    aci_logical_node_profile.l3out_node_profiles
   ]
-  for_each                = local.node_profiles_nodes
-  logical_node_profile_dn = aci_logical_node_profile.node_profiles[each.value.name].id
-  tdn                     = "topology/pod-${pod_id}/node-${node_id}"
+  for_each                = local.l3out_node_profiles_nodes
+  logical_node_profile_dn = aci_logical_node_profile.l3out_node_profiles[each.value.name].id
+  tdn                     = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
   rtr_id                  = each.value.router_id
   rtr_id_loop_back        = each.value.use_router_id_as_loopback
 }
@@ -252,11 +380,13 @@ GUI Location:
  - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_logical_interface_profile" "interface_profiles" {
+resource "aci_logical_interface_profile" "l3out_interface_profiles" {
   depends_on = [
-    aci_logical_node_profile.node_profiles
+    aci_logical_node_profile.l3out_node_profiles
   ]
-  logical_node_profile_dn               = aci_logical_node_profile.node_profiles[each.value.node_profile].id
+  for_each                              = local.l3out_interface_profiles
+  logical_node_profile_dn               = aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id
+  annotation                            = each.value.annotation
   description                           = each.value.description
   name                                  = each.value.name
   name_alias                            = each.value.alias
@@ -267,9 +397,13 @@ resource "aci_logical_interface_profile" "interface_profiles" {
   relation_l3ext_rs_ingress_qos_dpp_pol = each.value.ingress_data_plane_policing
   relation_l3ext_rs_l_if_p_cust_qos_pol = each.value.custom_qos_policy
   relation_l3ext_rs_nd_if_pol           = each.value.nd_policy
-  relation_l3ext_rs_l_if_p_to_netflow_monitor_pol = length(
-    each.value.netflow_policy
-  ) > 0 ? [for s in each.value.netflow_policy : "uni/infra/monitorpol-${s}"] : []
+  dynamic "relation_l3ext_rs_l_if_p_to_netflow_monitor_pol" {
+    for_each = each.value.netflow_policies
+    content {
+      tn_netflow_monitor_pol_name = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy
+      flt_type                    = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.filter_type # ipv4|ipv6|ce
+    }
+  }
 }
 
 
@@ -295,21 +429,22 @@ ________________________________________________________________________________
 */
 resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   depends_on = [
-    aci_logical_interface_profile.logical_interface_profiles
+    aci_logical_interface_profile.l3out_interface_profiles
   ]
-  logical_interface_profile_dn = aci_logical_interface_profile.logical_interface_profiles[each.value.interface_profile].id
+  for_each                     = local.l3out_path_attachments
+  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
   target_dn = length(regexall(
     "ext-svi", each.value.interface_type)
     ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${each.value.node1}-${each.value.node2}/pathep-[${each.value.policy_group}]" : length(regexall(
     "[[:alnum:]]+", each.value.interface_type)
   ) > 0 ? "topology/pod-${each.value.pod}/paths-${each.value.node1}/pathep-[${each.value.interface}]" : ""
   if_inst_t   = each.value.interface_type
-  addr        = each.value.primary_address
+  addr        = each.value.preferred_address
   annotation  = each.value.annotation
   autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : ""
-  encap       = each.value.vlan != "" ? "vlan-${vlan}" : ""
-  mode        = each.value.vlan != "" ? each.value.mode : ""
-  encap_scope = each.value.vlan != "" ? each.value.encap_scope : ""
+  encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.vlan}" : "unknown"
+  mode        = each.value.vlan != "" ? each.value.mode : "regular"
+  encap_scope = each.value.interface_type != "l3-port" ? each.value.encap_scope : "local"
   ipv6_dad    = each.value.ipv6_dad
   ll_addr     = each.value.a_link_local_address
   mac         = each.value.mac_address
@@ -335,8 +470,8 @@ resource "aci_l3out_vpc_member" "l3out_vpc_member" {
   depends_on = [
     aci_l3out_path_attachment.l3out_path_attachments
   ]
-  for_each     = local.vpc_addressing
-  addr         = each.value.primary_address
+  for_each     = local.l3out_paths_svi_addressing
+  addr         = each.value.address
   description  = each.value.description
   ipv6_dad     = each.value.ipv6_dad
   leaf_port_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.l3out_path].id
@@ -363,11 +498,11 @@ GUI Location:
 
 _______________________________________________________________________________________________________________________
 */
-resource "aci_l3out_path_attachment_secondary_ip" "aci_l3out_path_attachment_secondary_ips" {
+resource "aci_l3out_path_attachment_secondary_ip" "l3out_paths_secondary_ips" {
   depends_on = [
     aci_l3out_path_attachment.l3out_path_attachments
   ]
-  for_each                 = local.secondary_ips
+  for_each                 = local.l3out_paths_secondary_ips
   l3out_path_attachment_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.l3out_path].id
   addr                     = each.value.secondary_ip_address
   annotation               = each.value.annotation
@@ -416,12 +551,12 @@ ________________________________________________________________________________
 */
 resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
   depends_on = [
-    aci_logical_interface_profile.interface_profiles,
+    aci_logical_interface_profile.l3out_interface_profiles,
     aci_ospf_interface_policy.ospf_interface_policies,
-    local.ospf_interface_policies
+    local.rs_ospf_interface_policies
   ]
-  for_each                     = local.ospf_interface_profiles
-  logical_interface_profile_dn = aci_logical_interface_profile.interface_profiles[each.value.interface_profile].id
+  for_each                     = local.l3out_ospf_interface_profiles
+  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
   description                  = each.value.description
   auth_key = length(regexall(
     "(md5|simple)", each.value.authentication_type)
@@ -440,7 +575,7 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
     each.value.tenant, each.value.policy_tenant)
     ) > 0 ? aci_ospf_interface_policy.ospf_interface_policies[each.value.ospf_interface_policy].id : length(regexall(
     "[[:alnum:]]+", each.value.policy_tenant)
-  ) > 0 ? local.data_ospf_interface_policy[each.value.ospf_interface_policy].id : ""
+  ) > 0 ? local.rs_ospf_interface_policies[each.value.ospf_interface_policy].id : ""
 }
 
 
@@ -451,26 +586,34 @@ API Information:
 GUI Location:
  - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
 */
-resource "aci_external_network_instance_profile" "external_epgs" {
+resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each                                    = local.external_epgs
-  l3_outside_dn                               = aci_l3_outside.l3outs[each.value.l3out].id
-  annotation                                  = each.value.annotation
-  description                                 = each.value.description
-  exception_tag                               = each.value.contract_exception_tag
-  flood_on_encap                              = each.value.flood_on_encapsulation
-  match_t                                     = each.value.match_type
-  name_alias                                  = each.value.alias
-  name                                        = each.value.epg
-  pref_gr_memb                                = each.value.preferred_group_member
-  prio                                        = each.value.qos_class
-  target_dscp                                 = each.value.target_dscp
-  relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
-  relation_fv_rs_sec_inherited                = [each.value.l3out_contract_masters]
-  relation_l3ext_rs_inst_p_to_nat_mapping_epg = "aci_bridge_domain.{NAT_fvEPg}.id"
-  relation_l3ext_rs_inst_p_to_profile         = [each.value.route_control_profile]
+  for_each       = { for k, v in local.l3out_external_epgs : k => v if v.epg_type != "oob" }
+  l3_outside_dn  = aci_l3_outside.l3outs[each.value.l3out].id
+  annotation     = each.value.annotation
+  description    = each.value.description
+  exception_tag  = each.value.contract_exception_tag
+  flood_on_encap = each.value.flood_on_encapsulation
+  match_t        = each.value.match_type
+  name_alias     = each.value.alias
+  name           = each.value.name
+  pref_gr_memb   = each.value.preferred_group_member
+  prio           = each.value.qos_class
+  target_dscp    = each.value.target_dscp
+  # relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
+  # relation_fv_rs_cust_qos_pol                 = each.value.custom_qos_policy
+  # relation_fv_rs_sec_inherited                = [each.value.l3out_contract_masters]
+  # relation_l3ext_rs_inst_p_to_nat_mapping_epg = "aci_bridge_domain.{NAT_fvEPg}.id"
+  dynamic "relation_l3ext_rs_inst_p_to_profile" {
+    for_each = each.value.route_control_profiles
+    content {
+      tn_rtctrl_profile_name = each.value.route_map
+      direction              = each.value.direction
+    }
+  }
+  # [each.value.route_control_profile]
 }
 
 resource "aci_rest" "external_epg_intra_epg_contracts" {
@@ -527,7 +670,7 @@ resource "aci_rest" "oob_external_epgs" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each   = local.oob_external_epgs
+  for_each   = { for k, v in local.l3out_external_epgs: k => v if v.epg_type == "oob" }
   dn         = "uni/tn-mgmt/extmgmt-default/instp-{Ext_EPG}"
   class_name = "mgmtInstP"
   content = {
@@ -551,10 +694,10 @@ ________________________________________________________________________________
 */
 resource "aci_l3_ext_subnet" "external_epg_subnets" {
   depends_on = [
-    aci_external_network_instance_profile.external_epgs
+    aci_external_network_instance_profile.l3out_external_epgs
   ]
-  for_each                             = { for k, v in local.external_epg_subnets : k => v if epg_type != "oob" }
-  external_network_instance_profile_dn = aci_external_network_instance_profile.external_epgs[each.value.external_epg].id
+  for_each                             = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type != "oob" }
+  external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.external_epg].id
   description                          = each.value.description
   ip                                   = each.value.subnet
   aggregate                            = each.value.aggregate
@@ -588,7 +731,7 @@ resource "aci_rest" "oob_external_epg_subnets" {
   depends_on = [
     aci_rest.oob_external_epgs
   ]
-  for_each   = { for k, v in local.external_epg_subnets : k => v if epg_type == "oob" }
+  for_each   = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type == "oob" }
   dn         = "uni/tn-mgmt/extmgmt-default/instp-${each.value.epg}/subnet-[${each.value.subnet}]"
   class_name = "mgmtSubnet"
   content = {
