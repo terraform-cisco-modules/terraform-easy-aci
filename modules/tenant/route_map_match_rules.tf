@@ -58,23 +58,23 @@ variable "route_map_match_rules" {
     }
   ))
 }
-resource "aci_rest" "route_map_match_rules" {
-  provider   = netascode
-  for_each   = local.route_map_match_rules
-  dn         = "uni/tn-${each.value.tenant}/subj-${each.key}"
-  class_name = "rtctrlSubjP"
-  content = {
-    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr     = each.value.description
-    name      = each.key
-    nameAlias = each.value.alias
-  }
+
+resource "aci_match_rule" "route_map_match_rules" {
+  depends_on = [
+    aci_tenant.tenants
+  ]
+  for_each    = local.route_map_match_rules
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description = each.value.description
+  name        = each.key
+  name_alias  = each.value.alias
+  tenant_dn   = aci_tenant.tenants[each.value.tenant].id
 }
 
 resource "aci_rest" "route_map_rules_match_community" {
   provider = netascode
   depends_on = [
-    aci_rest.route_map_match_rules
+    aci_match_rule.route_map_match_rules
   ]
   for_each   = { for k, v in local.match_rule_rules : k => v if v.type == "match_community" }
   dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/commtrm-${each.value.community}"
@@ -89,7 +89,7 @@ resource "aci_rest" "route_map_rules_match_community" {
 resource "aci_rest" "route_map_rules_match_regex_community" {
   provider = netascode
   depends_on = [
-    aci_rest.route_map_match_rules
+    aci_match_rule.route_map_match_rules
   ]
   for_each   = { for k, v in local.match_rule_rules : k => v if v.type == "match_regex_community" }
   dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/commrxtrm-${each.value.community_type}"
@@ -103,19 +103,18 @@ resource "aci_rest" "route_map_rules_match_regex_community" {
   }
 }
 
-resource "aci_rest" "route_map_rules_match_prefix" {
-  provider = netascode
+
+resource "aci_match_route_destination_rule" "route_map_rules_match_prefix" {
+  # dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/dest-[${each.value.network}]"
+  # class_name = "rtctrlMatchRtDest"
   depends_on = [
-    aci_rest.route_map_match_rules
+    aci_match_rule.route_map_match_rules
   ]
-  for_each   = { for k, v in local.match_rule_rules : k => v if v.type == "match_prefix" }
-  dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/dest-[${each.value.network}]"
-  class_name = "rtctrlMatchRtDest"
-  content = {
-    aggregate  = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
-    fromPfxLen = each.value.greater_than
-    ip         = each.value.network
-    toPfxLen   = each.value.less_than
-    # type       = "rt-dst"
-  }
+  for_each  = { for k, v in local.match_rule_rules : k => v if v.type == "match_prefix" }
+  aggregate = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
+  # annotation        = each.value.annotation != "" ? each.value.annotation : var.annotation
+  match_rule_dn     = aci_match_rule.route_map_match_rules[each.value.match_rule].id
+  greater_than_mask = each.value.greater_than
+  ip                = each.value.network
+  less_than_mask    = each.value.less_than
 }

@@ -55,7 +55,7 @@ resource "aci_rest" "route_maps_for_route_control" {
 resource "aci_rest" "route_maps_contexts" {
   provider = netascode
   depends_on = [
-    aci_rest.route_map_match_rules
+    aci_match_rule.route_map_match_rules
   ]
   for_each   = local.route_maps_context_rules
   dn         = "uni/tn-${each.value.tenant}/prof-${each.value.route_map}/ctx-${each.value.ctx_name}"

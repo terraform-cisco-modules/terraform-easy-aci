@@ -276,6 +276,20 @@ resource "aci_rest" "route_map_rules_set_preference" {
   }
 }
 
+# resource "aci_l3out_route_tag_policy" "example" {
+#   depends_on = [
+#     aci_rest.route_map_set_rules
+#   ]
+#   for_each = { for k, v in local.set_rule_rules : k => v }
+#   # for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_route_tag" }
+#   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
+#   annotation  = "example"
+#   description = "from terraform"
+#   name        = "example"
+#   name_alias  = "example"
+#   tag         = "1"
+# }
+
 resource "aci_rest" "route_map_rules_set_route_tag" {
   provider = netascode
   depends_on = [

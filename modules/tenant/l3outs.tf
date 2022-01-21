@@ -39,10 +39,13 @@ variable "l3outs" {
                 shared_route_control_subnet = false
               }]
               route_summarization_policy = ""
-              route_control_profiles = [{
-                direction = "export" # export/import
-                route_map = "default"
-              }]
+              route_control_profiles     = []
+              # Example
+              # route_control_profiles = [{
+              #   direction = "export" # export/import
+              #   route_map = "default"
+              #   tenant = "**l3out_tenant**"
+              # }]
               subnet = "0.0.0.0/1"
             },
             {
@@ -62,10 +65,13 @@ variable "l3outs" {
               subnet = "128.0.0.0/1"
             }
           ]
-          route_control_profiles = [{
-            direction = "export" # export/import
-            route_map = "default"
-          }]
+          route_control_profiles = []
+          # Example
+          # route_control_profiles = [{
+          #   direction = "export" # export/import
+          #   route_map = "default"
+          #   tenant = "**l3out_tenant**"
+          # }]
           target_dscp = "unspecified"
         }
       ]
@@ -153,7 +159,7 @@ variable "l3outs" {
       #     name                  = "default"
       #     ospf_key              = 0
       #     ospf_interface_policy = "default"
-      #     policy_tenant    = "common"
+      #     policy_tenant    = "**l3out_tenant**"
       #   }
       # ]
       route_control_enforcement = [
@@ -167,7 +173,7 @@ variable "l3outs" {
       #   {
       #     address_family = "ipv4"
       #     route_map      = "**REQUIRED**"
-      #     tenant         = "common"
+      #     tenant         = "**l3out_tenant**"
       #   }
       # ]
       target_dscp = "unspecified"
@@ -366,6 +372,42 @@ variable "l3outs" {
   ))
 }
 
+variable "bgp_password_1" {
+  default     = ""
+  description = "BGP Password 1."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_2" {
+  default     = ""
+  description = "BGP Password 2."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_3" {
+  default     = ""
+  description = "BGP Password 3."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_4" {
+  default     = ""
+  description = "BGP Password 4."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_5" {
+  default     = ""
+  description = "BGP Password 5."
+  sensitive   = true
+  type        = string
+}
+
+
 variable "ospf_key_1" {
   default     = ""
   description = "OSPF Key 1."
@@ -473,17 +515,17 @@ resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   pref_gr_memb   = each.value.preferred_group_member
   prio           = each.value.qos_class
   target_dscp    = each.value.target_dscp
+  dynamic "relation_l3ext_rs_inst_p_to_profile" {
+    for_each = each.value.route_control_profiles
+    content {
+      direction              = each.value.direction
+      tn_rtctrl_profile_name = "uni/tn-${relation_l3ext_rs_inst_p_to_profile.value.tenant}/prof-${relation_l3ext_rs_inst_p_to_profile.value.route_map}"
+    }
+  }
   # relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
   # relation_fv_rs_cust_qos_pol = each.value.custom_qos_policy
   # relation_fv_rs_sec_inherited                = [each.value.l3out_contract_masters]
   # relation_l3ext_rs_inst_p_to_nat_mapping_epg = "aci_bridge_domain.{NAT_fvEPg}.id"
-  # dynamic "relation_l3ext_rs_inst_p_to_profile" {
-  #   for_each = each.value.route_control_profiles
-  #   content {
-  #     direction              = each.value.direction
-  #     tn_rtctrl_profile_name = each.value.route_map
-  #   }
-  # }
 }
 
 #------------------------------------------
@@ -605,12 +647,12 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
     aci_external_network_instance_profile.l3out_external_epgs
   ]
   for_each = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type != "oob" }
-  # aggregate = anytrue(
-  #   [each.value.agg_export, each.value.agg_shared]
-  #   ) ? replace(trim(join(",", concat([
-  #     length(regexall(true, each.value.agg_export)) > 0 ? "export-rtctrl" : ""], [
-  #     length(regexall(true, each.value.agg_shared)) > 0 ? "shared-rtctrl" : ""]
-  # )), ","), ",,", ",") : ""
+  aggregate = anytrue(
+    [each.value.agg_export, each.value.agg_shared]
+    ) ? replace(trim(join(",", concat([
+      length(regexall(true, each.value.agg_export)) > 0 ? "export-rtctrl" : ""], [
+      length(regexall(true, each.value.agg_shared)) > 0 ? "shared-rtctrl" : ""]
+  )), ","), ",,", ",") : "export-rtctrl"
   annotation                           = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                          = each.value.description
   external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.ext_epg].id
@@ -628,8 +670,8 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
   dynamic "relation_l3ext_rs_subnet_to_profile" {
     for_each = each.value.route_control_profiles
     content {
-      tn_rtctrl_profile_dn = relation_l3ext_rs_subnet_to_profile.value.route_map
       direction            = relation_l3ext_rs_subnet_to_profile.value.direction
+      tn_rtctrl_profile_dn = "uni/tn-${relation_l3ext_rs_subnet_to_profile.value.tenant}/prof-${relation_l3ext_rs_subnet_to_profile.value.route_map}"
     }
   }
   relation_l3ext_rs_subnet_to_rt_summ = length(
@@ -716,7 +758,6 @@ resource "aci_logical_node_to_fabric_node" "l3out_node_profiles_nodes" {
   rtr_id                  = each.value.router_id
   rtr_id_loop_back        = each.value.use_router_id_as_loopback
 }
-
 
 #------------------------------------------------
 # Create Logical Interface Profile
@@ -868,6 +909,61 @@ resource "aci_l3out_path_attachment_secondary_ip" "l3out_paths_secondary_ips" {
   annotation               = each.value.annotation != "" ? each.value.annotation : var.annotation
   ipv6_dad                 = each.value.ipv6_dad
 }
+
+
+#------------------------------------------------
+# Create a BGP Peer Connectivity Profile
+#------------------------------------------------
+
+/*
+API Information:
+ - Class: "bgpPeerP"
+ - Distinguished Name: "uni/tn-{Tenant}/out-{L3Out}/lnodep-{Node_Profile}/lifp-{Interface_Profile}/rspathL3OutAtt-[topology/pod-{Pod_ID}/{PATH}/pathep-[{Interface_or_PG}]]/peerP-[{Peer_IP}]"
+GUI Location:
+ - Tenants > {Tenant} > Networking > L3Outs > {L3Out} > Logical Node Profile {Node_Profile} > Logical Interface Profile > {Interface_Profile} > OSPF Interface Profile
+*/
+# resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
+#   depends_on = [
+#     aci_logical_node_profile.l3out_node_profiles,
+#     aci_logical_interface_profile.l3out_interface_profiles,
+#     aci_bgp_peer_prefix.bgp_peer_prefix_policies
+#   ]
+#   logical_node_profile_dn = length(
+#     regexall("interface", each.value.peer_level)
+#     ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
+#     regexall("loopback", each.value.peer_level)
+#   ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
+#   addr                = each.value.bgp_peer
+#   addr_t_ctrl         = each.value.address_type_controls
+#   allowed_self_as_cnt = each.value.allowed_self_as_count
+#   as_number           = each.value.remote_as
+#   ctrl                = each.value.bgp_controlls
+#   description         = each.value.description
+#   password = length(
+#     regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
+#     regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
+#     regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
+#     regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
+#   regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
+#   peer_ctrl           = each.value.peer_controls
+#   private_a_sctrl     = each.value.private_as_control
+#   ttl                 = each.value.ebgp_multihop_ttl
+#   weight              = each.value.weight_for_routes_from_neighbor
+#   local_asn           = each.value.local_as_number
+#   local_asn_propagate = each.value.local_as_number_config
+#   relation_bgp_rs_peer_pfx_pol = length(
+#     regexall(each.value.prefix_tenant == each.value.tenant)
+#     ) > 0 ? aci_bgp_peer_prefix.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : length(
+#     regexall("[:alnum:]", each.value.prefix_tenant)
+#   ) > 0 ? rs_bgp_peer_prefix_policy.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : ""
+#   dynamic "relation_bgp_rs_peer_pfx_pol" {
+#     for_each = each.value.route_control_profiles
+#     content {
+#       direction = relation_bgp_rs_peer_to_profile.value.direction
+#       target_dn = "uni/tn-${relation_bgp_rs_peer_pfx_pol.value.tenant}/prof-${relation_bgp_rs_peer_pfx_pol.value.route_map}"
+#     }
+#   }
+# }
 
 
 #------------------------------------------------

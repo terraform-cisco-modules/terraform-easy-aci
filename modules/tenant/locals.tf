@@ -233,7 +233,7 @@ locals {
         for key, value in v.route_control_for_dampening : {
           address_family = value.address_family != null ? value.address_family : "ipv4"
           route_map      = value.route_map
-          tenant         = value.tenant != null ? value.tenant : "common"
+          tenant         = value.tenant != null ? value.tenant : v.tenant
         }
       ] : []
       target_dscp = v.target_dscp != null ? v.target_dscp : "unspecified"
@@ -273,6 +273,7 @@ locals {
           for a, b in v.route_control_profiles : a => {
             direction = b.direction
             route_map = b.route_map
+            tenant    = b.tenant != null ? b.tenant : value.tenant
           }
         } : {}
         tenant = value.tenant
@@ -312,6 +313,7 @@ locals {
           for a, b in v.route_control_profiles : a => {
             direction = b.direction
             route_map = b.route_map
+            tenant    = b.tenant != null ? b.tenant : value.tenant
           }
         } : {}
         route_summarization_policy = v.route_summarization_policy != null ? v.route_summarization_policy : ""
