@@ -6,7 +6,18 @@ variable "l3outs" {
       description = ""
       external_epgs = [
         {
+          alias                  = ""
           contract_exception_tag = 0
+          contracts = [
+            {
+              contract_name   = "default"
+              contract_tenant = "common"
+              contract_type   = "consumer" # consumer|interface|intra_epg|provider|taboo
+              qos_class       = "unspecified"
+            }
+          ]
+          description            = ""
+          epg_type               = "default" # default or oob
           flood_on_encapsulation = "disabled"
           match_type             = "AtleastOne"
           name                   = "default"
@@ -15,37 +26,46 @@ variable "l3outs" {
           subnets = [
             {
               aggregate = [{
-                export_route_control = false
-                import_route_control = false
-                shared_route_control = false
+                aggregate_export        = false
+                aggregate_shared_routes = false
               }]
               description = ""
-              scope = [{
-                export_route_control = false
-                import_route_control = false
-                import_security      = true
-                shared_route_control = false
-                shared_security      = false
+              external_epg_classification = [{
+                external_subnets_for_external_epg = true
+                shared_security_import_subnet     = false
+              }]
+              route_control = [{
+                export_route_control_subnet = false
+                shared_route_control_subnet = false
+              }]
+              route_summarization_policy = ""
+              route_control_profiles = [{
+                direction = "export" # export/import
+                route_map = "default"
               }]
               subnet = "0.0.0.0/1"
             },
             {
               aggregate = [{
-                export_route_control = false
-                import_route_control = false
-                shared_route_control = false
+                aggregate_export        = false
+                aggregate_shared_routes = false
               }]
               description = ""
-              scope = [{
-                export_route_control = false
-                import_route_control = false
-                import_security      = true
-                shared_route_control = false
-                shared_security      = false
+              external_epg_classification = [{
+                external_subnets_for_external_epg = true
+                shared_security_import_subnet     = false
+              }]
+              route_control = [{
+                export_route_control_subnet = false
+                shared_route_control_subnet = false
               }]
               subnet = "128.0.0.0/1"
             }
           ]
+          route_control_profiles = [{
+            direction = "export" # export/import
+            route_map = "default"
+          }]
           target_dscp = "unspecified"
         }
       ]
@@ -53,61 +73,50 @@ variable "l3outs" {
       level     = "template"
       node_profiles = [
         {
-          alias       = ""
-          annotation  = ""
           color_tag   = "yellow-green"
           description = ""
           interface_profiles = [
             {
-              alias                       = ""
-              annotation                  = ""
               arp_policy                  = ""
+              auto_state                  = "disabled"
               color_tag                   = "yellow-green"
               custom_qos_policy           = ""
               description                 = ""
               egress_data_plane_policing  = ""
+              encapsulation_scope         = "local"
+              encapsulation_vlan          = 1
               ingress_data_plane_policing = ""
+              interface                   = "eth1/1"
+              interface_type              = "l3-port" # ext-svi|l3-port|sub-interface
+              ipv6_dad                    = "enabled"
+              link_local_address          = "::"
+              mac_address                 = "00:22:BD:F8:19:FF"
+              mode                        = "regular"
+              mtu                         = "inherit" # 576 to 9216
               name                        = "default"
-              netflow_policies            = []
               nd_policy                   = ""
-              ospf_interface_profiles = [{
-                description           = ""
-                authentication_type   = ""
-                ospf_key              = 0
-                ospf_interface_policy = "default"
-              }]
-              path_attachments = [
-                {
-                  auto_state          = "disabled"
-                  encapsulation_scope = "local"
-                  vlan                = 1
-                  interface_type      = "l3-port" # ext-svi|l3-port|sub-interface
-                  ipv6_dad            = "enabled"
-                  link_local          = "::"
-                  mac_address         = "00:22:BD:F8:19:FF"
-                  mode                = "regular"
-                  mtu                 = "inherit" # 576 to 9216
-                  preferred_address   = "198.18.0.1/24"
-                  target_dscp         = "unspecified"
-                  secondary_addresses = []
-                  svi_addresses = [
-                    {
-                      link_local_address  = "::"
-                      preferred_address   = "198.18.0.1/24"
-                      secondary_addresses = []
-                      side                = "A"
-                    },
-                    {
-                      link_local_address  = "::"
-                      preferred_address   = "198.18.0.2/24"
-                      secondary_addresses = []
-                      side                = "B"
-                    }
-                  ]
-
-                }
-              ]
-              qos_class = "unspecified"
+              netflow_policies            = []
+              nodes                       = [201]
+              ospf_interface_profile      = "default"
+              preferred_address           = "198.18.1.1/24"
+              qos_class                   = "unspecified"
+              secondary_addresses         = [] # "198.18.3.1/24"
+              svi_addresses               = []
+              # Example
+              # svi_addresses               = [
+              #   {
+              #     link_local_address  = "::"
+              #     preferred_address   = "198.18.1.1/24"
+              #     secondary_addresses = []
+              #     side                = "A"
+              #   },
+              #   {
+              #     link_local_address  = "::"
+              #     preferred_address   = "198.18.1.2/24"
+              #     secondary_addresses = []
+              #     side                = "B"
+              #   }
+              # ]
             }
           ]
           name = "default"
@@ -118,30 +127,58 @@ variable "l3outs" {
               use_router_id_as_loopback = "yes"
             }
           ]
-          pod = 1
+          pod_id = 1
         }
       ]
+      ospf_external_policies = []
+      # Example
+      # ospf_external_policies = [
+      #   {
+      #     ospf_area_cost = 1
+      #     ospf_area_control = [{
+      #       send_redistribution_lsas_into_nssa_area = true
+      #       originate_summary_lsa                   = true
+      #       suppress_forwarding_address             = false
+      #     }]
+      #     ospf_area_id   = "0.0.0.0"
+      #     ospf_area_type = "regular" # nssa, regular, stub
+      #   }
+      # ]
+      ospf_interface_profiles = []
+      # Example
+      # ospf_interface_profiles = [
+      #   {
+      #     description           = ""
+      #     authentication_type   = "none" # md5,none,simple
+      #     name                  = "default"
+      #     ospf_key              = 0
+      #     ospf_interface_policy = "default"
+      #     policy_tenant    = "common"
+      #   }
+      # ]
       route_control_enforcement = [
         {
-          export = false
-          import = true
+          import = false
         }
       ]
-      route_control_for_dampening = [
-        {
-          address_family = "ipv4"
-          route_map      = "test2"
-          tenant         = "common"
-        }
-      ]
+      route_control_for_dampening = []
+      # Example
+      # route_control_for_dampening = [
+      #   {
+      #     address_family = "ipv4"
+      #     route_map      = "**REQUIRED**"
+      #     tenant         = "common"
+      #   }
+      # ]
       target_dscp = "unspecified"
       sites       = []
       tags        = []
-      template    = ""
+      template    = "common"
       tenant      = "common"
       type        = "apic"
       vendor      = "cisco"
-      vrf         = "common"
+      vrf         = "default"
+      vrf_tenant  = "common"
     }
   }
   description = <<-EOT
@@ -160,67 +197,171 @@ variable "l3outs" {
   EOT
   type = map(object(
     {
-      alias                 = optional(string)
-      annotation            = optional(string)
-      bd_enforcement_status = optional(string)
-      bgp_timers            = optional(string)
-      bgp_timers_per_address_family = optional(list(object(
-        {
-          address_family = optional(string)
-          policy         = string
-        }
-      )))
-      communities = optional(list(object(
-        {
-          community = number
-        }
-      )))
-      contracts = optional(list(object(
-        {
-          match_type = optional(string)
-          name       = string
-          qos_class  = optional(string)
-          schema     = optional(string)
-          template   = optional(string)
-          tenant     = string
-          type       = string
-        }
-      )))
+      alias       = optional(string)
+      annotation  = optional(string)
       description = optional(string)
-      eigrp_timers_per_address_family = optional(list(object(
+      external_epgs = optional(list(object(
         {
-          address_family = optional(string)
-          policy         = string
+          alias                  = optional(string)
+          contract_exception_tag = optional(number)
+          contracts = optional(list(object(
+            {
+              contract_name   = string
+              contract_tenant = optional(string)
+              contract_type   = optional(string)
+              qos_class       = optional(string)
+            }
+          )))
+          description            = optional(string)
+          epg_type               = optional(string)
+          flood_on_encapsulation = optional(string)
+          match_type             = optional(string)
+          name                   = string
+          preferred_group_member = optional(string)
+          qos_class              = optional(string)
+          subnets = list(object(
+            {
+              aggregate = optional(list(object(
+                {
+                  aggregate_export        = optional(bool)
+                  aggregate_shared_routes = optional(bool)
+                }
+              )))
+              description = optional(string)
+              external_epg_classification = optional(list(object(
+                {
+                  external_subnets_for_external_epg = optional(bool)
+                  shared_security_import_subnet     = optional(bool)
+                }
+              )))
+              route_control = optional(list(object(
+                {
+                  export_route_control_subnet = optional(bool)
+                  shared_route_control_subnet = optional(bool)
+                }
+              )))
+              route_control_profiles = optional(list(object(
+                {
+                  direction = string
+                  route_map = string
+                }
+              )))
+              route_summarization_policy = optional(string)
+              subnet                     = string
+            }
+          ))
+          route_control_profiles = optional(list(object(
+            {
+              direction = string
+              route_map = string
+            }
+          )))
+          target_dscp = optional(string)
         }
       )))
-      endpoint_retention_policy = optional(string)
-      ip_data_plane_learning    = optional(string)
-      layer3_multicast          = optional(bool)
-      level                     = optional(string)
-      monitoring_policy         = optional(string)
-      ospf_timers               = optional(string)
-      ospf_timers_per_address_family = optional(list(object(
+      l3_domain = optional(string)
+      level     = optional(string)
+      node_profiles = optional(list(object(
         {
-          address_family = optional(string)
-          policy         = string
+          color_tag   = optional(string)
+          description = optional(string)
+          interface_profiles = optional(list(object(
+            {
+              arp_policy                  = optional(string)
+              auto_state                  = optional(string)
+              color_tag                   = optional(string)
+              custom_qos_policy           = optional(string)
+              description                 = optional(string)
+              egress_data_plane_policing  = optional(string)
+              encapsulation_scope         = optional(string)
+              encapsulation_vlan          = optional(number)
+              ingress_data_plane_policing = optional(string)
+              interface                   = string
+              interface_type              = optional(string)
+              ipv6_dad                    = optional(string)
+              link_local_address          = optional(string)
+              mac_address                 = optional(string)
+              mode                        = optional(string)
+              mtu                         = optional(string)
+              name                        = string
+              nd_policy                   = optional(string)
+              netflow_policies            = optional(list(string))
+              nodes                       = optional(list(string))
+              ospf_interface_profile      = optional(string)
+              preferred_address           = optional(string)
+              qos_class                   = optional(string)
+              secondary_addresses         = optional(list(string))
+              svi_addresses = optional(list(object(
+                {
+                  link_local_address  = optional(string)
+                  preferred_address   = optional(string)
+                  secondary_addresses = optional(list(string))
+                  side                = string
+                },
+              )))
+            }
+          )))
+          name = string
+          nodes = list(object(
+            {
+              node_id                   = optional(number)
+              router_id                 = optional(string)
+              use_router_id_as_loopback = optional(string)
+            }
+          ))
+          pod_id = optional(string)
         }
       )))
-      policy_enforcement_direction  = optional(string)
-      policy_enforcement_preference = optional(string)
-      preferred_group               = optional(string)
-      schema                        = optional(string)
-      sites                         = optional(list(string))
+      ospf_external_policies = optional(list(object(
+        {
+          ospf_area_cost = optional(number)
+          ospf_area_control = optional(list(object(
+            {
+              send_redistribution_lsas_into_nssa_area = optional(bool)
+              originate_summary_lsa                   = optional(bool)
+              suppress_forwarding_address             = optional(bool)
+            }
+          )))
+          ospf_area_id   = optional(string)
+          ospf_area_type = optional(string)
+        }
+      )))
+      ospf_interface_profiles = optional(list(object(
+        {
+          description           = optional(string)
+          authentication_type   = optional(string)
+          name                  = string
+          ospf_key              = optional(number)
+          ospf_interface_policy = optional(string)
+          policy_tenant         = optional(string)
+        }
+      )))
+      route_control_enforcement = optional(list(object(
+        {
+          import = optional(bool)
+        }
+      )))
+      route_control_for_dampening = optional(list(object(
+        {
+          address_family = optional(string)
+          route_map      = string
+          tenant         = optional(string)
+        }
+      )))
+      target_dscp = optional(string)
+      sites       = optional(list(string))
       tags = optional(list(object(
         {
           key   = string
           value = string
         }
       )))
-      template                 = optional(string)
-      tenant                   = optional(string)
-      transit_route_tag_policy = optional(string)
-      type                     = optional(string)
-      vendor                   = optional(string)
+      template   = optional(string)
+      tenant     = optional(string)
+      type       = optional(string)
+      vendor     = optional(string)
+      vrf        = optional(string)
+      vrf_tenant = optional(string)
     }
   ))
 }
@@ -280,21 +421,14 @@ resource "aci_l3_outside" "l3outs" {
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each    = { for k, v in local.l3outs : k => v if v.type == "apic" }
-  annotation  = each.value.annotation
-  description = each.value.description
-  enforce_rtctrl = alltrue(
-    [each.value.export, each.value.import]
-    ) ? ["export", "import"] : anytrue(
-    [each.value.export, each.value.import]
-    ) ? concat([
-      length(regexall(true, each.value.export)) > 0 ? "export" : ""], [
-    length(regexall(true, each.value.import)) > 0 ? "import" : ""]
-  ) : ["export"]
-  name        = each.key
-  name_alias  = each.value.alias
-  target_dscp = each.value.target_dscp
-  tenant_dn   = aci_tenant.tenants[each.value.tenant].id
+  for_each       = { for k, v in local.l3outs : k => v if v.type == "apic" }
+  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description    = each.value.description
+  enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
+  name           = each.key
+  name_alias     = each.value.alias
+  target_dscp    = each.value.target_dscp
+  tenant_dn      = aci_tenant.tenants[each.value.tenant].id
   relation_l3ext_rs_ectx = length(regexall(
     each.value.tenant, each.value.vrf_tenant)
     ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
@@ -312,6 +446,222 @@ resource "aci_l3_outside" "l3outs" {
   }
   # relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
   # relation_l3ext_rs_out_to_bd_public_subnet_holder = ["{fvBDPublicSubnetHolder}"]
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "l3extInstP"
+ - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{Ext_EPG}"
+GUI Location:
+ - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_external_network_instance_profile" "l3out_external_epgs" {
+  depends_on = [
+    aci_l3_outside.l3outs
+  ]
+  for_each       = { for k, v in local.l3out_external_epgs : k => v if v.epg_type != "oob" }
+  l3_outside_dn  = aci_l3_outside.l3outs[each.value.l3out].id
+  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description    = each.value.description
+  exception_tag  = each.value.contract_exception_tag
+  flood_on_encap = each.value.flood_on_encapsulation
+  match_t        = each.value.match_type
+  name_alias     = each.value.alias
+  name           = each.value.name
+  pref_gr_memb   = each.value.preferred_group_member
+  prio           = each.value.qos_class
+  target_dscp    = each.value.target_dscp
+  # relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
+  # relation_fv_rs_cust_qos_pol = each.value.custom_qos_policy
+  # relation_fv_rs_sec_inherited                = [each.value.l3out_contract_masters]
+  # relation_l3ext_rs_inst_p_to_nat_mapping_epg = "aci_bridge_domain.{NAT_fvEPg}.id"
+  # dynamic "relation_l3ext_rs_inst_p_to_profile" {
+  #   for_each = each.value.route_control_profiles
+  #   content {
+  #     direction              = each.value.direction
+  #     tn_rtctrl_profile_name = each.value.route_map
+  #   }
+  # }
+}
+
+#------------------------------------------
+# Create an Out-of-Band External EPG
+#------------------------------------------
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "mgmtInstP"
+ - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{name}"
+GUI Location:
+ - Tenants > mgmt > External Management Network Instance Profiles > {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "oob_external_epgs" {
+  provider = netascode
+  depends_on = [
+    aci_l3_outside.l3outs
+  ]
+  for_each   = { for k, v in local.l3out_external_epgs : k => v if v.epg_type == "oob" }
+  dn         = "uni/tn-mgmt/extmgmt-default/instp-{name}"
+  class_name = "mgmtInstP"
+  content = {
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    name       = each.value.name
+  }
+}
+
+#------------------------------------------------
+# Assign Contracts to an External EPG
+#------------------------------------------------
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "fvRsIntraEpg"
+ - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsintraEpg-{contract}"
+GUI Location:
+ - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "external_epg_intra_epg_contracts" {
+  provider   = netascode
+  depends_on = [
+    aci_external_network_instance_profile.l3out_external_epgs,
+    aci_rest.oob_external_epgs
+  ]
+  for_each   = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type == "intra_epg" }
+  dn         = "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsintraEpg-${each.value.contract}"
+  class_name = "fvRsIntraEpg"
+  content = {
+    tnVzBrCPName = each.value.contract
+  }
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Consumer Class: "fvRsCons"
+ - Interface Class: "vzRsAnyToConsIf"
+ - Provider Class: "fvRsProv"
+ - Taboo Class: "fvRsProtBy"
+ - Consumer Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsintraEpg-{contract}"
+ - Interface Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsconsIf-{contract}"
+ - Provider Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsprov-{contract}"
+ - Taboo Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsprotBy-{contract}"
+GUI Location:
+ - All Contracts: Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "external_epg_contracts" {
+  provider = netascode
+  depends_on = [
+    aci_external_network_instance_profile.l3out_external_epgs,
+    aci_rest.oob_external_epgs
+  ]
+  for_each = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type != "intra_epg" }
+  dn = length(regexall(
+    "consumer", each.value.contract_type)
+    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rscons-${each.value.contract}" : length(regexall(
+    "interface", each.value.contract_type)
+    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsconsIf-${each.value.contract}" : length(regexall(
+    "provider", each.value.contract_type)
+    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsprov-${each.value.contract}" : length(regexall(
+    "taboo", each.value.contract_type)
+  ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsprotBy-${each.value.contract}" : ""
+  class_name = length(regexall(
+    "consumer", each.value.contract_type)
+    ) > 0 ? "fvRsCons" : length(regexall(
+    "interface", each.value.contract_type)
+    ) > 0 ? "vzRsAnyToConsIf" : length(regexall(
+    "provider", each.value.contract_type)
+    ) > 0 ? "fvRsProv" : length(regexall(
+    "taboo", each.value.contract_type)
+  ) > 0 ? "fvRsProtBy" : ""
+  content = {
+    tnVzBrCPName = each.value.contract
+    prio = each.value.qos_class
+  }
+}
+
+
+#------------------------------------------------
+# Assign a Subnet to an External EPG
+#------------------------------------------------
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "l3extSubnet"
+ - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/extsubnet-[{subnet}]"
+GUI Location:
+ - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_l3_ext_subnet" "external_epg_subnets" {
+  depends_on = [
+    aci_external_network_instance_profile.l3out_external_epgs
+  ]
+  for_each = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type != "oob" }
+  # aggregate = anytrue(
+  #   [each.value.agg_export, each.value.agg_shared]
+  #   ) ? replace(trim(join(",", concat([
+  #     length(regexall(true, each.value.agg_export)) > 0 ? "export-rtctrl" : ""], [
+  #     length(regexall(true, each.value.agg_shared)) > 0 ? "shared-rtctrl" : ""]
+  # )), ","), ",,", ",") : ""
+  annotation                           = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description                          = each.value.description
+  external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.ext_epg].id
+  ip                                   = each.value.subnet
+  scope = alltrue(
+    [each.value.scope_export, each.value.scope_isec, each.value.scope_ishared, each.value.scope_shared]
+    ) ? ["export-rtctrl", "import-security", "shared-security", "shared-rtctrl"] : anytrue(
+    [each.value.scope_export, each.value.scope_isec, each.value.scope_ishared, each.value.scope_shared]
+    ) ? compact(concat([
+      length(regexall(true, each.value.scope_export)) > 0 ? "export-rtctrl" : ""], [
+      length(regexall(true, each.value.scope_isec)) > 0 ? "import-security" : ""], [
+      length(regexall(true, each.value.scope_ishared)) > 0 ? "shared-security" : ""], [
+      length(regexall(true, each.value.scope_shared)) > 0 ? "shared-rtctrl" : ""]
+  )) : ["import-security"]
+  dynamic "relation_l3ext_rs_subnet_to_profile" {
+    for_each = each.value.route_control_profiles
+    content {
+      tn_rtctrl_profile_dn = relation_l3ext_rs_subnet_to_profile.value.route_map
+      direction            = relation_l3ext_rs_subnet_to_profile.value.direction
+    }
+  }
+  relation_l3ext_rs_subnet_to_rt_summ = length(
+    regexall("[:alnum:]", each.value.route_summarization_policy)
+  ) > 0 ? "uni/tn-common/bgprtsum-${each.value.route_summarization_policy}" : ""
+}
+
+
+#------------------------------------------------
+# Assign a Subnet to an Out-of-Band External EPG
+#------------------------------------------------
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "mgmtSubnet"
+ - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{ext_epg}/subnet-[{subnet}]"
+GUI Location:
+ - Tenants > mgmt > External Management Network Instance Profiles > {ext_epg}: Subnets:{subnet}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest" "oob_external_epg_subnets" {
+  provider = netascode
+  depends_on = [
+    aci_rest.oob_external_epgs
+  ]
+  for_each   = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type == "oob" }
+  dn         = "uni/tn-mgmt/extmgmt-default/instp-${each.value.epg}/subnet-[${each.value.subnet}]"
+  class_name = "mgmtSubnet"
+  content = {
+    ip = each.value.subnet
+  }
 }
 
 #------------------------------------------------
@@ -333,10 +683,10 @@ resource "aci_logical_node_profile" "l3out_node_profiles" {
   ]
   for_each      = local.l3out_node_profiles
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
-  annotation    = each.value.annotation
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
   name          = each.value.name
-  name_alias    = each.value.alias
+  name_alias    = ""
   tag           = each.value.color_tag
   target_dscp   = each.value.target_dscp
 }
@@ -360,7 +710,8 @@ resource "aci_logical_node_to_fabric_node" "l3out_node_profiles_nodes" {
     aci_logical_node_profile.l3out_node_profiles
   ]
   for_each                = local.l3out_node_profiles_nodes
-  logical_node_profile_dn = aci_logical_node_profile.l3out_node_profiles[each.value.name].id
+  annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
+  logical_node_profile_dn = aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id
   tdn                     = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
   rtr_id                  = each.value.router_id
   rtr_id_loop_back        = each.value.use_router_id_as_loopback
@@ -384,19 +735,27 @@ resource "aci_logical_interface_profile" "l3out_interface_profiles" {
   depends_on = [
     aci_logical_node_profile.l3out_node_profiles
   ]
-  for_each                              = local.l3out_interface_profiles
-  logical_node_profile_dn               = aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id
-  annotation                            = each.value.annotation
-  description                           = each.value.description
-  name                                  = each.value.name
-  name_alias                            = each.value.alias
-  prio                                  = each.value.qos_class
-  tag                                   = each.value.color_tag
-  relation_l3ext_rs_arp_if_pol          = each.value.arp_policy
-  relation_l3ext_rs_egress_qos_dpp_pol  = each.value.egress_data_plane_policing
-  relation_l3ext_rs_ingress_qos_dpp_pol = each.value.ingress_data_plane_policing
-  relation_l3ext_rs_l_if_p_cust_qos_pol = each.value.custom_qos_policy
-  relation_l3ext_rs_nd_if_pol           = each.value.nd_policy
+  for_each                = local.l3out_interface_profiles
+  logical_node_profile_dn = aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id
+  annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description             = each.value.description
+  name                    = each.value.name
+  name_alias              = ""
+  prio                    = each.value.qos_class
+  tag                     = each.value.color_tag
+  relation_l3ext_rs_arp_if_pol = length(regexall(
+    "[[:alnum:]]+", each.value.arp_policy)
+  ) > 0 ? "uni/tn-common/arpifpol-${each.value.arp_policy}" : ""
+  relation_l3ext_rs_egress_qos_dpp_pol = length(regexall(
+    "[[:alnum:]]+", each.value.egress_data_plane_policing)
+  ) > 0 ? "uni/tn-common/qosdpppol-${each.value.egress_data_plane_policing}" : ""
+  relation_l3ext_rs_ingress_qos_dpp_pol = length(regexall(
+    "[[:alnum:]]+", each.value.ingress_data_plane_policing)
+  ) > 0 ? "uni/tn-common/qosdpppol-${each.value.ingress_data_plane_policing}" : ""
+  relation_l3ext_rs_l_if_p_cust_qos_pol = length(regexall(
+    "[[:alnum:]]+", each.value.custom_qos_policy)
+  ) > 0 ? "uni/tn-common/qoscustom-${each.value.custom_qos_policy}" : ""
+  relation_l3ext_rs_nd_if_pol = each.value.nd_policy
   dynamic "relation_l3ext_rs_l_if_p_to_netflow_monitor_pol" {
     for_each = each.value.netflow_policies
     content {
@@ -431,24 +790,24 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   depends_on = [
     aci_logical_interface_profile.l3out_interface_profiles
   ]
-  for_each                     = local.l3out_path_attachments
-  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
+  for_each                     = local.l3out_interface_profiles
+  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.key].id
   target_dn = length(regexall(
     "ext-svi", each.value.interface_type)
-    ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${each.value.node1}-${each.value.node2}/pathep-[${each.value.policy_group}]" : length(regexall(
+    ) > 0 ? "topology/pod-${each.value.pod_id}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.interface}]" : length(regexall(
     "[[:alnum:]]+", each.value.interface_type)
-  ) > 0 ? "topology/pod-${each.value.pod}/paths-${each.value.node1}/pathep-[${each.value.interface}]" : ""
+  ) > 0 ? "topology/pod-${each.value.pod_id}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.interface}]" : ""
   if_inst_t   = each.value.interface_type
-  addr        = each.value.preferred_address
-  annotation  = each.value.annotation
+  addr        = each.value.interface_type != "ext-svi" ? each.value.preferred_address : ""
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : ""
-  encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.vlan}" : "unknown"
-  mode        = each.value.vlan != "" ? each.value.mode : "regular"
-  encap_scope = each.value.interface_type != "l3-port" ? each.value.encap_scope : "local"
+  encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encapsulation_vlan}" : "unknown"
+  mode        = each.value.interface_type != "l3-port" ? each.value.mode : "regular"
+  encap_scope = each.value.interface_type != "l3-port" ? each.value.encapsulation_scope : "local"
   ipv6_dad    = each.value.ipv6_dad
-  ll_addr     = each.value.a_link_local_address
+  ll_addr     = each.value.interface_type != "ext-svi" ? each.value.link_local_address : "::"
   mac         = each.value.mac_address
-  mtu         = each.value.mtu != "" ? each.value.mtu : "inherit"
+  mtu         = each.value.mtu
   target_dscp = each.value.target_dscp
 }
 
@@ -471,10 +830,11 @@ resource "aci_l3out_vpc_member" "l3out_vpc_member" {
     aci_l3out_path_attachment.l3out_path_attachments
   ]
   for_each     = local.l3out_paths_svi_addressing
-  addr         = each.value.address
-  description  = each.value.description
+  addr         = each.value.preferred_address
+  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description  = ""
   ipv6_dad     = each.value.ipv6_dad
-  leaf_port_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.l3out_path].id
+  leaf_port_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.path].id
   ll_addr      = each.value.link_local_address
   side         = each.value.side
 }
@@ -505,7 +865,7 @@ resource "aci_l3out_path_attachment_secondary_ip" "l3out_paths_secondary_ips" {
   for_each                 = local.l3out_paths_secondary_ips
   l3out_path_attachment_dn = aci_l3out_path_attachment.l3out_path_attachments[each.value.l3out_path].id
   addr                     = each.value.secondary_ip_address
-  annotation               = each.value.annotation
+  annotation               = each.value.annotation != "" ? each.value.annotation : var.annotation
   ipv6_dad                 = each.value.ipv6_dad
 }
 
@@ -527,12 +887,21 @@ resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
-  for_each      = local.l3out_ospf_external_policies
-  l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
-  area_cost     = each.value.ospf_area_cost
-  area_ctrl     = each.value.ospf_area_control
+  for_each   = local.l3out_ospf_external_policies
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  area_cost  = each.value.ospf_area_cost
+  area_ctrl = alltrue(
+    [each.value.redistribute, each.value.summary, each.value.suppress_fa]
+    ) ? "redistribute,summary,suppress-fa" : anytrue(
+    [each.value.redistribute, each.value.summary, each.value.suppress_fa]
+    ) ? replace(trim(join(",", concat([
+      length(regexall(true, each.value.redistribute)) > 0 ? "redistribute" : ""], [
+      length(regexall(true, each.value.summary)) > 0 ? "summary" : ""], [
+      length(regexall(true, each.value.suppress_fa)) > 0 ? "suppress-fa" : ""]
+  )), ","), ",,", ",") : "redistribute,summary"
   area_id       = each.value.ospf_area_id
   area_type     = each.value.ospf_area_type
+  l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
   # multipod_internal = "no"
 }
 
@@ -555,186 +924,26 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
     aci_ospf_interface_policy.ospf_interface_policies,
     local.rs_ospf_interface_policies
   ]
-  for_each                     = local.l3out_ospf_interface_profiles
-  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
-  description                  = each.value.description
+  for_each   = local.l3out_ospf_interface_profiles
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   auth_key = length(regexall(
     "(md5|simple)", each.value.authentication_type)
-    ) > 0 && each.value.osfp_key == 5 ? var.ospf_key_5 : length(regexall(
+    ) > 0 && each.value.ospf_key == 5 ? var.ospf_key_5 : length(regexall(
     "(md5|simple)", each.value.authentication_type)
-    ) > 0 && each.value.osfp_key == 4 ? var.ospf_key_4 : length(regexall(
+    ) > 0 && each.value.ospf_key == 4 ? var.ospf_key_4 : length(regexall(
     "(md5|simple)", each.value.authentication_type)
-    ) > 0 && each.value.osfp_key == 3 ? var.ospf_key_3 : length(regexall(
+    ) > 0 && each.value.ospf_key == 3 ? var.ospf_key_3 : length(regexall(
     "(md5|simple)", each.value.authentication_type)
-    ) > 0 && each.value.osfp_key == 2 ? var.ospf_key_2 : length(regexall(
+    ) > 0 && each.value.ospf_key == 2 ? var.ospf_key_2 : length(regexall(
     "(md5|simple)", each.value.authentication_type)
-  ) > 0 && each.value.osfp_key == 1 ? var.ospf_key_1 : ""
-  auth_key_id = each.value.authentication_type == "md5" ? each.value.osfp_key : ""
-  auth_type   = each.value.authentication_type
+  ) > 0 && each.value.ospf_key == 1 ? var.ospf_key_1 : ""
+  auth_key_id                  = each.value.authentication_type == "md5" ? each.value.ospf_key : ""
+  auth_type                    = each.value.authentication_type
+  description                  = each.value.description
+  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
   relation_ospf_rs_if_pol = length(regexall(
     each.value.tenant, each.value.policy_tenant)
     ) > 0 ? aci_ospf_interface_policy.ospf_interface_policies[each.value.ospf_interface_policy].id : length(regexall(
     "[[:alnum:]]+", each.value.policy_tenant)
   ) > 0 ? local.rs_ospf_interface_policies[each.value.ospf_interface_policy].id : ""
-}
-
-
-/*
-API Information:
- - Class: "l3extInstP"
- - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{Ext_EPG}"
-GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
-*/
-resource "aci_external_network_instance_profile" "l3out_external_epgs" {
-  depends_on = [
-    aci_l3_outside.l3outs
-  ]
-  for_each       = { for k, v in local.l3out_external_epgs : k => v if v.epg_type != "oob" }
-  l3_outside_dn  = aci_l3_outside.l3outs[each.value.l3out].id
-  annotation     = each.value.annotation
-  description    = each.value.description
-  exception_tag  = each.value.contract_exception_tag
-  flood_on_encap = each.value.flood_on_encapsulation
-  match_t        = each.value.match_type
-  name_alias     = each.value.alias
-  name           = each.value.name
-  pref_gr_memb   = each.value.preferred_group_member
-  prio           = each.value.qos_class
-  target_dscp    = each.value.target_dscp
-  # relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
-  # relation_fv_rs_cust_qos_pol                 = each.value.custom_qos_policy
-  # relation_fv_rs_sec_inherited                = [each.value.l3out_contract_masters]
-  # relation_l3ext_rs_inst_p_to_nat_mapping_epg = "aci_bridge_domain.{NAT_fvEPg}.id"
-  dynamic "relation_l3ext_rs_inst_p_to_profile" {
-    for_each = each.value.route_control_profiles
-    content {
-      tn_rtctrl_profile_name = each.value.route_map
-      direction              = each.value.direction
-    }
-  }
-  # [each.value.route_control_profile]
-}
-
-resource "aci_rest" "external_epg_intra_epg_contracts" {
-  provider   = netascode
-  for_each   = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type == "intra_epg" }
-  dn         = "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsintraEpg-${each.value.contract}"
-  class_name = "fvRsIntraEpg"
-  content = {
-    tDn = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
-  }
-}
-
-resource "aci_rest" "external_epg_contracts" {
-  provider = netascode
-  for_each = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type != "intra_epg" }
-  dn = length(regexall(
-    "consumer", each.value.contract_type)
-    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rscons-${each.value.contract}" : length(regexall(
-    "interface", each.value.contract_type)
-    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsconsIf-${each.value.contract}" : length(regexall(
-    "provider", each.value.contract_type)
-    ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsprov-${each.value.contract}" : length(regexall(
-    "taboo", each.value.contract_type)
-  ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.vrf}/instP-${each.value.epg}/rsprotBy-${each.value.contract}" : ""
-  class_name = length(regexall(
-    "consumer", each.value.contract_type)
-    ) > 0 ? "fvRsCons" : length(regexall(
-    "interface", each.value.contract_type)
-    ) > 0 ? "vzRsAnyToConsIf" : length(regexall(
-    "provider", each.value.contract_type)
-    ) > 0 ? "fvRsProv" : length(regexall(
-    "taboo", each.value.contract_type)
-  ) > 0 ? "fvRsProtBy" : ""
-  content = {
-    tDn  = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
-    prio = each.value.qos_class
-  }
-}
-
-
-#------------------------------------------
-# Create an Out-of-Band External EPG
-#------------------------------------------
-
-/*
-API Information:
- - Class: "mgmtInstP"
- - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{Ext_EPG}"
-GUI Location:
- - Tenants > mgmt > External Management Network Instance Profiles > {Ext_EPG}
-*/
-resource "aci_rest" "oob_external_epgs" {
-  provider = netascode
-  depends_on = [
-    aci_l3_outside.l3outs
-  ]
-  for_each   = { for k, v in local.l3out_external_epgs: k => v if v.epg_type == "oob" }
-  dn         = "uni/tn-mgmt/extmgmt-default/instp-{Ext_EPG}"
-  class_name = "mgmtInstP"
-  content = {
-    annotation = each.value.annotation
-    name       = each.value.external_epg
-  }
-}
-
-#------------------------------------------------
-# Assign a Subnet to an External EPG
-#------------------------------------------------
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "l3extSubnet"
- - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{Ext_EPG}/extsubnet-[{Subnet}]"
-GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_l3_ext_subnet" "external_epg_subnets" {
-  depends_on = [
-    aci_external_network_instance_profile.l3out_external_epgs
-  ]
-  for_each                             = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type != "oob" }
-  external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.external_epg].id
-  description                          = each.value.description
-  ip                                   = each.value.subnet
-  aggregate                            = each.value.aggregate
-  scope                                = [each.value.scope]
-  dynamic "relation_l3ext_rs_subnet_to_profile" {
-    for_each = each.value.route_control_profiles
-    content {
-      tn_rtctrl_profile_dn = relation_l3ext_rs_subnet_to_profile.value.route_map
-      direction            = relation_l3ext_rs_subnet_to_profile.value.direction
-    }
-  }
-  relation_l3ext_rs_subnet_to_rt_summ = each.value.route_summarization_prolicy
-}
-
-
-#------------------------------------------------
-# Assign a Subnet to an Out-of-Band External EPG
-#------------------------------------------------
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "mgmtSubnet"
- - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{Ext_EPG}/subnet-[{Subnet}]"
-GUI Location:
- - Tenants > mgmt > External Management Network Instance Profiles > {Ext_EPG}: Subnets:{Subnet}
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_rest" "oob_external_epg_subnets" {
-  provider = netascode
-  depends_on = [
-    aci_rest.oob_external_epgs
-  ]
-  for_each   = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type == "oob" }
-  dn         = "uni/tn-mgmt/extmgmt-default/instp-${each.value.epg}/subnet-[${each.value.subnet}]"
-  class_name = "mgmtSubnet"
-  content = {
-    ip = each.value.subnet
-  }
 }
