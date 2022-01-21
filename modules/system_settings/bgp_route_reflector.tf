@@ -37,7 +37,7 @@ resource "aci_rest" "bgp_asn" {
   class_name = "bgpAsP"
   content = {
     # annotation = var.annotation
-    asn        = var.autonomous_system_number
+    asn = var.autonomous_system_number
   }
 }
 
@@ -57,7 +57,7 @@ resource "aci_rest" "bgp_route_reflectors" {
   class_name = "bgpRRNodePEp"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    id         = each.value.node_id
-    podId      = each.value.pod_id
+    id    = each.value.node_id
+    podId = each.value.pod_id
   }
 }

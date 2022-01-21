@@ -121,7 +121,7 @@ resource "aci_rest" "ep_loop_protection" {
         [length(regexall(true, each.value.action_bd)) > 0 ? "bd-learn-disable" : ""
         ], [length(regexall(true, each.value.action_port)) > 0 ? "port-disable" : ""]
     ))), ",") : ""
-    adminSt         = each.value.administrative_state
+    adminSt = each.value.administrative_state
     # annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
     loopDetectIntvl = each.value.loop_detection_interval
     loopDetectMult  = each.value.loop_detection_multiplier

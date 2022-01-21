@@ -527,7 +527,7 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest" "external_epg_intra_epg_contracts" {
-  provider   = netascode
+  provider = netascode
   depends_on = [
     aci_external_network_instance_profile.l3out_external_epgs,
     aci_rest.oob_external_epgs
@@ -582,7 +582,7 @@ resource "aci_rest" "external_epg_contracts" {
   ) > 0 ? "fvRsProtBy" : ""
   content = {
     tnVzBrCPName = each.value.contract
-    prio = each.value.qos_class
+    prio         = each.value.qos_class
   }
 }
 
