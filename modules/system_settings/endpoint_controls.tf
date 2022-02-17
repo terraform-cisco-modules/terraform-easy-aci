@@ -107,8 +107,7 @@ GUI Location:
  - System > System Settings > Endpoint Controls > Ep Loop Protection
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "ep_loop_protection" {
-  provider   = netascode
+resource "aci_rest_managed" "ep_loop_protection" {
   for_each   = local.ep_loop_protection
   dn         = "uni/infra/epLoopProtectP-default"
   class_name = "epLoopProtectP"

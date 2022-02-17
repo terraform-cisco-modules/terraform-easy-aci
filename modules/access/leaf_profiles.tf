@@ -215,8 +215,7 @@ resource "aci_leaf_profile" "leaf_profiles" {
   # ]
 }
 
-resource "aci_rest" "leaf_profile_to_leaf_interface_profile" {
-  provider = netascode
+resource "aci_rest_managed" "leaf_profile_to_leaf_interface_profile" {
   depends_on = [
     aci_leaf_interface_profile.leaf_interface_profiles,
     aci_leaf_profile.leaf_profiles
@@ -239,8 +238,7 @@ GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "leaf_selectors" {
-  provider = netascode
+resource "aci_rest_managed" "leaf_selectors" {
   depends_on = [
     aci_leaf_profile.leaf_profiles,
     aci_access_switch_policy_group.leaf_policy_groups
@@ -249,30 +247,28 @@ resource "aci_rest" "leaf_selectors" {
   dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/leaves-${each.value.name}-typ-range"
   class_name = "infraLeafS"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.value.name
     nameAlias  = each.value.alias
   }
 }
 
-resource "aci_rest" "leaf_profile_policy_group" {
-  provider   = netascode
+resource "aci_rest_managed" "leaf_profile_policy_group" {
   for_each   = local.leaf_profiles
-  dn         = "${aci_rest.leaf_selectors[each.key].dn}/rsaccNodePGrp"
+  dn         = "${aci_rest_managed.leaf_selectors[each.key].dn}/rsaccNodePGrp"
   class_name = "infraRsAccNodePGrp"
   content = {
     tDn = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
   }
 }
 
-resource "aci_rest" "leaf_profile_blocks" {
-  provider   = netascode
+resource "aci_rest_managed" "leaf_profile_blocks" {
   for_each   = local.leaf_profiles
-  dn         = "${aci_rest.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
+  dn         = "${aci_rest_managed.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = "blk${each.key}-${each.key}"
     from_      = each.key
     to_        = each.key

@@ -38,8 +38,7 @@ variable "route_maps_for_route_control" {
   ))
 }
 
-resource "aci_rest" "route_maps_for_route_control" {
-  provider   = netascode
+resource "aci_rest_managed" "route_maps_for_route_control" {
   for_each   = local.route_maps_for_route_control
   dn         = "uni/tn-${each.value.tenant}/prof-${each.key}"
   class_name = "rtctrlProfile"
@@ -52,8 +51,7 @@ resource "aci_rest" "route_maps_for_route_control" {
   }
 }
 
-resource "aci_rest" "route_maps_contexts" {
-  provider = netascode
+resource "aci_rest_managed" "route_maps_contexts" {
   depends_on = [
     aci_match_rule.route_map_match_rules
   ]
@@ -76,11 +74,10 @@ resource "aci_rest" "route_maps_contexts" {
   }
 }
 
-resource "aci_rest" "route_maps_context_set_rules" {
-  provider = netascode
+resource "aci_rest_managed" "route_maps_context_set_rules" {
   depends_on = [
-    aci_rest.route_map_set_rules,
-    aci_rest.route_maps_contexts
+    aci_rest_managed.route_map_set_rules,
+    aci_rest_managed.route_maps_contexts
   ]
   for_each   = { for k, v in local.route_maps_context_rules : k => v if v.set_rule != "" }
   dn         = "uni/tn-${each.value.tenant}/prof-${each.value.route_map}/ctx-${each.value.ctx_name}/scp"

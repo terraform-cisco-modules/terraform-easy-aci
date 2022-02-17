@@ -202,8 +202,7 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_policies" {
-  provider   = netascode
+resource "aci_rest_managed" "snmp_policies" {
   for_each   = local.snmp_policies
   dn         = "uni/fabric/snmppol-${each.key}"
   class_name = "snmpPol"
@@ -227,10 +226,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy}: {client_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_client_groups" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_client_groups" {
   depends_on = [
-    aci_rest.snmp_policies
+    aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_client_groups
   dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.name}"
@@ -259,11 +257,10 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > default > Client Group Policies: {client_group} > Client Entries
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_client_group_clients" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_client_group_clients" {
   depends_on = [
-    aci_rest.snmp_policies,
-    aci_rest.snmp_client_groups
+    aci_rest_managed.snmp_policies,
+    aci_rest_managed.snmp_client_groups
   ]
   for_each   = local.snmp_client_group_clients
   dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.key2}/client-[${each.value.address}]"
@@ -285,10 +282,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy} > Community Policies
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_policies_communities" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_policies_communities" {
   depends_on = [
-    aci_rest.snmp_policies
+    aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_policies_communities
   dn         = "uni/fabric/snmppol-${each.value.key1}/community-[${each.value.community_variable}]"
@@ -315,10 +311,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy}: SNMP V3 Users
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_policies_users" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_policies_users" {
   depends_on = [
-    aci_rest.snmp_policies
+    aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_policies_users
   dn         = "uni/fabric/snmppol-${each.value.key1}/user-[${each.value.username}]"
@@ -352,8 +347,7 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > SNMP > {snmp_monitoring_destination_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_monitoring_destination_groups" {
-  provider   = netascode
+resource "aci_rest_managed" "snmp_monitoring_destination_groups" {
   for_each   = local.snmp_policies
   dn         = "uni/fabric/snmpgroup-${each.key}"
   class_name = "snmpGroup"
@@ -373,10 +367,9 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > SNMP > {snmp_monitoring_destination_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_trap_destinations" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_trap_destinations" {
   depends_on = [
-    aci_rest.snmp_monitoring_destination_groups
+    aci_rest_managed.snmp_monitoring_destination_groups
   ]
   for_each   = local.snmp_trap_destinations
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
@@ -413,10 +406,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy}: Trap Forward Servers
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_policies_trap_servers" {
-  provider = netascode
+resource "aci_rest_managed" "snmp_policies_trap_servers" {
   depends_on = [
-    aci_rest.snmp_policies
+    aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_trap_destinations
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapfwdserver-[${each.value.host}]"
@@ -438,8 +430,7 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Monitoring > Common Policy > Callhome/Smart Callhome/SNMP/Syslog/TACACS: SNMP
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "snmp_trap_source" {
-  provider   = netascode
+resource "aci_rest_managed" "snmp_trap_source" {
   for_each   = local.snmp_policies
   dn         = "uni/fabric/moncommon/snmpsrc-${each.key}"
   class_name = "snmpSrc"

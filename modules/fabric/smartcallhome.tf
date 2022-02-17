@@ -101,8 +101,7 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > Smart Callhome > [Smart CallHome Dest Group]
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "smart_callhome_destination_groups" {
-  provider   = netascode
+resource "aci_rest_managed" "smart_callhome_destination_groups" {
   for_each   = local.smart_callhome
   dn         = "uni/fabric/smartgroup-${each.key}"
   class_name = "callhomeSmartGroup"
@@ -134,10 +133,9 @@ resource "aci_rest" "smart_callhome_destination_groups" {
   }
 }
 
-resource "aci_rest" "smart_callhome_smtp_servers" {
-  provider = netascode
+resource "aci_rest_managed" "smart_callhome_smtp_servers" {
   depends_on = [
-    aci_rest.smart_callhome_destination_groups
+    aci_rest_managed.smart_callhome_destination_groups
   ]
   for_each   = local.smart_callhome_smtp_servers
   dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
@@ -165,10 +163,9 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > Smart Callhome > {destionation_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "smart_callhome_destinations" {
-  provider = netascode
+resource "aci_rest_managed" "smart_callhome_destinations" {
   depends_on = [
-    aci_rest.smart_callhome_destination_groups
+    aci_rest_managed.smart_callhome_destination_groups
   ]
   for_each   = local.smart_callhome_destinations
   dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
@@ -193,10 +190,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Monitoring > Common Policies > Callhome/Smart Callhome/SNMP/Syslog/TACACS:Smart CallHome > Create Smart CallHome Source
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "smart_callhome_source" {
-  provider = netascode
+resource "aci_rest_managed" "smart_callhome_source" {
   depends_on = [
-    aci_rest.smart_callhome_destination_groups
+    aci_rest_managed.smart_callhome_destination_groups
   ]
   for_each   = local.smart_callhome
   dn         = "uni/fabric/moncommon/smartchsrc"

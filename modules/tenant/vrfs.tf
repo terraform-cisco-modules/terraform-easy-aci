@@ -305,8 +305,7 @@ GUI Location:
  - Tenants > {Tenant} > Networking > VRFs > {VRF} > EPG Collection for VRF: [Provided/Consumed Contracts]
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "vzany_provider_contracts" {
-  provider   = netascode
+resource "aci_rest_managed" "vzany_provider_contracts" {
   for_each   = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type == "provider" }
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}"
   class_name = "vzRsAnyToProv"
@@ -317,8 +316,7 @@ resource "aci_rest" "vzany_provider_contracts" {
   }
 }
 
-resource "aci_rest" "vzany_contracts" {
-  provider = netascode
+resource "aci_rest_managed" "vzany_contracts" {
   for_each = { for k, v in local.vzany_contracts : k => v if v.type == "apic" && v.contract_type != "provider" }
   dn = length(regexall(
     "consumer", each.value.contract_type)
@@ -379,8 +377,7 @@ GUI Location:
  - Tenants > {Tenant} > Networking > VRFs > {VRF}: {annotations}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "vrf_tags" {
-  provider   = netascode
+resource "aci_rest_managed" "vrf_tags" {
   for_each   = { for k, v in local.vrf_tags : k => v if v.type == "apic" }
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/annotationKey-[${each.value.key}]"
   class_name = "tagAnnotation"

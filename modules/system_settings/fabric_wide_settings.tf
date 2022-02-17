@@ -51,8 +51,7 @@ GUI Location:
  - System > System Settings > Fabric Wide Settings
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "fabric_wide_settings" {
-  provider   = netascode
+resource "aci_rest_managed" "fabric_wide_settings" {
   for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("(^[3-4]\\..*|^5.[0-1].*|^5.2\\([0-2].*\\))", var.apic_version)) > 0 }
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"
@@ -69,8 +68,7 @@ resource "aci_rest" "fabric_wide_settings" {
   }
 }
 
-resource "aci_rest" "fabric_wide_settings_5_2_3" {
-  provider   = netascode
+resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
   for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("5.2(3[a-z])", var.apic_version)) > 0 }
   dn         = "uni/infra/settings"
   class_name = "infraSetPol"

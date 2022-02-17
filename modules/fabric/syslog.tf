@@ -98,8 +98,7 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > Syslog > {Dest_Grp_Name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "syslog_destination_groups" {
-  provider   = netascode
+resource "aci_rest_managed" "syslog_destination_groups" {
   for_each   = local.syslog
   dn         = "uni/fabric/slgroup-${each.key}"
   class_name = "syslogGroup"
@@ -149,10 +148,9 @@ GUI Location:
    Create Syslog Remote Destination
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "syslog_remote_destinations" {
-  provider = netascode
+resource "aci_rest_managed" "syslog_remote_destinations" {
   depends_on = [
-    aci_rest.syslog_destination_groups
+    aci_rest_managed.syslog_destination_groups
   ]
   for_each   = local.syslog_remote_destinations
   dn         = "uni/fabric/slgroup-${each.value.key1}/rdst-${each.value.host}"
@@ -187,10 +185,9 @@ GUI Location:
    Callhome/Smart Callhome/SNMP/Syslog/TACACS:Syslog > Create Syslog Source
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "syslog_sources" {
-  provider = netascode
+resource "aci_rest_managed" "syslog_sources" {
   depends_on = [
-    aci_rest.syslog_destination_groups
+    aci_rest_managed.syslog_destination_groups
   ]
   for_each   = local.syslog
   dn         = "uni/fabric/moncommon/slsrc-${each.key}"

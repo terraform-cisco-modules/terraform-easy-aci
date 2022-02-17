@@ -71,8 +71,7 @@ resource "aci_match_rule" "route_map_match_rules" {
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
 }
 
-resource "aci_rest" "route_map_rules_match_community" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_match_community" {
   depends_on = [
     aci_match_rule.route_map_match_rules
   ]
@@ -86,8 +85,7 @@ resource "aci_rest" "route_map_rules_match_community" {
   }
 }
 
-resource "aci_rest" "route_map_rules_match_regex_community" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_match_regex_community" {
   depends_on = [
     aci_match_rule.route_map_match_rules
   ]

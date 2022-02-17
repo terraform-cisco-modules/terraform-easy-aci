@@ -50,8 +50,7 @@ GUI Location:
  - Fabric > Fabric Policies > Pods > Policy Groups: {policy_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "pod_policy_groups" {
-  provider   = netascode
+resource "aci_rest_managed" "pod_policy_groups" {
   for_each   = local.pod_policy_groups
   dn         = "uni/fabric/funcprof/podpgrp-${each.key}"
   class_name = "fabricPodPGrp"
@@ -167,10 +166,9 @@ GUI Location:
  - Fabric > Fabric Policies > Pods > Profiles > Pod Profile {pod_profile}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "pod_profiles" {
-  provider = netascode
+resource "aci_rest_managed" "pod_profiles" {
   depends_on = [
-    aci_rest.pod_policy_groups
+    aci_rest_managed.pod_policy_groups
   ]
   for_each   = local.pod_profiles
   dn         = "uni/fabric/podprof-${each.key}"
@@ -192,11 +190,10 @@ GUI Location:
  - Fabric > Fabric Policies > Pods > Profiles > Pod Profile {pod_profile} > Pod Selectors
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "pod_profile_selectors_all" {
-  provider = netascode
+resource "aci_rest_managed" "pod_profile_selectors_all" {
   depends_on = [
-    aci_rest.pod_policy_groups,
-    aci_rest.pod_profiles
+    aci_rest_managed.pod_policy_groups,
+    aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "ALL" }
   dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-ALL"
@@ -224,11 +221,10 @@ GUI Location:
  - Fabric > Fabric Policies > Pods > Profiles > Pod Profile {pod_profile} > Pod Selectors
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "pod_profile_selectors_range" {
-  provider = netascode
+resource "aci_rest_managed" "pod_profile_selectors_range" {
   depends_on = [
-    aci_rest.pod_policy_groups,
-    aci_rest.pod_profiles
+    aci_rest_managed.pod_policy_groups,
+    aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "range" }
   dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-range"

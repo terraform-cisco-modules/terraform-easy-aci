@@ -92,7 +92,7 @@ GUI Location:
 */
 resource "aci_vpc_explicit_protection_group" "vpc_domains" {
   depends_on = [
-    aci_rest.fabric_membership,
+    aci_rest_managed.fabric_membership,
     aci_vpc_domain_policy.vpc_domain_policies
   ]
   for_each                         = local.vpc_domains

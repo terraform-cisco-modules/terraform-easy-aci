@@ -31,8 +31,7 @@ GUI Location:
  - System > System Settings > BGP Route Reflector: {BGP_ASN}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "bgp_asn" {
-  provider   = netascode
+resource "aci_rest_managed" "bgp_asn" {
   dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
   content = {
@@ -50,8 +49,7 @@ GUI Location:
  - System > System Settings > BGP Route Reflector: Route Reflector Nodes
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "bgp_route_reflectors" {
-  provider   = netascode
+resource "aci_rest_managed" "bgp_route_reflectors" {
   for_each   = local.bgp_route_reflectors
   dn         = "uni/fabric/bgpInstP-default/rr/node-${each.value.node_id}"
   class_name = "bgpRRNodePEp"

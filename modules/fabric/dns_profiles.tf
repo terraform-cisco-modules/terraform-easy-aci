@@ -44,8 +44,7 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Global > DNS Profiles > default: Management EPG
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "dns_profiles" {
-  provider   = netascode
+resource "aci_rest_managed" "dns_profiles" {
   for_each   = local.dns_profiles
   dn         = "/api/node/mo/uni/fabric/dnsp-${each.key}"
   class_name = "dnsProfile"
@@ -74,10 +73,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Global > DNS Profiles > {name}: DNS Providers
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "dns_providers" {
-  provider = netascode
+resource "aci_rest_managed" "dns_providers" {
   depends_on = [
-    aci_rest.dns_profiles
+    aci_rest_managed.dns_profiles
   ]
   for_each   = local.dns_providers
   dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]"
@@ -99,10 +97,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Global > DNS Profiles > {name}: DNS Domains
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "dns_domains" {
-  provider = netascode
+resource "aci_rest_managed" "dns_domains" {
   depends_on = [
-    aci_rest.dns_profiles
+    aci_rest_managed.dns_profiles
   ]
   for_each   = local.dns_domains
   dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]"

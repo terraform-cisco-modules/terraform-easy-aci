@@ -541,8 +541,7 @@ GUI Location:
  - Tenants > mgmt > External Management Network Instance Profiles > {name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "oob_external_epgs" {
-  provider = netascode
+resource "aci_rest_managed" "oob_external_epgs" {
   depends_on = [
     aci_l3_outside.l3outs
   ]
@@ -568,11 +567,10 @@ GUI Location:
  - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "external_epg_intra_epg_contracts" {
-  provider = netascode
+resource "aci_rest_managed" "external_epg_intra_epg_contracts" {
   depends_on = [
     aci_external_network_instance_profile.l3out_external_epgs,
-    aci_rest.oob_external_epgs
+    aci_rest_managed.oob_external_epgs
   ]
   for_each   = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type == "intra_epg" }
   dn         = "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsintraEpg-${each.value.contract}"
@@ -597,11 +595,10 @@ GUI Location:
  - All Contracts: Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "external_epg_contracts" {
-  provider = netascode
+resource "aci_rest_managed" "external_epg_contracts" {
   depends_on = [
     aci_external_network_instance_profile.l3out_external_epgs,
-    aci_rest.oob_external_epgs
+    aci_rest_managed.oob_external_epgs
   ]
   for_each = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type != "intra_epg" }
   dn = length(regexall(
@@ -693,10 +690,9 @@ GUI Location:
  - Tenants > mgmt > External Management Network Instance Profiles > {ext_epg}: Subnets:{subnet}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "oob_external_epg_subnets" {
-  provider = netascode
+resource "aci_rest_managed" "oob_external_epg_subnets" {
   depends_on = [
-    aci_rest.oob_external_epgs
+    aci_rest_managed.oob_external_epgs
   ]
   for_each   = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type == "oob" }
   dn         = "uni/tn-mgmt/extmgmt-default/instp-${each.value.epg}/subnet-[${each.value.subnet}]"

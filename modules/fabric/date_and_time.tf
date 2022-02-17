@@ -555,8 +555,7 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > Date and Time > Policy {{name}}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "date_and_time" {
-  provider   = netascode
+resource "aci_rest_managed" "date_and_time" {
   for_each   = local.date_and_time
   dn         = "/api/node/mo/uni/fabric/time-${each.key}"
   class_name = "datetimePol"
@@ -581,10 +580,9 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > Date and Time > Policy {date_policy}: Authentication Keys: {key_id}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "ntp_authentication_keys" {
-  provider = netascode
+resource "aci_rest_managed" "ntp_authentication_keys" {
   depends_on = [
-    aci_rest.date_and_time
+    aci_rest_managed.date_and_time
   ]
   for_each   = local.ntp_authentication_keys
   dn         = "uni/fabric/time-${each.value.key1}/ntpauth-${each.value.key_id}"
@@ -611,8 +609,7 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > Date and Time > Policy {date_policy}: NTP Servers
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "ntp_servers" {
-  provider   = netascode
+resource "aci_rest_managed" "ntp_servers" {
   for_each   = local.ntp_servers
   dn         = "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}"
   class_name = "datetimeNtpProv"
@@ -645,8 +642,7 @@ GUI Location:
  - System Settings > Data and Time
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "date_and_time_format" {
-  provider   = netascode
+resource "aci_rest_managed" "date_and_time_format" {
   for_each   = { for k, v in local.date_and_time : k => v if k == "default" }
   dn         = "uni/fabric/format-default"
   class_name = "datetimeFormat"

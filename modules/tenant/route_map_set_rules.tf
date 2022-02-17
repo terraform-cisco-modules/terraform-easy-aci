@@ -107,8 +107,7 @@ variable "route_map_set_rules" {
     }
   ))
 }
-resource "aci_rest" "route_map_set_rules" {
-  provider   = netascode
+resource "aci_rest_managed" "route_map_set_rules" {
   for_each   = local.route_map_set_rules
   dn         = "uni/tn-${each.value.tenant}/attr-${each.key}"
   class_name = "rtctrlAttrP"
@@ -120,10 +119,9 @@ resource "aci_rest" "route_map_set_rules" {
   }
 }
 
-resource "aci_rest" "route_map_rules_additional_communities" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_additional_communities" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_communities : k => v if v.type == "additional_communities" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/saddcomm-${each.value.community}"
@@ -136,10 +134,9 @@ resource "aci_rest" "route_map_rules_additional_communities" {
   }
 }
 
-resource "aci_rest" "route_map_rules_multipath" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_multipath" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "multipath" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/redistmpath"
@@ -149,10 +146,9 @@ resource "aci_rest" "route_map_rules_multipath" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_as_path" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_as_path" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_asn_rules : k => v if v.type == "set_as_path" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/saspath-${each.value.set_criteria}"
@@ -175,10 +171,9 @@ resource "aci_rest" "route_map_rules_set_as_path" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_communities" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_communities" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_communities : k => v if v.type == "set_communities" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/scomm"
@@ -190,10 +185,9 @@ resource "aci_rest" "route_map_rules_set_communities" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_dampening" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_dampening" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_dampening" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/sdamp"
@@ -207,10 +201,9 @@ resource "aci_rest" "route_map_rules_set_dampening" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_metric" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_metric" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_metric" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/smetric"
@@ -221,10 +214,9 @@ resource "aci_rest" "route_map_rules_set_metric" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_metric_type" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_metric_type" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_metric_type" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/smetrict"
@@ -235,10 +227,9 @@ resource "aci_rest" "route_map_rules_set_metric_type" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_next_hop" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_next_hop" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_next_hop" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/nh"
@@ -249,10 +240,9 @@ resource "aci_rest" "route_map_rules_set_next_hop" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_next_hop_unchanged" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_next_hop_unchanged" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_next_hop_unchanged" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/nhunchanged"
@@ -262,10 +252,9 @@ resource "aci_rest" "route_map_rules_set_next_hop_unchanged" {
   }
 }
 
-resource "aci_rest" "route_map_rules_set_preference" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_preference" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_preference" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/spref"
@@ -278,7 +267,7 @@ resource "aci_rest" "route_map_rules_set_preference" {
 
 # resource "aci_l3out_route_tag_policy" "example" {
 #   depends_on = [
-#     aci_rest.route_map_set_rules
+#     aci_rest_managed.route_map_set_rules
 #   ]
 #   for_each = { for k, v in local.set_rule_rules : k => v }
 #   # for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_route_tag" }
@@ -290,10 +279,9 @@ resource "aci_rest" "route_map_rules_set_preference" {
 #   tag         = "1"
 # }
 
-resource "aci_rest" "route_map_rules_set_route_tag" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_rules_set_route_tag" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_route_tag" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/srttag"
@@ -304,10 +292,9 @@ resource "aci_rest" "route_map_rules_set_route_tag" {
   }
 }
 
-resource "aci_rest" "route_map_set_weight" {
-  provider = netascode
+resource "aci_rest_managed" "route_map_set_weight" {
   depends_on = [
-    aci_rest.route_map_set_rules
+    aci_rest_managed.route_map_set_rules
   ]
   for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_weight" }
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/sweight"

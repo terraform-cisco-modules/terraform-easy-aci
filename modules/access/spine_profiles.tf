@@ -89,8 +89,7 @@ GUI Location:
  - Fabric > Access Policies > Interfaces > Spine Interfaces > Profiles > {interface_profile}:{interface_selector}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "spine_interface_selectors" {
-  provider = netascode
+resource "aci_rest_managed" "spine_interface_selectors" {
   depends_on = [
     aci_spine_interface_profile.spine_interface_profiles
   ]
@@ -98,7 +97,7 @@ resource "aci_rest" "spine_interface_selectors" {
   dn         = "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.interface_name}-typ-range"
   class_name = "infraSHPortS"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = each.value.interface_name
     descr      = each.value.selector_description
   }
@@ -181,8 +180,7 @@ GUI Location:
  - Fabric > Access Policies > Switches > Spine Switches > Profiles > {name}: Spine Selectors [{name}]
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "spine_profile_node_blocks" {
-  provider = netascode
+resource "aci_rest_managed" "spine_profile_node_blocks" {
   depends_on = [
     aci_spine_profile.spine_profiles,
     aci_spine_switch_association.spine_profiles
@@ -191,7 +189,7 @@ resource "aci_rest" "spine_profile_node_blocks" {
   dn         = "uni/infra/spprof-${each.value.name}/spines-${each.value.name}-typ-range/nodeblk-blk${each.key}-${each.key}"
   class_name = "infraNodeBlk"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     from_      = each.key
     to_        = each.key
     name       = "blk${each.key}-${each.key}"

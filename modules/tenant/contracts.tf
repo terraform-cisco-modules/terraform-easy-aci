@@ -82,10 +82,9 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {contract}: Subjects
 _______________________________________________________________________________________________________________________
 */
-# resource "aci_rest" "oob_contract_subject_filters" {
-#   provider   = netascode
+# resource "aci_rest_managed" "oob_contract_subject_filters" {
 #   depends_on  = [
-#     aci_rest.oob_contract_subjects
+#     aci_rest_managed.oob_contract_subjects
 #   ]
 #   for_each   = local.oob_contract_subject_filters
 #   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}"
@@ -136,8 +135,7 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {contract}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest" "oob_contracts" {
-  provider = netascode
+resource "aci_rest_managed" "oob_contracts" {
   depends_on = [
     aci_tenant.tenants
   ]
@@ -233,7 +231,7 @@ ________________________________________________________________________________
 resource "aci_contract_subject" "contract_subjects" {
   depends_on = [
     aci_contract.contracts,
-    aci_rest.oob_contracts,
+    aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
     aci_filter.filters,
   ]
@@ -241,7 +239,7 @@ resource "aci_contract_subject" "contract_subjects" {
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   contract_dn = length(regexall(
     "oob", each.value.contract_type)
-    ) > 0 ? aci_rest.oob_contracts[each.key].id : length(regexall(
+    ) > 0 ? aci_rest_managed.oob_contracts[each.key].id : length(regexall(
     "standard", each.value.contract_type)
     ) > 0 ? aci_contract.contracts[each.key].id : length(regexall(
     "taboo", each.value.contract_type)
@@ -267,10 +265,9 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {name}: Subjects
 _______________________________________________________________________________________________________________________
 */
-# resource "aci_rest" "oob_contract_subjects" {
-#   provider   = netascode
+# resource "aci_rest_managed" "oob_contract_subjects" {
 #   depends_on  = [
-#     aci_rest.oob_contracts
+#     aci_rest_managed.oob_contracts
 #   ]
 #   for_each   = { for k, v in local.subjects: k => v if contract_type == "oob" }
 #   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}"
@@ -293,8 +290,8 @@ output "contracts" {
       keys(aci_contract.contracts)
     ) : v => aci_contract.contracts[v].id } : {}
     apic_oob_contracts = var.contracts != {} ? { for v in sort(
-      keys(aci_rest.oob_contracts)
-    ) : v => aci_rest.oob_contracts[v].id } : {}
+      keys(aci_rest_managed.oob_contracts)
+    ) : v => aci_rest_managed.oob_contracts[v].id } : {}
     apic_taboo_contracts = var.contracts != {} ? { for v in sort(
       keys(aci_taboo_contract.contracts)
     ) : v => aci_taboo_contract.contracts[v].id } : {}
