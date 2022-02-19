@@ -55,60 +55,75 @@ resource "aci_rest_managed" "pod_policy_groups" {
   dn         = "uni/fabric/funcprof/podpgrp-${each.key}"
   class_name = "fabricPodPGrp"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.key
-  }
-  child {
-    rn         = "rsTimePol"
-    class_name = "fabricRsTimePol"
-    content = {
-      tnDatetimePolName = "${each.value.date_time_policy}"
-    }
-  }
-  child {
-    rn         = "rsPodPGrpIsisDomP"
-    class_name = "fabricRsPodPGrpIsisDomP"
-    content = {
-      tnIsisDomPolName = "${each.value.isis_policy}"
-    }
-  }
-  child {
-    rn         = "rsPodPGrpCoopP"
-    class_name = "fabricRsPodPGrpCoopP"
-    content = {
-      tnCoopPolName = "${each.value.coop_group_policy}"
-    }
-  }
-  child {
-    rn         = "rsPodPGrpBGPRRP"
-    class_name = "fabricRsPodPGrpBGPRRP"
-    content = {
-      tnBgpInstPolName = "${each.value.bgp_route_reflector_policy}"
-    }
-  }
-  child {
-    rn         = "rsCommPol"
-    class_name = "fabricRsCommPol"
-    content = {
-      tnCommPolName = "${each.value.management_access_policy}"
-    }
-  }
-  child {
-    rn         = "rsSnmpPol"
-    class_name = "fabricRsSnmpPol"
-    content = {
-      tnSnmpPolName = "${each.value.snmp_policy}"
-    }
-  }
-  child {
-    rn         = "rsmacsecPol"
-    class_name = "fabricRsMacsecPol"
-    content = {
-      tnMacsecFabIfPolName = "${each.value.macsec_policy}"
-    }
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    descr = each.value.description
+    name  = each.key
   }
 }
+
+resource "aci_rest_managed" "pod_policy_groups_bgp_rr_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rspodPGrpBGPRRP"
+  class_name = "fabricRsPodPGrpBGPRRP"
+  content = {
+    tnBgpInstPolName = "${each.value.bgp_route_reflector_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_coop_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rspodPGrpCoopP"
+  class_name = "fabricRsPodPGrpCoopP"
+  content = {
+    tnCoopPolName = "${each.value.coop_group_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_date_and_time_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rsTimePol"
+  class_name = "fabricRsTimePol"
+  content = {
+    tnDatetimePolName = "${each.value.date_time_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_isis_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rspodPGrpIsisDomP"
+  class_name = "fabricRsPodPGrpIsisDomP"
+  content = {
+    tnIsisDomPolName = "${each.value.isis_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_macsec_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rsmacsecPol"
+  class_name = "fabricRsMacsecPol"
+  content = {
+    tnMacsecFabIfPolName = "${each.value.macsec_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_mgmt_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rsCommPol"
+  class_name = "fabricRsCommPol"
+  content = {
+    tnCommPolName = "${each.value.management_access_policy}"
+  }
+}
+
+resource "aci_rest_managed" "pod_policy_groups_snmp_policy" {
+  for_each   = local.pod_policy_groups
+  dn         = "uni/fabric/funcprof/podpgrp-${each.key}/rssnmpPol"
+  class_name = "fabricRsSnmpPol"
+  content = {
+    tnSnmpPolName = "${each.value.snmp_policy}"
+  }
+}
+
 
 
 variable "pod_profiles" {
@@ -174,10 +189,10 @@ resource "aci_rest_managed" "pod_profiles" {
   dn         = "uni/fabric/podprof-${each.key}"
   class_name = "fabricPodP"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.key
-    nameAlias  = each.value.alias
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    descr     = each.value.description
+    name      = each.key
+    nameAlias = each.value.alias
   }
 }
 
@@ -196,18 +211,18 @@ resource "aci_rest_managed" "pod_profile_selectors_all" {
     aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "ALL" }
-  dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-ALL"
+  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-ALL"
   class_name = "fabricPodS"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name       = each.value.name
-    type       = each.value.pod_selector_type
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    name = each.value.name
+    type = each.value.pod_selector_type
   }
   child {
     rn         = "rspodPGrp"
     class_name = "fabricRsPodPGrp"
     content = {
-      tDn = "uni/fabric/funcprof/podpgrp-${each.key}"
+      tDn = "uni/fabric/funcprof/podpgrp-${each.value.key1}"
     }
   }
 }
@@ -227,7 +242,7 @@ resource "aci_rest_managed" "pod_profile_selectors_range" {
     aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "range" }
-  dn         = "uni/fabric/podprof-${each.key}/pods-${each.value.name}-typ-range"
+  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-range"
   class_name = "fabricPodS"
   content = {
     annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -248,7 +263,7 @@ resource "aci_rest_managed" "pod_profile_selectors_range" {
     rn         = "rspodPGrp"
     class_name = "fabricRsPodPGrp"
     content = {
-      tDn = "uni/fabric/funcprof/podpgrp-${each.key}"
+      tDn = "uni/fabric/funcprof/podpgrp-${each.value.key1}"
     }
   }
 }

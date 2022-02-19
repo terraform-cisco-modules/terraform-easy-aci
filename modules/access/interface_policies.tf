@@ -62,7 +62,7 @@ variable "fc_interface_policies" {
       description           = ""
       fill_pattern          = "ARBFF"
       port_mode             = "f"
-      receive_buffer_credit = "64"
+      receive_buffer_credit = 64
       speed                 = "auto"
       trunk_mode            = "trunk-off"
       annotation            = ""
@@ -81,7 +81,7 @@ variable "fc_interface_policies" {
     - ARBFF
     - IDLE
   * port_mode: (Default value is "f").  In which mode Ports should be used. Allowed values are "f" and "np".
-  * receive_buffer_credit: (Default value is "64").  Receive buffer credits for native FC ports Range:(16 - 64).
+  * receive_buffer_credit: (Default value is 64).  Receive buffer credits for native FC ports Range:(16 - 64).
   * speed: (Default value is "auto").  CPU or port speed. All the supported values are:
     - unknown
     - auto
@@ -103,7 +103,7 @@ variable "fc_interface_policies" {
       description           = optional(string)
       fill_pattern          = optional(string)
       port_mode             = optional(string)
-      receive_buffer_credit = optional(string)
+      receive_buffer_credit = optional(number)
       speed                 = optional(string)
       annotation            = optional(string)
       trunk_mode            = optional(string)
@@ -215,8 +215,8 @@ variable "lacp_interface_policies" {
       fast_select_standby_ports = true
       graceful_convergence      = true
       load_defer_member_ports   = false
-      maximum_number_of_links   = "16"
-      minimum_number_of_links   = "1"
+      maximum_number_of_links   = 16
+      minimum_number_of_links   = 1
       mode                      = "off"
       suspend_individual_port   = true
       symmetric_hashing         = false
@@ -230,8 +230,8 @@ variable "lacp_interface_policies" {
   * fast_select_standby_ports: (Default value is true).  Configures fast select for hot standby ports. Enabling this feature will allow fast selection of a hot standby port when last active port in the port-channel is going down.
   * graceful_convergence: (Default value is true).  Configures port-channel LACP graceful convergence. Disable this only with LACP ports connected to a Non-Nexus peer. Disabling this with Nexus peer can lead to port suspension.
   * load_defer_member_ports: (Default value is false).  Configures the load-balancing algorithm for port channels that applies to the entire device or to only one module.
-  * maximum_number_of_links: (Default value is "16").  Maximum number of links. Allowed value range is "1" - "16".
-  * minimum_number_of_links: (Default value is "1").  Minimum number of links in port channel. Allowed value range is "1" - "16". 
+  * maximum_number_of_links: (Default value is 16).  Maximum number of links. Allowed value range is 1-16.
+  * minimum_number_of_links: (Default value is 1).  Minimum number of links in port channel. Allowed value range is 1-16. 
   * mode: (Default value is "off").  policy mode. Allowed values are "off", "active", "passive", "mac-pin" and "mac-pin-nicload".
     - active: LACP mode that places a port into an active negotiating state in which the port initiates negotiations with other ports by sending LACP packets.
     - mac-pin: Used for pinning VM traffic in a round-robin fashion to each uplink based on the MAC address of the VM. MAC Pinning is the recommended option for channeling when connecting to upstream switches that do not support multichassis EtherChannel (MEC).
@@ -249,8 +249,8 @@ variable "lacp_interface_policies" {
       fast_select_standby_ports = optional(bool)
       graceful_convergence      = optional(bool)
       load_defer_member_ports   = optional(bool)
-      maximum_number_of_links   = optional(string)
-      minimum_number_of_links   = optional(string)
+      maximum_number_of_links   = optional(number)
+      minimum_number_of_links   = optional(number)
       mode                      = optional(string)
       suspend_individual_port   = optional(bool)
       symmetric_hashing         = optional(bool)
@@ -294,7 +294,7 @@ variable "link_level_policies" {
       auto_negotiation            = "on"
       description                 = ""
       forwarding_error_correction = "inherit"
-      link_debounce_interval      = "100"
+      link_debounce_interval      = 100
       speed                       = "inherit"
       annotation                  = ""
     }
@@ -314,7 +314,7 @@ variable "link_level_policies" {
     - cons16-rs-fec
     - kp-fec
     - disable-fec
-  * link_debounce_interval: (Default value is "100").  Link debounce interval for object fabric if pol. Range of allowed values: "0" to "5000".
+  * link_debounce_interval: (Default value is 100).  Link debounce interval for object fabric if pol. Range of allowed values: 0-5000.
   * speed: (Default value is "inherit").  Port speed for object fabric if pol. Allowed values: 
     - unknown
     - 100M
@@ -335,7 +335,7 @@ variable "link_level_policies" {
       auto_negotiation            = optional(string)
       description                 = optional(string)
       forwarding_error_correction = optional(string)
-      link_debounce_interval      = optional(string)
+      link_debounce_interval      = optional(number)
       speed                       = optional(string)
       annotation                  = optional(string)
     }
@@ -481,25 +481,25 @@ variable "port_security_policies" {
     "default" = {
       alias                 = ""
       description           = ""
-      maximum_endpoints     = "0"
-      port_security_timeout = "60"
+      maximum_endpoints     = 0
+      port_security_timeout = 60
       annotation            = ""
     }
   }
   description = <<-EOT
   Key: Name of the Port Security Policy.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * maximum_endpoints: (Default value is "0").  The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
-  * port_security_timeout: (Default value is "60").  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
+  * maximum_endpoints: (Default value is 0).  T
+  he maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
+  * port_security_timeout: (Default value is 60).  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   EOT
   type = map(object(
     {
       alias                 = optional(string)
       description           = optional(string)
-      maximum_endpoints     = optional(string)
-      port_security_timeout = optional(string)
+      maximum_endpoints     = optional(number)
+      port_security_timeout = optional(number)
       annotation            = optional(string)
     }
   ))
@@ -536,8 +536,8 @@ variable "spanning_tree_interface_policies" {
     "default" = {
       alias               = ""
       annotation          = ""
-      bpdu_filter_enabled = "no"
-      bpdu_guard_enabled  = "no"
+      bpdu_filter = "disabled"
+      bpdu_guard  = "disabled"
       description         = ""
     }
   }
@@ -553,8 +553,8 @@ variable "spanning_tree_interface_policies" {
     {
       alias               = optional(string)
       annotation          = optional(string)
-      bpdu_filter_enabled = optional(string)
-      bpdu_guard_enabled  = optional(string)
+      bpdu_filter = optional(string)
+      bpdu_guard  = optional(string)
       description         = optional(string)
     }
   ))

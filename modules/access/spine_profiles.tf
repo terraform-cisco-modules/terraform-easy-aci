@@ -18,7 +18,7 @@ variable "spine_profiles" {
       monitoring_policy  = "default"
       name               = "**REQUIRED**"
       spine_policy_group = "**REQUIRED**"
-      pod_id             = "1"
+      pod_id             = 1
       serial             = "**REQUIRED**"
       annotation         = ""
     }
@@ -54,7 +54,7 @@ variable "spine_profiles" {
       name               = string
       spine_policy_group = string
       node_type          = optional(string)
-      pod_id             = optional(string)
+      pod_id             = optional(number)
       serial             = string
       annotation         = optional(string)
     }
@@ -98,8 +98,8 @@ resource "aci_rest_managed" "spine_interface_selectors" {
   class_name = "infraSHPortS"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name       = each.value.interface_name
-    descr      = each.value.selector_description
+    name  = each.value.interface_name
+    descr = each.value.selector_description
   }
   child {
     rn         = "portblk-${each.value.interface_name}"
@@ -190,8 +190,8 @@ resource "aci_rest_managed" "spine_profile_node_blocks" {
   class_name = "infraNodeBlk"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    from_      = each.key
-    to_        = each.key
-    name       = "blk${each.key}-${each.key}"
+    from_ = each.key
+    to_   = each.key
+    name  = "blk${each.key}-${each.key}"
   }
 }

@@ -7,7 +7,7 @@ locals {
   authentication_properties = {
     for k, v in var.authentication : k => {
       annotation                    = v.annotation != null ? v.annotation : ""
-      icmp_reachable_providers_only = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "reachable_providers_only", true) : true
+      icmp_reachable_providers_only = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "icmp_reachable_providers_only", true) : true
       retries                       = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "retries", 1) : 1
       timeout                       = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "timeout", 5) : 5
       remote_user_login_policy      = v.remote_user_login_policy != null ? v.remote_user_login_policy : "no-login"
@@ -25,13 +25,103 @@ locals {
 
   default_authentication = {
     for k, v in var.authentication : k => {
-      annotation     = v.annotation != null ? v.annotation : ""
-      fallback_check = v.default_authentication != null ? lookup(v.default_authentication[0], "fallback_check", false) : false
-      provider_group = v.default_authentication != null ? lookup(v.default_authentication[0], "provider_group", "") : ""
-      realm          = v.default_authentication != null ? lookup(v.default_authentication[0], "realm", "local") : "local"
-      realm_sub_type = v.default_authentication != null ? lookup(v.default_authentication[0], "realm_sub_type", "default") : "default"
+      annotation                   = v.annotation != null ? v.annotation : ""
+      fallback_domain_avialability = v.default_authentication != null ? lookup(v.default_authentication[0], "fallback_domain_avialability", false) : false
+      provider_group               = v.default_authentication != null ? lookup(v.default_authentication[0], "provider_group", "") : ""
+      realm                        = v.default_authentication != null ? lookup(v.default_authentication[0], "realm", "local") : "local"
+      realm_sub_type               = v.default_authentication != null ? lookup(v.default_authentication[0], "realm_sub_type", "default") : "default"
     }
   }
+
+
+  #__________________________________________________________
+  #
+  # Configuration Backups Variables
+  #__________________________________________________________
+
+  trigger_schedulers = {
+    for k, v in var.configuration_backups : k => {
+      annotation           = v.annotation != null ? v.annotation : ""
+      description          = v.recurring_window != null ? lookup(v.recurring_window[0], "description", "") : ""
+      configuration_export = v.configuration_export != null ? v.configuration_export : []
+      recurring_window     = v.recurring_window != null ? v.recurring_window : []
+    }
+  }
+
+  configuration_export_loop_1 = flatten([
+    for key, value in local.trigger_schedulers : [
+      for k, v in value.configuration_export : {
+        annotation            = value.annotation
+        authentication_type   = v.authentication_type != null ? v.authentication_type : "usePassword"
+        description           = v.description != null ? v.description : ""
+        format                = v.format != null ? v.format : "json"
+        include_secure_fields = v.include_secure_fields != null ? v.include_secure_fields : true
+        key1                  = key
+        management_epg        = v.management_epg != null ? v.management_epg : "default"
+        management_epg_type   = v.management_epg_type != null ? v.management_epg_type : "oob"
+        max_snapshot_count    = v.max_snapshot_count != null ? v.max_snapshot_count : 0
+        password              = v.password != null ? v.password : 1
+        protocol              = v.protocol != null ? v.protocol : "sftp"
+        remote_hosts          = v.remote_hosts != null ? v.remote_hosts : ["fileserver.example.com"]
+        remote_path           = v.remote_path != null ? v.remote_path : "/tmp"
+        remote_port           = v.remote_port != null ? v.remote_port : 22
+        snapshot              = v.snapshot != null ? v.snapshot : false
+        ssh_key_contents      = v.ssh_key_contents != null ? v.ssh_key_contents : 0
+        ssh_key_passphrase    = v.ssh_key_passphrase != null ? v.ssh_key_passphrase : 0
+        start_now             = v.start_now != null ? v.start_now : "untriggered"
+        username              = v.username != null ? v.username : "admin"
+      }
+    ]
+  ])
+
+  configuration_export_loop_2 = flatten([
+    for k, v in local.configuration_export_loop_1 : [
+      for s in v.remote_hosts : {
+        annotation            = v.annotation
+        authentication_type   = v.authentication_type
+        description           = v.description
+        format                = v.format
+        include_secure_fields = v.include_secure_fields
+        key1                  = v.key1
+        management_epg        = v.management_epg
+        management_epg_type   = v.management_epg_type
+        max_snapshot_count    = v.max_snapshot_count
+        password              = v.password
+        protocol              = v.protocol
+        remote_host           = s
+        remote_path           = v.remote_path
+        remote_port           = v.remote_port
+        snapshot              = v.snapshot
+        ssh_key_contents      = v.ssh_key_contents
+        ssh_key_passphrase    = v.ssh_key_passphrase
+        start_now             = v.start_now
+        username              = v.username
+      }
+    ]
+  ])
+
+  configuration_export = { for k, v in local.configuration_export_loop_2 : "${v.key1}_${v.remote_host}" => v }
+
+  recurring_window_loop = flatten([
+    for key, value in local.trigger_schedulers : [
+      for k, v in value.recurring_window : {
+        annotation                  = value.annotation
+        delay_between_node_upgrades = v.delay_between_node_upgrades != null ? v.delay_between_node_upgrades : 0
+        description                 = v.description != null ? v.description : ""
+        key1                        = key
+        maximum_concurrent_nodes    = v.maximum_concurrent_nodes != null ? v.maximum_concurrent_nodes : "unlimited"
+        maximum_running_time        = v.maximum_running_time != null ? v.maximum_running_time : "unlimited"
+        processing_break            = v.processing_break != null ? v.processing_break : "none"
+        processing_size_capacity    = v.processing_size_capacity != null ? v.processing_size_capacity : "unlimited"
+        scheduled_days              = v.scheduled_days != null ? v.scheduled_days : "every-day"
+        scheduled_hour              = v.scheduled_hour != null ? v.scheduled_hour : 23
+        scheduled_minute            = v.scheduled_minute != null ? v.scheduled_minute : 45
+        window_type                 = v.window_type != null ? v.window_type : "recurring"
+      }
+    ]
+  ])
+
+  recurring_window = { for k, v in local.recurring_window_loop : v.key1 => v }
 
 
   #__________________________________________________________
@@ -94,7 +184,7 @@ locals {
       password_change_interval         = v.password_change_interval != null ? v.password_change_interval : 48
       password_changes_within_interval = v.password_changes_within_interval != null ? v.password_changes_within_interval : 2
       password_expiration_warn_time    = v.password_expiration_warn_time != null ? v.password_expiration_warn_time : 15
-      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : "yes"
+      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : true
       user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
       web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
       web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600

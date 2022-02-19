@@ -73,19 +73,19 @@ locals {
   fabric_wide_settings = {
     for k, v in var.fabric_wide_settings : k => {
       annotation                         = v.annotation != null ? v.annotation : ""
-      disable_remote_ep_learning         = v.disable_remote_ep_learning != null ? v.disable_remote_ep_learning : "yes"
-      enforce_domain_validation          = v.enforce_domain_validation != null ? v.enforce_domain_validation : "yes"
-      enforce_epg_vlan_validation        = v.enforce_epg_vlan_validation != null ? v.enforce_epg_vlan_validation : "no"
-      enforce_subnet_check               = v.enforce_subnet_check != null ? v.enforce_subnet_check : "yes"
-      leaf_opflex_client_authentication  = v.leaf_opflex_client_authentication != null ? v.leaf_opflex_client_authentication : "yes"
-      leaf_ssl_opflex                    = v.leaf_ssl_opflex != null ? v.leaf_ssl_opflex : "yes"
-      reallocate_gipo                    = v.reallocate_gipo != null ? v.reallocate_gipo : "no"
-      restrict_infra_vlan_traffic        = v.restrict_infra_vlan_traffic != null ? v.restrict_infra_vlan_traffic : "no"
+      disable_remote_ep_learning         = v.disable_remote_ep_learning != null ? v.disable_remote_ep_learning : true
+      enforce_domain_validation          = v.enforce_domain_validation != null ? v.enforce_domain_validation : true
+      enforce_epg_vlan_validation        = v.enforce_epg_vlan_validation != null ? v.enforce_epg_vlan_validation : false
+      enforce_subnet_check               = v.enforce_subnet_check != null ? v.enforce_subnet_check : true
+      leaf_opflex_client_authentication  = v.leaf_opflex_client_authentication != null ? v.leaf_opflex_client_authentication : true
+      leaf_ssl_opflex                    = v.leaf_ssl_opflex != null ? v.leaf_ssl_opflex : true
+      reallocate_gipo                    = v.reallocate_gipo != null ? v.reallocate_gipo : false
+      restrict_infra_vlan_traffic        = v.restrict_infra_vlan_traffic != null ? v.restrict_infra_vlan_traffic : false
       ssl_opflex_version1_0              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1", false) : false
       ssl_opflex_version1_1              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_1", false) : false
       ssl_opflex_version1_2              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_2", true) : true
-      spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : "yes"
-      spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : "yes"
+      spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : true
+      spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : true
     }
   }
 
@@ -96,8 +96,8 @@ locals {
 
   aes_encryption_settings = {
     for k, v in var.aes_encryption_settings : k => {
-      clear_passphrase                  = v.clear_passphrase != null ? v.clear_passphrase : "no"
-      enable_encryption                 = v.enable_encryption != null ? v.enable_encryption : "yes"
+      clear_passphrase                  = v.clear_passphrase != null ? v.clear_passphrase : false
+      enable_encryption                 = v.enable_encryption != null ? v.enable_encryption : true
       passphrase_key_derivation_version = v.passphrase_key_derivation_version != null ? v.passphrase_key_derivation_version : "v1"
     }
   }
@@ -131,7 +131,7 @@ locals {
     for k, v in var.port_tracking : k => {
       annotation             = v.annotation != null ? v.annotation : ""
       delay_restore_timer    = v.delay_restore_timer != null ? v.delay_restore_timer : 120
-      include_apic_ports     = v.include_apic_ports != null ? v.include_apic_ports : "no"
+      include_apic_ports     = v.include_apic_ports != null ? v.include_apic_ports : false
       number_of_active_ports = v.number_of_active_ports != null ? v.number_of_active_ports : 0
       port_tracking_state    = v.port_tracking_state != null ? v.port_tracking_state : "on"
     }

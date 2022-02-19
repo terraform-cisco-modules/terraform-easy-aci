@@ -178,7 +178,7 @@ resource "aci_radius_provider" "radius_providers" {
   retries         = each.value.retries
   timeout         = each.value.timeout
   type            = each.value.type
-  # relation_aaa_rs_prov_to_epp     = "5"
+  # relation_aaa_rs_prov_to_epp     = 5
   relation_aaa_rs_sec_prov_to_epg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
 }
 
@@ -204,7 +204,7 @@ resource "aci_rsa_provider" "rsa_providers" {
   name            = each.value.host
   retries         = each.value.retries
   timeout         = each.value.timeout
-  # relation_aaa_rs_prov_to_epp     = "5"
+  # relation_aaa_rs_prov_to_epp     = 5
   relation_aaa_rs_sec_prov_to_epg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
 }
 

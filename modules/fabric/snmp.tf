@@ -207,12 +207,12 @@ resource "aci_rest_managed" "snmp_policies" {
   dn         = "uni/fabric/snmppol-${each.key}"
   class_name = "snmpPol"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    adminSt    = each.value.admin_state
-    contact    = each.value.contact
-    descr      = each.value.description
-    loc        = each.value.location
-    name       = each.key
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    adminSt = each.value.admin_state
+    contact = each.value.contact
+    descr   = each.value.description
+    loc     = each.value.location
+    name    = each.key
   }
 }
 
@@ -234,9 +234,9 @@ resource "aci_rest_managed" "snmp_client_groups" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.name}"
   class_name = "snmpClientGrpP"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.value.name
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    descr = each.value.description
+    name  = each.value.name
   }
   child {
     rn         = "rsepg"
@@ -435,7 +435,7 @@ resource "aci_rest_managed" "snmp_trap_source" {
   dn         = "uni/fabric/moncommon/snmpsrc-${each.key}"
   class_name = "snmpSrc"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(

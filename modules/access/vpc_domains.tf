@@ -7,7 +7,7 @@ variable "vpc_domain_policies" {
   default = {
     "default" = {
       alias         = ""
-      dead_interval = "200"
+      dead_interval = 200
       description   = ""
       annotation    = ""
     }
@@ -15,14 +15,14 @@ variable "vpc_domain_policies" {
   description = <<-EOT
   key - Name of Object VPC Explicit Protection Group.
     * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-    * dead_interval: The VPC peer dead interval time of object VPC Domain Policy. Range: "5" - "600". Default value is "200".
+    * dead_interval: The VPC peer dead interval time of object VPC Domain Policy. Range: 5-600. Default value is 200.
     * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
     * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   EOT
   type = map(object(
     {
       alias         = optional(string)
-      dead_interval = optional(string)
+      dead_interval = optional(number)
       description   = optional(string)
       annotation    = optional(string)
     }

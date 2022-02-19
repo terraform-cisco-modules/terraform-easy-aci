@@ -7,6 +7,7 @@ locals {
   date_and_time = {
     for k, v in var.date_and_time : k => {
       administrative_state = v.administrative_state != null ? v.administrative_state : "enabled"
+      annotation           = v.annotation != null ? v.annotation : ""
       authentication_keys  = v.authentication_keys != null ? v.authentication_keys : []
       description          = v.description != null ? v.description : ""
       display_format       = v.display_format != null ? v.display_format : "local"
@@ -441,7 +442,7 @@ locals {
         authentication_type = v.authentication_type != null ? v.authentication_type : "sha1"
         key_id              = v.key_id
         key1                = key
-        trusted             = v.trusted != null ? v.trusted : "yes"
+        trusted             = v.trusted != null ? v.trusted : true
       }
     ]
   ])
@@ -451,6 +452,7 @@ locals {
   ntp_servers_loop = flatten([
     for key, value in local.date_and_time : [
       for k, v in value.ntp_servers : {
+        annotation               = value.annotation != null ? value.annotation : ""
         authentication_key       = v.authentication_key != null ? v.authentication_key : 0
         authentication_keys      = value.authentication_keys
         description              = v.description != null ? v.description : ""
@@ -460,7 +462,7 @@ locals {
         maximum_polling_interval = v.maximum_polling_interval != null ? v.maximum_polling_interval : 6
         minimum_polling_interval = v.minimum_polling_interval != null ? v.minimum_polling_interval : 4
         key1                     = key
-        preferred                = v.preferred != null ? v.preferred : "no"
+        preferred                = v.preferred != null ? v.preferred : false
       }
     ]
   ])
@@ -474,6 +476,7 @@ locals {
 
   dns_profiles = {
     for k, v in var.dns_profiles : k => {
+      annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
       dns_domains           = v.dns_domains != null ? v.dns_domains : []
       dns_providers         = v.dns_providers != null ? v.dns_providers : []
@@ -486,8 +489,9 @@ locals {
   dns_domains_loop = flatten([
     for key, value in local.dns_profiles : [
       for k, v in value.dns_domains : {
+        annotation     = value.annotation != null ? value.annotation : ""
         domain         = v.domain
-        default_domain = v.default_domain != null ? v.default_domain : "no"
+        default_domain = v.default_domain != null ? v.default_domain : false
         description    = v.description != null ? v.description : ""
         key1           = key
       }
@@ -499,9 +503,10 @@ locals {
   dns_providers_loop = flatten([
     for key, value in local.dns_profiles : [
       for k, v in value.dns_providers : {
+        annotation   = value.annotation != null ? value.annotation : ""
         description  = v.description != null ? v.description : ""
         dns_provider = v.dns_provider
-        preferred    = v.preferred != null ? v.preferred : "no"
+        preferred    = v.preferred != null ? v.preferred : false
         key1         = key
       }
     ]
@@ -570,7 +575,7 @@ locals {
   pod_profile_selectors_loop = flatten([
     for key, value in local.pod_profiles : [
       for k, v in value.pod_selectors : {
-        annotation        = v.annotation != null ? v.annotation : ""
+        annotation        = value.annotation != null ? value.annotation : ""
         key1              = key
         name              = v.name != null ? v.name : "default"
         pod_selector_type = v.pod_selector_type != null ? v.pod_selector_type : "ALL"
@@ -603,9 +608,9 @@ locals {
       include_f              = v.include_types != null ? lookup(v.include_types[0], "faults", true) : true
       include_s              = v.include_types != null ? lookup(v.include_types[0], "session_logs", false) : false
       phone_contact          = v.phone_contact != null ? v.phone_contact : ""
-      port_number            = v.port_number != null ? v.port_number : 25
+      port_number            = lookup(v.smtp_server[0], "port_number", 25)
       reply_to_email         = v.reply_to_email != null ? v.reply_to_email : ""
-      secure_smtp            = lookup(v.smtp_server[0], "secure_smtp", "no")
+      secure_smtp            = lookup(v.smtp_server[0], "secure_smtp", false)
       site_id                = v.site_id != null ? v.site_id : ""
       street_address         = v.street_address != null ? v.street_address : ""
       smtp_server            = v.smtp_server
@@ -616,6 +621,7 @@ locals {
   smart_callhome_smtp_servers_loop = flatten([
     for key, value in local.smart_callhome : [
       for k, v in value.smtp_server : {
+        annotation          = value.annotation != null ? value.annotation : ""
         key1                = key
         management_epg      = v.management_epg != null ? v.management_epg : "default"
         management_epg_type = v.management_epg_type != null ? v.management_epg_type : "oob"
@@ -630,11 +636,12 @@ locals {
     for key, value in local.smart_callhome : [
       for k, v in value.destinations : {
         admin_state   = v.admin_state != null ? v.admin_state : "enabled"
+        annotation    = value.annotation != null ? value.annotation : ""
         email         = v.email != null ? v.email : "admin@example.com"
         format        = v.format != null ? v.format : "short-txt"
         key1          = key
         name          = element(split("@", v.email), 0)
-        rfc_compliant = v.rfc_compliant != null ? v.rfc_compliant : "no"
+        rfc_compliant = v.rfc_compliant != null ? v.rfc_compliant : false
       }
     ]
   ])
@@ -667,6 +674,7 @@ locals {
   snmp_client_groups_loop = flatten([
     for key, value in local.snmp_policies : [
       for k, v in value.snmp_client_groups : {
+        annotation          = value.annotation != null ? value.annotation : ""
         clients             = v.clients != null ? v.clients : []
         description         = v.description != null ? v.description : ""
         management_epg      = v.management_epg != null ? v.management_epg : "default"
@@ -747,7 +755,7 @@ locals {
       annotation                     = v.annotation != null ? v.annotation : ""
       description                    = v.description != null ? v.description : ""
       console_admin_state            = v.console_destination != null ? lookup(v.console_destination[0], "admin_state", "enabled") : "enabled"
-      console_severity               = v.console_destination != null ? lookup(v.console_destination[0], "severity", "warnings") : "warnings"
+      console_severity               = v.console_destination != null ? lookup(v.console_destination[0], "severity", "critical") : "critical"
       format                         = v.format != null ? v.format : "aci"
       include_a                      = v.include_types != null ? lookup(v.include_types[0], "audit_logs", false) : false
       include_e                      = v.include_types != null ? lookup(v.include_types[0], "events", false) : false
@@ -757,8 +765,8 @@ locals {
       local_severity                 = v.local_file_destination != null ? lookup(v.local_file_destination[0], "severity", "warnings") : "warnings"
       min_severity                   = v.min_severity != null ? v.min_severity : "warnings"
       remote_destinations            = v.remote_destinations != null ? v.remote_destinations : []
-      show_milliseconds_in_timestamp = v.show_milliseconds_in_timestamp != null ? v.show_milliseconds_in_timestamp : "no"
-      show_time_zone_in_timestamp    = v.show_time_zone_in_timestamp != null ? v.show_time_zone_in_timestamp : "no"
+      show_milliseconds_in_timestamp = v.show_milliseconds_in_timestamp != null ? v.show_milliseconds_in_timestamp : false
+      show_time_zone_in_timestamp    = v.show_time_zone_in_timestamp != null ? v.show_time_zone_in_timestamp : false
     }
   }
 
@@ -766,7 +774,7 @@ locals {
     for key, value in local.syslog : [
       for k, v in value.remote_destinations : {
         admin_state         = v.admin_state != null ? v.admin_state : "enabled"
-        annotation          = v.annotation != null ? v.annotation : ""
+        annotation          = value.annotation != null ? value.annotation : ""
         forwarding_facility = v.forwarding_facility != null ? v.forwarding_facility : "local7"
         host                = v.host != null ? v.host : "host.example.com"
         key1                = key

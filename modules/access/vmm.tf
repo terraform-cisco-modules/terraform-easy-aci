@@ -24,8 +24,8 @@ variable "virtual_networking" {
           management_epg         = ""
           monitoring_policy      = "default"
           policy_scope           = "vm"
-          port                   = "0"
-          sequence_number        = "0"
+          port                   = 0
+          sequence_number        = 0
           stats_collection       = "disabled"
           trigger_inventory_sync = "untriggered"
           virtual_switch_type    = "default"
@@ -33,11 +33,11 @@ variable "virtual_networking" {
       }
       vswitch_policy = {
         "default" = {
-          active_flow_timeout   = "60"
+          active_flow_timeout   = 60
           alias                 = ""
           annotation            = ""
-          idle_flow_timeout     = "15"
-          sample_rate           = "0"
+          idle_flow_timeout     = 15
+          sample_rate           = 0
           netflow_export_policy = ""
         }
       }
@@ -94,8 +94,8 @@ variable "virtual_networking" {
           management_epg         = optional(string)
           monitoring_policy      = optional(string)
           policy_scope           = optional(string)
-          port                   = optional(string)
-          sequence_number        = optional(string)
+          port                   = optional(number)
+          sequence_number        = optional(number)
           stats_collection       = optional(string)
           trigger_inventory_sync = optional(string)
           virtual_switch_type    = optional(string)
@@ -104,10 +104,10 @@ variable "virtual_networking" {
       vswitch_policy = map(object(
         {
           annotation            = optional(string)
-          active_flow_timeout   = optional(string)
+          active_flow_timeout   = optional(number)
           alias                 = optional(string)
-          idle_flow_timeout     = optional(string)
-          sample_rate           = optional(string)
+          idle_flow_timeout     = optional(number)
+          sample_rate           = optional(number)
           netflow_export_policy = optional(string)
         }
       ))

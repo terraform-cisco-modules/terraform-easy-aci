@@ -485,7 +485,7 @@ variable "date_and_time" {
         {
           authentication_type = optional(string)
           key_id              = string
-          trusted             = optional(string)
+          trusted             = optional(bool)
         }
       )))
       description    = optional(string)
@@ -557,10 +557,10 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "date_and_time" {
   for_each   = local.date_and_time
-  dn         = "/api/node/mo/uni/fabric/time-${each.key}"
+  dn         = "uni/fabric/time-${each.key}"
   class_name = "datetimePol"
   content = {
-    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminSt      = each.value.administrative_state
     authSt       = length(each.value.authentication_keys) > 0 ? "enabled" : "disabled"
     descr        = each.value.description
@@ -611,15 +611,15 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "ntp_servers" {
   for_each   = local.ntp_servers
-  dn         = "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.ntp_server}"
+  dn         = "uni/fabric/time-${each.value.key1}/ntpprov-${each.value.hostname}"
   class_name = "datetimeNtpProv"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     keyId      = length(each.value.authentication_keys) > 0 ? each.value.authentication_key : 0
     maxPoll    = each.value.maximum_polling_interval
     minPoll    = each.value.minimum_polling_interval
-    name       = each.value.ntp_server
+    name       = each.value.hostname
     preferred  = each.value.preferred
     trueChimer = "disabled"
   }
@@ -647,7 +647,7 @@ resource "aci_rest_managed" "date_and_time_format" {
   dn         = "uni/fabric/format-default"
   class_name = "datetimeFormat"
   content = {
-    annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
     displayFormat = each.value.display_format
     showOffset    = each.value.offset_state
     tz            = each.value.time_zone

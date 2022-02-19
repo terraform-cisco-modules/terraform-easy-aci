@@ -9,7 +9,7 @@ variable "leaf_profiles" {
       alias            = ""
       annotation       = ""
       description      = ""
-      external_pool_id = "0"
+      external_pool_id = 0
       interfaces = {
         "default" = {
           interface_description  = ""
@@ -23,8 +23,8 @@ variable "leaf_profiles" {
       monitoring_policy = "default"
       name              = "**REQUIRED**"
       node_type         = "unspecified"
-      pod_id            = "1"
-      role              = "leaf"
+      pod_id            = 1
+      role              = "unspecified"
       serial            = "**REQUIRED**"
       two_slot_leaf     = false
     }
@@ -63,7 +63,7 @@ variable "leaf_profiles" {
       alias            = optional(string)
       annotation       = optional(string)
       description      = optional(string)
-      external_pool_id = optional(string)
+      external_pool_id = optional(number)
       interfaces = map(object(
         {
           interface_description  = optional(string)
@@ -77,7 +77,7 @@ variable "leaf_profiles" {
       monitoring_policy = optional(string)
       name              = string
       node_type         = optional(string)
-      pod_id            = optional(string)
+      pod_id            = optional(number)
       role              = optional(string)
       serial            = string
       two_slot_leaf     = optional(bool)
@@ -210,23 +210,11 @@ resource "aci_leaf_profile" "leaf_profiles" {
   description = each.value.description
   name        = each.value.name
   name_alias  = each.value.alias
-  # relation_infra_rs_acc_port_p = [
-  #   aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
-  # ]
+  relation_infra_rs_acc_port_p = [
+    aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
+  ]
 }
 
-resource "aci_rest_managed" "leaf_profile_to_leaf_interface_profile" {
-  depends_on = [
-    aci_leaf_interface_profile.leaf_interface_profiles,
-    aci_leaf_profile.leaf_profiles
-  ]
-  for_each   = local.leaf_profiles
-  dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/rsaccPortP-[${aci_leaf_interface_profile.leaf_interface_profiles[each.key].id}]"
-  class_name = "infraRsAccPortP"
-  content = {
-    tDn = aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
-  }
-}
 
 /*_____________________________________________________________________________________________________________________
 
@@ -238,54 +226,31 @@ GUI Location:
  - Fabric > Access Policies > Switches > Leaf Switches > Profiles > {name}: Leaf Selectors Policy Group: {selector_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "leaf_selectors" {
+resource "aci_leaf_selector" "leaf_selectors" {
   depends_on = [
     aci_leaf_profile.leaf_profiles,
     aci_access_switch_policy_group.leaf_policy_groups
   ]
-  for_each   = local.leaf_profiles
-  dn         = "${aci_leaf_profile.leaf_profiles[each.key].id}/leaves-${each.value.name}-typ-range"
-  class_name = "infraLeafS"
-  content = {
-    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.value.name
-    nameAlias  = each.value.alias
-  }
+  for_each                         = local.leaf_profiles
+  annotation                       = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description                      = each.value.description
+  leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
+  name                             = each.value.name
+  name_alias                       = each.value.alias
+  relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
+  switch_association_type          = "range"
 }
 
-resource "aci_rest_managed" "leaf_profile_policy_group" {
-  for_each   = local.leaf_profiles
-  dn         = "${aci_rest_managed.leaf_selectors[each.key].dn}/rsaccNodePGrp"
-  class_name = "infraRsAccNodePGrp"
-  content = {
-    tDn = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
-  }
+resource "aci_node_block" "leaf_profile_blocks" {
+  depends_on = [
+    aci_leaf_selector.leaf_selectors
+  ]
+  for_each              = local.leaf_profiles
+  annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description           = each.value.description
+  from_                 = each.key
+  name                  = "blk${each.key}-${each.key}"
+  name_alias            = each.value.alias
+  switch_association_dn = aci_leaf_selector.leaf_selectors[each.key].id
+  to_                   = each.key
 }
-
-resource "aci_rest_managed" "leaf_profile_blocks" {
-  for_each   = local.leaf_profiles
-  dn         = "${aci_rest_managed.leaf_selectors[each.key].dn}/nodeblk-blk${each.key}-${each.key}"
-  class_name = "infraNodeBlk"
-  content = {
-    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name       = "blk${each.key}-${each.key}"
-    from_      = each.key
-    to_        = each.key
-  }
-}
-
-# resource "aci_leaf_selector" "leaf_selectors" {
-#   depends_on = [
-#     aci_leaf_profile.leaf_profiles,
-#     aci_access_switch_policy_group.leaf_policy_groups
-#   ]
-#   for_each                         = local.leaf_profiles
-#   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
-#   name                             = each.value.name
-#   switch_association_type          = "range"
-#   annotation                       = each.value.annotation != "" ? each.value.annotation : var.annotation
-#   description                      = each.value.description
-#   name_alias                       = each.value.alias
-#   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
-# }

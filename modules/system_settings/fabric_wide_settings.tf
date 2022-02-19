@@ -2,34 +2,34 @@ variable "fabric_wide_settings" {
   default = {
     "default" = {
       annotation                        = ""
-      disable_remote_ep_learning        = "yes"
-      enforce_domain_validation         = "yes"
-      enforce_epg_vlan_validation       = "no"
-      enforce_subnet_check              = "yes"
-      leaf_opflex_client_authentication = "yes"
-      leaf_ssl_opflex                   = "yes"
-      reallocate_gipo                   = "no"
-      restrict_infra_vlan_traffic       = "no"
+      disable_remote_ep_learning        = true
+      enforce_domain_validation         = true
+      enforce_epg_vlan_validation       = false
+      enforce_subnet_check              = true
+      leaf_opflex_client_authentication = true
+      leaf_ssl_opflex                   = true
+      reallocate_gipo                   = false
+      restrict_infra_vlan_traffic       = false
       ssl_opflex_versions = [{
         TLSv1   = false
         TLSv1_1 = false
         TLSv1_2 = true
       }]
-      spine_opflex_client_authentication = "yes"
-      spine_ssl_opflex                   = "yes"
+      spine_opflex_client_authentication = true
+      spine_ssl_opflex                   = true
     }
   }
   type = map(object(
     {
       annotation                        = optional(string)
-      disable_remote_ep_learning        = optional(string)
-      enforce_domain_validation         = optional(string)
-      enforce_epg_vlan_validation       = optional(string)
-      enforce_subnet_check              = optional(string)
-      leaf_opflex_client_authentication = optional(string)
-      leaf_ssl_opflex                   = optional(string)
-      reallocate_gipo                   = optional(string)
-      restrict_infra_vlan_traffic       = optional(string)
+      disable_remote_ep_learning        = optional(bool)
+      enforce_domain_validation         = optional(bool)
+      enforce_epg_vlan_validation       = optional(bool)
+      enforce_subnet_check              = optional(bool)
+      leaf_opflex_client_authentication = optional(bool)
+      leaf_ssl_opflex                   = optional(bool)
+      reallocate_gipo                   = optional(bool)
+      restrict_infra_vlan_traffic       = optional(bool)
       ssl_opflex_versions = optional(list(object(
         {
           TLSv1   = optional(bool)
@@ -37,8 +37,8 @@ variable "fabric_wide_settings" {
           TLSv1_2 = optional(bool)
         }
       )))
-      spine_opflex_client_authentication = optional(string)
-      spine_ssl_opflex                   = optional(string)
+      spine_opflex_client_authentication = optional(bool)
+      spine_ssl_opflex                   = optional(bool)
     }
   ))
 }
@@ -57,14 +57,14 @@ resource "aci_rest_managed" "fabric_wide_settings" {
   class_name = "infraSetPol"
   content = {
     # annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
-    domainValidation           = each.value.enforce_domain_validation
-    enforceSubnetCheck         = each.value.enforce_subnet_check
-    opflexpAuthenticateClients = each.value.spine_opflex_client_authentication
-    opflexpUseSsl              = each.value.spine_ssl_opflex
-    reallocateGipo             = each.value.reallocate_gipo
-    restrictInfraVLANTraffic   = each.value.restrict_infra_vlan_traffic
-    unicastXrEpLearnDisable    = each.value.disable_remote_ep_learning
-    validateOverlappingVlans   = each.value.enforce_epg_vlan_validation
+    domainValidation           = each.value.enforce_domain_validation == true ? "yes" : "no"
+    enforceSubnetCheck         = each.value.enforce_subnet_check == true ? "yes" : "no"
+    opflexpAuthenticateClients = each.value.spine_opflex_client_authentication == true ? "yes" : "no"
+    opflexpUseSsl              = each.value.spine_ssl_opflex == true ? "yes" : "no"
+    reallocateGipo             = each.value.reallocate_gipo == true ? "yes" : "no"
+    restrictInfraVLANTraffic   = each.value.restrict_infra_vlan_traffic == true ? "yes" : "no"
+    unicastXrEpLearnDisable    = each.value.disable_remote_ep_learning == true ? "yes" : "no"
+    validateOverlappingVlans   = each.value.enforce_epg_vlan_validation == true ? "yes" : "no"
   }
 }
 
@@ -77,11 +77,11 @@ resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
     # enableMoStreaming      = 	each.value.
     # enableRemoteLeafDirect = 	each.value.
     # policySyncNodeBringup  = 	each.value.
-    domainValidation               = each.value.enforce_domain_validation
-    enforceSubnetCheck             = each.value.enforce_subnet_check
-    leafOpflexpAuthenticateClients = each.value.leaf_opflex_client_authentication
-    leafOpflexpUseSsl              = each.value.leaf_ssl_opflex
-    opflexpAuthenticateClients     = each.value.spine_opflex_client_authentication
+    domainValidation               = each.value.enforce_domain_validation == true ? "yes" : "no"
+    enforceSubnetCheck             = each.value.enforce_subnet_check == true ? "yes" : "no"
+    leafOpflexpAuthenticateClients = each.value.leaf_opflex_client_authentication == true ? "yes" : "no"
+    leafOpflexpUseSsl              = each.value.leaf_ssl_opflex == true ? "yes" : "no"
+    opflexpAuthenticateClients     = each.value.spine_opflex_client_authentication == true ? "yes" : "no"
     opflexpSslProtocols = alltrue(
       [each.value.ssl_opflex_version1_0, each.value.ssl_opflex_version1_1, each.value.ssl_opflex_version1_2]
       ) ? "TLSv1,TLSv1.1,TLSv1.2" : anytrue(
@@ -91,10 +91,10 @@ resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
         length(regexall(true, each.value.ssl_opflex_version1_1)) > 0 ? "TLSv1.1" : ""], [
         length(regexall(true, each.value.ssl_opflex_version1_2)) > 0 ? "TLSv1.2" : ""]
     )), ","), ",,", ",") : "TLSv1.1,TLSv1.2"
-    opflexpUseSsl            = each.value.spine_ssl_opflex
-    reallocateGipo           = each.value.reallocate_gipo
-    restrictInfraVLANTraffic = each.value.restrict_infra_vlan_traffic
-    unicastXrEpLearnDisable  = each.value.disable_remote_ep_learning
-    validateOverlappingVlans = each.value.enforce_epg_vlan_validation
+    opflexpUseSsl            = each.value.spine_ssl_opflex == true ? "yes" : "no"
+    reallocateGipo           = each.value.reallocate_gipo == true ? "yes" : "no"
+    restrictInfraVLANTraffic = each.value.restrict_infra_vlan_traffic == true ? "yes" : "no"
+    unicastXrEpLearnDisable  = each.value.disable_remote_ep_learning == true ? "yes" : "no"
+    validateOverlappingVlans = each.value.enforce_epg_vlan_validation == true ? "yes" : "no"
   }
 }

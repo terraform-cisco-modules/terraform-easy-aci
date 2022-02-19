@@ -7,7 +7,7 @@ variable "syslog" {
       console_destination = [
         {
           admin_state = "enabled"
-          severity    = "warnings"
+          severity    = "critical"
         }
       ]
       format = "aci"
@@ -38,8 +38,8 @@ variable "syslog" {
           transport           = "udp"
         }
       ]
-      show_milliseconds_in_timestamp = "no"
-      show_time_zone_in_timestamp    = "no"
+      show_milliseconds_in_timestamp = false
+      show_time_zone_in_timestamp    = false
     }
   }
   description = <<-EOT
@@ -83,8 +83,8 @@ variable "syslog" {
           transport           = optional(string)
         }
       )))
-      show_milliseconds_in_timestamp = optional(string)
-      show_time_zone_in_timestamp    = optional(string)
+      show_milliseconds_in_timestamp = optional(bool)
+      show_time_zone_in_timestamp    = optional(bool)
     }
   ))
 }
@@ -103,11 +103,11 @@ resource "aci_rest_managed" "syslog_destination_groups" {
   dn         = "uni/fabric/slgroup-${each.key}"
   class_name = "syslogGroup"
   content = {
-    annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr               = each.value.description
     format              = each.value.format
-    includeMilliSeconds = each.value.show_milliseconds_in_timestamp
-    includeTimeZone     = each.value.show_time_zone_in_timestamp
+    includeMilliSeconds = each.value.show_milliseconds_in_timestamp == true ? "yes" : "no"
+    includeTimeZone     = each.value.show_time_zone_in_timestamp == true ? "yes" : "no"
     name                = each.key
   }
   child {
@@ -156,14 +156,14 @@ resource "aci_rest_managed" "syslog_remote_destinations" {
   dn         = "uni/fabric/slgroup-${each.value.key1}/rdst-${each.value.host}"
   class_name = "syslogRemoteDest"
   content = {
-    annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminState         = each.value.admin_state
     forwardingFacility = each.value.forwarding_facility
     host               = each.value.host
     name               = each.value.host
     port               = each.value.port
-    protocol           = each.value.transport
-    severity           = each.value.severity
+    # protocol           = each.value.transport
+    severity = each.value.severity
   }
   child {
     rn         = "rsARemoteHostToEpg"
@@ -193,7 +193,7 @@ resource "aci_rest_managed" "syslog_sources" {
   dn         = "uni/fabric/moncommon/slsrc-${each.key}"
   class_name = "syslogSrc"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(
       [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
       ) ? "all" : anytrue(

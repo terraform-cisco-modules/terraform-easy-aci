@@ -13,20 +13,20 @@ resource "aci_rest_managed" "fabric_membership" {
   class_name = "fabricNodeIdentP"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    extPoolId  = each.value.external_pool_id
-    name       = each.value.name
-    nodeId     = each.key
-    nodeType   = each.value.node_type
-    podId      = each.value.pod_id
-    # role      = each.value.role
-    serial = each.value.serial
+    extPoolId = each.value.external_pool_id
+    name      = each.value.name
+    nodeId    = each.key
+    nodeType  = each.value.node_type
+    podId     = each.value.pod_id
+    role      = each.value.role
+    serial    = each.value.serial
   }
 }
 
 # resource "aci_fabric_node_member" "fabric_node_members" {
 #   for_each    = local.fabric_node_members
 #   ext_pool_id = each.value.external_pool_id
-#   fabric_id   = "1"
+#   fabric_id   = 1
 #   name        = each.value.name
 #   node_id     = each.key
 #   node_type   = each.value.node_type

@@ -4,39 +4,37 @@ variable "configuration_backups" {
       annotation = ""
       configuration_export = [
         {
+          authentication_type   = "usePassword"
           description           = ""
           format                = "json"
-          include_secure_fields = "yes"
+          include_secure_fields = true
+          management_epg        = "default"
+          management_epg_type   = "oob"
           max_snapshot_count    = 0
+          password              = 1
+          protocol              = "sftp"
           remote_hosts          = ["fileserver.example.com"]
-          snapshot              = "no"
+          remote_path           = "/tmp"
+          remote_port           = 22
+          snapshot              = false
+          ssh_key_contents      = 0
+          ssh_key_passphrase    = 0
+          start_now             = "untriggered"
+          username              = "admin"
         }
       ]
-      recurring_window = [{
-        delay_between_node_upgrades = 0 # Only applicable if the maximum concurrent node count is 1.
-        description                 = ""
-        maximum_concurrent_nodes    = "unlimited"
-        processing_break            = "none"
-        processing_size_capacity    = "unlimited"
-        scheduled_days              = "every-day"
-        scheduled_hour              = 23
-        scheduled_minute            = 45
-        windows_type                = "recurring"
-      }]
-      remote_hosts = [
+      recurring_window = [
         {
-          authentication_type = "usePassword"
-          description         = ""
-          hosts               = ["fileserver.example.com"]
-          management_epg      = "default"
-          management_epg_type = "oob"
-          password            = 1
-          protocol            = "sftp"
-          remote_path         = "/tmp"
-          remote_port         = 22
-          ssh_key_contents    = 0
-          ssh_key_passphrase  = 0
-          username            = "admin"
+          delay_between_node_upgrades = 0 # Only applicable if the maximum concurrent node count is 1.
+          description                 = ""
+          maximum_concurrent_nodes    = "unlimited"
+          maximum_running_time        = "unlimited"
+          processing_break            = "none"
+          processing_size_capacity    = "unlimited"
+          scheduled_days              = "every-day"
+          scheduled_hour              = 23
+          scheduled_minute            = 45
+          window_type                 = "recurring"
         }
       ]
     }
@@ -46,12 +44,23 @@ variable "configuration_backups" {
       annotation = optional(string)
       configuration_export = list(object(
         {
+          authentication_type   = optional(string)
           description           = optional(string)
           format                = optional(string)
-          include_secure_fields = optional(string)
+          include_secure_fields = optional(bool)
+          management_epg        = optional(string)
+          management_epg_type   = optional(string)
           max_snapshot_count    = optional(number)
+          password              = optional(number)
+          protocol              = optional(string)
           remote_hosts          = list(string)
-          snapshot              = optional(string)
+          remote_path           = optional(string)
+          remote_port           = optional(number)
+          snapshot              = optional(bool)
+          ssh_key_contents      = optional(number)
+          ssh_key_passphrase    = optional(number)
+          start_now             = optional(string)
+          username              = optional(string)
         }
       ))
       recurring_window = list(object(
@@ -59,28 +68,13 @@ variable "configuration_backups" {
           delay_between_node_upgrades = optional(number)
           description                 = optional(string)
           maximum_concurrent_nodes    = optional(string)
+          maximum_running_time        = optional(string)
           processing_break            = optional(string)
           processing_size_capacity    = optional(string)
           scheduled_days              = optional(string)
           scheduled_hour              = optional(number)
           scheduled_minute            = optional(number)
-          windows_type                = optional(string)
-        }
-      ))
-      remote_hosts = list(object(
-        {
-          authentication_type = optional(string)
-          description         = optional(string)
-          hosts               = list(string)
-          management_epg      = optional(string)
-          management_epg_type = optional(string)
-          password            = optional(number)
-          protocol            = optional(string)
-          remote_path         = optional(string)
-          remote_port         = optional(number)
-          ssh_key_contents    = optional(number)
-          ssh_key_passphrase  = optional(number)
-          username            = optional(string)
+          window_type                 = optional(string)
         }
       ))
     }
@@ -149,8 +143,10 @@ GUI Location:
  - Admin > Schedulers > Fabric > {scheduler_name}
 */
 resource "aci_trigger_scheduler" "trigger_schedulers" {
+  for_each    = local.trigger_schedulers
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
-  name        = each.value.key1
+  name        = each.key
 }
 
 #----------------------------------------------------
@@ -167,19 +163,20 @@ resource "aci_recurring_window" "recurring_window" {
   depends_on = [
     aci_trigger_scheduler.trigger_schedulers
   ]
-  scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
-  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
-  concur_cap   = each.value.maximum_concurrent_nodes # "unlimited"
-  day          = each.value.scheduled_days           # "every-day"
-  hour         = each.value.scheduled_hour           # "0"
-  minute       = each.value.scheduled_minute         # "0"
-  name         = each.value.key1
+  for_each   = local.recurring_window
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  concur_cap = each.value.maximum_concurrent_nodes # "unlimited"
+  day        = each.value.scheduled_days           # "every-day"
+  hour       = each.value.scheduled_hour           # 0
+  minute     = each.value.scheduled_minute         # 0
+  name       = each.key
   node_upg_interval = length(regexall(
     1, each.value.maximum_concurrent_nodes)
   ) > 0 && each.value.window_type == "one-time" ? each.value.delay_between_node_upgrades : 0
-  proc_break = each.value.processing_break         # "none"
-  proc_cap   = each.value.processing_size_capacity # "unlimited"
-  time_cap   = each.value.maximum_running_time     # "unlimited"
+  proc_break   = each.value.processing_break         # "none"
+  proc_cap     = each.value.processing_size_capacity # "unlimited"
+  scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.key].id
+  time_cap     = each.value.maximum_running_time # "unlimited"
 }
 
 
@@ -191,14 +188,14 @@ GUI Location:
  - Admin > Import/Export > Remote Locations:{Remote_Host}
 */
 resource "aci_file_remote_path" "export_remote_hosts" {
+  for_each                        = local.configuration_export
   annotation                      = each.value.annotation != "" ? each.value.annotation : var.annotation
   auth_type                       = each.value.authentication_type
   description                     = each.value.description
-  host                            = each.value.host
+  host                            = each.value.remote_host
   identity_private_key_contents   = each.value.authentication_type == "useSshKeyContents" ? var.ssh_key_contents : ""
   identity_private_key_passphrase = each.value.authentication_type == "useSshKeyContents" ? var.ssh_key_passphrase : ""
   name                            = each.key
-  name_alias                      = each.alias
   protocol                        = each.value.protocol
   remote_path                     = each.value.remote_path
   remote_port                     = each.value.remote_port
@@ -228,18 +225,18 @@ resource "aci_configuration_export_policy" "configuration_export" {
     aci_file_remote_path.export_remote_hosts,
     aci_trigger_scheduler.trigger_schedulers
   ]
-  admin_st                              = each.value.start_now # triggered|untriggered
-  annotation                            = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description                           = each.value.description
-  format                                = each.value.format                # "json|xml"
-  include_secure_fields                 = each.value.include_secure_fields # "yes"
-  max_snapshot_count                    = each.value.max_snapshot_count    # "0-10"
-  name                                  = each.value.name
-  name_alias                            = each.value.alias
-  snapshot                              = each.value.snapshot # "yes"
-  target_dn                             = aci_file_remote_path.export_remote_hosts[each.value.remote_host].id
-  relation_config_rs_export_destination = aci_file_remote_path.export_remote_hosts[each.value.remote_host].id
+  for_each              = local.configuration_export
+  admin_st              = each.value.start_now # triggered|untriggered
+  annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description           = each.value.description
+  format                = each.value.format                                       # "json|xml"
+  include_secure_fields = each.value.include_secure_fields == true ? "yes" : "no"
+  max_snapshot_count    = each.value.max_snapshot_count == 0 ? "global-limit" : 0 # 0-10
+  name                  = each.key
+  snapshot              = each.value.snapshot == true ? "yes" : "no"
+  target_dn             = aci_file_remote_path.export_remote_hosts[each.key].id
+  relation_config_rs_export_destination = aci_file_remote_path.export_remote_hosts[each.key].id
   # relation_trig_rs_triggerable            = Unsure
-  relation_config_rs_remote_path      = aci_file_remote_path.export_remote_hosts[each.value.remote_host].id
-  relation_config_rs_export_scheduler = aci_trigger_scheduler.trigger_schedulers[each.value.scheduler].id
+  # relation_config_rs_remote_path      = aci_file_remote_path.export_remote_hosts[each.key].id
+  relation_config_rs_export_scheduler = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
 }

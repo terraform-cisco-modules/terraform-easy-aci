@@ -3,9 +3,9 @@ variable "authentication" {
     "default" = {
       annotation = ""
       icmp_reachability = [{
-        reachable_providers_only = true
-        retries                  = 1
-        timeout                  = 5
+        icmp_reachable_providers_only = true
+        retries                       = 1
+        timeout                       = 5
       }]
       console_authentication = [{
         provider_group = ""
@@ -21,7 +21,39 @@ variable "authentication" {
       remote_user_login_policy = "no-login"
     }
   }
+  description = <<-EOT
+  blah
+  EOT
+  type = map(object(
+    {
+      annotation = optional(string)
+      icmp_reachability = optional(list(object(
+        {
+          icmp_reachable_providers_only = optional(bool)
+          retries                       = optional(number)
+          timeout                       = optional(number)
+        }
+      )))
+      console_authentication = optional(list(object(
+        {
+          provider_group = optional(string)
+          realm          = optional(string)
+          realm_sub_type = optional(string)
+        }
+      )))
+      default_authentication = optional(list(object(
+        {
+          fallback_domain_avialability = optional(bool)
+          provider_group               = optional(string)
+          realm                        = optional(string)
+          realm_sub_type               = optional(string)
+        }
+      )))
+      remote_user_login_policy = optional(string)
+    }
+  ))
 }
+
 resource "aci_authentication_properties" "authentication_properties" {
   for_each        = local.authentication_properties
   annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation

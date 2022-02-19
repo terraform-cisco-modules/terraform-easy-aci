@@ -30,14 +30,14 @@ locals {
       configure_infra_port_groups    = v.configure_infra_port_groups != null ? v.configure_infra_port_groups : ""
       control                        = v.control != null ? v.control : "epDpVerify"
       delimiter                      = v.delimiter != null ? v.delimiter : ""
-      enable_tag_collection          = v.enable_tag_collection != null ? v.enable_tag_collection : "no"
+      enable_tag_collection          = v.enable_tag_collection != null ? v.enable_tag_collection : false
       encapsulation                  = v.encapsulation != null ? v.encapsulation : "vlan"
       endpoint_inventory_type        = v.endpoint_inventory_type != null ? v.endpoint_inventory_type : "on-link"
-      endpoint_retention_time        = v.endpoint_retention_time != null ? v.endpoint_retention_time : "0"
+      endpoint_retention_time        = v.endpoint_retention_time != null ? v.endpoint_retention_time : 0
       enforcement                    = v.enforcement != null ? v.enforcement : "hw"
       enhanced_lag_policy            = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
       firewall_policy                = v.firewall_policy != null ? v.firewall_policy : ""
-      host_availability_monitor      = v.host_availability_monitor != null ? v.host_availability_monitor : "no"
+      host_availability_monitor      = v.host_availability_monitor != null ? v.host_availability_monitor : false
       lacp_interface_policy          = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
       lldp_interface_policy          = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
       multicast_address              = v.multicast_address != null ? v.multicast_address : ""
@@ -51,6 +51,60 @@ locals {
     }
   }
 
+
+  #__________________________________________________________
+  #
+  # Firmware Management Variables
+  #__________________________________________________________
+
+  firmware = {
+    for k, v in var.firmware : k => {
+      annotation             = v.annotation != null ? v.annotation : ""
+      compatibility_check    = v.compatibility_check != null ? v.compatibility_check : false
+      description            = v.description != null ? v.description : ""
+      policy_type            = v.policy_type != null ? v.policy_type : "switch"
+      graceful_upgrade       = v.graceful_upgrade != null ? v.graceful_upgrade : false
+      maintenance_groups     = v.maintenance_groups
+      notify_conditions      = v.notify_conditions != null ? v.notify_conditions : "notifyOnlyOnFailures"
+      run_mode               = v.run_mode != null ? v.run_mode : "pauseOnlyOnFailures"
+      simulator              = v.simulator != null ? v.simulator : false
+      version                = v.version != null ? v.version : "5.2(3g)"
+      version_check_override = v.version_check_override != null ? v.version_check_override : false
+    }
+  }
+
+  maintenance_groups_loop = flatten([
+    for k, v in local.firmware : [
+      for key, value in v.maintenance_groups : {
+        annotation             = v.annotation
+        compatibility_check    = v.compatibility_check
+        description            = v.description
+        policy_type            = v.policy_type
+        graceful_upgrade       = v.graceful_upgrade
+        name                   = value.name
+        nodes                  = value.nodes != null ? value.nodes : [101, 201]
+        notify_conditions      = v.notify_conditions
+        simulator              = v.simulator
+        start_now              = value.start_now != null ? value.start_now : false
+        run_mode               = v.run_mode
+        version                = v.version
+        version_check_override = v.version_check_override
+      }
+    ]
+  ])
+
+  maintenance_groups = { for k, v in local.maintenance_groups_loop : v.name => v }
+
+  maintenance_group_nodes_loop = flatten([
+    for k, v in local.maintenance_groups : [
+      for s in v.nodes : {
+        name    = v.name
+        node_id = s
+      }
+    ]
+  ])
+
+  maintenance_group_nodes = { for k, v in local.maintenance_group_nodes_loop : "${v.name}_${v.node_id}" => v }
 
   #__________________________________________________________
   #
@@ -94,29 +148,29 @@ locals {
       alias                             = v.alias != null ? v.alias : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
-      arp_inspection                    = "yes"
-      bpdu_guard                        = "yes"
-      debug_1                           = "yes"
-      debug_2                           = "yes"
-      debug_3                           = "yes"
-      debug_4                           = "yes"
-      debug_5                           = "yes"
-      dhcp_rate_limit                   = "yes"
-      ethernet_port_module              = "yes"
-      ip_address_conflict               = "yes"
-      ipqos_dcbxp_compatability_failure = "yes"
-      ipqos_manager_error               = "yes"
-      link_flap                         = "yes"
-      loopback                          = "yes"
-      loop_indication_by_mcp            = "yes"
-      port_security_violation           = "yes"
-      security_violation                = "yes"
-      set_port_state_failed             = "yes"
-      storm_control                     = "yes"
-      stp_inconsist_vpc_peerlink        = "yes"
-      system_error_based                = "yes"
-      unidirection_link_detection       = "yes"
-      unknown                           = "yes"
+      arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : true
+      bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
+      debug_1                           = v.debug_1 != null ? v.debug_1 : true
+      debug_2                           = v.debug_2 != null ? v.debug_2 : true
+      debug_3                           = v.debug_3 != null ? v.debug_3 : true
+      debug_4                           = v.debug_4 != null ? v.debug_4 : true
+      debug_5                           = v.debug_5 != null ? v.debug_5 : true
+      dhcp_rate_limit                   = v.dhcp_rate_limit != null ? v.dhcp_rate_limit : true
+      ethernet_port_module              = v.ethernet_port_module != null ? v.ethernet_port_module : true
+      ip_address_conflict               = v.ip_address_conflict != null ? v.ip_address_conflict : true
+      ipqos_dcbxp_compatability_failure = v.ipqos_dcbxp_compatability_failure != null ? v.ipqos_dcbxp_compatability_failure : true
+      ipqos_manager_error               = v.ipqos_manager_error != null ? v.ipqos_manager_error : true
+      link_flap                         = v.link_flap != null ? v.link_flap : true
+      loopback                          = v.loopback != null ? v.loopback : true
+      loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
+      port_security_violation           = v.port_security_violation != null ? v.port_security_violation : true
+      security_violation                = v.security_violation != null ? v.security_violation : true
+      set_port_state_failed             = v.set_port_state_failed != null ? v.set_port_state_failed : true
+      storm_control                     = v.storm_control != null ? v.storm_control : true
+      stp_inconsist_vpc_peerlink        = v.stp_inconsist_vpc_peerlink != null ? v.stp_inconsist_vpc_peerlink : true
+      system_error_based                = v.system_error_based != null ? v.system_error_based : true
+      unidirection_link_detection       = v.unidirection_link_detection != null ? v.unidirection_link_detection : true
+      unknown                           = v.unknown != null ? v.unknown : true
     }
   }
 
@@ -129,11 +183,11 @@ locals {
       description                       = v.description != null ? v.description : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       controls                          = v.enable_mcp_pdu_per_vlan == true ? ["pdu-per-vlan", "stateful-ha"] : ["stateful-ha"]
-      initial_delay                     = "180"
-      loop_detect_multiplication_factor = "3"
-      loop_protect_action               = "yes"
-      transmission_frequency_seconds    = "2"
-      transmission_frequency_msec       = "0"
+      initial_delay                     = v.initial_delay != null ? v.initial_delay : 180
+      loop_detect_multiplication_factor = v.loop_detect_multiplication_factor != null ? v.loop_detect_multiplication_factor : 3
+      loop_protection_disable_port      = v.loop_protection_disable_port != null ? v.loop_protection_disable_port : true
+      transmission_frequency_seconds    = v.transmission_frequency_seconds != null ? v.transmission_frequency_seconds : 2
+      transmission_frequency_msec       = v.transmission_frequency_msec != null ? v.transmission_frequency_msec : 0
     }
   }
 
@@ -144,14 +198,14 @@ locals {
       annotation                        = v.annotation != null ? v.annotation : ""
       control                           = v.preserve_cos == false ? ["none"] : ["dot1p-preserve"]
       description                       = v.description != null ? v.description : ""
-      elephant_trap_age_period          = "0"
-      elephant_trap_bandwidth_threshold = "0"
-      elephant_trap_byte_count          = "0"
-      elephant_trap_state               = "no"
-      fabric_flush_interval             = "500"
-      fabric_flush_state                = "no"
-      micro_burst_spine_queues          = "0"
-      micro_burst_leaf_queues           = "0"
+      elephant_trap_age_period          = v.elephant_trap_age_period != null ? v.elephant_trap_age_period : 0
+      elephant_trap_bandwidth_threshold = v.elephant_trap_bandwidth_threshold != null ? v.elephant_trap_bandwidth_threshold : 0
+      elephant_trap_byte_count          = v.elephant_trap_byte_count != null ? v.elephant_trap_byte_count : 0
+      elephant_trap_state               = v.elephant_trap_state != null ? v.elephant_trap_state : false
+      fabric_flush_interval             = v.fabric_flush_interval != null ? v.fabric_flush_interval : 500
+      fabric_flush_state                = v.fabric_flush_state != null ? v.fabric_flush_state : false
+      micro_burst_spine_queues          = v.micro_burst_spine_queues != null ? v.micro_burst_spine_queues : 0
+      micro_burst_leaf_queues           = v.micro_burst_leaf_queues != null ? v.micro_burst_leaf_queues : 0
     }
   }
 
@@ -179,7 +233,7 @@ locals {
       description           = v.description != null ? v.description : ""
       fill_pattern          = v.fill_pattern != null ? v.fill_pattern : "ARBFF"
       port_mode             = v.port_mode != null ? v.port_mode : "f"
-      receive_buffer_credit = v.receive_buffer_credit != null ? v.receive_buffer_credit : "64"
+      receive_buffer_credit = v.receive_buffer_credit != null ? v.receive_buffer_credit : 64
       speed                 = v.speed != null ? v.speed : "auto"
       trunk_mode            = v.trunk_mode != null ? v.trunk_mode : "trunk-off"
     }
@@ -206,8 +260,8 @@ locals {
       fast_select_standby_ports = v.fast_select_standby_ports != null ? v.fast_select_standby_ports : true
       graceful_convergence      = v.graceful_convergence != null ? v.graceful_convergence : true
       load_defer_member_ports   = v.load_defer_member_ports != null ? v.load_defer_member_ports : false
-      maximum_number_of_links   = v.maximum_number_of_links != null ? v.maximum_number_of_links : "16"
-      minimum_number_of_links   = v.minimum_number_of_links != null ? v.minimum_number_of_links : "1"
+      maximum_number_of_links   = v.maximum_number_of_links != null ? v.maximum_number_of_links : 16
+      minimum_number_of_links   = v.minimum_number_of_links != null ? v.minimum_number_of_links : 1
       mode                      = v.mode != null ? v.mode : "off"
       suspend_individual_port   = v.suspend_individual_port != null ? v.suspend_individual_port : true
       symmetric_hashing         = v.symmetric_hashing != null ? v.symmetric_hashing : false
@@ -222,7 +276,7 @@ locals {
       auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : "on"
       description                 = v.description != null ? v.description : ""
       forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
-      link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : "100"
+      link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : 100
       speed                       = v.speed != null ? v.speed : "inherit"
     }
   }
@@ -254,22 +308,32 @@ locals {
       alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
-      maximum_endpoints     = v.maximum_endpoints != null ? v.maximum_endpoints : "0"
-      port_security_timeout = v.port_security_timeout != null ? v.port_security_timeout : "60"
+      maximum_endpoints     = v.maximum_endpoints != null ? v.maximum_endpoints : 0
+      port_security_timeout = v.port_security_timeout != null ? v.port_security_timeout : 60
     }
   }
 
 
-  spanning_tree_interface_policies = {
+  spanning_tree_interface_policies_loop1 = {
     for k, v in var.spanning_tree_interface_policies : k => {
       alias      = v.alias != null ? v.alias : ""
       annotation = v.annotation != null ? v.annotation : ""
+      bpdu_filter = v.bpdu_filter != null ? v.bpdu_filter : "disabled"
+      bpdu_guard = v.bpdu_guard != null ? v.bpdu_guard : "disabled"
+      description = v.description != null ? v.description : ""
+    }
+  }
+
+  spanning_tree_interface_policies = {
+    for k, v in local.spanning_tree_interface_policies_loop1 : k => {
+      alias      = v.alias != null ? v.alias : ""
+      annotation = v.annotation != null ? v.annotation : ""
       control = length(
-        regexall("^yes$", v.bpdu_filter_enabled)) > 0 && length(regexall("^yes$", v.bpdu_filter_enabled)
+        regexall("enabled", v.bpdu_filter)) > 0 && length(regexall("enabled", v.bpdu_guard)
         ) > 0 ? ["bpdu-filter", "bpdu-guard"] : length(
-        regexall("^yes$", v.bpdu_filter_enabled)) > 0 && length(regexall("^no$", v.bpdu_filter_enabled)
+        regexall("enabled", v.bpdu_filter)) > 0 && length(regexall("disabled", v.bpdu_guard)
         ) > 0 ? ["bpdu-filter"] : length(
-        regexall("^no$", v.bpdu_filter_enabled)) > 0 && length(regexall("^yes$", v.bpdu_filter_enabled)
+        regexall("disabled", v.bpdu_filter)) > 0 && length(regexall("enabled", v.bpdu_guard)
       ) > 0 ? ["bpdu-filter", "bpdu-guard"] : ["unspecified"]
       description = v.description != null ? v.description : ""
     }
@@ -396,16 +460,17 @@ locals {
 
   leaf_profiles = {
     for k, v in var.leaf_profiles : k => {
-      alias             = v.alias != null ? v.alias : ""
-      annotation        = v.annotation != null ? v.annotation : ""
-      description       = v.description != null ? v.description : ""
-      external_pool_id  = v.external_pool_id != null ? v.external_pool_id : "0"
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      external_pool_id = length(regexall(
+      "^[[:alnum:]]", coalesce(v.external_pool_id, "_EMPTY"))) > 0 ? v.external_pool_id : 0
       interfaces        = v.interfaces != null ? v.interfaces : {}
       leaf_policy_group = v.leaf_policy_group
       monitoring_policy = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
       name              = v.name
       node_type         = v.node_type != null ? v.node_type : "unspecified"
-      pod_id            = v.pod_id != null ? v.pod_id : "1"
+      pod_id            = v.pod_id != null ? v.pod_id : 1
       role              = v.role != null ? v.role : "unspecified"
       serial            = v.serial
       two_slot_leaf     = v.two_slot_leaf != null ? v.two_slot_leaf : false
@@ -516,12 +581,12 @@ locals {
       alias              = v.alias != null ? v.alias : ""
       annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
-      external_pool_id   = ""
+      external_pool_id   = 0
       interfaces         = v.interfaces != null ? v.interfaces : {}
       monitoring_policy  = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
       name               = v.name
       node_type          = "unspecified"
-      pod_id             = v.pod_id != null ? v.pod_id : "1"
+      pod_id             = v.pod_id != null ? v.pod_id : 1
       role               = "spine"
       serial             = v.serial
       spine_policy_group = v.spine_policy_group
@@ -668,8 +733,8 @@ locals {
         management_epg         = v.management_epg != null ? v.management_epg : ""
         monitoring_policy      = v.monitoring_policy != null ? v.monitoring_policy : "default"
         policy_scope           = v.policy_scope != null ? v.policy_scope : "vm"
-        port                   = v.port != null ? v.port : "0"
-        sequence_number        = v.sequence_number != null ? v.sequence_number : "0"
+        port                   = v.port != null ? v.port : 0
+        sequence_number        = v.sequence_number != null ? v.sequence_number : 0
         stats_collection       = v.stats_collection != null ? v.stats_collection : "disabled"
         trigger_inventory_sync = v.trigger_inventory_sync != null ? v.trigger_inventory_sync : "untriggered"
         virtual_switch_type    = v.virtual_switch_type != null ? v.virtual_switch_type : "default"
@@ -684,13 +749,13 @@ locals {
   vswitch_policies_loop_1 = flatten([
     for key, value in var.virtual_networking : [
       for k, v in value.vswitch_policy : {
-        active_flow_timeout   = v.active_flow_timeout != null ? v.active_flow_timeout : "60"
+        active_flow_timeout   = v.active_flow_timeout != null ? v.active_flow_timeout : 60
         alias                 = v.alias != null ? v.alias : ""
         annotation            = v.annotation != null ? v.annotation : ""
-        idle_flow_timeout     = v.idle_flow_timeout != null ? v.idle_flow_timeout : "15"
+        idle_flow_timeout     = v.idle_flow_timeout != null ? v.idle_flow_timeout : 15
         key1                  = key
         key2                  = k
-        sample_rate           = v.sample_rate != null ? v.sample_rate : "0"
+        sample_rate           = v.sample_rate != null ? v.sample_rate : 0
         netflow_export_policy = v.netflow_export_policy != null ? v.netflow_export_policy : ""
         vmm_domain            = value.vmm_domain
       }
@@ -709,7 +774,7 @@ locals {
     for k, v in var.vpc_domain_policies : k => {
       alias         = v.alias != null ? v.alias : ""
       annotation    = v.annotation != null ? v.annotation : ""
-      dead_interval = v.dead_interval != null ? v.dead_interval : "200"
+      dead_interval = v.dead_interval != null ? v.dead_interval : 200
       description   = v.description != null ? v.description : ""
     }
   }

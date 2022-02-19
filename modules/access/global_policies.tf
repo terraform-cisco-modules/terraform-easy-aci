@@ -89,89 +89,89 @@ variable "error_disabled_recovery_policy" {
     "default" = {
       alias                             = ""
       annotation                        = ""
-      arp_inspection                    = "yes"
-      bpdu_guard                        = "yes"
-      debug_1                           = "yes"
-      debug_2                           = "yes"
-      debug_3                           = "yes"
-      debug_4                           = "yes"
-      debug_5                           = "yes"
+      arp_inspection                    = true
+      bpdu_guard                        = true
+      debug_1                           = true
+      debug_2                           = true
+      debug_3                           = true
+      debug_4                           = true
+      debug_5                           = true
       description                       = ""
-      dhcp_rate_limit                   = "yes"
-      ethernet_port_module              = "yes"
-      ip_address_conflict               = "yes"
-      ipqos_dcbxp_compatability_failure = "yes"
-      ipqos_manager_error               = "yes"
-      link_flap                         = "yes"
-      loopback                          = "yes"
-      loop_indication_by_mcp            = "yes"
-      port_security_violation           = "yes"
-      security_violation                = "yes"
-      set_port_state_failed             = "yes"
-      storm_control                     = "yes"
-      stp_inconsist_vpc_peerlink        = "yes"
-      system_error_based                = "yes"
-      unidirection_link_detection       = "yes"
-      unknown                           = "yes"
+      dhcp_rate_limit                   = true
+      ethernet_port_module              = true
+      ip_address_conflict               = true
+      ipqos_dcbxp_compatability_failure = true
+      ipqos_manager_error               = true
+      link_flap                         = true
+      loopback                          = true
+      loop_indication_by_mcp            = true
+      port_security_violation           = true
+      security_violation                = true
+      set_port_state_failed             = true
+      storm_control                     = true
+      stp_inconsist_vpc_peerlink        = true
+      system_error_based                = true
+      unidirection_link_detection       = true
+      unknown                           = true
     }
   }
   description = <<-EOT
   Key: Unique Identifier for the Map of Objects.  Not used in assignment.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation                              = ""
-  * arp_inspection                    = "yes"
-  * bpdu_guard                        = "yes"
-  * debug_1                           = "yes"
-  * debug_2                           = "yes"
-  * debug_3                           = "yes"
-  * debug_4                           = "yes"
-  * debug_5                           = "yes"
+  * arp_inspection                    = true
+  * bpdu_guard                        = true
+  * debug_1                           = true
+  * debug_2                           = true
+  * debug_3                           = true
+  * debug_4                           = true
+  * debug_5                           = true
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * dhcp_rate_limit                   = "yes"
-  * ethernet_port_module              = "yes"
-  * ip_address_conflict               = "yes"
-  * ipqos_dcbxp_compatability_failure = "yes"
-  * ipqos_manager_error               = "yes"
-  * link_flap                         = "yes"
-  * loopback                          = "yes"
-  * loop_indication_by_mcp            = "yes"
-  * port_security_violation           = "yes"
-  * security_violation                = "yes"
-  * set_port_state_failed             = "yes"
-  * storm_control                     = "yes"
-  * stp_inconsist_vpc_peerlink        = "yes"
-  * system_error_based                = "yes"
-  * unidirection_link_detection       = "yes"
-  * unknown                           = "yes"
+  * dhcp_rate_limit                   = true
+  * ethernet_port_module              = true
+  * ip_address_conflict               = true
+  * ipqos_dcbxp_compatability_failure = true
+  * ipqos_manager_error               = true
+  * link_flap                         = true
+  * loopback                          = true
+  * loop_indication_by_mcp            = true
+  * port_security_violation           = true
+  * security_violation                = true
+  * set_port_state_failed             = true
+  * storm_control                     = true
+  * stp_inconsist_vpc_peerlink        = true
+  * system_error_based                = true
+  * unidirection_link_detection       = true
+  * unknown                           = true
   EOT
   type = map(object(
     {
       alias                             = optional(string)
       annotation                        = optional(string)
-      arp_inspection                    = optional(string)
-      bpdu_guard                        = optional(string)
-      debug_1                           = optional(string)
-      debug_2                           = optional(string)
-      debug_3                           = optional(string)
-      debug_4                           = optional(string)
-      debug_5                           = optional(string)
+      arp_inspection                    = optional(bool)
+      bpdu_guard                        = optional(bool)
+      debug_1                           = optional(bool)
+      debug_2                           = optional(bool)
+      debug_3                           = optional(bool)
+      debug_4                           = optional(bool)
+      debug_5                           = optional(bool)
       description                       = optional(string)
-      dhcp_rate_limit                   = optional(string)
-      ethernet_port_module              = optional(string)
-      ip_address_conflict               = optional(string)
-      ipqos_dcbxp_compatability_failure = optional(string)
-      ipqos_manager_error               = optional(string)
-      link_flap                         = optional(string)
-      loopback                          = optional(string)
-      loop_indication_by_mcp            = optional(string)
-      port_security_violation           = optional(string)
-      security_violation                = optional(string)
-      set_port_state_failed             = optional(string)
-      storm_control                     = optional(string)
-      stp_inconsist_vpc_peerlink        = optional(string)
-      system_error_based                = optional(string)
-      unidirection_link_detection       = optional(string)
-      unknown                           = optional(string)
+      dhcp_rate_limit                   = optional(bool)
+      ethernet_port_module              = optional(bool)
+      ip_address_conflict               = optional(bool)
+      ipqos_dcbxp_compatability_failure = optional(bool)
+      ipqos_manager_error               = optional(bool)
+      link_flap                         = optional(bool)
+      loopback                          = optional(bool)
+      loop_indication_by_mcp            = optional(bool)
+      port_security_violation           = optional(bool)
+      security_violation                = optional(bool)
+      set_port_state_failed             = optional(bool)
+      storm_control                     = optional(bool)
+      stp_inconsist_vpc_peerlink        = optional(bool)
+      system_error_based                = optional(bool)
+      unidirection_link_detection       = optional(bool)
+      unknown                           = optional(bool)
     }
   ))
 }
@@ -194,99 +194,99 @@ resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   name_alias          = each.value.alias
   edr_event {
     event   = "event-arp-inspection"
-    recover = each.value.arp_inspection
+    recover = each.value.arp_inspection == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-bpduguard"
-    recover = each.value.bpdu_guard
+    recover = each.value.bpdu_guard == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-debug-1"
-    recover = each.value.debug_1
+    recover = each.value.debug_1 == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-debug-2"
-    recover = each.value.debug_2
+    recover = each.value.debug_2 == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-debug-3"
-    recover = each.value.debug_3
+    recover = each.value.debug_3 == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-debug-4"
-    recover = each.value.debug_4
+    recover = each.value.debug_4 == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-debug-5"
-    recover = each.value.debug_5
+    recover = each.value.debug_5 == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-dhcp-rate-lim"
-    recover = each.value.dhcp_rate_limit
+    recover = each.value.dhcp_rate_limit == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-ep-move"
-    recover = each.value.frequent_endpoint_move
+    recover = each.value.frequent_endpoint_move == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-ethpm"
-    recover = each.value.ethernet_port_module
+    recover = each.value.ethernet_port_module == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-ip-addr-conflict"
-    recover = each.value.ip_address_conflict
+    recover = each.value.ip_address_conflict == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-ipqos-dcbxp-compat-failure"
-    recover = each.value.ipqos_dcbxp_compatability_failure
+    recover = each.value.ipqos_dcbxp_compatability_failure == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-ipqos-mgr-error"
-    recover = each.value.ipqos_manager_error
+    recover = each.value.ipqos_manager_error == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-link-flap"
-    recover = each.value.link_flap
+    recover = each.value.link_flap == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-loopback"
-    recover = each.value.loopback
+    recover = each.value.loopback == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-mcp-loop"
-    recover = each.value.loop_indication_by_mcp
+    recover = each.value.loop_indication_by_mcp == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-psec-violation"
-    recover = each.value.port_security_violation
+    recover = each.value.port_security_violation == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-sec-violation"
-    recover = each.value.security_violation
+    recover = each.value.security_violation == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-set-port-state-failed"
-    recover = each.value.set_port_state_failed
+    recover = each.value.set_port_state_failed == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-storm-ctrl"
-    recover = each.value.storm_control
+    recover = each.value.storm_control == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-stp-inconsist-vpc-peerlink"
-    recover = each.value.stp_inconsist_vpc_peerlink
+    recover = each.value.stp_inconsist_vpc_peerlink == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-syserr-based"
-    recover = each.value.system_error_based
+    recover = each.value.system_error_based == true ? "yes" : "no"
   }
   edr_event {
     event   = "event-udld"
-    recover = each.value.unidirection_link_detection
+    recover = each.value.unidirection_link_detection == true ? "yes" : "no"
   }
   edr_event {
     event   = "unknown"
-    recover = each.value.unknown
+    recover = each.value.unknown == true ? "yes" : "no"
   }
 }
 
@@ -304,11 +304,11 @@ variable "mcp_instance_policy" {
       description                       = ""
       annotation                        = ""
       enable_mcp_pdu_per_vlan           = true
-      initial_delay                     = "180"
-      loop_detect_multiplication_factor = "3"
-      loop_protect_action               = "yes"
-      transmission_frequency_seconds    = "2"
-      transmission_frequency_msec       = "0"
+      initial_delay                     = 180
+      loop_detect_multiplication_factor = 3
+      loop_protect_action               = true
+      transmission_frequency_seconds    = 2
+      transmission_frequency_msec       = 0
     }
   }
   description = <<-EOT
@@ -318,11 +318,11 @@ variable "mcp_instance_policy" {
   * admin_state                       = "enabled"
   * annotation                              = ""
   * enable_mcp_pdu_per_vlan           = true
-  * initial_delay                     = "180"
-  * loop_detect_multiplication_factor = "3"
-  * loop_protect_action               = "yes"
-  * transmission_frequency_seconds    = "2"
-  * transmission_frequency_msec       = "0"
+  * initial_delay                     = 180
+  * loop_detect_multiplication_factor = 3
+  * loop_protection_disable_port               = true
+  * transmission_frequency_seconds    = 2
+  * transmission_frequency_msec       = 0
   EOT
   type = map(object(
     {
@@ -331,11 +331,11 @@ variable "mcp_instance_policy" {
       admin_state                       = optional(string)
       annotation                        = optional(string)
       enable_mcp_pdu_per_vlan           = bool
-      initial_delay                     = optional(string)
-      loop_detect_multiplication_factor = optional(string)
-      loop_protect_action               = optional(string)
-      transmission_frequency_seconds    = optional(string)
-      transmission_frequency_msec       = optional(string)
+      initial_delay                     = optional(number)
+      loop_detect_multiplication_factor = optional(number)
+      loop_protection_disable_port      = optional(bool)
+      transmission_frequency_seconds    = optional(number)
+      transmission_frequency_msec       = optional(number)
     }
   ))
 }
@@ -365,7 +365,7 @@ resource "aci_mcp_instance_policy" "mcp_instance_policy" {
   init_delay_time  = each.value.initial_delay
   key              = var.mcp_instance_key
   loop_detect_mult = each.value.loop_detect_multiplication_factor
-  loop_protect_act = each.value.loop_protect_action
+  loop_protect_act = each.value.loop_protection_disable_port == true ? "yes" : "no"
   name_alias       = each.value.alias
   tx_freq          = each.value.transmission_frequency_seconds
   tx_freq_msec     = each.value.transmission_frequency_msec
@@ -382,14 +382,14 @@ variable "global_qos_class" {
     "default" = {
       alias                             = ""
       description                       = ""
-      elephant_trap_age_period          = "0"
-      elephant_trap_bandwidth_threshold = "0"
-      elephant_trap_byte_count          = "0"
-      elephant_trap_state               = "no"
-      fabric_flush_interval             = "500"
-      fabric_flush_state                = "no"
-      micro_burst_spine_queues          = "0"
-      micro_burst_leaf_queues           = "0"
+      elephant_trap_age_period          = 0
+      elephant_trap_bandwidth_threshold = 0
+      elephant_trap_byte_count          = 0
+      elephant_trap_state               = false
+      fabric_flush_interval             = 500
+      fabric_flush_state                = false
+      micro_burst_spine_queues          = 0
+      micro_burst_leaf_queues           = 0
       preserve_cos                      = true
       annotation                        = ""
     }
@@ -414,12 +414,12 @@ variable "global_qos_class" {
     {
       alias                             = optional(string)
       description                       = optional(string)
-      elephant_trap_age_period          = optional(string)
-      elephant_trap_bandwidth_threshold = optional(string)
-      elephant_trap_byte_count          = optional(string)
-      elephant_trap_state               = optional(string)
-      fabric_flush_interval             = optional(string)
-      fabric_flush_state                = optional(string)
+      elephant_trap_age_period          = optional(number)
+      elephant_trap_bandwidth_threshold = optional(number)
+      elephant_trap_byte_count          = optional(number)
+      elephant_trap_state               = optional(bool)
+      fabric_flush_interval             = optional(number)
+      fabric_flush_state                = optional(bool)
       micro_burst_spine_queues          = optional(string)
       micro_burst_leaf_queues           = optional(string)
       preserve_cos                      = optional(bool)

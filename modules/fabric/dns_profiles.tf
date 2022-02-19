@@ -17,7 +17,7 @@ variable "dns_profiles" {
       dns_domains = optional(list(object(
         {
           domain         = string
-          default_domain = optional(string)
+          default_domain = optional(bool)
           description    = optional(string)
         }
       )))
@@ -46,10 +46,10 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "dns_profiles" {
   for_each   = local.dns_profiles
-  dn         = "/api/node/mo/uni/fabric/dnsp-${each.key}"
+  dn         = "uni/fabric/dnsp-${each.key}"
   class_name = "dnsProfile"
   content = {
-    annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr           = each.value.description
     IPVerPreference = each.value.ip_version_preference
     name            = each.key
@@ -78,12 +78,12 @@ resource "aci_rest_managed" "dns_providers" {
     aci_rest_managed.dns_profiles
   ]
   for_each   = local.dns_providers
-  dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]"
+  dn         = "uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]"
   class_name = "dnsProv"
   content = {
     addr       = each.value.dns_provider
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    preferred  = each.value.preferred
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    preferred  = each.value.preferred == true ? "yes" : "no"
   }
 }
 
@@ -102,12 +102,12 @@ resource "aci_rest_managed" "dns_domains" {
     aci_rest_managed.dns_profiles
   ]
   for_each   = local.dns_domains
-  dn         = "/api/node/mo/uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]"
+  dn         = "uni/fabric/dnsp-${each.value.key1}/dom-[${each.value.domain}]"
   class_name = "dnsDomain"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
-    isDefault  = each.value.default_domain
+    isDefault  = each.value.default_domain == true ? "yes" : "no"
     name       = each.value.domain
   }
 }

@@ -1,8 +1,8 @@
 variable "aes_encryption_settings" {
   default = {
     "default" = {
-      clear_passphrase                  = "no"
-      enable_encryption                 = "yes"
+      clear_passphrase                  = false
+      enable_encryption                 = true
       passphrase_key_derivation_version = "v1"
     }
   }
@@ -14,8 +14,8 @@ variable "aes_encryption_settings" {
   EOT
   type = map(object(
     {
-      clear_passphrase                  = optional(string)
-      enable_encryption                 = optional(string)
+      clear_passphrase                  = optional(bool)
+      enable_encryption                 = optional(bool)
       passphrase_key_derivation_version = optional(string)
     }
   ))
@@ -37,8 +37,8 @@ ________________________________________________________________________________
 */
 resource "aci_encryption_key" "global_aes_passphrase" {
   for_each                          = local.aes_encryption_settings
-  clear_encryption_key              = each.value.clear_passphrase                  # "no"
-  passphrase                        = var.aes_passphrase                           # "example_passphrase"
+  clear_encryption_key              = each.value.clear_passphrase == true ? "yes" : "no"
+  passphrase                        = var.aes_passphrase
   passphrase_key_derivation_version = each.value.passphrase_key_derivation_version # "v1"
-  strong_encryption_enabled         = each.value.enable_encryption                 # "yes"
+  strong_encryption_enabled         = each.value.enable_encryption == true ? "yes" : "no"
 }

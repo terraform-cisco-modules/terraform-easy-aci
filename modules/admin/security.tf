@@ -16,7 +16,7 @@ variable "security" {
       password_change_interval         = 48
       password_changes_within_interval = 2
       password_expiration_warn_time    = 15
-      password_strength_check          = "yes"
+      password_strength_check          = true
       user_passwords_to_store_count    = 5
       web_session_idle_timeout         = 1200
       web_token_timeout                = 600
@@ -41,7 +41,7 @@ variable "security" {
       password_change_interval         = optional(number)
       password_changes_within_interval = optional(number)
       password_expiration_warn_time    = optional(number)
-      password_strength_check          = optional(string)
+      password_strength_check          = optional(bool)
       user_passwords_to_store_count    = optional(number)
       web_session_idle_timeout         = optional(number)
       web_token_timeout                = optional(number)
@@ -70,7 +70,7 @@ resource "aci_global_security" "security" {
   max_failed_attempts        = each.value.max_failed_attempts
   max_failed_attempts_window = each.value.max_failed_attempts_window
   maximum_validity_period    = each.value.maximum_validity_period
-  pwd_strength_check         = each.value.password_strength_check
+  pwd_strength_check         = each.value.password_strength_check == true ? "yes" : "no"
   session_record_flags       = ["login", "logout", "refresh"]
   ui_idle_timeout_seconds    = each.value.web_session_idle_timeout
   webtoken_timeout_seconds   = each.value.web_token_timeout

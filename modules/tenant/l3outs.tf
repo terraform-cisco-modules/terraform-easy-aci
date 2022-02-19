@@ -984,13 +984,13 @@ resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
   area_cost  = each.value.ospf_area_cost
   area_ctrl = alltrue(
     [each.value.redistribute, each.value.summary, each.value.suppress_fa]
-    ) ? "redistribute,summary,suppress-fa" : anytrue(
+    ) ? ["redistribute","summary","suppress-fa"] : anytrue(
     [each.value.redistribute, each.value.summary, each.value.suppress_fa]
     ) ? replace(trim(join(",", concat([
       length(regexall(true, each.value.redistribute)) > 0 ? "redistribute" : ""], [
       length(regexall(true, each.value.summary)) > 0 ? "summary" : ""], [
       length(regexall(true, each.value.suppress_fa)) > 0 ? "suppress-fa" : ""]
-  )), ","), ",,", ",") : "redistribute,summary"
+  )), ","), ",,", ",") : ["redistribute","summary"]
   area_id       = each.value.ospf_area_id
   area_type     = each.value.ospf_area_type
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id

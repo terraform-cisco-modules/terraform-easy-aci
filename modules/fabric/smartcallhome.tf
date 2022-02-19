@@ -13,7 +13,7 @@ variable "smart_callhome" {
           admin_state   = "enabled"
           email         = "admin@example.com"
           format        = "short-txt" # aml|short-txt|xml
-          rfc_compliant = "no"
+          rfc_compliant = false
         }
       ]
       from_email = ""
@@ -34,7 +34,7 @@ variable "smart_callhome" {
           management_epg      = "default"
           management_epg_type = "oob" # inb|oob
           port_number         = 25
-          secure_smtp         = "no"
+          secure_smtp         = false
           smtp_server         = "relay.example.com"
           username            = ""
         }
@@ -55,7 +55,7 @@ variable "smart_callhome" {
           admin_state   = optional(string)
           email         = optional(string)
           format        = optional(string)
-          rfc_compliant = optional(string)
+          rfc_compliant = optional(bool)
         }
       ))
       from_email = optional(string)
@@ -76,7 +76,7 @@ variable "smart_callhome" {
           management_epg      = optional(string)
           management_epg_type = optional(string)
           port_number         = optional(number)
-          secure_smtp         = optional(string)
+          secure_smtp         = optional(bool)
           smtp_server         = string
           username            = optional(string)
         }
@@ -106,30 +106,32 @@ resource "aci_rest_managed" "smart_callhome_destination_groups" {
   dn         = "uni/fabric/smartgroup-${each.key}"
   class_name = "callhomeSmartGroup"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.key
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    descr = each.value.description
+    name  = each.key
   }
-  child {
-    rn         = "prof"
-    class_name = "callhomeProf"
-    content = {
-      addr       = each.value.street_address
-      adminState = each.value.admin_state
-      annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-      contract   = each.value.contract_id
-      contact    = each.value.contact_information
-      customer   = each.value.customer_id
-      email      = each.value.customer_contact_email
-      from       = each.value.from_email
-      replyTo    = each.value.reply_to_email
-      phone      = each.value.phone_contact
-      port       = each.value.port_number
-      pwd        = var.smtp_password
-      secureSmtp = each.value.secure_smtp
-      site       = each.value.site_id
-      username   = each.value.username
-    }
+}
+
+resource "aci_rest_managed" "smart_callhome_destination_groups_callhome_profile" {
+  for_each   = local.smart_callhome
+  dn         = "uni/fabric/smartgroup-${each.key}/prof"
+  class_name = "callhomeProf"
+  content = {
+    addr       = each.value.street_address
+    adminState = each.value.admin_state
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    contract   = each.value.contract_id
+    contact    = each.value.contact_information
+    customer   = each.value.customer_id
+    email      = each.value.customer_contact_email
+    from       = each.value.from_email
+    replyTo    = each.value.reply_to_email
+    phone      = each.value.phone_contact
+    port       = each.value.port_number
+    pwd        = var.smtp_password
+    secureSmtp = each.value.secure_smtp == true ? "yes" : "no"
+    site       = each.value.site_id
+    username   = each.value.username
   }
 }
 
@@ -141,8 +143,8 @@ resource "aci_rest_managed" "smart_callhome_smtp_servers" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
   class_name = "callhomeSmtpServer"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    host       = each.value.smtp_server
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    host = each.value.smtp_server
   }
   child {
     rn         = "rsARemoteHostToEpg"
@@ -171,12 +173,12 @@ resource "aci_rest_managed" "smart_callhome_destinations" {
   dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
   class_name = "callhomeSmartDest"
   content = {
-    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminState   = each.value.admin_state
     email        = each.value.email
     format       = each.value.format
     name         = each.value.name
-    rfcCompliant = each.value.rfc_compliant
+    rfcCompliant = each.value.rfc_compliant == true ? "yes" : "no"
   }
 }
 
@@ -198,17 +200,17 @@ resource "aci_rest_managed" "smart_callhome_source" {
   dn         = "uni/fabric/moncommon/smartchsrc"
   class_name = "callhomeSmartSrc"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    incl = alltrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
-      ) ? "all" : anytrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
-      ) ? replace(trim(join(",", concat([
-        length(regexall(true, each.value.include_a)) > 0 ? "audit" : ""], [
-        length(regexall(true, each.value.include_e)) > 0 ? "events" : ""], [
-        length(regexall(true, each.value.include_f)) > 0 ? "faults" : ""], [
-        length(regexall(true, each.value.include_s)) > 0 ? "session" : ""]
-    )), ","), ",,", ",") : "none"
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # incl = alltrue(
+    #   [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+    #   ) ? "all" : anytrue(
+    #   [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+    #   ) ? replace(trim(join(",", concat([
+    #     length(regexall(true, each.value.include_a)) > 0 ? "audit" : ""], [
+    #     length(regexall(true, each.value.include_e)) > 0 ? "events" : ""], [
+    #     length(regexall(true, each.value.include_f)) > 0 ? "faults" : ""], [
+    #     length(regexall(true, each.value.include_s)) > 0 ? "session" : ""]
+    # )), ","), ",,", ",") : "none"
   }
   child {
     rn         = "rssmartdestGroup"

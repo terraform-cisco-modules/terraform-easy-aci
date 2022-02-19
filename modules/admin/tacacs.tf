@@ -204,7 +204,7 @@ resource "aci_tacacs_accounting_destination" "tacacs_accounting_destinations" {
   name                 = each.value.host
   port                 = each.value.port
   tacacs_accounting_dn = aci_tacacs_accounting.tacacs_accounting[each.value.key1].id
-  # relation_aaa_rs_prov_to_epp     = "5"
+  # relation_aaa_rs_prov_to_epp     = 5
   relation_file_rs_a_remote_host_to_epg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
 }
 
@@ -237,7 +237,7 @@ resource "aci_tacacs_provider" "tacacs_providers" {
   port            = each.value.port
   retries         = each.value.retries
   timeout         = each.value.timeout
-  # relation_aaa_rs_prov_to_epp     = "5"
+  # relation_aaa_rs_prov_to_epp     = 5
   relation_aaa_rs_sec_prov_to_epg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
 }
 

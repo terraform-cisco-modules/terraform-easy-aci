@@ -285,7 +285,7 @@ GUI Location:
 Tenants > {tenant} > Networking > VRFs > {vrf} > Create SNMP Context: Community Profiles
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vrf_snmp_context_community" "vrf_communities" {
+resource "aci_snmp_community" "vrf_communities" {
   depends_on = [
     aci_vrf_snmp_context.vrf_snmp_contexts
   ]
@@ -297,7 +297,7 @@ resource "aci_vrf_snmp_context_community" "vrf_communities" {
     3, each.value.community)) > 0 ? var.snmp_community_3 : length(regexall(
   2, each.value.community)) > 0 ? var.snmp_community_2 : var.snmp_community_1
   name_alias          = ""
-  vrf_snmp_context_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
+  parent_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
 /*_____________________________________________________________________________________________________________________
 
