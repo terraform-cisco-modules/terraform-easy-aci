@@ -118,10 +118,10 @@ locals {
       bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
       bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
       description                    = v.description != null ? v.description : ""
-      hold_interval                  = v.hold_interval != null ? v.hold_interval : 300
-      local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : 900
-      move_frequency                 = v.move_frequency != null ? v.move_frequency : 256
-      remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : 900
+      hold_interval                  = v.hold_interval != null ? v.hold_interval : "300"
+      local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : "900"
+      move_frequency                 = v.move_frequency != null ? v.move_frequency : "256"
+      remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : "900"
       tenant                         = v.tenant != null ? v.tenant : "common"
     }
   }
@@ -365,7 +365,7 @@ locals {
         node_profile              = key
         pod_id                    = value.pod_id
         router_id                 = v.router_id != null ? v.router_id : "198.18.0.1"
-        use_router_id_as_loopback = v.use_router_id_as_loopback != null ? v.use_router_id_as_loopback : "yes"
+        use_router_id_as_loopback = v.use_router_id_as_loopback != null ? v.use_router_id_as_loopback : true
         type                      = value.type
       }
     ]
@@ -651,7 +651,7 @@ locals {
       annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
       match_rules        = v.match_rules != null ? v.match_rules : {}
-      route_map_continue = v.route_map_continue != null ? v.route_map_continue : "no"
+      route_map_continue = v.route_map_continue != null ? v.route_map_continue : false
       tenant             = v.tenant != null ? v.tenant : "common"
     }
   }
@@ -744,7 +744,7 @@ locals {
     for k, v in var.vrfs : k => {
       alias                           = v.alias != null ? v.alias : ""
       annotation                      = v.annotation != null ? v.annotation : ""
-      bd_enforcement_status           = v.bd_enforcement_status != null ? v.bd_enforcement_status : "no"
+      bd_enforcement_status           = v.bd_enforcement_status != null ? v.bd_enforcement_status : false
       bgp_timers_per_address_family   = v.bgp_timers_per_address_family != null ? v.bgp_timers_per_address_family : []
       bgp_timers                      = v.bgp_timers != null ? v.bgp_timers : "default"
       communities                     = v.communities != null ? v.communities : []

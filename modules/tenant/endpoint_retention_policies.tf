@@ -3,13 +3,13 @@ variable "endpoint_retention_policies" {
     "default" = {
       alias                          = ""
       annotation                     = ""
-      bounce_entry_aging_interval    = 630
+      bounce_entry_aging_interval    = "630"
       bounce_trigger                 = "protocol"
       description                    = ""
-      hold_interval                  = 300
-      local_endpoint_aging_interval  = 900
-      move_frequency                 = 256
-      remote_endpoint_aging_interval = 900
+      hold_interval                  = "300"
+      local_endpoint_aging_interval  = "900"
+      move_frequency                 = "256"
+      remote_endpoint_aging_interval = "900"
       tenant                         = "common"
     }
   }
@@ -29,13 +29,13 @@ variable "endpoint_retention_policies" {
     {
       alias                          = optional(string)
       annotation                     = optional(string)
-      bounce_entry_aging_interval    = optional(number)
+      bounce_entry_aging_interval    = optional(string)
       bounce_trigger                 = optional(string)
       description                    = optional(string)
-      hold_interval                  = optional(number)
-      local_endpoint_aging_interval  = optional(number)
-      move_frequency                 = optional(number)
-      remote_endpoint_aging_interval = optional(number)
+      hold_interval                  = optional(string)
+      local_endpoint_aging_interval  = optional(string)
+      move_frequency                 = optional(string)
+      remote_endpoint_aging_interval = optional(string)
       tenant                         = optional(string)
     }
   ))

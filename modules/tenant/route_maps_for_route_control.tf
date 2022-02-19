@@ -14,7 +14,7 @@ variable "route_maps_for_route_control" {
           set_rule    = ""
         }
       }
-      route_map_continue = "no"
+      route_map_continue = false
       tenant             = "common"
     }
   }
@@ -32,7 +32,7 @@ variable "route_maps_for_route_control" {
           set_rule    = optional(string)
         }
       )))
-      route_map_continue = optional(string)
+      route_map_continue = optional(bool)
       tenant             = optional(string)
     }
   ))
@@ -44,7 +44,7 @@ resource "aci_rest_managed" "route_maps_for_route_control" {
   class_name = "rtctrlProfile"
   content = {
     # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
-    autoContinue = each.value.route_map_continue
+    autoContinue = each.value.route_map_continue == true ? "yes" : "no"
     descr        = each.value.description
     name         = each.key
     nameAlias    = each.value.alias

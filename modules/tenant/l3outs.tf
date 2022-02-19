@@ -130,7 +130,7 @@ variable "l3outs" {
             {
               node_id                   = 201
               router_id                 = "198.18.0.1"
-              use_router_id_as_loopback = "yes"
+              use_router_id_as_loopback = true
             }
           ]
           pod_id = 1
@@ -312,7 +312,7 @@ variable "l3outs" {
             {
               node_id                   = optional(number)
               router_id                 = optional(string)
-              use_router_id_as_loopback = optional(string)
+              use_router_id_as_loopback = optional(bool)
             }
           ))
           pod_id = optional(string)
@@ -752,7 +752,7 @@ resource "aci_logical_node_to_fabric_node" "l3out_node_profiles_nodes" {
   logical_node_profile_dn = aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id
   tdn                     = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
   rtr_id                  = each.value.router_id
-  rtr_id_loop_back        = each.value.use_router_id_as_loopback
+  rtr_id_loop_back        = each.value.use_router_id_as_loopback == true ? "yes" : "no"
 }
 
 #------------------------------------------------

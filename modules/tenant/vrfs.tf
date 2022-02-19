@@ -3,7 +3,7 @@ variable "vrfs" {
     "default" = {
       alias                           = ""
       annotation                      = ""
-      bd_enforcement_status           = "no"
+      bd_enforcement_status           = false
       bgp_timers                      = "default"
       bgp_timers_per_address_family   = []
       communities                     = []
@@ -48,7 +48,7 @@ variable "vrfs" {
     {
       alias                 = optional(string)
       annotation            = optional(string)
-      bd_enforcement_status = optional(string)
+      bd_enforcement_status = optional(bool)
       bgp_timers            = optional(string)
       bgp_timers_per_address_family = optional(list(object(
         {
@@ -162,7 +162,7 @@ resource "aci_vrf" "vrfs" {
   ]
   for_each               = { for k, v in local.vrfs : k => v if v.type == "apic" }
   annotation             = each.value.annotation != "" ? each.value.annotation : var.annotation
-  bd_enforced_enable     = each.value.bd_enforcement_status
+  bd_enforced_enable     = each.value.bd_enforcement_status == true ? "yes" : "no"
   description            = each.value.description
   ip_data_plane_learning = each.value.ip_data_plane_learning
   knw_mcast_act          = each.value.layer3_multicast == true ? "permit" : "deny"

@@ -276,7 +276,7 @@ resource "aci_rest_managed" "route_map_rules_set_preference" {
 #   description = "from terraform"
 #   name        = "example"
 #   name_alias  = "example"
-#   tag         = "1"
+#   tag         = 1
 # }
 
 resource "aci_rest_managed" "route_map_rules_set_route_tag" {
