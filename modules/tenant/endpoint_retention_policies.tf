@@ -9,7 +9,7 @@ variable "endpoint_retention_policies" {
       local_endpoint_aging_interval  = "900"
       move_frequency                 = "256"
       name_alias                     = ""
-      remote_endpoint_aging_interval = "900"
+      remote_endpoint_aging_interval = "300"
       tenant                         = "common"
     }
   }
@@ -45,8 +45,8 @@ resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each            = local.endpoint_retention_policies
-  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each = local.endpoint_retention_policies
+  # annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   bounce_age_intvl    = each.value.bounce_entry_aging_interval
   bounce_trig         = each.value.bounce_trigger
   description         = each.value.description
@@ -55,7 +55,7 @@ resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
   move_freq           = each.value.move_frequency
   name                = each.key
   name_alias          = each.value.name_alias
-  remote_ep_age_intvl = each.value.remote_endpoint_aging_interval
+  remote_ep_age_intvl = each.value.remote_endpoint_aging_interval == "0" ? "infinite" : each.value.remote_endpoint_aging_interval
   tenant_dn           = aci_tenant.tenants[each.value.tenant].id
 }
 

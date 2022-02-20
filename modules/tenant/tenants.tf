@@ -49,9 +49,9 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_tenant" "tenants" {
-  for_each                      = { for k, v in local.tenants : k => v if v.type == "apic" }
-  annotation                    = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description                   = each.value.description
+  for_each = { for k, v in local.tenants : k => v if v.type == "apic" }
+  # annotation                    = each.value.annotation != "" ? each.value.annotation : var.annotation
+  # description                   = each.value.description
   name                          = each.key
   name_alias                    = each.value.name_alias
   relation_fv_rs_tenant_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""

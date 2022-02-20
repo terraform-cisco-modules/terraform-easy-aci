@@ -160,8 +160,8 @@ resource "aci_vrf" "vrfs" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each               = { for k, v in local.vrfs : k => v if v.type == "apic" }
-  annotation             = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each = { for k, v in local.vrfs : k => v if v.type == "apic" }
+  # annotation             = each.value.annotation != "" ? each.value.annotation : var.annotation
   bd_enforced_enable     = each.value.bd_enforcement_status == true ? "yes" : "no"
   description            = each.value.description
   ip_data_plane_learning = each.value.ip_data_plane_learning

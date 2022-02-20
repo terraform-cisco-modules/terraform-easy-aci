@@ -463,8 +463,8 @@ resource "aci_l3_outside" "l3outs" {
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each       = { for k, v in local.l3outs : k => v if v.type == "apic" }
-  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each = { for k, v in local.l3outs : k => v if v.type == "apic" }
+  # annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = each.value.description
   enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
   name           = each.key
@@ -649,7 +649,7 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
     ) ? replace(trim(join(",", concat([
       length(regexall(true, each.value.agg_export)) > 0 ? "export-rtctrl" : ""], [
       length(regexall(true, each.value.agg_shared)) > 0 ? "shared-rtctrl" : ""]
-  )), ","), ",,", ",") : "export-rtctrl"
+  )), ","), ",,", ",") : "none"
   annotation                           = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                          = each.value.description
   external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.ext_epg].id
