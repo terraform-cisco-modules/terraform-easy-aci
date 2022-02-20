@@ -7,33 +7,33 @@ variable "spine_interface_policy_groups" {
   default = {
     "default" = {
       aaep_policy       = "**REQUIRED**"
-      alias             = ""
       annotation        = ""
       cdp_policy        = "default"
       description       = ""
       link_level_policy = "default"
       macsec_policy     = "default"
+      name_alias        = ""
     }
   }
   description = <<-EOT
   key - Name of the Spine Interface Policy Group.
   * aaep_policy: Name of the Access Entity Profile Policy.  An Attached Entity Profile (AEP) provides a template to deploy hypervisor policies or application EPGs on a large set of ports.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * cdp_policy: Name of the CDP Policy.  Cisco Discovery Protocol (CDP) policy to obtain protocol addresses of neighboring devices and discover the platform of these devices.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * link_level_policy: Name of the Link Level Policy.  Link Level policy specifies Layer 1 parameters for host facing ports.
   * macsec_policy: Name of the MACsec Policy.  
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       aaep_policy       = string
-      alias             = optional(string)
       annotation        = optional(string)
       cdp_policy        = optional(string)
       description       = optional(string)
       link_level_policy = optional(string)
       macsec_policy     = optional(string)
+      name_alias        = optional(string)
     }
   ))
 }
@@ -57,7 +57,7 @@ resource "aci_spine_port_policy_group" "spine_interface_policy_groups" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
+  name_alias  = each.value.name_alias
   # class: infraAttEntityP
   # DN: "uni/infra/attentp-{aaep_policy}"
   relation_infra_rs_att_ent_p = length(

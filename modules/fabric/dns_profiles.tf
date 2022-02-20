@@ -81,9 +81,9 @@ resource "aci_rest_managed" "dns_providers" {
   dn         = "uni/fabric/dnsp-${each.value.key1}/prov-[${each.value.dns_provider}]"
   class_name = "dnsProv"
   content = {
-    addr       = each.value.dns_provider
+    addr = each.value.dns_provider
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    preferred  = each.value.preferred == true ? "yes" : "no"
+    preferred = each.value.preferred == true ? "yes" : "no"
   }
 }
 
@@ -106,8 +106,8 @@ resource "aci_rest_managed" "dns_domains" {
   class_name = "dnsDomain"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    isDefault  = each.value.default_domain == true ? "yes" : "no"
-    name       = each.value.domain
+    descr     = each.value.description
+    isDefault = each.value.default_domain == true ? "yes" : "no"
+    name      = each.value.domain
   }
 }

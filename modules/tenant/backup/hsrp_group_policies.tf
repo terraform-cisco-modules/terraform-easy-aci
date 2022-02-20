@@ -1,19 +1,19 @@
 resource "aci_hsrp_group_policy" "example" {
 
-  tenant_dn  = aci_tenant.example.id
-  name  = "example"
-  annotation  = "example"
-  description = "from terraform"
-  ctrl = "preempt"
-  hello_intvl  = "3000"
-  hold_intvl  = "10000"
-  key  = "cisco"
-  name_alias  = "example"
-  preempt_delay_min  = "60"
-  preempt_delay_reload  = "60"
-  preempt_delay_sync  = "60"
-  prio  = "100"
-  timeout  = "60"
+  tenant_dn              = aci_tenant.example.id
+  name                   = "example"
+  annotation             = "example"
+  description            = "from terraform"
+  ctrl                   = "preempt"
+  hello_intvl            = "3000"
+  hold_intvl             = "10000"
+  key                    = "cisco"
+  name_alias             = "example"
+  preempt_delay_min      = "60"
+  preempt_delay_reload   = "60"
+  preempt_delay_sync     = "60"
+  prio                   = "100"
+  timeout                = "60"
   hsrp_group_policy_type = "md5"
 
 }
@@ -27,7 +27,7 @@ resource "aci_hsrp_group_policy" "example" {
 # hello_intvl - (Optional) The hello interval. Default value: "3000".
 # hold_intvl - (Optional) The period of time before declaring that the neighbor is down. Default value: "10000".
 # key - (Optional) The key or password used to uniquely identify this configuration object. If key is set, the object key will reset when terraform configuration is applied. Default value: "cisco".
-# name_alias - (Optional) Name alias for object hsrp group policy.
+# name_alias - (Optional) Name name_alias for object hsrp group policy.
 # preempt_delay_min - (Optional) HSRP Group's Minimum Preemption delay. Default value: "0".
 # preempt_delay_reload - (Optional) Preemption delay after switch reboot. Default value: "0".
 # preempt_delay_sync - (Optional) Maximum number of seconds to allow IPredundancy clients to prevent preemption. Default value: "0".

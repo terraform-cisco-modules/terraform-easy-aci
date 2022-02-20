@@ -521,11 +521,11 @@ locals {
 
   fabric_node_controls = {
     for k, v in var.fabric_node_controls : k => {
-      alias              = v.alias != null ? v.alias : ""
       annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
       enable_dom         = v.enable_dom != null ? v.enable_dom : "Dom"
       feature_selections = v.feature_selections != null ? v.feature_selections : "telemetry"
+      name_alias         = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -536,10 +536,10 @@ locals {
 
   l3_interface = {
     for k, v in var.l3_interface : k => {
-      alias                         = v.alias != null ? v.alias : ""
       annotation                    = v.annotation != null ? v.annotation : ""
-      description                   = v.description != null ? v.description : ""
       bfd_isis_policy_configuration = v.bfd_isis_policy_configuration != null ? v.bfd_isis_policy_configuration : "enabled"
+      description                   = v.description != null ? v.description : ""
+      name_alias                    = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -550,7 +550,6 @@ locals {
 
   pod_policy_groups = {
     for k, v in var.pod_policy_groups : k => {
-      alias                      = v.alias != null ? v.alias : ""
       annotation                 = v.annotation != null ? v.annotation : ""
       bgp_route_reflector_policy = v.bgp_route_reflector_policy != null ? v.bgp_route_reflector_policy : "default"
       coop_group_policy          = v.coop_group_policy != null ? v.coop_group_policy : "default"
@@ -559,15 +558,16 @@ locals {
       isis_policy                = v.isis_policy != null ? v.isis_policy : "default"
       macsec_policy              = v.macsec_policy != null ? v.macsec_policy : "default"
       management_access_policy   = v.management_access_policy != null ? v.management_access_policy : "default"
+      name_alias                 = v.name_alias != null ? v.name_alias : ""
       snmp_policy                = v.snmp_policy != null ? v.snmp_policy : "default"
     }
   }
 
   pod_profiles = {
     for k, v in var.pod_profiles : k => {
-      alias         = v.alias != null ? v.alias : ""
       annotation    = v.annotation != null ? v.annotation : ""
       description   = v.description != null ? v.description : ""
+      name_alias    = v.name_alias != null ? v.name_alias : ""
       pod_selectors = v.pod_selectors
     }
   }

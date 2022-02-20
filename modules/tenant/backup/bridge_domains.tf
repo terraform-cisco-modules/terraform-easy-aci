@@ -33,7 +33,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   mac                       = each.value.custom_mac_address
   mcast_allow               = each.value.pim
   multi_dst_pkt_act         = each.value.multi_destination_flooding
-  name_alias                = each.value.alias
+  name_alias                = each.value.name_alias
   optimize_wan_bandwidth = length(regexall(
     "yes", each.value.bd_stretched_to_remote_sites)) > 0 && length(regexall(
     "yes", each.value.allow_bum_traffic_on_stretched_bd)

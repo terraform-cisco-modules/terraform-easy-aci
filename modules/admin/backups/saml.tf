@@ -8,7 +8,7 @@ resource "aci_saml_provider" "example" {
   key                       = "key_example"
   metadata_url              = "metadata_url_example"
   name                      = "example"
-  name_alias                = "saml_provider_alias"
+  name_alias                = "saml_provider_name_alias"
   retries                   = "1"
   sig_alg                   = "SIG_RSA_SHA256"
   timeout                   = "5"

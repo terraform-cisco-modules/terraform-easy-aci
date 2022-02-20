@@ -34,5 +34,5 @@ resource "aci_bfd_interface_policy" "example" {
 # echo_rx_intvl - (Optional) Echo rx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
 # min_rx_intvl - (Optional) Required minimum rx interval for boject BFD Interface Policy. Range: "50" - "999". Default value is "50".
 # min_tx_intvl - (Optional) Desired minimum tx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
-# name_alias - (Optional) Name alias for object BFD Interface Policy.
+# name_alias - (Optional) Name name_alias for object BFD Interface Policy.
 # description - (Optional) Description for object BFD Interface Policy.

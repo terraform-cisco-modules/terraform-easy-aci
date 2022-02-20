@@ -1,12 +1,10 @@
 variable "l3outs" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       external_epgs = [
         {
-          alias                  = ""
           contract_exception_tag = 0
           contracts = [
             {
@@ -21,6 +19,7 @@ variable "l3outs" {
           flood_on_encapsulation = "disabled"
           match_type             = "AtleastOne"
           name                   = "default"
+          name_alias             = ""
           preferred_group_member = "exclude"
           qos_class              = "unspecified"
           subnets = [
@@ -75,8 +74,9 @@ variable "l3outs" {
           target_dscp = "unspecified"
         }
       ]
-      l3_domain = ""
-      level     = "template"
+      l3_domain  = ""
+      level      = "template"
+      name_alias = ""
       node_profiles = [
         {
           color_tag   = "yellow-green"
@@ -189,10 +189,10 @@ variable "l3outs" {
   }
   description = <<-EOT
   Key: Name of the VRF.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_context_per_address_family: 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
@@ -203,12 +203,10 @@ variable "l3outs" {
   EOT
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       external_epgs = optional(list(object(
         {
-          alias                  = optional(string)
           contract_exception_tag = optional(number)
           contracts = optional(list(object(
             {
@@ -223,6 +221,7 @@ variable "l3outs" {
           flood_on_encapsulation = optional(string)
           match_type             = optional(string)
           name                   = string
+          name_alias             = optional(string)
           preferred_group_member = optional(string)
           qos_class              = optional(string)
           subnets = list(object(
@@ -265,8 +264,9 @@ variable "l3outs" {
           target_dscp = optional(string)
         }
       )))
-      l3_domain = optional(string)
-      level     = optional(string)
+      l3_domain  = optional(string)
+      level      = optional(string)
+      name_alias = optional(string)
       node_profiles = optional(list(object(
         {
           color_tag   = optional(string)
@@ -468,7 +468,7 @@ resource "aci_l3_outside" "l3outs" {
   description    = each.value.description
   enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
   name           = each.key
-  name_alias     = each.value.alias
+  name_alias     = each.value.name_alias
   target_dscp    = each.value.target_dscp
   tenant_dn      = aci_tenant.tenants[each.value.tenant].id
   relation_l3ext_rs_ectx = length(regexall(
@@ -510,7 +510,7 @@ resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   exception_tag  = each.value.contract_exception_tag
   flood_on_encap = each.value.flood_on_encapsulation
   match_t        = each.value.match_type
-  name_alias     = each.value.alias
+  name_alias     = each.value.name_alias
   name           = each.value.name
   pref_gr_memb   = each.value.preferred_group_member
   prio           = each.value.qos_class
@@ -984,13 +984,13 @@ resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
   area_cost  = each.value.ospf_area_cost
   area_ctrl = alltrue(
     [each.value.redistribute, each.value.summary, each.value.suppress_fa]
-    ) ? ["redistribute","summary","suppress-fa"] : anytrue(
+    ) ? ["redistribute", "summary", "suppress-fa"] : anytrue(
     [each.value.redistribute, each.value.summary, each.value.suppress_fa]
     ) ? replace(trim(join(",", concat([
       length(regexall(true, each.value.redistribute)) > 0 ? "redistribute" : ""], [
       length(regexall(true, each.value.summary)) > 0 ? "summary" : ""], [
       length(regexall(true, each.value.suppress_fa)) > 0 ? "suppress-fa" : ""]
-  )), ","), ",,", ",") : ["redistribute","summary"]
+  )), ","), ",,", ",") : ["redistribute", "summary"]
   area_id       = each.value.ospf_area_id
   area_type     = each.value.ospf_area_type
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id

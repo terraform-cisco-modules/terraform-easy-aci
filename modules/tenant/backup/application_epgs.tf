@@ -26,7 +26,7 @@ resource "aci_application_epg" "application_epgs" {
   has_mcast_source       = "{has_mcast}"
   is_attr_based_epg      = "{is_attr_based}"
   match_t                = "{match_t}"
-  name_alias             = each.value.alias
+  name_alias             = each.value.name_alias
   pc_enf_pref            = "{pc_enf_pref}"
   pref_gr_memb           = "{pref_gr_memb}"
   prio                   = "{prio}"
@@ -77,7 +77,7 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   annotation                 = each.value.annotation
   encap                      = each.value.epg_type == "in_band" ? "vlan-${each.value.vlan}" : ""
   match_t                    = each.value.epg_type == "in_band" ? each.value.match_t : ""
-  name_alias                 = each.value.alias
+  name_alias                 = each.value.name_alias
   pref_gr_memb               = "exclude"
   prio                       = each.value.qos_class
   type                       = each.value.type

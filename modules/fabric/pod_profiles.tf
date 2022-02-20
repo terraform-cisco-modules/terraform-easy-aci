@@ -1,7 +1,6 @@
 variable "pod_policy_groups" {
   default = {
     "default" = {
-      alias                      = ""
       annotation                 = ""
       bgp_route_reflector_policy = "default"
       coop_group_policy          = "default"
@@ -10,12 +9,12 @@ variable "pod_policy_groups" {
       isis_policy                = "default"
       macsec_policy              = "default"
       management_access_policy   = "default"
+      name_alias                 = ""
       snmp_policy                = "default"
     }
   }
   description = <<-EOT
   key - Name of the Pod Policy Group
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_route_reflector_policy: Name of the BGP Route Reflector Policy.
   * coop_group_policy: Name of the COOP Group Policy.
@@ -24,11 +23,11 @@ variable "pod_policy_groups" {
   * isis_policy: Name of the ISIS Policy.
   * macsec_policy: Name of the MACSec Policy.
   * management_access_policy: Name of the Management Access Policy.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * snmp_policy: Name of the SNMP Policy.
   EOT
   type = map(object(
     {
-      alias                      = optional(string)
       annotation                 = optional(string)
       bgp_route_reflector_policy = optional(string)
       coop_group_policy          = optional(string)
@@ -37,6 +36,7 @@ variable "pod_policy_groups" {
       isis_policy                = optional(string)
       macsec_policy              = optional(string)
       management_access_policy   = optional(string)
+      name_alias                 = optional(string)
       snmp_policy                = optional(string)
     }
   ))
@@ -129,7 +129,7 @@ resource "aci_rest_managed" "pod_policy_groups_snmp_policy" {
 variable "pod_profiles" {
   default = {
     "default" = {
-      alias       = ""
+      name_alias  = ""
       annotation  = ""
       description = ""
       pod_selectors = [
@@ -143,7 +143,7 @@ variable "pod_profiles" {
   }
   description = <<-EOT
   key - Name of the Pod Profile.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_route_reflector_policy: Name of the BGP Route Reflector Policy.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
@@ -158,7 +158,7 @@ variable "pod_profiles" {
   EOT
   type = map(object(
     {
-      alias       = optional(string)
+      name_alias  = optional(string)
       annotation  = optional(string)
       description = optional(string)
       pod_selectors = list(object(
@@ -192,7 +192,7 @@ resource "aci_rest_managed" "pod_profiles" {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr     = each.value.description
     name      = each.key
-    nameAlias = each.value.alias
+    nameAlias = each.value.name_alias
   }
 }
 

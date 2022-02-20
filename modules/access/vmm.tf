@@ -34,9 +34,9 @@ variable "virtual_networking" {
       vswitch_policy = {
         "default" = {
           active_flow_timeout   = 60
-          alias                 = ""
           annotation            = ""
           idle_flow_timeout     = 15
+          name_alias            = ""
           sample_rate           = 0
           netflow_export_policy = ""
         }
@@ -45,7 +45,7 @@ variable "virtual_networking" {
   }
   description = <<-EOT
   key - Name of the Leaf Policy Group.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
   * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
@@ -105,8 +105,8 @@ variable "virtual_networking" {
         {
           annotation            = optional(string)
           active_flow_timeout   = optional(number)
-          alias                 = optional(string)
           idle_flow_timeout     = optional(number)
+          name_alias            = optional(string)
           sample_rate           = optional(number)
           netflow_export_policy = optional(string)
         }
@@ -232,7 +232,7 @@ resource "aci_vswitch_policy" "vswitch_policies" {
   vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
-  name_alias    = each.value.alias
+  name_alias    = each.value.name_alias
   relation_vmm_rs_vswitch_exporter_pol {
     active_flow_time_out = each.value.active_flow_timeout
     idle_flow_time_out   = each.value.idle_flow_timeout

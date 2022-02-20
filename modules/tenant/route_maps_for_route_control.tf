@@ -2,7 +2,6 @@
 variable "route_maps_for_route_control" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       match_rules = {
@@ -14,13 +13,13 @@ variable "route_maps_for_route_control" {
           set_rule    = ""
         }
       }
+      name_alias         = ""
       route_map_continue = false
       tenant             = "common"
     }
   }
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       match_rules = optional(map(object(
@@ -32,6 +31,7 @@ variable "route_maps_for_route_control" {
           set_rule    = optional(string)
         }
       )))
+      name_alias         = optional(string)
       route_map_continue = optional(bool)
       tenant             = optional(string)
     }
@@ -47,7 +47,7 @@ resource "aci_rest_managed" "route_maps_for_route_control" {
     autoContinue = each.value.route_map_continue == true ? "yes" : "no"
     descr        = each.value.description
     name         = each.key
-    nameAlias    = each.value.alias
+    nameAlias    = each.value.name_alias
   }
 }
 

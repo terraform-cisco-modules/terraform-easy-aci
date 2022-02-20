@@ -6,20 +6,20 @@ ________________________________________________________________________________
 variable "layer3_domains" {
   default = {
     "default" = {
-      alias      = ""
       annotation = ""
+      name_alias = ""
       vlan_pool  = ""
     }
   }
   description = <<-EOT
   Key: Name of the Layer 3 Domain.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
-      alias      = optional(string)
+      name_alias = optional(string)
       annotation = optional(string)
       vlan_pool  = string
     }
@@ -42,7 +42,7 @@ resource "aci_l3_domain_profile" "layer3_domains" {
   for_each                  = local.layer3_domains
   annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
   name                      = each.key
-  name_alias                = each.value.alias
+  name_alias                = each.value.name_alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
 }
 
@@ -55,20 +55,20 @@ ________________________________________________________________________________
 variable "physical_domains" {
   default = {
     "default" = {
-      alias      = ""
       annotation = ""
+      name_alias = ""
       vlan_pool  = ""
     }
   }
   description = <<-EOT
   Key: Name of the Physical Domain.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
-      alias      = optional(string)
+      name_alias = optional(string)
       annotation = optional(string)
       vlan_pool  = string
     }
@@ -91,7 +91,7 @@ resource "aci_physical_domain" "physical_domains" {
   for_each                  = local.physical_domains
   annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
   name                      = each.key
-  name_alias                = each.value.alias
+  name_alias                = each.value.name_alias
   relation_infra_rs_vlan_ns = aci_vlan_pool.vlan_pools[each.value.vlan_pool].id
 }
 
@@ -105,7 +105,6 @@ variable "vmm_domains" {
   default = {
     "default" = {
       access_mode                    = "read-write"
-      alias                          = ""
       annotation                     = ""
       arp_learning                   = "disabled"
       cdp_interface_policy           = ""
@@ -125,6 +124,7 @@ variable "vmm_domains" {
       multicast_address              = ""
       multicast_pool                 = ""
       mtu_policy                     = "default"
+      name_alias                     = ""
       preferred_encapsulation        = "unspecified"
       provider_type                  = "VMware"
       spanning_tree_interface_policy = ""
@@ -134,14 +134,13 @@ variable "vmm_domains" {
   }
   description = <<-EOT
   Key: Name of the Virtual Machine Managed (VMM) Domain.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {
       access_mode                    = optional(string)
-      alias                          = optional(string)
       annotation                     = optional(string)
       arp_learning                   = optional(string)
       cdp_interface_policy           = optional(string)
@@ -161,6 +160,7 @@ variable "vmm_domains" {
       multicast_address              = optional(string)
       multicast_pool                 = optional(string)
       mtu_policy                     = optional(string)
+      name_alias                     = optional(string)
       preferred_encapsulation        = optional(string)
       provider_type                  = optional(string)
       spanning_tree_interface_policy = optional(string)
@@ -204,7 +204,7 @@ resource "aci_vmm_domain" "vmm_domains" {
   mcast_addr                            = each.value.multicast_address
   mode                                  = each.value.virtual_switch_type
   name                                  = each.key
-  name_alias                            = each.value.alias
+  name_alias                            = each.value.name_alias
   pref_encap_mode                       = each.value.preferred_encapsulation
   provider_profile_dn                   = each.value.provider_type
   relation_vmm_rs_pref_enhanced_lag_pol = each.value.enhanced_lag_policy

@@ -1,12 +1,10 @@
 variable "filters" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       filter_entries = [
         {
-          alias                 = ""
           annotation            = ""
           arp_flag              = "unspecified"
           description           = ""
@@ -17,6 +15,7 @@ variable "filters" {
           match_dscp            = "unspecified"
           match_only_fragments  = false
           name                  = "default"
+          name_alias            = ""
           stateful              = false
           source_port_from      = "unspecified"
           source_port_to        = "unspecified"
@@ -33,20 +32,19 @@ variable "filters" {
           ]
         }
       ]
-      schema   = "common"
-      template = "common"
-      tenant   = "common"
-      type     = "apic"
+      name_alias = ""
+      schema     = "common"
+      template   = "common"
+      tenant     = "common"
+      type       = "apic"
     }
   }
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       filter_entries = list(object(
         {
-          alias                 = optional(string)
           annotation            = optional(string)
           arp_flag              = optional(string)
           description           = optional(string)
@@ -57,6 +55,7 @@ variable "filters" {
           match_dscp            = optional(string)
           match_only_fragments  = optional(bool)
           name                  = string
+          name_alias            = optional(string)
           stateful              = optional(bool)
           source_port_from      = optional(string)
           source_port_to        = optional(string)
@@ -73,10 +72,11 @@ variable "filters" {
           )))
         }
       ))
-      schema   = optional(string)
-      template = optional(string)
-      tenant   = optional(string)
-      type     = optional(string)
+      name_alias = optional(string)
+      schema     = optional(string)
+      template   = optional(string)
+      tenant     = optional(string)
+      type       = optional(string)
     }
   ))
 }
@@ -99,7 +99,7 @@ resource "aci_filter" "filters" {
   annotation                     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                    = each.value.description
   name                           = each.key
-  name_alias                     = each.value.alias
+  name_alias                     = each.value.name_alias
   relation_vz_rs_filt_graph_att  = ""
   relation_vz_rs_fwd_r_flt_p_att = ""
   relation_vz_rs_rev_r_flt_p_att = ""
@@ -123,7 +123,7 @@ resource "aci_filter_entry" "filter_entries" {
   filter_dn     = aci_filter.filters[each.value.filter_name].id
   description   = each.value.description
   name          = each.key
-  name_alias    = each.value.alias
+  name_alias    = each.value.name_alias
   ether_t       = each.value.ethertype
   prot          = each.value.ip_protocol
   arp_opc       = each.value.arp_flag == "request" ? "req" : each.value.arp_flag

@@ -14,7 +14,7 @@ resource "aci_l3out_static_route" "example" {
 # aggregate - (Optional) Aggregated Route for object l3out static route. Allowed values: "no", "yes". Default value is "no".
 # annotation - (Optional) Annotation for object l3out static route.
 # description - (Optional) Description for object l3out static route.
-# name_alias - (Optional) Name alias for object l3out static route.
+# name_alias - (Optional) Name name_alias for object l3out static route.
 # pref - (Optional) The administrative preference value for this route. This value is useful for resolving routes advertised from different protocols. Range of allowed values is "1" to "255". Default value is "1".
 # rt_ctrl - (Optional) Route control for object l3out static route. Allowed values: "bfd", "unspecified". Default value is "unspecified".
 # relation_ip_rs_route_track - (Optional) Relation to class fvTrackList. Cardinality - N_TO_ONE. Type - String.
@@ -35,7 +35,7 @@ resource "aci_l3out_static_route_next_hop" "example" {
 # nh_addr - (Required) The nexthop IP address for the static route to the outside network.
 # annotation - (Optional) Annotation for object l3out static route next hop.
 # description - (Optional) Description for object l3out static route next hop.
-# name_alias - (Optional) Name alias for object l3out static route next hop.
+# name_alias - (Optional) Name name_alias for object l3out static route next hop.
 # pref - (Optional) Administrative preference value for this route. Range: "1" to "255" Allowed values: "unspecified". Default value: "unspecified".
 # nexthop_profile_type - (Optional) Component type.
 # Allowed values: "none", "prefix". Default value: "prefix".

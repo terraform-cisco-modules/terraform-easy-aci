@@ -1,7 +1,6 @@
 variable "ospf_interface_policies" {
   default = {
     "default" = {
-      alias             = ""
       annotation        = ""
       cost_of_interface = 0
       dead_interval     = 40
@@ -15,6 +14,7 @@ variable "ospf_interface_policies" {
           passive_participation = false
         }
       ]
+      name_alias          = ""
       network_type        = "bcast"
       priority            = 1
       retransmit_interval = 5
@@ -24,7 +24,6 @@ variable "ospf_interface_policies" {
   }
   description = <<-EOT
   Key - Name of the OSPF Interface Policy.
-  * alias:  Name alias for object OSPF interface policy.
   * annotation:  Annotation for object OSPF interface policy.
   * cost_of_interface:  The OSPF cost for the interface. The cost (also called metric) of an interface in OSPF is an indication of the overhead required to send packets across a certain interface. The cost of an interface is inversely proportional to the bandwidth of that interface. A higher bandwidth indicates a lower cost. There is more overhead (higher cost) and time delays involved in crossing a 56k serial line than crossing a 10M ethernet line. The formula used to calculate the cost is: cost= 10000 0000/bandwidth in bps For example, it will cost 10 EXP8/10 EXP7 = 10 to cross a 10M Ethernet line and will cost 10 EXP8/1544000 = 64 to cross a T1 line. By default, the cost of an interface is calculated based on the bandwidth; you can force the cost of an interface with the ip OSPF cost value interface sub-configuration mode command. Allowed value range is 0-65535. Default is 0.
   * dead_interval:  The interval between hello packets from a neighbor before the router declares the neighbor as down. This value must be the same for all networking devices on a specific network. Specifying a smaller dead interval (seconds) will give faster detection of a neighbor being down and improve convergence, but might cause more routing instability. Allowed value range is 1-65535. Default value is 40.
@@ -35,6 +34,7 @@ variable "ospf_interface_policies" {
     - bfd: Flag to Enable Bidirectional Forward Detection on the interface.
     - mtu_ignore: Flag to ignore the MTU when establishing neighbor relationships
     - passive: Flag to passively add the interface to the OSPF process.
+  * name_alias:  Name name_alias for object OSPF interface policy.
   * network_type:  The OSPF interface policy network type. OSPF supports point-to-point and broadcast. Allowed values are "unspecified", "p2p" and "bcast". Default value is "unspecified".
   * priority:  The OSPF interface priority used to determine the designated router (DR) on a specific network. The router with the highest OSPF priority on a segment will become the DR for that segment. The same process is repeated for the backup designated router (BDR). In the case of a tie, the router with the highest RID will win. The default for the interface OSPF priority is one. Remember that the DR and BDR concepts are per multiaccess segment. Allowed range is 0-255. Default value is 1.
   * retransmit_interval:  The interval between LSA retransmissions. The retransmit interval occurs while the router is waiting for an acknowledgement from the neighbor router that it received the LSA. If no acknowlegment is received at the end of the interval, then the LSA is resent. Allowed value range is 1-65535. Default value is 5.
@@ -43,7 +43,6 @@ variable "ospf_interface_policies" {
   EOT
   type = map(object(
     {
-      alias             = optional(string)
       annotation        = optional(string)
       cost_of_interface = optional(number)
       dead_interval     = optional(number)
@@ -57,6 +56,7 @@ variable "ospf_interface_policies" {
           passive_participation = optional(bool)
         }
       )))
+      name_alias          = optional(string)
       network_type        = optional(string)
       priority            = optional(number)
       retransmit_interval = optional(number)
@@ -88,7 +88,7 @@ resource "aci_ospf_interface_policy" "ospf_interface_policies" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
+  name_alias  = each.value.name_alias
   cost        = each.value.cost_of_interface == 0 ? "unspecified" : each.value.cost_of_interface
   ctrl = alltrue(
     [each.value.adv_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]

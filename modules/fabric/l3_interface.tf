@@ -1,27 +1,27 @@
 variable "l3_interface" {
   default = {
     "default" = {
-      alias                         = ""
       annotation                    = ""
-      description                   = ""
       bfd_isis_policy_configuration = "enabled"
+      description                   = ""
+      name_alias                    = ""
     }
   }
   description = <<-EOT
   Key: Name of the Fabric Node Control Policy - **This should always be default.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * bfd_isis_policy_configuration: State ( enabled or disabled) of the BFD-IS-IS policy configuration.
     - enabled: Enables BFD-IS-IS policy.
     - disabled: Disables BFD-IS-IS policy.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
-      alias                         = optional(string)
       annotation                    = optional(string)
       bfd_isis_policy_configuration = optional(string)
       description                   = optional(string)
+      name_alias                    = optional(string)
     }
   ))
 }
@@ -42,5 +42,5 @@ resource "aci_l3_interface_policy" "l3_interface" {
   bfd_isis    = each.value.bfd_isis_policy_configuration
   description = each.value.description
   name        = "default"
-  name_alias  = each.value.alias
+  name_alias  = each.value.name_alias
 }

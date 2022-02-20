@@ -1,7 +1,6 @@
 variable "contracts" {
   default = {
     "default" = {
-      alias               = ""
       annotation          = ""
       consumer_match_type = "AtleastOne"
       contract_type       = "standard" # oob|taboo
@@ -14,6 +13,7 @@ variable "contracts" {
         }
       ]
       log_packets          = false
+      name_alias           = ""
       qos_class            = "unspecified"
       provider_match_type  = "AtleastOne"
       reverse_filter_ports = true
@@ -28,19 +28,16 @@ variable "contracts" {
   }
   description = <<-EOT
   Key: Name of the Contract.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_context_per_address_family: 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
   EOT
   type = map(object(
     {
-      alias               = optional(string)
-      annotation          = optional(string)
-      alias               = optional(string)
       annotation          = optional(string)
       consumer_match_type = optional(string)
       contract_type       = optional(string)
@@ -53,6 +50,7 @@ variable "contracts" {
         }
       )))
       log_packets          = optional(bool)
+      name_alias           = optional(string)
       provider_match_type  = optional(string)
       qos_class            = optional(string)
       reverse_filter_ports = optional(bool)
@@ -116,7 +114,7 @@ resource "aci_contract" "contracts" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
+  name_alias  = each.value.name_alias
   prio        = each.value.qos_class
   scope       = each.value.scope
   target_dscp = each.value.target_dscp
@@ -146,7 +144,7 @@ resource "aci_rest_managed" "oob_contracts" {
     annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.key
-    nameAlias  = each.value.alias
+    nameAlias  = each.value.name_alias
     prio       = each.value.qos_class
     scope      = each.value.scope
     targetDscp = each.value.target_dscp
@@ -175,7 +173,7 @@ resource "aci_taboo_contract" "contracts" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
+  name_alias  = each.value.name_alias
 }
 
 resource "mso_schema_template_contract" "contracts" {
@@ -247,7 +245,7 @@ resource "aci_contract_subject" "contract_subjects" {
   cons_match_t                 = each.value.consumer_match_type
   description                  = each.value.description
   name                         = each.key
-  name_alias                   = each.value.alias
+  name_alias                   = each.value.name_alias
   prio                         = each.value.qos_class
   prov_match_t                 = each.value.provider_match_type
   rev_flt_ports                = each.value.reverse_filter_ports == true ? "yes" : "no"
@@ -276,7 +274,7 @@ ________________________________________________________________________________
 #     consMatchT  = each.value.consumer_match_type
 #     descr       = each.value.description
 #     name        = each.value.name
-#     nameAlias   = each.value.alias
+#     nameAlias   = each.value.name_alias
 #     prio        = each.value.qos_priority
 #     provMatchT  = each.value.provider_match_type
 #     revFltPorts = each.value.reverse_filter_ports

@@ -225,16 +225,16 @@ resource "aci_configuration_export_policy" "configuration_export" {
     aci_file_remote_path.export_remote_hosts,
     aci_trigger_scheduler.trigger_schedulers
   ]
-  for_each              = local.configuration_export
-  admin_st              = each.value.start_now # triggered|untriggered
-  annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description           = each.value.description
-  format                = each.value.format                                       # "json|xml"
-  include_secure_fields = each.value.include_secure_fields == true ? "yes" : "no"
-  max_snapshot_count    = each.value.max_snapshot_count == 0 ? "global-limit" : 0 # 0-10
-  name                  = each.key
-  snapshot              = each.value.snapshot == true ? "yes" : "no"
-  target_dn             = aci_file_remote_path.export_remote_hosts[each.key].id
+  for_each                              = local.configuration_export
+  admin_st                              = each.value.start_now # triggered|untriggered
+  annotation                            = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description                           = each.value.description
+  format                                = each.value.format # "json|xml"
+  include_secure_fields                 = each.value.include_secure_fields == true ? "yes" : "no"
+  max_snapshot_count                    = each.value.max_snapshot_count == 0 ? "global-limit" : 0 # 0-10
+  name                                  = each.key
+  snapshot                              = each.value.snapshot == true ? "yes" : "no"
+  target_dn                             = aci_file_remote_path.export_remote_hosts[each.key].id
   relation_config_rs_export_destination = aci_file_remote_path.export_remote_hosts[each.key].id
   # relation_trig_rs_triggerable            = Unsure
   # relation_config_rs_remote_path      = aci_file_remote_path.export_remote_hosts[each.key].id

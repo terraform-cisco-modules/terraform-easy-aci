@@ -24,7 +24,6 @@ variable "endpoint_controls" {
   }
   description = <<-EOT
   Key: Name of the APIC Connectivity Preference Map.  This should be default.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * type: COOP protocol is enhanced to support two ZMQ authentication modes:

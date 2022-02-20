@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "spine_policy_groups" {
   default = {
     "default" = {
-      alias                    = ""
       annotation               = ""
       bfd_ipv4_policy          = "default"
       bfd_ipv6_policy          = "default"
@@ -15,12 +14,12 @@ variable "spine_policy_groups" {
       copp_spine_policy        = "default"
       description              = ""
       lldp_policy              = "default"
+      name_alias               = ""
       usb_configuration_policy = "default"
     }
   }
   description = <<-EOT
   key - Name of the Leaf Policy Group.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
   * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
@@ -29,11 +28,11 @@ variable "spine_policy_groups" {
   * copp_spine_policy: The Spine CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * lldp_policy: The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * usb_configuration_policy: The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
   EOT
   type = map(object(
     {
-      alias                    = optional(string)
       annotation               = optional(string)
       bfd_ipv4_policy          = optional(string)
       bfd_ipv6_policy          = optional(string)
@@ -42,6 +41,7 @@ variable "spine_policy_groups" {
       copp_spine_policy        = optional(string)
       description              = optional(string)
       lldp_policy              = optional(string)
+      name_alias               = optional(string)
       usb_configuration_policy = optional(string)
     }
   ))
@@ -85,7 +85,7 @@ resource "aci_spine_switch_policy_group" "spine_policy_groups" {
   annotation                                   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                                  = each.value.description
   name                                         = each.key
-  name_alias                                   = each.value.alias
+  name_alias                                   = each.value.name_alias
   relation_infra_rs_iacl_spine_profile         = "uni/infra/iaclspinep-${each.value.copp_pre_filter}"
   relation_infra_rs_spine_bfd_ipv4_inst_pol    = "uni/infra/bfdIpv4Inst-${each.value.bfd_ipv4_policy}"
   relation_infra_rs_spine_bfd_ipv6_inst_pol    = "uni/infra/bfdIpv6Inst-${each.value.bfd_ipv6_policy}"

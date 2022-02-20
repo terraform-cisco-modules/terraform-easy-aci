@@ -16,10 +16,10 @@ locals {
 
   application_profiles = {
     for k, v in var.application_profiles : k => {
-      alias             = v.alias != null ? v.alias : ""
       annotation        = v.annotation != null ? v.annotation : ""
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      name_alias        = v.name_alias != null ? v.name_alias : ""
       qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
       schema            = v.schema != null ? v.schema : "common"
       template          = v.template != null ? v.template : "common"
@@ -36,13 +36,13 @@ locals {
 
   contracts = {
     for k, v in var.contracts : k => {
-      alias                = v.alias != null ? v.alias : ""
       annotation           = v.annotation != null ? v.annotation : ""
       contract_type        = v.contract_type != null ? v.contract_type : "standard"
       consumer_match_type  = v.consumer_match_type != null ? v.consumer_match_type : "AtleastOne"
       description          = v.description != null ? v.description : ""
       filters              = v.filters != null ? v.filters : []
       log_packets          = v.log_packets != null ? v.log_packets : false
+      name_alias           = v.name_alias != null ? v.name_alias : ""
       qos_class            = v.qos_class != null ? v.qos_class : "unspecified"
       provider_match_type  = v.provider_match_type != null ? v.provider_match_type : "AtleastOne"
       reverse_filter_ports = v.reverse_filter_ports != null ? v.reverse_filter_ports : true
@@ -73,13 +73,13 @@ locals {
 
   contract_subjects = {
     for k, v in local.contracts : k => {
-      alias                = v.alias
       annotation           = v.annotation
       contract_type        = v.contract_type
       consumer_match_type  = v.consumer_match_type
       description          = v.description
       filters              = [for key, value in local.apic_contract_filters : value.filter if value.contract == k]
       log_packets          = v.log_packets != null ? v.log_packets : false
+      name_alias           = v.name_alias
       qos_class            = v.qos_class
       provider_match_type  = v.provider_match_type
       reverse_filter_ports = v.reverse_filter_ports
@@ -113,7 +113,6 @@ locals {
 
   endpoint_retention_policies = {
     for k, v in var.endpoint_retention_policies : k => {
-      alias                          = v.alias != null ? v.alias : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
       bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
@@ -121,6 +120,7 @@ locals {
       hold_interval                  = v.hold_interval != null ? v.hold_interval : "300"
       local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : "900"
       move_frequency                 = v.move_frequency != null ? v.move_frequency : "256"
+      name_alias                     = v.name_alias != null ? v.name_alias : ""
       remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : "900"
       tenant                         = v.tenant != null ? v.tenant : "common"
     }
@@ -134,10 +134,10 @@ locals {
 
   filters = {
     for k, v in var.filters : k => {
-      alias          = v.alias != null ? v.alias : ""
       annotation     = v.annotation != null ? v.annotation : ""
       description    = v.description != null ? v.description : ""
       filter_entries = v.filter_entries != null ? v.filter_entries : []
+      name_alias     = v.name_alias != null ? v.name_alias : ""
       schema         = v.schema != null ? v.schema : "common"
       template       = v.template != null ? v.template : "common"
       tenant         = v.tenant != null ? v.tenant : "common"
@@ -148,7 +148,6 @@ locals {
   filter_entries_loop = flatten([
     for key, value in local.filters : [
       for k, v in value.filter_entries : {
-        alias                 = v.alias != null ? v.alias : ""
         annotation            = v.annotation != null ? v.annotation : ""
         arp_flag              = v.arp_flag != null ? v.arp_flag : "unspecified"
         description           = v.description != null ? v.description : ""
@@ -162,6 +161,7 @@ locals {
         match_dscp            = v.match_dscp != null ? v.match_dscp : "unspecified"
         match_only_fragments  = v.match_only_fragments != null ? v.match_only_fragments : false
         name                  = v.name != null ? v.name : "default"
+        name_alias            = v.name_alias != null ? v.name_alias : ""
         source_port_from      = v.source_port_from != null ? v.source_port_from : "unspecified"
         source_port_to        = v.source_port_to != null ? v.source_port_to : "unspecified"
         schema                = value.schema
@@ -191,13 +191,13 @@ locals {
       bfd                 = v.interface_controls != null ? lookup(v.interface_controls[0], "bfd", false) : false
       mtu_ignore          = v.interface_controls != null ? lookup(v.interface_controls[0], "mtu_ignore", false) : false
       passive             = v.interface_controls != null ? lookup(v.interface_controls[0], "passive_participation", false) : false
-      alias               = v.alias != null ? v.alias : ""
       annotation          = v.annotation != null ? v.annotation : ""
       cost_of_interface   = v.cost_of_interface != null ? v.cost_of_interface : 0
       dead_interval       = v.dead_interval != null ? v.dead_interval : 40
       description         = v.description != null ? v.description : ""
       hello_interval      = v.hello_interval != null ? v.hello_interval : 10
       network_type        = v.network_type != null ? v.network_type : "bcast"
+      name_alias          = v.name_alias != null ? v.name_alias : ""
       priority            = v.priority != null ? v.priority : 1
       retransmit_interval = v.retransmit_interval != null ? v.retransmit_interval : 5
       transmit_delay      = v.transmit_delay != null ? v.transmit_delay : 1
@@ -217,7 +217,6 @@ locals {
 
   l3outs = {
     for k, v in var.l3outs : k => {
-      alias         = v.alias != null ? v.alias : ""
       annotation    = v.annotation != null ? v.annotation : ""
       description   = v.description != null ? v.description : ""
       external_epgs = v.external_epgs != null ? v.external_epgs : []
@@ -226,6 +225,7 @@ locals {
       ) : false
       l3_domain               = v.l3_domain != null ? v.l3_domain : ""
       level                   = v.level != null ? v.level : "template"
+      name_alias              = v.name_alias != null ? v.name_alias : ""
       node_profiles           = v.node_profiles != null ? v.node_profiles : []
       ospf_external_policies  = v.ospf_external_policies != null ? v.ospf_external_policies : []
       ospf_interface_profiles = v.ospf_interface_profiles != null ? v.ospf_interface_profiles : []
@@ -255,7 +255,6 @@ locals {
   external_epgs_loop = flatten([
     for key, value in local.l3outs : [
       for k, v in value.external_epgs : {
-        alias                  = v.alias != null ? v.alias : ""
         annotation             = value.annotation
         contract_exception_tag = v.contract_exception_tag != null ? v.contract_exception_tag : 0
         contracts              = v.contracts != null ? v.contracts : []
@@ -264,6 +263,7 @@ locals {
         l3out                  = key
         match_type             = v.match_type != null ? v.match_type : "AtleastOne"
         name                   = v.name != null ? v.name : "default"
+        name_alias             = v.name_alias != null ? v.name_alias : ""
         preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : "exclude"
         qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
         subnets                = v.subnets != null ? v.subnets : []
@@ -537,9 +537,9 @@ locals {
 
   route_map_match_rules = {
     for k, v in var.route_map_match_rules : k => {
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
       rules       = v.rules != null ? v.rules : {}
       tenant      = v.tenant != null ? v.tenant : "common"
     }
@@ -572,9 +572,9 @@ locals {
 
   route_map_set_rules = {
     for k, v in var.route_map_set_rules : k => {
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
       rules       = v.rules != null ? v.rules : []
       tenant      = v.tenant != null ? v.tenant : "common"
     }
@@ -647,10 +647,10 @@ locals {
 
   route_maps_for_route_control = {
     for k, v in var.route_maps_for_route_control : k => {
-      alias              = v.alias != null ? v.alias : ""
       annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
       match_rules        = v.match_rules != null ? v.match_rules : {}
+      name_alias         = v.name_alias != null ? v.name_alias : ""
       route_map_continue = v.route_map_continue != null ? v.route_map_continue : false
       tenant             = v.tenant != null ? v.tenant : "common"
     }
@@ -724,9 +724,9 @@ locals {
 
   tenants = {
     for k, v in var.tenants : k => {
-      alias             = v.alias != null ? v.alias : ""
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
+      name_alias        = v.name_alias != null ? v.name_alias : ""
       sites             = v.sites != null ? v.sites : []
       annotation        = v.annotation != null ? v.annotation : ""
       type              = v.type != null ? v.type : "apic"
@@ -742,7 +742,6 @@ locals {
 
   vrfs = {
     for k, v in var.vrfs : k => {
-      alias                           = v.alias != null ? v.alias : ""
       annotation                      = v.annotation != null ? v.annotation : ""
       bd_enforcement_status           = v.bd_enforcement_status != null ? v.bd_enforcement_status : false
       bgp_timers_per_address_family   = v.bgp_timers_per_address_family != null ? v.bgp_timers_per_address_family : []
@@ -756,6 +755,7 @@ locals {
       layer3_multicast                = v.layer3_multicast != null ? v.layer3_multicast : true
       level                           = v.level != null ? v.level : "template"
       monitoring_policy               = v.monitoring_policy != null ? v.monitoring_policy : ""
+      name_alias                      = v.name_alias != null ? v.name_alias : ""
       ospf_timers_per_address_family  = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
       ospf_timers                     = v.ospf_timers != null ? v.ospf_timers : "default"
       policy_enforcement_direction    = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"

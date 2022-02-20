@@ -1,7 +1,6 @@
 variable "vrfs" {
   default = {
     "default" = {
-      alias                           = ""
       annotation                      = ""
       bd_enforcement_status           = false
       bgp_timers                      = "default"
@@ -15,6 +14,7 @@ variable "vrfs" {
       layer3_multicast                = true
       level                           = "template"
       monitoring_policy               = ""
+      name_alias                      = ""
       ospf_timers                     = "default"
       ospf_timers_per_address_family  = []
       policy_enforcement_direction    = "ingress"  # "egress"
@@ -32,10 +32,10 @@ variable "vrfs" {
   }
   description = <<-EOT
   Key: Name of the VRF.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_context_per_address_family: 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
@@ -46,7 +46,6 @@ variable "vrfs" {
   EOT
   type = map(object(
     {
-      alias                 = optional(string)
       annotation            = optional(string)
       bd_enforcement_status = optional(bool)
       bgp_timers            = optional(string)
@@ -83,6 +82,7 @@ variable "vrfs" {
       ip_data_plane_learning    = optional(string)
       layer3_multicast          = optional(bool)
       level                     = optional(string)
+      name_alias                = optional(string)
       monitoring_policy         = optional(string)
       ospf_timers               = optional(string)
       ospf_timers_per_address_family = optional(list(object(
@@ -167,7 +167,7 @@ resource "aci_vrf" "vrfs" {
   ip_data_plane_learning = each.value.ip_data_plane_learning
   knw_mcast_act          = each.value.layer3_multicast == true ? "permit" : "deny"
   name                   = each.key
-  name_alias             = each.value.alias
+  name_alias             = each.value.name_alias
   pc_enf_dir             = each.value.policy_enforcement_direction
   pc_enf_pref            = each.value.policy_enforcement_preference
   relation_fv_rs_ctx_to_ep_ret = length(regexall(
@@ -296,8 +296,8 @@ resource "aci_snmp_community" "vrf_communities" {
     4, each.value.community)) > 0 ? var.snmp_community_4 : length(regexall(
     3, each.value.community)) > 0 ? var.snmp_community_3 : length(regexall(
   2, each.value.community)) > 0 ? var.snmp_community_2 : var.snmp_community_1
-  name_alias          = ""
-  parent_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
+  name_alias = ""
+  parent_dn  = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
 /*_____________________________________________________________________________________________________________________
 

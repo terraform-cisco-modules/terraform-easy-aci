@@ -1,9 +1,9 @@
 variable "route_map_set_rules" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
+      name_alias  = ""
       rules = [
         {
           address = "198.18.0.1"
@@ -34,9 +34,9 @@ variable "route_map_set_rules" {
   }
   description = <<-EOT
   Key - Name of the Set Rule.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * rules: These are the Set Rules and their Attributes.  Details about attributes for each type are below:
     - type: Type of Set Rule.  Options are:
       * additional_communities or set_communities: These Rule(s) Attributes as follows:
@@ -75,9 +75,9 @@ variable "route_map_set_rules" {
   EOT
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
+      name_alias  = optional(string)
       rules = list(object(
         {
           address = optional(string)
@@ -115,7 +115,7 @@ resource "aci_rest_managed" "route_map_set_rules" {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr     = each.value.description
     name      = each.key
-    nameAlias = each.value.alias
+    nameAlias = each.value.name_alias
   }
 }
 

@@ -2,10 +2,10 @@
 variable "tenants" {
   default = {
     "default" = {
-      alias             = ""
       annotation        = ""
       description       = ""
       monitoring_policy = ""
+      name_alias        = ""
       sites             = []
       type              = "apic" # apic or ndo
       users             = []
@@ -14,9 +14,9 @@ variable "tenants" {
   }
   description = <<-EOT
   Key: Name of the Tenant.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
@@ -27,10 +27,10 @@ variable "tenants" {
   EOT
   type = map(object(
     {
-      alias             = optional(string)
       annotation        = optional(string)
       description       = optional(string)
       monitoring_policy = optional(string)
+      name_alias        = optional(string)
       sites             = optional(list(string))
       type              = optional(string)
       users             = optional(list(string))
@@ -53,7 +53,7 @@ resource "aci_tenant" "tenants" {
   annotation                    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                   = each.value.description
   name                          = each.key
-  name_alias                    = each.value.alias
+  name_alias                    = each.value.name_alias
   relation_fv_rs_tenant_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }
 

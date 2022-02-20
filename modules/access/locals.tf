@@ -6,16 +6,16 @@ locals {
 
   layer3_domains = {
     for k, v in var.layer3_domains : k => {
-      alias      = v.alias != null ? v.alias : ""
       annotation = v.annotation != null ? v.annotation : ""
+      name_alias = v.name_alias != null ? v.name_alias : ""
       vlan_pool  = v.vlan_pool
     }
   }
 
   physical_domains = {
     for k, v in var.layer3_domains : k => {
-      alias      = v.alias != null ? v.alias : ""
       annotation = v.annotation != null ? v.annotation : ""
+      name_alias = v.name_alias != null ? v.name_alias : ""
       vlan_pool  = v.vlan_pool
     }
   }
@@ -23,7 +23,6 @@ locals {
   vmm_domains = {
     for k, v in var.vmm_domains : k => {
       access_mode                    = v.access_mode != null ? v.access_mode : "read-write"
-      alias                          = v.alias != null ? v.alias : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       arp_learning                   = v.arp_learning != null ? v.arp_learning : "disabled"
       cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
@@ -43,6 +42,7 @@ locals {
       multicast_address              = v.multicast_address != null ? v.multicast_address : ""
       multicast_pool                 = v.multicast_pool != null ? v.multicast_pool : ""
       mtu_policy                     = v.mtu_policy != null ? v.mtu_policy : "default"
+      name_alias                     = v.name_alias != null ? v.name_alias : ""
       preferred_encapsulation        = v.preferred_encapsulation != null ? v.preferred_encapsulation : "unspecified"
       provider_type                  = v.provider_type != null ? v.provider_type : "VMware"
       spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
@@ -113,10 +113,10 @@ locals {
 
   aaep_policies_loop_1 = {
     for k, v in var.aaep_policies : k => {
-      alias            = v.alias != null ? v.alias : ""
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
       layer3_domains   = v.layer3_domains != null ? v.layer3_domains : []
+      name_alias       = v.name_alias != null ? v.name_alias : ""
       physical_domains = v.physical_domains != null ? v.physical_domains : []
       vmm_domains      = v.vmm_domains != null ? v.vmm_domains : []
     }
@@ -124,7 +124,7 @@ locals {
 
   aaep_policies_loop_2 = {
     for k, v in local.aaep_policies_loop_1 : k => {
-      alias            = v.alias != null ? v.alias : ""
+      name_alias       = v.name_alias != null ? v.name_alias : ""
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
       layer3_domains   = [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"]]
@@ -135,17 +135,16 @@ locals {
 
   aaep_policies = {
     for k, v in local.aaep_policies_loop_2 : k => {
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
       domains     = compact(concat(v.layer3_domains, v.physical_domains, v.vmm_domains))
+      name_alias  = v.name_alias != null ? v.name_alias : ""
     }
   }
 
 
   error_disabled_recovery_policy = {
     for k, v in var.error_disabled_recovery_policy : k => {
-      alias                             = v.alias != null ? v.alias : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
       arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : true
@@ -163,6 +162,7 @@ locals {
       link_flap                         = v.link_flap != null ? v.link_flap : true
       loopback                          = v.loopback != null ? v.loopback : true
       loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
+      name_alias                        = v.name_alias != null ? v.name_alias : ""
       port_security_violation           = v.port_security_violation != null ? v.port_security_violation : true
       security_violation                = v.security_violation != null ? v.security_violation : true
       set_port_state_failed             = v.set_port_state_failed != null ? v.set_port_state_failed : true
@@ -178,7 +178,6 @@ locals {
   mcp_instance_policy = {
     for k, v in var.mcp_instance_policy : k => {
       admin_state                       = v.admin_state != null ? v.admin_state : "enabled"
-      alias                             = v.alias != null ? v.alias : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
       annotation                        = v.annotation != null ? v.annotation : ""
@@ -186,6 +185,7 @@ locals {
       initial_delay                     = v.initial_delay != null ? v.initial_delay : 180
       loop_detect_multiplication_factor = v.loop_detect_multiplication_factor != null ? v.loop_detect_multiplication_factor : 3
       loop_protection_disable_port      = v.loop_protection_disable_port != null ? v.loop_protection_disable_port : true
+      name_alias                        = v.name_alias != null ? v.name_alias : ""
       transmission_frequency_seconds    = v.transmission_frequency_seconds != null ? v.transmission_frequency_seconds : 2
       transmission_frequency_msec       = v.transmission_frequency_msec != null ? v.transmission_frequency_msec : 0
     }
@@ -194,7 +194,6 @@ locals {
 
   global_qos_class = {
     for k, v in var.global_qos_class : k => {
-      alias                             = v.alias != null ? v.alias : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       control                           = v.preserve_cos == false ? ["none"] : ["dot1p-preserve"]
       description                       = v.description != null ? v.description : ""
@@ -206,6 +205,7 @@ locals {
       fabric_flush_state                = v.fabric_flush_state != null ? v.fabric_flush_state : false
       micro_burst_spine_queues          = v.micro_burst_spine_queues != null ? v.micro_burst_spine_queues : 0
       micro_burst_leaf_queues           = v.micro_burst_leaf_queues != null ? v.micro_burst_leaf_queues : 0
+      name_alias                        = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -218,9 +218,9 @@ locals {
   cdp_interface_policies = {
     for k, v in var.cdp_interface_policies : k => {
       admin_state = v.admin_state != null ? v.admin_state : "enabled"
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -228,10 +228,10 @@ locals {
   fc_interface_policies = {
     for k, v in var.fc_interface_policies : k => {
       auto_max_speed        = v.auto_max_speed != null ? v.auto_max_speed : "32G"
-      alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
       fill_pattern          = v.fill_pattern != null ? v.fill_pattern : "ARBFF"
+      name_alias            = v.name_alias != null ? v.name_alias : ""
       port_mode             = v.port_mode != null ? v.port_mode : "f"
       receive_buffer_credit = v.receive_buffer_credit != null ? v.receive_buffer_credit : 64
       speed                 = v.speed != null ? v.speed : "auto"
@@ -242,9 +242,9 @@ locals {
 
   l2_interface_policies = {
     for k, v in var.l2_interface_policies : k => {
-      alias            = v.alias != null ? v.alias : ""
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
+      name_alias       = v.name_alias != null ? v.name_alias : ""
       qinq             = v.qinq != null ? v.qinq : "disabled"
       reflective_relay = v.reflective_relay != null ? v.reflective_relay : "disabled"
       vlan_scope       = v.vlan_scope != null ? v.vlan_scope : "global"
@@ -254,7 +254,6 @@ locals {
 
   lacp_interface_policies = {
     for k, v in var.lacp_interface_policies : k => {
-      alias                     = v.alias != null ? v.alias : ""
       annotation                = v.annotation != null ? v.annotation : ""
       description               = v.description != null ? v.description : ""
       fast_select_standby_ports = v.fast_select_standby_ports != null ? v.fast_select_standby_ports : true
@@ -263,6 +262,7 @@ locals {
       maximum_number_of_links   = v.maximum_number_of_links != null ? v.maximum_number_of_links : 16
       minimum_number_of_links   = v.minimum_number_of_links != null ? v.minimum_number_of_links : 1
       mode                      = v.mode != null ? v.mode : "off"
+      name_alias                = v.name_alias != null ? v.name_alias : ""
       suspend_individual_port   = v.suspend_individual_port != null ? v.suspend_individual_port : true
       symmetric_hashing         = v.symmetric_hashing != null ? v.symmetric_hashing : false
     }
@@ -271,12 +271,12 @@ locals {
 
   link_level_policies = {
     for k, v in var.link_level_policies : k => {
-      alias                       = v.alias != null ? v.alias : ""
       annotation                  = v.annotation != null ? v.annotation : ""
       auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : "on"
       description                 = v.description != null ? v.description : ""
       forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
       link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : 100
+      name_alias                  = v.name_alias != null ? v.name_alias : ""
       speed                       = v.speed != null ? v.speed : "inherit"
     }
   }
@@ -284,9 +284,9 @@ locals {
 
   lldp_interface_policies = {
     for k, v in var.lldp_interface_policies : k => {
-      alias          = v.alias != null ? v.alias : ""
       annotation     = v.annotation != null ? v.annotation : ""
       description    = v.description != null ? v.description : ""
+      name_alias     = v.name_alias != null ? v.name_alias : ""
       receive_state  = v.receive_state != null ? v.receive_state : "enabled"
       transmit_state = v.transmit_state != null ? v.transmit_state : "enabled"
     }
@@ -296,19 +296,19 @@ locals {
   mcp_interface_policies = {
     for k, v in var.mcp_interface_policies : k => {
       admin_state = v.admin_state != null ? v.admin_state : "enabled"
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
     }
   }
 
 
   port_security_policies = {
     for k, v in var.port_security_policies : k => {
-      alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
       maximum_endpoints     = v.maximum_endpoints != null ? v.maximum_endpoints : 0
+      name_alias            = v.name_alias != null ? v.name_alias : ""
       port_security_timeout = v.port_security_timeout != null ? v.port_security_timeout : 60
     }
   }
@@ -316,17 +316,16 @@ locals {
 
   spanning_tree_interface_policies_loop1 = {
     for k, v in var.spanning_tree_interface_policies : k => {
-      alias      = v.alias != null ? v.alias : ""
-      annotation = v.annotation != null ? v.annotation : ""
+      annotation  = v.annotation != null ? v.annotation : ""
       bpdu_filter = v.bpdu_filter != null ? v.bpdu_filter : "disabled"
-      bpdu_guard = v.bpdu_guard != null ? v.bpdu_guard : "disabled"
+      bpdu_guard  = v.bpdu_guard != null ? v.bpdu_guard : "disabled"
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
     }
   }
 
   spanning_tree_interface_policies = {
     for k, v in local.spanning_tree_interface_policies_loop1 : k => {
-      alias      = v.alias != null ? v.alias : ""
       annotation = v.annotation != null ? v.annotation : ""
       control = length(
         regexall("enabled", v.bpdu_filter)) > 0 && length(regexall("enabled", v.bpdu_guard)
@@ -336,6 +335,7 @@ locals {
         regexall("disabled", v.bpdu_filter)) > 0 && length(regexall("enabled", v.bpdu_guard)
       ) > 0 ? ["bpdu-filter", "bpdu-guard"] : ["unspecified"]
       description = v.description != null ? v.description : ""
+      name_alias  = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -348,7 +348,6 @@ locals {
   leaf_port_group_access = {
     for k, v in var.leaf_port_group_access : k => {
       aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
-      alias                              = v.alias != null ? v.alias : ""
       annotation                         = v.annotation != null ? v.annotation : ""
       cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
       copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
@@ -365,6 +364,7 @@ locals {
       macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
+      name_alias                         = v.name_alias != null ? v.name_alias : ""
       netflow_policy                     = v.netflow_policy != null ? v.netflow_policy : []
       port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
       priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
@@ -379,10 +379,10 @@ locals {
 
   leaf_port_group_breakout = {
     for k, v in var.leaf_port_group_breakout : k => {
-      alias        = v.alias != null ? v.alias : ""
       annotation   = v.annotation != null ? v.annotation : ""
       breakout_map = v.breakout_map != null ? v.breakout_map : "10g-4x"
       description  = v.description != null ? v.description : ""
+      name_alias   = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -390,7 +390,6 @@ locals {
   leaf_port_group_bundle = {
     for k, v in var.leaf_port_group_bundle : k => {
       aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
-      alias                              = v.alias != null ? v.alias : ""
       annotation                         = v.annotation != null ? v.annotation : ""
       cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
       copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
@@ -407,6 +406,7 @@ locals {
       macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
+      name_alias                         = v.name_alias != null ? v.name_alias : ""
       port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
       priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
       slow_drain_policy                  = v.slow_drain_policy != null ? v.slow_drain_policy : ""
@@ -425,7 +425,6 @@ locals {
 
   leaf_policy_groups = {
     for k, v in var.leaf_policy_groups : k => {
-      alias                          = v.alias != null ? v.alias : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       bfd_ipv4_policy                = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
       bfd_ipv6_policy                = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
@@ -443,6 +442,7 @@ locals {
       forward_scale_profile_policy   = v.forward_scale_profile_policy != null ? v.forward_scale_profile_policy : "default"
       lldp_policy                    = v.lldp_policy != null ? v.lldp_policy : "default"
       monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      name_alias                     = v.name_alias != null ? v.name_alias : ""
       netflow_node_policy            = v.netflow_node_policy != null ? v.netflow_node_policy : "default"
       ptp_node_policy                = v.ptp_node_policy != null ? v.ptp_node_policy : "default"
       poe_node_policy                = v.poe_node_policy != null ? v.poe_node_policy : "default"
@@ -460,15 +460,16 @@ locals {
 
   leaf_profiles = {
     for k, v in var.leaf_profiles : k => {
-      alias       = v.alias != null ? v.alias : ""
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
       external_pool_id = length(regexall(
-      "^[[:alnum:]]", coalesce(v.external_pool_id, "_EMPTY"))) > 0 ? v.external_pool_id : 0
+        "^[[:alnum:]]", coalesce(v.external_pool_id, "_EMPTY"))
+      ) > 0 ? v.external_pool_id : 0
       interfaces        = v.interfaces != null ? v.interfaces : {}
       leaf_policy_group = v.leaf_policy_group
       monitoring_policy = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
       name              = v.name
+      name_alias        = v.name_alias != null ? v.name_alias : ""
       node_type         = v.node_type != null ? v.node_type : "unspecified"
       pod_id            = v.pod_id != null ? v.pod_id : 1
       role              = v.role != null ? v.role : "unspecified"
@@ -540,12 +541,12 @@ locals {
   spine_interface_policy_groups = {
     for k, v in var.spine_interface_policy_groups : k => {
       aaep_policy       = v.aaep_policy
-      alias             = v.alias != null ? v.alias : ""
       annotation        = v.annotation != null ? v.annotation : ""
       cdp_policy        = v.cdp_policy != null ? v.cdp_policy : "default"
       description       = v.description != null ? v.description : ""
       link_level_policy = v.link_level_policy != null ? v.link_level_policy : "default"
       macsec_policy     = v.macsec_policy != null ? v.macsec_policy : "default"
+      name_alias        = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -557,7 +558,6 @@ locals {
 
   spine_policy_groups = {
     for k, v in var.spine_policy_groups : k => {
-      alias                    = v.alias != null ? v.alias : ""
       annotation               = v.annotation != null ? v.annotation : ""
       bfd_ipv4_policy          = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
       bfd_ipv6_policy          = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
@@ -566,6 +566,7 @@ locals {
       copp_spine_policy        = v.copp_spine_policy != null ? v.copp_spine_policy : "default"
       description              = v.description != null ? v.description : ""
       lldp_policy              = v.lldp_policy != null ? v.lldp_policy : "default"
+      name_alias               = v.name_alias != null ? v.name_alias : ""
       usb_configuration_policy = v.usb_configuration_policy != null ? v.usb_configuration_policy : "default"
     }
   }
@@ -578,13 +579,13 @@ locals {
 
   spine_profiles = {
     for k, v in var.spine_profiles : k => {
-      alias              = v.alias != null ? v.alias : ""
       annotation         = v.annotation != null ? v.annotation : ""
       description        = v.description != null ? v.description : ""
       external_pool_id   = 0
       interfaces         = v.interfaces != null ? v.interfaces : {}
       monitoring_policy  = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
       name               = v.name
+      name_alias         = v.name_alias != null ? v.name_alias : ""
       node_type          = "unspecified"
       pod_id             = v.pod_id != null ? v.pod_id : 1
       role               = "spine"
@@ -633,11 +634,11 @@ locals {
   # default values if the user doesn't enter a value.
   vlan_pools = {
     for k, v in var.vlan_pools : k => {
-      alias           = v.alias != null ? v.alias : ""
       allocation_mode = v.allocation_mode != null ? v.allocation_mode : "dynamic"
       annotation      = v.annotation != null ? v.annotation : ""
       description     = v.description != null ? v.description : ""
       encap_blocks    = v.encap_blocks != null ? v.encap_blocks : {}
+      name_alias      = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -750,12 +751,12 @@ locals {
     for key, value in var.virtual_networking : [
       for k, v in value.vswitch_policy : {
         active_flow_timeout   = v.active_flow_timeout != null ? v.active_flow_timeout : 60
-        alias                 = v.alias != null ? v.alias : ""
         annotation            = v.annotation != null ? v.annotation : ""
         idle_flow_timeout     = v.idle_flow_timeout != null ? v.idle_flow_timeout : 15
         key1                  = key
         key2                  = k
         sample_rate           = v.sample_rate != null ? v.sample_rate : 0
+        name_alias            = v.name_alias != null ? v.name_alias : ""
         netflow_export_policy = v.netflow_export_policy != null ? v.netflow_export_policy : ""
         vmm_domain            = value.vmm_domain
       }
@@ -772,10 +773,10 @@ locals {
 
   vpc_domain_policies = {
     for k, v in var.vpc_domain_policies : k => {
-      alias         = v.alias != null ? v.alias : ""
       annotation    = v.annotation != null ? v.annotation : ""
       dead_interval = v.dead_interval != null ? v.dead_interval : 200
       description   = v.description != null ? v.description : ""
+      name_alias    = v.name_alias != null ? v.name_alias : ""
     }
   }
   vpc_domains = {

@@ -24,7 +24,7 @@ resource "aci_bgp_route_control_profile" "example" {
 # name - (Required) Name of router control profile object.
 # annotation - (Optional) Annotation for router control profile object.
 # description - (Optional) Description for router control profile object.
-# name_alias - (Optional) Name alias for router control profile object.
+# name_alias - (Optional) Name name_alias for router control profile object.
 # route_control_profile_type - (Optional) Component type for router control profile object. Allowed values are "combinable" and "global". Default value is "combinable".
 
 
