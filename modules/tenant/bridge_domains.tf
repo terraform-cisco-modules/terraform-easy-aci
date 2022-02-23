@@ -23,8 +23,8 @@ resource "aci_bridge_domain" "bridge_domains" {
   ep_move_detect_mode = each.value.ep_move_detection_mode
   host_based_routing  = each.value.advertise_host_routes
   intersite_bum_traffic_allow = length(regexall(
-    "yes", each.value.bd_stretched_to_remote_sites)
-  ) > 0 ? each.value.allow_bum_traffic_on_stretched_bd : "no"
+    true, each.value.bd_stretched_to_remote_sites)
+  ) > 0 ? each.value.allow_bum_traffic_on_stretched_bd : false
   intersite_l2_stretch      = each.value.bd_stretched_to_remote_sites
   ip_learning               = each.value.ip_data_plane_learning
   ipv6_mcast_allow          = each.value.pimv6
@@ -35,9 +35,9 @@ resource "aci_bridge_domain" "bridge_domains" {
   multi_dst_pkt_act         = each.value.multi_destination_flooding
   name_alias                = each.value.name_alias
   optimize_wan_bandwidth = length(regexall(
-    "yes", each.value.bd_stretched_to_remote_sites)) > 0 && length(regexall(
-    "yes", each.value.allow_bum_traffic_on_stretched_bd)
-  ) > 0 ? each.value.optimize_wan_bandwidth : "no"
+    true, each.value.bd_stretched_to_remote_sites)) > 0 && length(regexall(
+    true, each.value.allow_bum_traffic_on_stretched_bd)
+  ) > 0 ? each.value.optimize_wan_bandwidth : false
   relation_fv_rs_ctx = length(regexall(
     each.value.tenant, each.value.vrf_tenant)
     ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(

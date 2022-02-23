@@ -16,11 +16,11 @@ resource "aci_application_epg" "application_epgs" {
     aci_rest.oob_contracts,
     aci_taboo_contract.taboo_contracts,
   ]
-  application_profile_dn = aci_application_profile.application_profiles[each.value.application_profile].id
-  name                   = each.value.name
-  description            = each.value.description
   annotation             = each.value.annotation
+  application_profile_dn = aci_application_profile.application_profiles[each.value.application_profile].id
+  description            = each.value.description
   exception_tag          = "{exception_tag}"
+  name                   = each.value.name
   flood_on_encap         = "{flood}"
   fwd_ctrl               = "{fwd_ctrl}"
   has_mcast_source       = "{has_mcast}"
