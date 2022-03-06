@@ -17,6 +17,7 @@ locals {
   application_profiles = {
     for k, v in var.application_profiles : k => {
       annotation        = v.annotation != null ? v.annotation : ""
+      controller_type   = v.controller_type != null ? v.controller_type : "apic"
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
       name_alias        = v.name_alias != null ? v.name_alias : ""
@@ -24,10 +25,102 @@ locals {
       schema            = v.schema != null ? v.schema : "common"
       template          = v.template != null ? v.template : "common"
       tenant            = v.tenant != null ? v.tenant : "common"
-      type              = v.type != null ? v.type : "apic"
     }
   }
 
+
+  #__________________________________________________________
+  #
+  # Application EPGs Variables
+  #__________________________________________________________
+
+  application_epgs = {
+    for k, v in var.application_epgs : k => {
+      annotation             = v.annotation != null ? v.annotation : ""
+      application_profile    = v.application_profile != null ? v.application_profile : "default"
+      bd_schema              = v.bd_schema != null ? v.bd_schema : "common"
+      bd_template            = v.bd_template != null ? v.bd_template : "common"
+      bd_tenant              = v.bd_tenant != null ? v.bd_tenant : v.tenant
+      bridge_domain          = v.bridge_domain != null ? v.bridge_domain : "default"
+      contract_exception_tag = v.contract_exception_tag != null ? v.contract_exception_tag : ""
+      contracts              = v.contracts != null ? v.contracts : []
+      controller_type        = v.controller_type != null ? v.controller_type : "apic"
+      description            = v.description != null ? v.description : ""
+      domains                = v.domains != null ? v.domains : []
+      epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
+      epg_type               = v.epg_type != null ? v.epg_type : "standard"
+      flood_in_encapsulation = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
+      hasMcastSource         = v.hasMcastSource != null ? v.hasMcastSource : false
+      label_match_criteria   = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
+      name_alias             = v.name_alias != null ? v.name_alias : ""
+      intra_epg_isolation    = v.intra_epg_isolation != null ? v.intra_epg_isolation : "unenforced"
+      preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : false
+      qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
+      schema                 = v.schema != null ? v.schema : "common"
+      static_paths           = v.static_paths != null ? v.static_paths : []
+      template               = v.template != null ? v.template : "common"
+      tenant                 = v.tenant != null ? v.tenant : "common"
+      useg_epg               = v.useg_epg != null ? v.useg_epg : false
+      vrf                    = v.vrf != null ? v.vrf : "default"
+      vrf_schema             = v.vrf_schema != null ? v.vrf_schema : "common"
+      vrf_template           = v.vrf_template != null ? v.vrf_template : "common"
+    }
+  }
+
+  epg_to_domains_loop = flatten([
+    for key, value in local.application_epgs : [
+      for k, v in value.domains : {
+        annotation               = v.annotation != null ? v.annotation : ""
+        allow_micro_segmentation = v.allow_micro_segmentation != null ? v.allow_micro_segmentation : false
+        application_epg          = key
+        delimiter                = v.delimiter != null ? v.delimiter : ""
+        domain                   = v.domain
+        domain_type              = v.domain_type != null ? v.domain_type : "physical"
+        domain_vendor            = v.domain_vendor != null ? v.domain_vendor : "VMware"
+        port_binding             = v.port_binding != null ? v.port_binding : "none"
+        resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "pre-provision"
+        security = v.security != null ? {
+          for keys, values in v.security : keys => {
+            allow_promiscuous = v.allow_promiscuous != null ? v.allow_promiscuous : "reject"
+            forged_transmits  = v.forged_transmits != null ? v.forged_transmits : "reject"
+            mac_changes       = v.mac_changes != null ? v.mac_changes : "reject"
+          }
+        } : []
+        vlan_mode = v.vlan_mode != null ? v.vlan_mode : "auto"
+        vlans     = v.vlans != null ? v.vlans : []
+      }
+    ]
+  ])
+
+  epg_to_domains = { for k, v in local.epg_to_domains_loop : "${v.application_epg}_${v.domain}" => v }
+
+
+  contract_to_epgs_loop = flatten([
+    for key, value in local.application_epgs : [
+      for k, v in value.contracts : {
+        application_epg     = key
+        application_profile = value.application_profile
+        contract            = v.contract
+        contract_class = length(regexall("consumer", v.contract_type)) > 0 ? "fvRsCons" : length(regexall(
+          "contract_interface", v.contract_type)) > 0 ? "fvRsConsIf" : length(regexall(
+          "intra_epg", v.contract_type)) > 0 ? "fvRsIntraEpg" : length(regexall(
+          "provider", v.contract_type)) > 0 ? "fvRsProv" : length(regexall(
+          "taboo", v.contract_type)
+        ) > 0 ? "fvRsProtBy" : ""
+        contract_dn = length(regexall("consumer", v.contract_type)) > 0 ? "rscons" : length(regexall(
+          "contract_interface", v.contract_type)) > 0 ? "rsconsIf" : length(regexall(
+          "intra_epg", v.contract_type)) > 0 ? "rsintraEpg" : length(regexall(
+          "provider", v.contract_type)) > 0 ? "rsprov" : length(regexall(
+          "taboo", v.contract_type)
+        ) > 0 ? "rsprotBy" : ""
+        contract_tdn    = length(regexall("taboo", v.contract_type)) > 0 ? "taboo" : "brc"
+        contract_tenant = v.contract_tenant != null ? v.contract_tenant : value.tenant
+        qos_class       = v.qos_class != null ? v.qos_class : "unspecified"
+        tenant          = value.tenant
+      }
+    ]
+  ])
+  contract_to_epgs = { for k, v in local.contract_to_epgs_loop : "${v.application_epg}_${v.contract}" => v }
 
   #__________________________________________________________
   #
@@ -153,14 +246,83 @@ locals {
 
   #__________________________________________________________
   #
+  # Application Profile Variables
+  #__________________________________________________________
+
+  bridge_domains = {
+    for k, v in var.bridge_domains : k => {
+      advertise_host_routes                  = lookup(v.general[0], "advertise_host_routes", false)
+      alias                                  = lookup(v.general[0], "alias", "")
+      annotation                             = lookup(v.general[0], "annotation", "")
+      arp_flooding                           = lookup(v.general[0], "arp_flooding", false)
+      description                            = lookup(v.general[0], "description", "")
+      endpoint_clear                         = lookup(v.general[0], "endpoint_clear", false)
+      endpoint_retention_policy              = lookup(v.general[0], "endpoint_retention_policy", "")
+      ep_move_detection_mode                 = lookup(v.general[0], "ep_move_detection_mode", "disable")
+      igmp_snooping_policy                   = lookup(v.general[0], "igmp_snooping_policy", "")
+      ipv6_l3_unknown_multicast              = lookup(v.general[0], "ipv6_l3_unknown_multicast", "flood")
+      l2_unknown_unicast                     = lookup(v.general[0], "l2_unknown_unicast", "flood")
+      l3_unknown_multicast_flooding          = lookup(v.general[0], "l3_unknown_multicast_flooding", "flood")
+      limit_ip_learn_to_subnets              = lookup(v.general[0], "limit_ip_learn_to_subnets", true)
+      mld_snoop_policy                       = lookup(v.general[0], "mld_snoop_policy", "")
+      multi_destination_flooding             = lookup(v.general[0], "multi_destination_flooding", "bd-flood")
+      pim                                    = lookup(v.general[0], "pim", false)
+      pimv6                                  = lookup(v.general[0], "pimv6", false)
+      tenant                                 = lookup(v.general[0], "tenant", "common")
+      type                                   = lookup(v.general[0], "type", "regular")
+      vrf                                    = lookup(v.general[0], "vrf", "default")
+      vrf_tenant                             = lookup(v.general[0], "vrf_tenant", "common")
+      unicast_routing                        = lookup(v.l3_configurations[0], "unicast_routing", true)
+      custom_mac_address                     = lookup(v.l3_configurations[0], "custom_mac_address", "")
+      link_local_ipv6_address                = lookup(v.l3_configurations[0], "link_local_ipv6_address", "::")
+      subnets                                = lookup(v.l3_configurations[0], "subnets", [])
+      virtual_mac_address                    = lookup(v.l3_configurations[0], "virtual_mac_address", "not-applicable")
+      allow_bum_traffic_on_stretched_bd      = lookup(v.troubleshooting_advanced[0], "allow_bum_traffic_on_stretched_bd", false)
+      bd_stretched_to_remote_sites           = lookup(v.troubleshooting_advanced[0], "bd_stretched_to_remote_sites", false)
+      disable_ip_data_plane_learning_for_pbr = lookup(v.troubleshooting_advanced[0], "disable_ip_data_plane_learning_for_pbr", false)
+      first_hop_security_policy              = lookup(v.troubleshooting_advanced[0], "first_hop_security_policy", "")
+      monitoring_policy                      = lookup(v.troubleshooting_advanced[0], "monitoring_policy", "")
+      netflow_monitor_policies               = lookup(v.troubleshooting_advanced[0], "netflow_monitor_policies", [])
+      rogue_coop_exception_list              = lookup(v.troubleshooting_advanced[0], "rogue_coop_exception_list", [])
+    }
+  }
+
+
+  subnets_loop_1 = flatten([
+    for key, value in local.bridge_domains : [
+      for k, v in value.subnets : {
+        advertise_externally         = v.advertise_externally != null ? v.advertise_externally : false
+        bridge_domain                = key
+        description                  = v.description != null ? v.description : ""
+        gateway_ip                   = v.gateway_ip != null ? v.gateway_ip : "198.18.5.1/24"
+        l3_out_for_route_profile     = v.l3_out_for_route_profile != null ? v.l3_out_for_route_profile : ""
+        associated_l3outs            = v.associated_l3outs != null ? v.associated_l3outs : []
+        make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
+        shared_between_vrfs          = v.shared_between_vrfs != null ? v.shared_between_vrfs : false
+        subnet_control = [
+          {
+            no_default_svi_gateway = false
+            querier_ip             = false
+          }
+        ]
+        treat_as_virtual_ip_address = v.treat_as_virtual_ip_address != null ? v.treat_as_virtual_ip_address : false
+      }
+    ]
+  ])
+
+  subnets = { for k, v in local.subnets_loop_1 : "${v.bridge_domain}_${v.gateway_ip}" => v }
+
+  #__________________________________________________________
+  #
   # Contract Variables
   #__________________________________________________________
 
   contracts = {
     for k, v in var.contracts : k => {
       annotation           = v.annotation != null ? v.annotation : ""
-      contract_type        = v.contract_type != null ? v.contract_type : "standard"
       consumer_match_type  = v.consumer_match_type != null ? v.consumer_match_type : "AtleastOne"
+      contract_type        = v.contract_type != null ? v.contract_type : "standard"
+      controller_type      = v.controller_type != null ? v.controller_type : "apic"
       description          = v.description != null ? v.description : ""
       filters              = v.filters != null ? v.filters : []
       log_packets          = v.log_packets != null ? v.log_packets : false
@@ -174,7 +336,6 @@ locals {
       target_dscp          = v.target_dscp != null ? v.target_dscp : "unspecified"
       template             = v.template != null ? v.template : "common"
       tenant               = v.tenant != null ? v.tenant : "common"
-      type                 = v.type != null ? v.type : "apic"
     }
   }
 
@@ -188,7 +349,7 @@ locals {
         ) > 0 ? aci_filter.filters[v.name].id : local.rs_filters[v.name].id
         name = v.name
       }
-    ] if value.type == "apic"
+    ] if value.controller_type == "apic"
   ])
 
   apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${v.name}" => v }
@@ -198,6 +359,7 @@ locals {
       annotation           = v.annotation
       contract_type        = v.contract_type
       consumer_match_type  = v.consumer_match_type
+      controller_type      = v.controller_type
       description          = v.description
       filters              = [for key, value in local.apic_contract_filters : value.filter if value.contract == k]
       log_packets          = v.log_packets != null ? v.log_packets : false
@@ -211,7 +373,6 @@ locals {
       target_dscp          = v.target_dscp
       template             = v.template
       tenant               = v.tenant
-      type                 = v.type
     }
   }
 
@@ -256,14 +417,14 @@ locals {
 
   filters = {
     for k, v in var.filters : k => {
-      annotation     = v.annotation != null ? v.annotation : ""
-      description    = v.description != null ? v.description : ""
-      filter_entries = v.filter_entries != null ? v.filter_entries : []
-      name_alias     = v.name_alias != null ? v.name_alias : ""
-      schema         = v.schema != null ? v.schema : "common"
-      template       = v.template != null ? v.template : "common"
-      tenant         = v.tenant != null ? v.tenant : "common"
-      type           = v.type != null ? v.type : "apic"
+      annotation      = v.annotation != null ? v.annotation : ""
+      controller_type = v.controller_type != null ? v.controller_type : "apic"
+      description     = v.description != null ? v.description : ""
+      filter_entries  = v.filter_entries != null ? v.filter_entries : []
+      name_alias      = v.name_alias != null ? v.name_alias : ""
+      schema          = v.schema != null ? v.schema : "common"
+      template        = v.template != null ? v.template : "common"
+      tenant          = v.tenant != null ? v.tenant : "common"
     }
   }
 
@@ -272,6 +433,7 @@ locals {
       for k, v in value.filter_entries : {
         annotation            = v.annotation != null ? v.annotation : ""
         arp_flag              = v.arp_flag != null ? v.arp_flag : "unspecified"
+        controller_type       = value.controller_type
         description           = v.description != null ? v.description : ""
         destination_port_from = v.destination_port_from != null ? v.destination_port_from : "unspecified"
         destination_port_to   = v.destination_port_to != null ? v.destination_port_to : "unspecified"
@@ -295,7 +457,6 @@ locals {
         tcp_syn               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "synchronize", false) : false
         template              = value.template
         tenant                = value.tenant
-        type                  = value.type
       }
     ]
   ])
@@ -407,9 +568,10 @@ locals {
 
   l3outs = {
     for k, v in var.l3outs : k => {
-      annotation    = v.annotation != null ? v.annotation : ""
-      description   = v.description != null ? v.description : ""
-      external_epgs = v.external_epgs != null ? v.external_epgs : []
+      annotation      = v.annotation != null ? v.annotation : ""
+      controller_type = v.controller_type != null ? v.controller_type : "apic"
+      description     = v.description != null ? v.description : ""
+      external_epgs   = v.external_epgs != null ? v.external_epgs : []
       import = v.route_control_enforcement != null ? lookup(
         v.route_control_enforcement[0], "import", false
       ) : false
@@ -426,15 +588,14 @@ locals {
           tenant         = value.tenant != null ? value.tenant : v.tenant
         }
       ] : []
-      target_dscp = v.target_dscp != null ? v.target_dscp : "unspecified"
-      sites       = v.sites != null ? v.sites : []
-      tags        = v.tags != null ? v.tags : []
-      template    = v.template != null ? v.template : "common"
-      tenant      = v.tenant != null ? v.tenant : "common"
-      type        = v.type != null ? v.type : "apic"
-      vendor      = v.vendor != null ? v.vendor : "cisco"
-      vrf         = v.vrf != null ? v.vrf : "default"
-      vrf_tenant  = v.vrf_tenant != null ? v.vrf_tenant : "common"
+      target_dscp       = v.target_dscp != null ? v.target_dscp : "unspecified"
+      sites             = v.sites != null ? v.sites : []
+      tags              = v.tags != null ? v.tags : []
+      template          = v.template != null ? v.template : "common"
+      tenant            = v.tenant != null ? v.tenant : "common"
+      controller_vendor = v.controller_vendor != null ? v.controller_vendor : "cisco"
+      vrf               = v.vrf != null ? v.vrf : "default"
+      vrf_tenant        = v.vrf_tenant != null ? v.vrf_tenant : "common"
     }
   }
 
@@ -448,6 +609,7 @@ locals {
         annotation             = value.annotation
         contract_exception_tag = v.contract_exception_tag != null ? v.contract_exception_tag : 0
         contracts              = v.contracts != null ? v.contracts : []
+        controller_type        = value.controller_type
         description            = v.description != null ? v.description : ""
         flood_on_encapsulation = v.flood_on_encapsulation != null ? v.flood_on_encapsulation : "disabled"
         l3out                  = key
@@ -467,7 +629,6 @@ locals {
           }
         } : {}
         tenant = value.tenant
-        type   = value.type
       }
     ]
   ])
@@ -480,11 +641,11 @@ locals {
         contract        = v.contract_name
         contract_tenant = v.contract_tenant != null ? v.contract_tenant : "common"
         contract_type   = v.contract_type != null ? v.contract_type : "consumer"
+        controller_type = value.controller_type
         epg             = value.name
         l3out           = value.l3out
         qos_class       = v.qos_class
         tenant          = value.tenant
-        type            = value.type
       }
     ]
   ])
@@ -493,12 +654,13 @@ locals {
   external_epg_subnets_loop = flatten([
     for key, value in local.l3out_external_epgs : [
       for k, v in value.subnets : {
-        agg_export  = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_export", false) : false
-        agg_shared  = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_shared_routes", false) : false
-        annotation  = value.annotation
-        description = v.description != null ? v.description : ""
-        epg_type    = value.epg_type
-        ext_epg     = key
+        agg_export      = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_export", false) : false
+        agg_shared      = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_shared_routes", false) : false
+        annotation      = value.annotation
+        controller_type = value.controller_type
+        description     = v.description != null ? v.description : ""
+        epg_type        = value.epg_type
+        ext_epg         = key
         route_control_profiles = v.route_control_profiles != null ? {
           for a, b in v.route_control_profiles : a => {
             direction = b.direction
@@ -516,7 +678,6 @@ locals {
         scope_export = v.route_control != null ? lookup(v.route_control[0], "export_route_control_subnet", false) : false
         scope_shared = v.route_control != null ? lookup(v.route_control[0], "shared_route_control_subnet", false) : false
         subnet       = v.subnet != null ? v.subnet : "0.0.0.0/1"
-        type         = value.type
       }
     ]
   ])
@@ -532,6 +693,7 @@ locals {
       for k, v in value.node_profiles : {
         annotation              = value.annotation
         color_tag               = v.color_tag != null ? v.color_tag : "yellow-green"
+        controller_type         = value.controller_type
         description             = v.description != null ? v.description : ""
         interface_profiles      = v.interface_profiles != null ? v.interface_profiles : []
         l3out                   = key
@@ -541,7 +703,6 @@ locals {
         pod_id                  = v.pod_id != null ? v.pod_id : 1
         target_dscp             = value.target_dscp
         tenant                  = value.tenant
-        type                    = value.type
       }
     ]
   ])
@@ -551,12 +712,12 @@ locals {
     for key, value in local.l3out_node_profiles : [
       for k, v in value.nodes : {
         annotation                = value.annotation
+        controller_type           = value.controller_type
         node_id                   = v.node_id != null ? v.node_id : 201
         node_profile              = key
         pod_id                    = value.pod_id
         router_id                 = v.router_id != null ? v.router_id : "198.18.0.1"
         use_router_id_as_loopback = v.use_router_id_as_loopback != null ? v.use_router_id_as_loopback : true
-        type                      = value.type
       }
     ]
   ])
@@ -573,6 +734,7 @@ locals {
         arp_policy                  = v.arp_policy != null ? v.arp_policy : ""
         auto_state                  = v.auto_state != null ? v.auto_state : "disabled"
         color_tag                   = value.color_tag
+        controller_type             = value.controller_type
         custom_qos_policy           = v.custom_qos_policy != null ? v.custom_qos_policy : ""
         description                 = v.description != null ? v.description : ""
         egress_data_plane_policing  = v.egress_data_plane_policing != null ? v.egress_data_plane_policing : ""
@@ -600,7 +762,6 @@ locals {
         svi_addresses               = v.svi_addresses != null ? v.svi_addresses : []
         target_dscp                 = value.target_dscp
         tenant                      = value.tenant
-        type                        = value.type
       }
     ]
   ])
@@ -628,11 +789,11 @@ locals {
     for k, v in local.l3out_interface_profiles : [
       for s in v.secondaries_keys : {
         annotation           = v.annotation
+        controller_type      = v.controller_type
         ipv6_dad             = v.ipv6_dad != null ? v.ipv6_dad : "enabled"
         key1                 = "${k}-${s}"
         l3out_path           = k
         secondary_ip_address = element(v.secondary_addresses, s)
-        type                 = v.type
       }
     ]
   ])
@@ -641,11 +802,11 @@ locals {
     for k, v in local.l3out_paths_svi_addressing : [
       for s in v.secondaries_keys : {
         annotation           = v.annotation
+        controller_type      = v.controller_type
         ipv6_dad             = v.ipv6_dad != null ? v.ipv6_dad : "enabled"
         key1                 = "${k}-${s}"
         l3out_path           = k
         secondary_ip_address = element(v.secondary_addresses, s)
-        type                 = v.type
       }
     ]
   ])
@@ -746,7 +907,7 @@ locals {
         network        = v.network != null ? v.network : "198.18.0.0/24"
         regex          = v.regex != null ? v.regex : ""
         match_rule     = key
-        type           = v.type != null ? v.type : v.type
+        type           = v.type
         tenant         = value.tenant
       }
     ]
@@ -914,14 +1075,14 @@ locals {
 
   tenants = {
     for k, v in var.tenants : k => {
+      annotation        = v.annotation != null ? v.annotation : ""
+      controller_type   = v.controller_type != null ? v.controller_type : "apic"
+      controller_vendor = v.controller_vendor != null ? v.controller_vendor : "cisco"
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
       name_alias        = v.name_alias != null ? v.name_alias : ""
       sites             = v.sites != null ? v.sites : []
-      annotation        = v.annotation != null ? v.annotation : ""
-      type              = v.type != null ? v.type : "apic"
       users             = v.users != null ? v.users : []
-      vendor            = v.vendor != null ? v.vendor : "cisco"
     }
   }
 
@@ -938,6 +1099,8 @@ locals {
       bgp_timers                      = v.bgp_timers != null ? v.bgp_timers : "default"
       communities                     = v.communities != null ? v.communities : []
       contracts                       = v.contracts != null ? v.contracts : []
+      controller_type                 = v.controller_type != null ? v.controller_type : "apic"
+      controller_vendor               = v.controller_vendor != null ? v.controller_vendor : "cisco"
       description                     = v.description != null ? v.description : ""
       endpoint_retention_policy       = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : "default"
       eigrp_timers_per_address_family = v.eigrp_timers_per_address_family != null ? v.eigrp_timers_per_address_family : []
@@ -957,8 +1120,6 @@ locals {
       template                        = v.template != null ? v.template : ""
       tenant                          = v.tenant != null ? v.tenant : "common"
       transit_route_tag_policy        = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
-      type                            = v.type != null ? v.type : "apic"
-      vendor                          = v.vendor != null ? v.vendor : "cisco"
     }
   }
 

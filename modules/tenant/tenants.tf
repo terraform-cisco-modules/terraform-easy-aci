@@ -3,27 +3,27 @@ variable "tenants" {
   default = {
     "default" = {
       annotation        = ""
+      controller_type   = "apic" # apic or ndo
+      controller_vendor = "cisco"
       description       = ""
       monitoring_policy = ""
       name_alias        = ""
       sites             = []
-      type              = "apic" # apic or ndo
       users             = []
-      vendor            = "cisco"
     }
   }
   description = <<-EOT
   Key: Name of the Tenant.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * type: What is the type of controller.  Options are:
+  * controller_type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
-  * vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
+  * controller_vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
     - aws
     - azure
     - cisco (Default)
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
@@ -32,9 +32,9 @@ variable "tenants" {
       monitoring_policy = optional(string)
       name_alias        = optional(string)
       sites             = optional(list(string))
-      type              = optional(string)
+      controller_type   = optional(string)
+      controller_vendor = optional(string)
       users             = optional(list(string))
-      vendor            = optional(string)
     }
   ))
 }
@@ -49,7 +49,7 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_tenant" "tenants" {
-  for_each = { for k, v in local.tenants : k => v if v.type == "apic" }
+  for_each = { for k, v in local.tenants : k => v if v.controller_type == "apic" }
   # annotation                    = each.value.annotation != "" ? each.value.annotation : var.annotation
   # description                   = each.value.description
   name                          = each.key
@@ -63,7 +63,7 @@ resource "mso_tenant" "tenants" {
     data.mso_site.sites,
     data.mso_user.users
   ]
-  for_each     = { for k, v in local.tenants : k => v if v.type == "ndo" && v.vendor == "cisco" }
+  for_each     = { for k, v in local.tenants : k => v if v.controller_type == "ndo" && v.controller_vendor == "cisco" }
   name         = each.key
   display_name = each.key
   dynamic "site_associations" {

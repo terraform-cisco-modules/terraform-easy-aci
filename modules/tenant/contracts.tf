@@ -4,6 +4,7 @@ variable "contracts" {
       annotation          = ""
       consumer_match_type = "AtleastOne"
       contract_type       = "standard" # oob|taboo
+      controller_type     = "apic"
       description         = ""
       filters = [
         {
@@ -23,24 +24,24 @@ variable "contracts" {
       target_dscp          = "unspecified"
       template             = "common"
       tenant               = "common"
-      type                 = "apic"
     }
   }
   description = <<-EOT
   Key: Name of the Contract.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * bgp_context_per_address_family: 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * type: What is the type of controller.  Options are:
+  * controller_type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       annotation          = optional(string)
       consumer_match_type = optional(string)
       contract_type       = optional(string)
+      controller_type     = optional(string)
       description         = optional(string)
       filters = optional(list(object(
         {
@@ -66,7 +67,6 @@ variable "contracts" {
       target_dscp = optional(string)
       template    = optional(string)
       tenant      = optional(string)
-      type        = optional(string)
     }
   ))
 }
@@ -109,7 +109,7 @@ resource "aci_contract" "contracts" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "standard" }
+  for_each    = { for k, v in local.contracts : k => v if v.controller_type == "apic" && v.contract_type == "standard" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
@@ -137,7 +137,7 @@ resource "aci_rest_managed" "oob_contracts" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each   = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "oob" }
+  for_each   = { for k, v in local.contracts : k => v if v.controller_type == "apic" && v.contract_type == "oob" }
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}"
   class_name = "vzOOBBrCP"
   content = {
@@ -168,7 +168,7 @@ resource "aci_taboo_contract" "contracts" {
   depends_on = [
     aci_tenant.tenants,
   ]
-  for_each    = { for k, v in local.contracts : k => v if v.type == "apic" && v.contract_type == "taboo" }
+  for_each    = { for k, v in local.contracts : k => v if v.controller_type == "apic" && v.contract_type == "taboo" }
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
@@ -181,7 +181,7 @@ resource "mso_schema_template_contract" "contracts" {
   depends_on = [
     mso_schema.schemas,
   ]
-  for_each      = { for k, v in local.contracts : k => v if v.type == "ndo" }
+  for_each      = { for k, v in local.contracts : k => v if v.controller_type == "ndo" }
   schema_id     = mso_schema.schemas[each.value.schema].id
   template_name = each.value.template
   contract_name = each.key
@@ -233,7 +233,7 @@ resource "aci_contract_subject" "contract_subjects" {
     aci_taboo_contract.contracts,
     aci_filter.filters,
   ]
-  for_each   = { for k, v in local.contract_subjects : k => v if v.type == "apic" }
+  for_each   = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" }
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   contract_dn = length(regexall(
     "oob", each.value.contract_type)
@@ -263,24 +263,24 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {name}: Subjects
 _______________________________________________________________________________________________________________________
 */
-# resource "aci_rest_managed" "oob_contract_subjects" {
-#   depends_on  = [
-#     aci_rest_managed.oob_contracts
-#   ]
-#   for_each   = { for k, v in local.subjects: k => v if contract_type == "oob" }
-#   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}"
-#   class_name = "vzSubj"
-#   content = {
-#     consMatchT  = each.value.consumer_match_type
-#     descr       = each.value.description
-#     name        = each.value.name
-#     nameAlias   = each.value.name_alias
-#     prio        = each.value.qos_priority
-#     provMatchT  = each.value.provider_match_type
-#     revFltPorts = each.value.reverse_filter_ports
-#     targetDscp  = each.value.target_dscp
-#   }
-# }
+resource "aci_rest_managed" "oob_contract_subjects" {
+  depends_on = [
+    aci_rest_managed.oob_contracts
+  ]
+  for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "oob" }
+  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}"
+  class_name = "vzSubj"
+  content = {
+    consMatchT  = each.value.consumer_match_type
+    descr       = each.value.description
+    name        = each.value.name
+    nameAlias   = each.value.name_alias
+    prio        = each.value.qos_priority
+    provMatchT  = each.value.provider_match_type
+    revFltPorts = each.value.reverse_filter_ports
+    targetDscp  = each.value.target_dscp
+  }
+}
 
 output "contracts" {
   value = {

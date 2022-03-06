@@ -1,8 +1,10 @@
 variable "l3outs" {
   default = {
     "default" = {
-      annotation  = ""
-      description = ""
+      annotation        = ""
+      controller_type   = "apic"
+      controller_vendor = "cisco"
+      description       = ""
       external_epgs = [
         {
           contract_exception_tag = 0
@@ -181,8 +183,6 @@ variable "l3outs" {
       tags        = []
       template    = "common"
       tenant      = "common"
-      type        = "apic"
-      vendor      = "cisco"
       vrf         = "default"
       vrf_tenant  = "common"
     }
@@ -203,8 +203,10 @@ variable "l3outs" {
   EOT
   type = map(object(
     {
-      annotation  = optional(string)
-      description = optional(string)
+      annotation        = optional(string)
+      controller_type   = optional(string)
+      controller_vendor = optional(string)
+      description       = optional(string)
       external_epgs = optional(list(object(
         {
           contract_exception_tag = optional(number)
@@ -364,8 +366,6 @@ variable "l3outs" {
       )))
       template   = optional(string)
       tenant     = optional(string)
-      type       = optional(string)
-      vendor     = optional(string)
       vrf        = optional(string)
       vrf_tenant = optional(string)
     }
@@ -463,7 +463,7 @@ resource "aci_l3_outside" "l3outs" {
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each = { for k, v in local.l3outs : k => v if v.type == "apic" }
+  for_each = { for k, v in local.l3outs : k => v if v.controller_type == "apic" }
   # annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = each.value.description
   enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
@@ -572,7 +572,7 @@ resource "aci_rest_managed" "external_epg_intra_epg_contracts" {
     aci_external_network_instance_profile.l3out_external_epgs,
     aci_rest_managed.oob_external_epgs
   ]
-  for_each   = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type == "intra_epg" }
+  for_each   = { for k, v in local.l3out_ext_epg_contracts : k => v if v.controller_type == "apic" && v.contract_type == "intra_epg" }
   dn         = "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsintraEpg-${each.value.contract}"
   class_name = "fvRsIntraEpg"
   content = {
@@ -600,7 +600,7 @@ resource "aci_rest_managed" "external_epg_contracts" {
     aci_external_network_instance_profile.l3out_external_epgs,
     aci_rest_managed.oob_external_epgs
   ]
-  for_each = { for k, v in local.l3out_ext_epg_contracts : k => v if v.type == "apic" && v.contract_type != "intra_epg" }
+  for_each = { for k, v in local.l3out_ext_epg_contracts : k => v if v.controller_type == "apic" && v.contract_type != "intra_epg" }
   dn = length(regexall(
     "consumer", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rscons-${each.value.contract}" : length(regexall(

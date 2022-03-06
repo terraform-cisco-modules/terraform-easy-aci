@@ -1,13 +1,14 @@
-resource "aci_dhcp_relay_policy" "example" {
+resource "aci_dhcp_relay_policy" "dhcp_relay_policies" {
   depends_on = [
     aci_tenant.tenants
   ]
-  annotation  = "annotation_example"
-  description = "from terraform"
-  mode        = "visible"
-  name        = "name_example"
-  name_alias  = "name_alias_example"
-  owner       = "infra"
+  for_each    = local.dhcp_relay_policies
+  annotation  = each.value.annotation
+  description = each.value.description
+  mode        = each.value.mode
+  name        = each.key
+  name_alias  = each.value.name_alias
+  owner       = each.value.owner
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   dynamic "relation_dhcp_rs_prov" {
     for_each = each.value.dhcp_relay_providers

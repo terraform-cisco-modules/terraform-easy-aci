@@ -223,19 +223,19 @@ resource "aci_ospf_interface_policy" "ospf_interface_policies" {
   name_alias  = each.value.name_alias
   cost        = each.value.cost_of_interface == 0 ? "unspecified" : each.value.cost_of_interface
   # Bug 805 Submitted
-  # ctrl = alltrue(
-  #   [each.value.adv_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
-  #   ) ? ["advert-subnet", "bfd", "mtu-ignore", "passive"] : anytrue(
-  #   [each.value.adv_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
-  #   ) ? compact(concat([
-  #     length(regexall(true, each.value.advertise_subnet)) > 0 ? "advert-subnet" : ""], [
-  #     length(regexall(true, each.value.bfd)) > 0 ? "bfd" : ""], [
-  #     length(regexall(true, each.value.mtu_ignore)) > 0 ? "mtu-ignore" : ""], [
-  #     length(regexall(true, each.value.passive_participation)) > 0 ? "passive" : ""]
-  # )) : ["unspecified"]
+  ctrl = alltrue(
+    [each.value.advertise_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
+    ) ? ["advert-subnet", "bfd", "mtu-ignore", "passive"] : anytrue(
+    [each.value.advertise_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
+    ) ? compact(concat([
+      length(regexall(true, each.value.advertise_subnet)) > 0 ? "advert-subnet" : ""], [
+      length(regexall(true, each.value.bfd)) > 0 ? "bfd" : ""], [
+      length(regexall(true, each.value.mtu_ignore)) > 0 ? "mtu-ignore" : ""], [
+      length(regexall(true, each.value.passive_participation)) > 0 ? "passive" : ""]
+  )) : ["unspecified"]
   dead_intvl  = each.value.dead_interval
   hello_intvl = each.value.hello_interval
-  # nw_t        = each.value.network_type
+  nw_t        = each.value.network_type
   # pfx_suppress  = each.value.pfx_suppress
   prio         = each.value.priority
   rexmit_intvl = each.value.retransmit_interval
@@ -247,7 +247,7 @@ resource "aci_ospf_route_summarization" "ospf_route_summarization_policies" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each           = local.ospf_route_summarization_policies
+  for_each = local.ospf_route_summarization_policies
   # annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
   cost               = each.value.cost == 0 ? "unspecified" : each.value.cost # 0 to 16777215
   description        = each.value.description

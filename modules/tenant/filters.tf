@@ -1,8 +1,9 @@
 variable "filters" {
   default = {
     "default" = {
-      annotation  = ""
-      description = ""
+      annotation      = ""
+      controller_type = "apic"
+      description     = ""
       filter_entries = [
         {
           annotation            = ""
@@ -36,13 +37,13 @@ variable "filters" {
       schema     = "common"
       template   = "common"
       tenant     = "common"
-      type       = "apic"
     }
   }
   type = map(object(
     {
-      annotation  = optional(string)
-      description = optional(string)
+      annotation      = optional(string)
+      controller_type = optional(string)
+      description     = optional(string)
       filter_entries = list(object(
         {
           annotation            = optional(string)
@@ -76,7 +77,6 @@ variable "filters" {
       schema     = optional(string)
       template   = optional(string)
       tenant     = optional(string)
-      type       = optional(string)
     }
   ))
 }
@@ -94,7 +94,7 @@ resource "aci_filter" "filters" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each                       = { for k, v in local.filters : k => v if v.type == "apic" }
+  for_each                       = { for k, v in local.filters : k => v if v.controller_type == "apic" }
   tenant_dn                      = aci_tenant.tenants[each.value.tenant].id
   annotation                     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                    = each.value.description
@@ -119,7 +119,7 @@ resource "aci_filter_entry" "filter_entries" {
     aci_tenant.tenants,
     aci_filter.filters
   ]
-  for_each      = { for k, v in local.filter_entries : k => v if v.type == "apic" }
+  for_each      = { for k, v in local.filter_entries : k => v if v.controller_type == "apic" }
   filter_dn     = aci_filter.filters[each.value.filter_name].id
   description   = each.value.description
   name          = each.key
@@ -154,7 +154,7 @@ resource "mso_schema_template_filter_entry" "filter_entries" {
   depends_on = [
     mso_schema.schemas
   ]
-  for_each             = { for k, v in local.filter_entries : k => v if v.type == "ndo" }
+  for_each             = { for k, v in local.filter_entries : k => v if v.controller_type == "ndo" }
   schema_id            = mso_schema.schemas[each.value.schema].id
   template_name        = each.value.template
   display_name         = each.value.filter_name
