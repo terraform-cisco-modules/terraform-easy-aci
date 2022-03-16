@@ -394,6 +394,32 @@ locals {
   # Endpoint Retention Policy Variables
   #__________________________________________________________
 
+  dhcp_relay_policies = {
+    for k, v in var.dhcp_relay_policies : k => {
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : lindex.count =>
+        {
+          address             = value.address
+          application_profile = value.application_profile != null ? value.application_profile : "default"
+          epg                 = value.epg != null ? v.epg : "default"
+          epg_type            = value.epg_type != null ? v.epg_type : "epg"
+          l3out               = value.l3out != null ? v.l3out : ""
+          tenant              = value.tenant != null ? v.tenant : ""
+        }
+      } : {}
+      mode       = value.mode != null ? value.mode : "visible"
+      name_alias = value.name_alias != null ? value.name_alias : ""
+      owner      = value.owner != null ? value.owner : "infra"
+      tenant     = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  #__________________________________________________________
+  #
+  # Endpoint Retention Policy Variables
+  #__________________________________________________________
+
   endpoint_retention_policies = {
     for k, v in var.endpoint_retention_policies : k => {
       annotation                     = v.annotation != null ? v.annotation : ""
