@@ -161,7 +161,7 @@ When running in Terraform Cloud with VCS Integration the first Plan will need to
 
 ### Terraform CLI
 
-* Execute the Plan
+* Execute the Plan - Linux
 
 ```bash
 # First time execution requires initialization.  Not needed on subsequent runs.
@@ -169,6 +169,8 @@ When running in Terraform Cloud with VCS Integration the first Plan will need to
 terraform plan -out="main.plan"
 terraform apply "main.plan"
 ```
+
+* Execute the Plan - Windows
 
 ```powershell
 # First time execution requires initialization.  Not needed on subsequent runs.
