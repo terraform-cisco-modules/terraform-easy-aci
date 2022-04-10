@@ -3,39 +3,42 @@ variable "application_profiles" {
     "default" = {
       annotation        = ""
       controller_type   = "apic"
-      controller_vendor = "cisco"
       description       = ""
       monitoring_policy = ""
       name_alias        = ""
       qos_class         = "unspecified"
+      site              = ""
       schema            = ""
       template          = "common"
       tenant            = "common"
     }
   }
   description = <<-EOT
-  Key: Name of the Tenant.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * controller_type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * controller_vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
-    - aws
-    - azure
-    - cisco (Default)
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  Key: Name of the Application Profile.
+  * controller_type: (Required) - The type of controller.  Options are:
+    - apic: For APIC Controllers.
+    - ndo: For Nexus Dashboard Orchestrator.
+  APIC Specific Attributes:
+  * annotation: (Optional) - A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * description: (Optional) - Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * monitoring_poicy: (Optional) - Default is default.  To keep it simple the monitoring policy must be in the common Tenant.
+  * name_alias: (Optional) - A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * qos_class: (Optional) - Default is unspecified.  The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+  NDO Specific Attributes:
+  * schema: (Required) - Schema Name the Template is assigned to.
+  * site: (Optional) - Name of the Site to assign the Application Profile to if doing a Site specific assignment.
+  * template: (Required) - Name of the Template to assign the Application Profile to.
   EOT
   type = map(object(
     {
       annotation        = optional(string)
       controller_type   = optional(string)
-      controller_vendor = optional(string)
       description       = optional(string)
       monitoring_policy = optional(string)
       name_alias        = optional(string)
       qos_class         = optional(string)
       schema            = optional(string)
+      site              = optional(string)
       template          = optional(string)
       tenant            = optional(string)
     }
@@ -63,4 +66,30 @@ resource "aci_application_profile" "application_profiles" {
   name_alias                = each.value.name_alias
   prio                      = each.value.qos_class
   relation_fv_rs_ap_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
+}
+
+resource "mso_schema_site_anp" "application_profiles" {
+  provider = mso
+  depends_on = [
+    mso_schema.schemas,
+    mso_schema_template.templates
+  ]
+  for_each      = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" && v.site != "" }
+  anp_name      = each.key
+  schema_id     = mso_schema.schemas[each.value.schema].id
+  site_id       = data.mso_site.sites[each.value.site].id
+  template_name = each.value.template
+}
+
+resource "mso_schema_template_anp" "application_profiles" {
+  provider = mso
+  depends_on = [
+    mso_schema.schemas,
+    mso_schema_template.templates
+  ]
+  for_each     = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" && v.site == "" }
+  display_name = each.key
+  name         = each.key
+  schema_id    = mso_schema.schemas[each.value.schema].id
+  template     = each.value.template
 }

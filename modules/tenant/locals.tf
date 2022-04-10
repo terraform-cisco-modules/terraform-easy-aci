@@ -1107,8 +1107,21 @@ locals {
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
       name_alias        = v.name_alias != null ? v.name_alias : ""
-      sites             = v.sites != null ? v.sites : []
-      users             = v.users != null ? v.users : []
+      sites = v.sites != null ? [
+        for key, value in v.sites : {
+          aws_access_key_id         = value.aws_access_key_id != null ? value.aws_access_key_id : ""
+          aws_account_id            = value.aws_account_id != null ? value.aws_account_id : ""
+          azure_access_type         = value.azure_access_type != null ? value.azure_access_type : "managed"
+          azure_active_directory_id = value.azure_active_directory_id != null ? value.azure_active_directory_id : ""
+          azure_application_id      = value.azure_application_id != null ? value.azure_application_id : ""
+          azure_shared_account_id   = value.azure_shared_account_id != null ? value.azure_shared_account_id : ""
+          azure_subscription_id     = value.azure_subscription_id != null ? value.azure_subscription_id : ""
+          is_aws_account_trusted    = value.is_aws_account_trusted != null ? value.is_aws_account_trusted : false
+          site                      = value.site
+          vendor                    = v.vendor != null ? v.vendor : "cisco"
+        }
+      ] : []
+      users = v.users != null ? v.users : []
     }
   }
 
