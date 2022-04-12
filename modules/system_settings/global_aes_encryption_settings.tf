@@ -1,4 +1,4 @@
-variable "aes_encryption_settings" {
+variable "global_aes_encryption_settings" {
   default = {
     "default" = {
       clear_passphrase                  = false

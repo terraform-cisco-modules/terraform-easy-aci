@@ -68,6 +68,19 @@ resource "aci_application_profile" "application_profiles" {
   relation_fv_rs_ap_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }
 
+resource "mso_schema_template_anp" "application_profiles" {
+  provider = mso
+  depends_on = [
+    mso_schema.schemas,
+    mso_schema_template.templates
+  ]
+  for_each     = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" }
+  display_name = each.key
+  name         = each.key
+  schema_id    = mso_schema.schemas[each.value.schema].id
+  template     = each.value.template
+}
+
 resource "mso_schema_site_anp" "application_profiles" {
   provider = mso
   depends_on = [
@@ -79,17 +92,4 @@ resource "mso_schema_site_anp" "application_profiles" {
   schema_id     = mso_schema.schemas[each.value.schema].id
   site_id       = data.mso_site.sites[each.value.site].id
   template_name = each.value.template
-}
-
-resource "mso_schema_template_anp" "application_profiles" {
-  provider = mso
-  depends_on = [
-    mso_schema.schemas,
-    mso_schema_template.templates
-  ]
-  for_each     = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" && v.site == "" }
-  display_name = each.key
-  name         = each.key
-  schema_id    = mso_schema.schemas[each.value.schema].id
-  template     = each.value.template
 }

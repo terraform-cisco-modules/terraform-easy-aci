@@ -178,7 +178,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   arp_flood          = each.value.arp_flooding == true ? "yes" : "no"
   bridge_domain_type = each.value.type
   description        = each.value.description
-  host_based_routing = each.value.advertise_host_routes
+  host_based_routing = each.value.advertise_host_routes == true ? "yes" : "no"
   ipv6_mcast_allow   = each.value.pimv6 == true ? "yes" : "no"
   mcast_allow        = each.value.pim == true ? "yes" : "no"
   name               = each.key
@@ -278,7 +278,7 @@ resource "mso_schema_template_bd" "bridge_domains" {
     mso_schema.schemas,
     mso_schema_template.templates
   ]
-  for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.site == "" }
+  for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" }
   arp_flooding = each.value.arp_flooding
   dynamic "dhcp_policy" {
     for_each = each.value.dhcp_relay_policy
@@ -316,13 +316,18 @@ resource "mso_schema_template_bd" "bridge_domains" {
   ) > 0 ? each.value.template : ""
 }
 
-resource "mso_schema_site_bd" "bd1" {
+resource "mso_schema_site_bd" "bridge_domains" {
+  provider = mso
+  depends_on = [
+    mso_schema.schemas,
+    mso_schema_template.templates
+  ]
   for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.site != "" }
-  schema_id     = "5d5dbf3f2e0000580553ccce"
-  bd_name       = "bd4"
-  template_name = "Template1"
-  site_id       = "5c7c95b25100008f01c1ee3c"
-  host_route    = false
+  schema_id     = mso_schema.schemas[each.value.schema].id
+  bd_name       = each.key
+  template_name = each.value.template
+  site_id       = data.mso_site.sites[each.value.site].id
+  host_route    = each.value.advertise_host_routes
 }
 
 resource "mso_schema_template_bd_subnet" "subnets" {
