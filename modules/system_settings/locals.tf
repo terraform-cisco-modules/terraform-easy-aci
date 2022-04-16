@@ -94,8 +94,8 @@ locals {
   # Global AES Passphrase Variables
   #__________________________________________________________
 
-  aes_encryption_settings = {
-    for k, v in var.aes_encryption_settings : k => {
+  global_aes_encryption_settings = {
+    for k, v in var.global_aes_encryption_settings : k => {
       clear_passphrase                  = v.clear_passphrase != null ? v.clear_passphrase : false
       enable_encryption                 = v.enable_encryption != null ? v.enable_encryption : true
       passphrase_key_derivation_version = v.passphrase_key_derivation_version != null ? v.passphrase_key_derivation_version : "v1"

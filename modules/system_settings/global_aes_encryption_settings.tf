@@ -36,7 +36,7 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_encryption_key" "global_aes_passphrase" {
-  for_each                          = local.aes_encryption_settings
+  for_each                          = local.global_aes_encryption_settings
   clear_encryption_key              = each.value.clear_passphrase == true ? "yes" : "no"
   passphrase                        = var.aes_passphrase
   passphrase_key_derivation_version = each.value.passphrase_key_derivation_version # "v1"
