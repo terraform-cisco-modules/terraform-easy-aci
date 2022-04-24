@@ -2,7 +2,9 @@
 variable "tenants" {
   default = {
     "default" = {
+      alias             = ""
       annotation        = ""
+      annotations       = ""
       controller_type   = "apic" # apic or ndo
       description       = ""
       monitoring_policy = ""
@@ -13,7 +15,9 @@ variable "tenants" {
   }
   description = <<-EOT
   Key: Name of the Tenant.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * alias: A changeable name for a given object. While the name of an object, once created, can't be changed, the Alias is a field that can be changed.
+  * annotation: A search keyword or term that is assigned to the Object. Annotations allow you to group multiple objects by descriptive names. You can assign the same annotation name to multiple objects and you can assign one or more annotation names to a single object.
+  * annotations: A key/value pair of annotations to assign to an object.
   * controller_type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
@@ -32,20 +36,30 @@ variable "tenants" {
     - azure_subscription_id: (Optional) - Azure subscription id. It's required when vendor is set to azure. This parameter will only have effect with vendor = azure.
     - is_aws_account_trusted: (Optional) - Azure Access Key ID.
     - site: (Required) - Name of the Site to Associate
-    - vendor: (Optional) - Vendor type.  Options are:
-      * aws
-      * azure
-      * cisco (Default)
   EOT
   type = map(object(
     {
+      alias             = optional(string)
       annotation        = optional(string)
+      annotations       = optional(list(map(string)))
       controller_type   = optional(string)
       description       = optional(string)
       monitoring_policy = optional(string)
       name_alias        = optional(string)
-      sites             = optional(list(object))
-      users             = optional(list(string))
+      sites = optional(list(object(
+        {
+          aws_access_key_id         = optional(string)
+          aws_account_id            = optional(string)
+          azure_access_type         = optional(string)
+          azure_active_directory_id = optional(string)
+          azure_application_id      = optional(string)
+          azure_shared_account_id   = optional(string)
+          azure_subscription_id     = optional(string)
+          is_aws_account_trusted    = optional(string)
+          site                      = string
+        }
+      )))
+      users = optional(list(string))
     }
   ))
 }

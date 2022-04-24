@@ -39,7 +39,7 @@ variable "application_epgs" {
       epg_admin_state        = "admin_up"
       epg_type               = "standard"
       flood_in_encapsulation = "disabled"
-      hasMcastSource         = false
+      has_multicast_source   = false
       label_match_criteria   = "AtleastOne"
       name_alias             = ""
       intra_epg_isolation    = "unenforced"
@@ -135,7 +135,7 @@ variable "application_epgs" {
       epg_admin_state        = optional(string)
       epg_type               = optional(string)
       flood_in_encapsulation = optional(string)
-      hasMcastSource         = optional(bool)
+      has_multicast_source   = optional(bool)
       label_match_criteria   = optional(string)
       name_alias             = optional(string)
       intra_epg_isolation    = optional(string)
@@ -185,7 +185,7 @@ resource "aci_application_epg" "application_epgs" {
   exception_tag          = each.value.contract_exception_tag
   flood_on_encap         = each.value.flood_in_encapsulation
   fwd_ctrl               = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
-  has_mcast_source       = each.value.hasMcastSource
+  has_mcast_source       = each.value.has_multicast_source
   is_attr_based_epg      = each.value.useg_epg == true ? "yes" : "no"
   match_t                = each.value.label_match_criteria
   name                   = each.key

@@ -34,7 +34,6 @@ variable "snmp_policies" {
       annotation  = optional(string)
       communities = optional(list(object(
         {
-          community          = string
           community_variable = number
           description        = optional(string)
         }
@@ -282,24 +281,36 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy} > Community Policies
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "snmp_policies_communities" {
+resource "aci_snmp_community" "communities" {
   depends_on = [
     aci_rest_managed.snmp_policies
   ]
-  for_each   = local.snmp_policies_communities
-  dn         = "uni/fabric/snmppol-${each.value.key1}/community-[${each.value.community_variable}]"
-  class_name = "snmpCommunityP"
-  content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr      = each.value.description
-    name       = each.value.community_variable
-    # name    = length(regexall(
-    #   5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
-    #   4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
-    #   3, each.value.community_variable)) > 0 ? var.snmp_community_3 : length(regexall(
-    #   2, each.value.community_variable)) > 0 ? var.snmp_community_2 : var.snmp_community_1
-  }
+  for_each  = local.snmp_policies_communities
+  parent_dn = aci_snmp_policy.example.id
+  name = length(regexall(
+    5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
+    4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
+    3, each.value.community_variable)) > 0 ? var.snmp_community_3 : length(regexall(
+  2, each.value.community_variable)) > 0 ? var.snmp_community_2 : var.snmp_community_1
 }
+# resource "aci_rest_managed" "snmp_policies_communities" {
+#   depends_on = [
+#     aci_rest_managed.snmp_policies
+#   ]
+#   for_each   = local.snmp_policies_communities
+#   dn         = "uni/fabric/snmppol-${each.value.key1}/community-[${each.value.community_variable}]"
+#   class_name = "snmpCommunityP"
+#   content = {
+#     annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+#     descr      = each.value.description
+#     name       = each.value.community
+#     # name    = length(regexall(
+#     #   5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
+#     #   4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
+#     #   3, each.value.community_variable)) > 0 ? var.snmp_community_3 : length(regexall(
+#     #   2, each.value.community_variable)) > 0 ? var.snmp_community_2 : var.snmp_community_1
+#   }
+# }
 
 
 /*_____________________________________________________________________________________________________________________

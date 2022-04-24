@@ -38,9 +38,9 @@ variable "date_and_time" {
     - Master Mode is only applicable when the server clock is undisciplined.
     - The default master mode stratum number is 8.
   * ntp_servers: List of NTP Servers.
-    - authentication_key: key_id of the Authentication key.
     - description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
     - hostname: Hostname/IP Address of the NTP Server
+    - key_id: key_id of the Authentication key.
     - management_epg: Name of the Management EPG
     - management_epg_type: Type of EPG.  Options are:
       * inb: for Inband EPGs.
@@ -493,14 +493,14 @@ variable "date_and_time" {
       master_mode    = optional(string)
       ntp_servers = optional(list(object(
         {
-          authentication_key       = optional(number)
           description              = optional(string)
           hostname                 = string
+          key_id                   = optional(number)
           management_epg           = optional(string)
           management_epg_type      = optional(string)
           maximum_polling_interval = optional(number)
           minimum_polling_interval = optional(number)
-          preferred                = optional(string)
+          preferred                = optional(bool)
         }
       )))
       offset_state  = optional(string)
@@ -620,7 +620,7 @@ resource "aci_rest_managed" "ntp_servers" {
     maxPoll    = each.value.maximum_polling_interval
     minPoll    = each.value.minimum_polling_interval
     name       = each.value.hostname
-    preferred  = each.value.preferred
+    preferred  = each.value.preferred == true ? "yes" : "no"
     trueChimer = "disabled"
   }
   child {

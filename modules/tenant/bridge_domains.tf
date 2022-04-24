@@ -322,7 +322,7 @@ resource "mso_schema_site_bd" "bridge_domains" {
     mso_schema.schemas,
     mso_schema_template.templates
   ]
-  for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.site != "" }
+  for_each      = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.site != "" }
   schema_id     = mso_schema.schemas[each.value.schema].id
   bd_name       = each.key
   template_name = each.value.template
