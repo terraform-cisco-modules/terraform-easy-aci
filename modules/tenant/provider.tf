@@ -16,7 +16,7 @@ provider "aci" {
   cert_name   = var.certName
   password    = var.apicPass
   private_key = var.privateKey
-  url         = var.apicUrl
+  url         = "https://${var.apicUrl}"
   username    = var.apicUser
   insecure    = true
 }
@@ -26,6 +26,6 @@ provider "mso" {
   insecure = true
   password = var.ndoPass
   platform = "nd"
-  url      = var.ndoUrl
+  url      = "https://${var.ndoUrl}"
   username = var.ndoUser
 }

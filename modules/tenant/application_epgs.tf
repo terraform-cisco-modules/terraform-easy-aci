@@ -185,7 +185,7 @@ resource "aci_application_epg" "application_epgs" {
   exception_tag          = each.value.contract_exception_tag
   flood_on_encap         = each.value.flood_in_encapsulation
   fwd_ctrl               = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
-  has_mcast_source       = each.value.has_multicast_source
+  has_mcast_source       = each.value.has_multicast_source == true ? "yes" : "no"
   is_attr_based_epg      = each.value.useg_epg == true ? "yes" : "no"
   match_t                = each.value.label_match_criteria
   name                   = each.key
