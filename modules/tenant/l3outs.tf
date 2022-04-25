@@ -930,27 +930,27 @@ resource "aci_l3out_path_attachment_secondary_ip" "l3out_paths_secondary_ips" {
 }
 
 
-resource "aci_l3out_floating_svi" "l3out_floating_svis" {
-  depends_on = [
-    aci_logical_interface_profile.l3out_interface_profiles
-  ]
-  for_each                     = local.l3out_floating_svis
-  addr                         = each.value.address
-  annotation                   = each.value.annotation
-  autostate                    = each.value.autostate
-  description                  = each.value.description
-  encap_scope                  = each.value.encapsulation_scope
-  if_inst_t                    = "ext-svi"
-  ipv6_dad                     = each.value.ipv6_dad
-  ll_addr                      = each.value.link_local_address
-  logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.key].id
-  node_dn                      = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
-  encap                        = "vlan-${each.value.vlan}"
-  mac                          = each.value.mac_address
-  mode                         = each.value.mode
-  mtu                          = each.value.mtu
-  target_dscp                  = each.value.target_dscp
-}
+# resource "aci_l3out_floating_svi" "l3out_floating_svis" {
+#   depends_on = [
+#     aci_logical_interface_profile.l3out_interface_profiles
+#   ]
+#   for_each                     = local.l3out_floating_svis
+#   addr                         = each.value.address
+#   annotation                   = each.value.annotation
+#   autostate                    = each.value.autostate
+#   description                  = each.value.description
+#   encap_scope                  = each.value.encapsulation_scope
+#   if_inst_t                    = "ext-svi"
+#   ipv6_dad                     = each.value.ipv6_dad
+#   ll_addr                      = each.value.link_local_address
+#   logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.key].id
+#   node_dn                      = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
+#   encap                        = "vlan-${each.value.vlan}"
+#   mac                          = each.value.mac_address
+#   mode                         = each.value.mode
+#   mtu                          = each.value.mtu
+#   target_dscp                  = each.value.target_dscp
+# }
 
 #------------------------------------------------
 # Create a BGP Peer Connectivity Profile

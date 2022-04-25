@@ -23,6 +23,7 @@ locals {
       name_alias        = v.name_alias != null ? v.name_alias : ""
       qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
       schema            = v.schema != null ? v.schema : "common"
+      sites             = v.sites != null ? v.sites : []
       template          = v.template != null ? v.template : "common"
       tenant            = v.tenant != null ? v.tenant : "common"
     }
@@ -50,7 +51,7 @@ locals {
       epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
       epg_type               = v.epg_type != null ? v.epg_type : "standard"
       flood_in_encapsulation = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
-      hasMcastSource         = v.hasMcastSource != null ? v.hasMcastSource : false
+      has_multicast_source   = v.has_multicast_source != null ? v.has_multicast_source : false
       label_match_criteria   = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
       name_alias             = v.name_alias != null ? v.name_alias : ""
       intra_epg_isolation    = v.intra_epg_isolation != null ? v.intra_epg_isolation : "unenforced"
@@ -246,7 +247,7 @@ locals {
 
   #__________________________________________________________
   #
-  # Application Profile Variables
+  # Bridge Domain Variables
   #__________________________________________________________
 
   bridge_domains = {
@@ -255,6 +256,7 @@ locals {
       alias                                  = lookup(v.general[0], "alias", "")
       annotation                             = lookup(v.general[0], "annotation", "")
       arp_flooding                           = lookup(v.general[0], "arp_flooding", false)
+      controller_type                        = v.controller_type != null ? v.controller_type : "apic"
       description                            = lookup(v.general[0], "description", "")
       endpoint_clear                         = lookup(v.general[0], "endpoint_clear", false)
       endpoint_retention_policy              = lookup(v.general[0], "endpoint_retention_policy", "")
@@ -266,6 +268,7 @@ locals {
       limit_ip_learn_to_subnets              = lookup(v.general[0], "limit_ip_learn_to_subnets", true)
       mld_snoop_policy                       = lookup(v.general[0], "mld_snoop_policy", "")
       multi_destination_flooding             = lookup(v.general[0], "multi_destination_flooding", "bd-flood")
+      name_alias                             = lookup(v.general[0], "name_alias", "")
       pim                                    = lookup(v.general[0], "pim", false)
       pimv6                                  = lookup(v.general[0], "pimv6", false)
       tenant                                 = lookup(v.general[0], "tenant", "common")
@@ -275,10 +278,13 @@ locals {
       unicast_routing                        = lookup(v.l3_configurations[0], "unicast_routing", true)
       custom_mac_address                     = lookup(v.l3_configurations[0], "custom_mac_address", "")
       link_local_ipv6_address                = lookup(v.l3_configurations[0], "link_local_ipv6_address", "::")
+      schema                                 = v.schema != null ? v.schema : "common"
+      sites                                  = v.sites != null ? v.sites : []
       subnets                                = lookup(v.l3_configurations[0], "subnets", [])
-      virtual_mac_address                    = lookup(v.l3_configurations[0], "virtual_mac_address", "not-applicable")
-      allow_bum_traffic_on_stretched_bd      = lookup(v.troubleshooting_advanced[0], "allow_bum_traffic_on_stretched_bd", false)
-      bd_stretched_to_remote_sites           = lookup(v.troubleshooting_advanced[0], "bd_stretched_to_remote_sites", false)
+      virtual_mac_address                    = lookup(v.l3_configurations[0], "virtual_mac_address", ["not-applicable"])
+      intersite_bum_traffic_allow            = lookup(v.troubleshooting_advanced[0], "intersite_bum_traffic_allow", false)
+      intersite_l2_stretch                   = lookup(v.troubleshooting_advanced[0], "intersite_l2_stretch", false)
+      optimize_wan_bandwidth                 = lookup(v.troubleshooting_advanced[0], "optimize_wan_bandwidth", false)
       disable_ip_data_plane_learning_for_pbr = lookup(v.troubleshooting_advanced[0], "disable_ip_data_plane_learning_for_pbr", false)
       first_hop_security_policy              = lookup(v.troubleshooting_advanced[0], "first_hop_security_policy", "")
       monitoring_policy                      = lookup(v.troubleshooting_advanced[0], "monitoring_policy", "")
@@ -291,18 +297,26 @@ locals {
   subnets_loop_1 = flatten([
     for key, value in local.bridge_domains : [
       for k, v in value.subnets : {
-        advertise_externally         = v.advertise_externally != null ? v.advertise_externally : false
         bridge_domain                = key
+        controller_type              = value.controller_type
         description                  = v.description != null ? v.description : ""
         gateway_ip                   = v.gateway_ip != null ? v.gateway_ip : "198.18.5.1/24"
         l3_out_for_route_profile     = v.l3_out_for_route_profile != null ? v.l3_out_for_route_profile : ""
         associated_l3outs            = v.associated_l3outs != null ? v.associated_l3outs : []
         make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
-        shared_between_vrfs          = v.shared_between_vrfs != null ? v.shared_between_vrfs : false
+        schema                       = value.schema
+        sites                        = value.sites
+        scope = [
+          {
+            advertise_externally = lookup(v.scope[0], "shared_between_vrfs", false)
+            shared_between_vrfs  = lookup(v.scope[0], "advertise_externally", false)
+          }
+        ]
         subnet_control = [
           {
-            no_default_svi_gateway = false
-            querier_ip             = false
+            neighbor_discovery     = lookup(v.subnet_control[0], "neighbor_discovery", false)
+            no_default_svi_gateway = lookup(v.subnet_control[0], "no_default_svi_gateway", false)
+            querier_ip             = lookup(v.subnet_control[0], "querier_ip", false)
           }
         ]
         treat_as_virtual_ip_address = v.treat_as_virtual_ip_address != null ? v.treat_as_virtual_ip_address : false
@@ -394,26 +408,26 @@ locals {
   # Endpoint Retention Policy Variables
   #__________________________________________________________
 
-  dhcp_relay_policies = {
-    for k, v in var.dhcp_relay_policies : k => {
-      annotation  = v.annotation != null ? v.annotation : ""
-      description = v.description != null ? v.description : ""
-      dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : lindex.count =>
-        {
-          address             = value.address
-          application_profile = value.application_profile != null ? value.application_profile : "default"
-          epg                 = value.epg != null ? v.epg : "default"
-          epg_type            = value.epg_type != null ? v.epg_type : "epg"
-          l3out               = value.l3out != null ? v.l3out : ""
-          tenant              = value.tenant != null ? v.tenant : ""
-        }
-      } : {}
-      mode       = value.mode != null ? value.mode : "visible"
-      name_alias = value.name_alias != null ? value.name_alias : ""
-      owner      = value.owner != null ? value.owner : "infra"
-      tenant     = v.tenant != null ? v.tenant : "common"
-    }
-  }
+  # dhcp_relay_policies = {
+  #   for k, v in var.dhcp_relay_policies : k => {
+  #     annotation  = v.annotation != null ? v.annotation : ""
+  #     description = v.description != null ? v.description : ""
+  #     dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : key =>
+  #       {
+  #         address             = value.address
+  #         application_profile = value.application_profile != null ? value.application_profile : "default"
+  #         epg                 = value.epg != null ? v.epg : "default"
+  #         epg_type            = value.epg_type != null ? v.epg_type : "epg"
+  #         l3out               = value.l3out != null ? v.l3out : ""
+  #         tenant              = value.tenant != null ? v.tenant : ""
+  #       }
+  #     } : {}
+  #     mode       = v.mode != null ? v.mode : "visible"
+  #     name_alias = v.name_alias != null ? v.name_alias : ""
+  #     owner      = v.owner != null ? v.owner : "infra"
+  #     tenant     = v.tenant != null ? v.tenant : "common"
+  #   }
+  # }
 
   #__________________________________________________________
   #
@@ -1103,7 +1117,6 @@ locals {
     for k, v in var.tenants : k => {
       annotation        = v.annotation != null ? v.annotation : ""
       controller_type   = v.controller_type != null ? v.controller_type : "apic"
-      controller_vendor = v.controller_vendor != null ? v.controller_vendor : "cisco"
       description       = v.description != null ? v.description : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : ""
       name_alias        = v.name_alias != null ? v.name_alias : ""
@@ -1118,7 +1131,7 @@ locals {
           azure_subscription_id     = value.azure_subscription_id != null ? value.azure_subscription_id : ""
           is_aws_account_trusted    = value.is_aws_account_trusted != null ? value.is_aws_account_trusted : false
           site                      = value.site
-          vendor                    = v.vendor != null ? v.vendor : "cisco"
+          vendor                    = value.vendor != null ? value.vendor : "cisco"
         }
       ] : []
       users = v.users != null ? v.users : []

@@ -4,7 +4,7 @@ variable "tenants" {
     "default" = {
       alias             = ""
       annotation        = ""
-      annotations       = ""
+      annotations       = []
       controller_type   = "apic" # apic or ndo
       description       = ""
       monitoring_policy = ""
@@ -36,6 +36,10 @@ variable "tenants" {
     - azure_subscription_id: (Optional) - Azure subscription id. It's required when vendor is set to azure. This parameter will only have effect with vendor = azure.
     - is_aws_account_trusted: (Optional) - Azure Access Key ID.
     - site: (Required) - Name of the Site to Associate
+    - vendor: The type of vendor to apply the tenant to.
+      * aws
+      * azure
+      * cisco
   EOT
   type = map(object(
     {
@@ -57,6 +61,7 @@ variable "tenants" {
           azure_subscription_id     = optional(string)
           is_aws_account_trusted    = optional(string)
           site                      = string
+          vendor                    = optional(string)
         }
       )))
       users = optional(list(string))
@@ -72,7 +77,7 @@ variable "aws_secret_key" {
 }
 
 variable "azure_client_secret" {
-  default     = ""
+  default     = "1"
   description = "Azure Client Secret. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure."
   sensitive   = true
   type        = string
@@ -106,7 +111,7 @@ resource "mso_tenant" "tenants" {
   name         = each.key
   display_name = each.key
   dynamic "site_associations" {
-    for_each = toset(each.value.sites)
+    for_each = { for k, v in each.value.sites : k => v if v.vendor == "aws" }
     content {
       aws_access_key_id = length(regexall(
         "aws", site_associations.value.vendor)
@@ -117,6 +122,13 @@ resource "mso_tenant" "tenants" {
       aws_secret_key = length(regexall(
         "aws", site_associations.value.vendor)
       ) > 0 ? var.aws_secret_key : ""
+      site_id = data.mso_site.sites[site_associations.value.site].id
+      vendor  = site_associations.value.vendor
+    }
+  }
+  dynamic "site_associations" {
+    for_each = { for k, v in each.value.sites : k => v if v.vendor == "azure" }
+    content {
       azure_access_type = length(regexall(
         "azure", site_associations.value.vendor)
       ) > 0 ? site_associations.value.azure_access_type : ""
@@ -128,18 +140,21 @@ resource "mso_tenant" "tenants" {
       ) > 0 && site_associations.value.azure_access_type == "credentials" ? site_associations.value.azure_application_id : ""
       azure_client_secret = length(regexall(
         "azure", site_associations.value.vendor)
-      ) > 0 && site_associations.value.azure_access_type == "credentials" ? var.value.azure_client_secret : ""
+      ) > 0 && site_associations.value.azure_access_type == "credentials" ? var.azure_client_secret : ""
       azure_shared_account_id = length(regexall(
         "azure", site_associations.value.vendor)
       ) > 0 && site_associations.value.azure_access_type == "shared" ? site_associations.value.azure_shared_account_id : ""
       azure_subscription_id = length(regexall(
         "azure", site_associations.value.vendor)
       ) > 0 ? site_associations.value.azure_subscription_id : ""
-      is_aws_account_trusted = length(regexall(
-        "aws", site_associations.value.vendor)
-      ) > 0 ? site_associations.value.is_aws_account_trusted : false
       site_id = data.mso_site.sites[site_associations.value.site].id
       vendor  = site_associations.value.vendor
+    }
+  }
+  dynamic "site_associations" {
+    for_each = { for k, v in each.value.sites : k => v if v.vendor == "cisco" }
+    content {
+      site_id = data.mso_site.sites[site_associations.value.site].id
     }
   }
   dynamic "user_associations" {

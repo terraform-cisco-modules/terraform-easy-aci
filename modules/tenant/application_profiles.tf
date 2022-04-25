@@ -7,7 +7,7 @@ variable "application_profiles" {
       monitoring_policy = ""
       name_alias        = ""
       qos_class         = "unspecified"
-      site              = ""
+      sites             = []
       schema            = ""
       template          = "common"
       tenant            = "common"
@@ -26,7 +26,7 @@ variable "application_profiles" {
   * qos_class: (Optional) - Default is unspecified.  The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
   NDO Specific Attributes:
   * schema: (Required) - Schema Name the Template is assigned to.
-  * site: (Optional) - Name of the Site to assign the Application Profile to if doing a Site specific assignment.
+  * sites: (Optional) - Name of the Site to assign the Application Profile to if doing a Site specific assignment.
   * template: (Required) - Name of the Template to assign the Application Profile to.
   EOT
   type = map(object(
@@ -38,7 +38,7 @@ variable "application_profiles" {
       name_alias        = optional(string)
       qos_class         = optional(string)
       schema            = optional(string)
-      site              = optional(string)
+      sites             = optional(list(string))
       template          = optional(string)
       tenant            = optional(string)
     }
@@ -87,7 +87,7 @@ resource "mso_schema_site_anp" "application_profiles" {
     mso_schema.schemas,
     mso_schema_template.templates
   ]
-  for_each      = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" && v.site != "" }
+  for_each      = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" && v.sites != [] }
   anp_name      = each.key
   schema_id     = mso_schema.schemas[each.value.schema].id
   site_id       = data.mso_site.sites[each.value.site].id

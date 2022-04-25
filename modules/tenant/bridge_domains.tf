@@ -1,6 +1,7 @@
 variable "bridge_domains" {
   default = {
     "default" = {
+      controller_type = "apic"
       general = [
         {
           advertise_host_routes         = false
@@ -18,6 +19,7 @@ variable "bridge_domains" {
           limit_ip_learn_to_subnets     = true
           mld_snoop_policy              = ""
           multi_destination_flooding    = "bd-flood"
+          name_alias                    = ""
           pim                           = false
           pimv6                         = false
           tenant                        = "common"
@@ -49,9 +51,7 @@ variable "bridge_domains" {
                   advertise_externally = false
                   shared_between_vrfs  = false
                 }
-
               ]
-
               subnet_control = [
                 {
                   neighbor_discovery     = true
@@ -65,6 +65,8 @@ variable "bridge_domains" {
           virtual_mac_address = ""
         }
       ]
+      schema = "common"
+      sites  = []
       troubleshooting_advanced = [
         {
           intersite_bum_traffic_allow            = false
@@ -81,6 +83,7 @@ variable "bridge_domains" {
   }
   type = map(object(
     {
+      controller_type = optional(string)
       general = list(object(
         {
           advertise_host_routes         = optional(bool)
@@ -98,6 +101,7 @@ variable "bridge_domains" {
           limit_ip_learn_to_subnets     = optional(bool)
           mld_snoop_policy              = optional(string)
           multi_destination_flooding    = optional(string)
+          name_alias                    = optional(string)
           pim                           = optional(bool)
           pimv6                         = optional(bool)
           tenant                        = optional(string)
@@ -142,6 +146,8 @@ variable "bridge_domains" {
           virtual_mac_address = optional(string)
         }
       ))
+      schema = optional(string)
+      sites  = optional(list(string))
       troubleshooting_advanced = list(object(
         {
           intersite_bum_traffic_allow            = optional(bool)
@@ -193,7 +199,8 @@ resource "aci_bridge_domain" "bridge_domains" {
   ll_addr                   = each.value.link_local_ipv6_address
   mac                       = each.value.custom_mac_address
   unicast_route             = each.value.unicast_routing == true ? "yes" : "no"
-  vmac                      = each.value.virtual_mac_address
+  vmac                      = "not-applicable"
+  # vmac                      = each.value.virtual_mac_address
   # Advanced/Troubleshooting
   ep_clear            = each.value.endpoint_clear == true ? "yes" : "no"
   ep_move_detect_mode = each.value.ep_move_detection_mode
@@ -244,14 +251,14 @@ resource "aci_subnet" "subnets" {
   ]
   for_each  = { for k, v in local.subnets : k => v if v.controller_type == "apic" }
   parent_dn = aci_bridge_domain.bridge_domains[each.value.bridge_domain].id
-  ctrl = alltrue([each.value.subnet_control["neighbor_discovery"
-    ], each.value.subnet_control["no_default_svi_gateway"], each.value.subnet_control["querier_ip"]
-    ]) ? ["nd", "no-default-gateway", "querier"] : anytrue([each.value.subnet_control["neighbor_discovery"
-    ], each.value.subnet_control["no_default_svi_gateway"], each.value.subnet_control["querier_ip"]
+  ctrl = alltrue([each.value.subnet_control[0]["neighbor_discovery"
+    ], each.value.subnet_control[0]["no_default_svi_gateway"], each.value.subnet_control[0]["querier_ip"]
+    ]) ? ["nd", "no-default-gateway", "querier"] : anytrue([each.value.subnet_control[0]["neighbor_discovery"
+    ], each.value.subnet_control[0]["no_default_svi_gateway"], each.value.subnet_control[0]["querier_ip"]
     ]) ? compact(concat([
-      length(regexall(true, each.value.subnet_control["neighbor_discovery"])) > 0 ? "nd" : ""], [
-      length(regexall(true, each.value.subnet_control["no_default_svi_gateway"])) > 0 ? "no-default-gateway" : ""], [
-    length(regexall(true, each.value.subnet_control["querier_ip"])) > 0 ? "querier" : ""]
+      length(regexall(true, each.value.subnet_control[0]["neighbor_discovery"])) > 0 ? "nd" : ""], [
+      length(regexall(true, each.value.subnet_control[0]["no_default_svi_gateway"])) > 0 ? "no-default-gateway" : ""], [
+    length(regexall(true, each.value.subnet_control[0]["querier_ip"])) > 0 ? "querier" : ""]
   )) : ["unspecified"]
   description = each.value.description
   ip          = each.value.gateway_ip
@@ -259,11 +266,11 @@ resource "aci_subnet" "subnets" {
   # relation_fv_rs_bd_subnet_to_out     = [each.value.l3_out_for_route_profile]
   # relation_fv_rs_bd_subnet_to_profile = each.value.route_profile
   # relation_fv_rs_nd_pfx_pol           = each.value.nd_ra_prefix_policy
-  scope = alltrue([each.value.scope["advertise_externally"], each.value.scope["shared_between_vrfs"]
-    ]) ? ["public", "shared"] : anytrue([each.value.scope["advertise_externally"
-      ], each.value.scope["shared_between_vrfs"]]) ? compact(concat([
-      length(regexall(true, each.value.scope["advertise_externally"])) > 0 ? "public" : ""], [
-    length(regexall(true, each.value.scope["shared_between_vrfs"])) > 0 ? "shared" : ""]
+  scope = alltrue([each.value.scope[0]["advertise_externally"], each.value.scope[0]["shared_between_vrfs"]
+    ]) ? ["public", "shared"] : anytrue([each.value.scope[0]["advertise_externally"
+      ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
+      length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
+    length(regexall(true, each.value.scope[0]["shared_between_vrfs"])) > 0 ? "shared" : ""]
   )) : ["private"]
   virtual = each.value.treat_as_virtual_ip_address == true ? "yes" : "no"
 }
@@ -280,15 +287,15 @@ resource "mso_schema_template_bd" "bridge_domains" {
   ]
   for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" }
   arp_flooding = each.value.arp_flooding
-  dynamic "dhcp_policy" {
-    for_each = each.value.dhcp_relay_policy
-    content {
-      name                       = dhcp_policy.value.name
-      version                    = dhcp_policy.value.version
-      dhcp_option_policy_name    = dhcp_policy.value.dhcp_option_policy_name
-      dhcp_option_policy_version = dhcp_policy.value.dhcp_option_policy_version
-    }
-  }
+  # dynamic "dhcp_policy" {
+  #   for_each = each.value.dhcp_relay_policy
+  #   content {
+  #     name                       = dhcp_policy.value.name
+  #     version                    = dhcp_policy.value.version
+  #     dhcp_option_policy_name    = dhcp_policy.value.dhcp_option_policy_name
+  #     dhcp_option_policy_version = dhcp_policy.value.dhcp_option_policy_version
+  #   }
+  # }
   display_name                    = each.key
   name                            = each.key
   intersite_bum_traffic           = each.value.intersite_bum_traffic_allow
@@ -322,7 +329,7 @@ resource "mso_schema_site_bd" "bridge_domains" {
     mso_schema.schemas,
     mso_schema_template.templates
   ]
-  for_each      = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.site != "" }
+  for_each      = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" && v.sites != [] }
   schema_id     = mso_schema.schemas[each.value.schema].id
   bd_name       = each.key
   template_name = each.value.template
@@ -335,7 +342,7 @@ resource "mso_schema_template_bd_subnet" "subnets" {
   depends_on = [
     mso_schema_template_bd.bridge_domains
   ]
-  for_each           = { for k, v in local.subnets : k => v if v.controller_type == "ndo" && v.site == "" }
+  for_each           = { for k, v in local.subnets : k => v if v.controller_type == "ndo" && v.sites == [] }
   bd_name            = each.value.bridge_domain
   description        = each.value.description
   ip                 = each.value.gateway_ip
