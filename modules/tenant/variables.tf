@@ -9,15 +9,15 @@ variable "certName" {
   type        = string
 }
 
+variable "apicHostname" {
+  description = "Cisco APIC Hostname"
+  type        = string
+}
+
 variable "apicPass" {
   default     = ""
   description = "Password for User based Authentication."
   sensitive   = true
-  type        = string
-}
-
-variable "apicUrl" {
-  description = "Cisco APIC URL.  In Example http://apic.example.com"
   type        = string
 }
 
@@ -40,16 +40,16 @@ variable "ndoDomain" {
   type        = string
 }
 
+variable "ndoHostname" {
+  default     = "https://nxo.example.com"
+  description = "Cisco Nexus Dashboard Orchestrator Hostname"
+  type        = string
+}
+
 variable "ndoPass" {
   default     = ""
   description = "Password for Nexus Dashboard Orchestrator Authentication."
   sensitive   = true
-  type        = string
-}
-
-variable "ndoUrl" {
-  default     = "https://nxo.example.com"
-  description = "Cisco Nexus Dashboard Orchestrator URL.  In Example https://nxo.example.com"
   type        = string
 }
 
