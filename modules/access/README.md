@@ -56,7 +56,8 @@ This module will create the following Access Policies in an APIC Controller:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.0 |
-| <a name="requirement_aci"></a> [aci](#requirement\_aci) | >= 2.0.0 |
+| <a name="requirement_aci"></a> [aci](#requirement\_aci) | >= 2.1.0 |
+| <a name="requirement_mso"></a> [mso](#requirement\_mso) | >= 0.4.1 |
 
 ## Providers
 
@@ -72,52 +73,52 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [aci_access_generic.access_generic](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/access_generic) | resource |
-| [aci_access_port_block.leaf_port_blocks](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/access_port_block) | resource |
-| [aci_access_port_selector.leaf_interface_selectors](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/access_port_selector) | resource |
-| [aci_access_sub_port_block.leaf_port_subblocks](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/access_sub_port_block) | resource |
-| [aci_access_switch_policy_group.leaf_policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/access_switch_policy_group) | resource |
-| [aci_attachable_access_entity_profile.aaep_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/attachable_access_entity_profile) | resource |
-| [aci_cdp_interface_policy.cdp_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/cdp_interface_policy) | resource |
-| [aci_error_disable_recovery.error_disabled_recovery_policy](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/error_disable_recovery) | resource |
-| [aci_fabric_if_pol.link_level_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/fabric_if_pol) | resource |
-| [aci_interface_fc_policy.fc_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/interface_fc_policy) | resource |
-| [aci_l2_interface_policy.l2_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/l2_interface_policy) | resource |
-| [aci_l3_domain_profile.layer3_domains](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/l3_domain_profile) | resource |
-| [aci_lacp_policy.lacp_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/lacp_policy) | resource |
-| [aci_leaf_access_bundle_policy_group.policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_access_bundle_policy_group) | resource |
-| [aci_leaf_access_port_policy_group.policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_access_port_policy_group) | resource |
-| [aci_leaf_breakout_port_group.policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_breakout_port_group) | resource |
-| [aci_leaf_interface_profile.leaf_interface_profiles](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_interface_profile) | resource |
-| [aci_leaf_profile.leaf_profiles](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_profile) | resource |
-| [aci_leaf_selector.leaf_selectors](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/leaf_selector) | resource |
-| [aci_lldp_interface_policy.lldp_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/lldp_interface_policy) | resource |
-| [aci_maintenance_group_node.maintenance_group_nodes](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/maintenance_group_node) | resource |
-| [aci_maintenance_policy.maintenance_group_policy](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/maintenance_policy) | resource |
-| [aci_mcp_instance_policy.mcp_instance_policy](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/mcp_instance_policy) | resource |
-| [aci_miscabling_protocol_interface_policy.mcp_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/miscabling_protocol_interface_policy) | resource |
-| [aci_node_block.leaf_profile_blocks](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/node_block) | resource |
-| [aci_physical_domain.physical_domains](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/physical_domain) | resource |
-| [aci_pod_maintenance_group.maintenance_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/pod_maintenance_group) | resource |
-| [aci_port_security_policy.port_security_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/port_security_policy) | resource |
-| [aci_qos_instance_policy.global_qos_class](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/qos_instance_policy) | resource |
-| [aci_ranges.vlans](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/ranges) | resource |
-| [aci_rest_managed.fabric_membership](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/rest_managed) | resource |
-| [aci_rest_managed.spine_interface_selectors](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/rest_managed) | resource |
-| [aci_rest_managed.spine_profile_node_blocks](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/rest_managed) | resource |
-| [aci_spanning_tree_interface_policy.spanning_tree_interface_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spanning_tree_interface_policy) | resource |
-| [aci_spine_interface_profile.spine_interface_profiles](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spine_interface_profile) | resource |
-| [aci_spine_port_policy_group.spine_interface_policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spine_port_policy_group) | resource |
-| [aci_spine_profile.spine_profiles](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spine_profile) | resource |
-| [aci_spine_switch_association.spine_profiles](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spine_switch_association) | resource |
-| [aci_spine_switch_policy_group.spine_policy_groups](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/spine_switch_policy_group) | resource |
-| [aci_vlan_pool.vlan_pools](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vlan_pool) | resource |
-| [aci_vmm_controller.vmm_controllers](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vmm_controller) | resource |
-| [aci_vmm_credential.vmm_credentials](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vmm_credential) | resource |
-| [aci_vmm_domain.vmm_domains](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vmm_domain) | resource |
-| [aci_vpc_domain_policy.vpc_domain_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vpc_domain_policy) | resource |
-| [aci_vpc_explicit_protection_group.vpc_domains](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vpc_explicit_protection_group) | resource |
-| [aci_vswitch_policy.vswitch_policies](https://registry.terraform.io/providers/ciscodevnet/aci/latest/docs/resources/vswitch_policy) | resource |
+| [aci_access_generic.access_generic](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/access_generic) | resource |
+| [aci_access_port_block.leaf_port_blocks](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/access_port_block) | resource |
+| [aci_access_port_selector.leaf_interface_selectors](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/access_port_selector) | resource |
+| [aci_access_sub_port_block.leaf_port_subblocks](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/access_sub_port_block) | resource |
+| [aci_access_switch_policy_group.leaf_policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/access_switch_policy_group) | resource |
+| [aci_attachable_access_entity_profile.aaep_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/attachable_access_entity_profile) | resource |
+| [aci_cdp_interface_policy.cdp_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/cdp_interface_policy) | resource |
+| [aci_error_disable_recovery.error_disabled_recovery_policy](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/error_disable_recovery) | resource |
+| [aci_fabric_if_pol.link_level_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/fabric_if_pol) | resource |
+| [aci_interface_fc_policy.fc_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/interface_fc_policy) | resource |
+| [aci_l2_interface_policy.l2_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/l2_interface_policy) | resource |
+| [aci_l3_domain_profile.layer3_domains](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/l3_domain_profile) | resource |
+| [aci_lacp_policy.lacp_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/lacp_policy) | resource |
+| [aci_leaf_access_bundle_policy_group.policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_access_bundle_policy_group) | resource |
+| [aci_leaf_access_port_policy_group.policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_access_port_policy_group) | resource |
+| [aci_leaf_breakout_port_group.policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_breakout_port_group) | resource |
+| [aci_leaf_interface_profile.leaf_interface_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_interface_profile) | resource |
+| [aci_leaf_profile.leaf_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_profile) | resource |
+| [aci_leaf_selector.leaf_selectors](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/leaf_selector) | resource |
+| [aci_lldp_interface_policy.lldp_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/lldp_interface_policy) | resource |
+| [aci_maintenance_group_node.maintenance_group_nodes](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/maintenance_group_node) | resource |
+| [aci_maintenance_policy.maintenance_group_policy](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/maintenance_policy) | resource |
+| [aci_mcp_instance_policy.mcp_instance_policy](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/mcp_instance_policy) | resource |
+| [aci_miscabling_protocol_interface_policy.mcp_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/miscabling_protocol_interface_policy) | resource |
+| [aci_node_block.leaf_profile_blocks](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/node_block) | resource |
+| [aci_physical_domain.physical_domains](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/physical_domain) | resource |
+| [aci_pod_maintenance_group.maintenance_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/pod_maintenance_group) | resource |
+| [aci_port_security_policy.port_security_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/port_security_policy) | resource |
+| [aci_qos_instance_policy.global_qos_class](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/qos_instance_policy) | resource |
+| [aci_ranges.vlans](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/ranges) | resource |
+| [aci_rest_managed.fabric_membership](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
+| [aci_rest_managed.spine_interface_selectors](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
+| [aci_rest_managed.spine_profile_node_blocks](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
+| [aci_spanning_tree_interface_policy.spanning_tree_interface_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spanning_tree_interface_policy) | resource |
+| [aci_spine_interface_profile.spine_interface_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spine_interface_profile) | resource |
+| [aci_spine_port_policy_group.spine_interface_policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spine_port_policy_group) | resource |
+| [aci_spine_profile.spine_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spine_profile) | resource |
+| [aci_spine_switch_association.spine_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spine_switch_association) | resource |
+| [aci_spine_switch_policy_group.spine_policy_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/spine_switch_policy_group) | resource |
+| [aci_vlan_pool.vlan_pools](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vlan_pool) | resource |
+| [aci_vmm_controller.vmm_controllers](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vmm_controller) | resource |
+| [aci_vmm_credential.vmm_credentials](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vmm_credential) | resource |
+| [aci_vmm_domain.vmm_domains](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vmm_domain) | resource |
+| [aci_vpc_domain_policy.vpc_domain_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vpc_domain_policy) | resource |
+| [aci_vpc_explicit_protection_group.vpc_domains](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vpc_explicit_protection_group) | resource |
+| [aci_vswitch_policy.vswitch_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/vswitch_policy) | resource |
 
 ## Inputs
 
@@ -125,8 +126,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_aaep_policies"></a> [aaep\_policies](#input\_aaep\_policies) | Key: Name of the Attachable Access Entity Profile Policy.<br>* description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.<br>* layer3\_domains: A List of Layer3 Domains to Attach to this AAEP Policy.<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed.<br>* physical\_domains: A List of Physical Domains to Attach to this AAEP Policy.<br>* vmm\_domains: A List of Virtual Domains to Attach to this AAEP Policy. | <pre>map(object(<br>    {<br>      description      = optional(string)<br>      layer3_domains   = optional(list(string))<br>      name_alias       = optional(string)<br>      physical_domains = optional(list(string))<br>      vmm_domains      = optional(list(string))<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "description": "",<br>    "layer3_domains": [],<br>    "name_alias": "",<br>    "physical_domains": [],<br>    "vmm_domains": []<br>  }<br>}</pre> | no |
 | <a name="input_annotation"></a> [annotation](#input\_annotation) | workspace tag value. | `string` | `""` | no |
+| <a name="input_apicHostname"></a> [apicHostname](#input\_apicHostname) | Cisco APIC Hostname | `string` | n/a | yes |
 | <a name="input_apicPass"></a> [apicPass](#input\_apicPass) | Password for User based Authentication. | `string` | `""` | no |
-| <a name="input_apicUrl"></a> [apicUrl](#input\_apicUrl) | Cisco APIC URL.  In Example http://apic.example.com | `string` | n/a | yes |
 | <a name="input_apicUser"></a> [apicUser](#input\_apicUser) | Username for User based Authentication. | `string` | `""` | no |
 | <a name="input_apic_version"></a> [apic\_version](#input\_apic\_version) | The Version of ACI Running in the Environment. | `string` | `"5.2(1g)"` | no |
 | <a name="input_cdp_interface_policies"></a> [cdp\_interface\_policies](#input\_cdp\_interface\_policies) | Key: Name of the CDP Interface Policy.<br>* admin\_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.<br>* annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.<br>* description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed. | <pre>map(object(<br>    {<br>      admin_state = optional(string)<br>      annotation  = optional(string)<br>      description = optional(string)<br>      name_alias  = optional(string)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "admin_state": "enabled",<br>    "annotation": "",<br>    "description": "",<br>    "name_alias": ""<br>  }<br>}</pre> | no |
@@ -148,6 +149,10 @@ No modules.
 | <a name="input_mcp_instance_key"></a> [mcp\_instance\_key](#input\_mcp\_instance\_key) | The key or password to uniquely identify the MCP packets within this fabric. | `string` | n/a | yes |
 | <a name="input_mcp_instance_policy"></a> [mcp\_instance\_policy](#input\_mcp\_instance\_policy) | Key: Name of the Layer2 Interface Policy.<br>* description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.<br>* admin\_state                       = "enabled"<br>* annotation                              = ""<br>* enable\_mcp\_pdu\_per\_vlan           = true<br>* initial\_delay                     = 180<br>* loop\_detect\_multiplication\_factor = 3<br>* loop\_protection\_disable\_port               = true<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed.<br>* transmission\_frequency\_seconds    = 2<br>* transmission\_frequency\_msec       = 0 | <pre>map(object(<br>    {<br>      description                       = optional(string)<br>      admin_state                       = optional(string)<br>      annotation                        = optional(string)<br>      enable_mcp_pdu_per_vlan           = bool<br>      initial_delay                     = optional(number)<br>      loop_detect_multiplication_factor = optional(number)<br>      loop_protection_disable_port      = optional(bool)<br>      name_alias                        = optional(string)<br>      transmission_frequency_seconds    = optional(number)<br>      transmission_frequency_msec       = optional(number)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "admin_state": "enabled",<br>    "annotation": "",<br>    "description": "",<br>    "enable_mcp_pdu_per_vlan": true,<br>    "initial_delay": 180,<br>    "loop_detect_multiplication_factor": 3,<br>    "loop_protect_action": true,<br>    "name_alias": "",<br>    "transmission_frequency_msec": 0,<br>    "transmission_frequency_seconds": 2<br>  }<br>}</pre> | no |
 | <a name="input_mcp_interface_policies"></a> [mcp\_interface\_policies](#input\_mcp\_interface\_policies) | Key: Name of the MCP Interface Policy.<br>* admin\_state: (Default value is "enabled").  The administrative state of the MCP interface policy. The state can be:<br>* annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.<br>* description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed. | <pre>map(object(<br>    {<br>      admin_state = optional(string)<br>      annotation  = optional(string)<br>      description = optional(string)<br>      name_alias  = optional(string)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "admin_state": "enabled",<br>    "annotation": "",<br>    "description": "",<br>    "name_alias": ""<br>  }<br>}</pre> | no |
+| <a name="input_ndoDomain"></a> [ndoDomain](#input\_ndoDomain) | Authentication Domain for Nexus Dashboard Orchestrator Authentication. | `string` | `"local"` | no |
+| <a name="input_ndoHostname"></a> [ndoHostname](#input\_ndoHostname) | Cisco Nexus Dashboard Orchestrator Hostname | `string` | `"https://nxo.example.com"` | no |
+| <a name="input_ndoPass"></a> [ndoPass](#input\_ndoPass) | Password for Nexus Dashboard Orchestrator Authentication. | `string` | `""` | no |
+| <a name="input_ndoUser"></a> [ndoUser](#input\_ndoUser) | Username for Nexus Dashboard Orchestrator Authentication. | `string` | `"admin"` | no |
 | <a name="input_physical_domains"></a> [physical\_domains](#input\_physical\_domains) | Key: Name of the Physical Domain.<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed.<br>* annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.<br>* vlan\_pool: Name of the VLAN Pool to Associate to the Domain. | <pre>map(object(<br>    {<br>      name_alias = optional(string)<br>      annotation = optional(string)<br>      vlan_pool  = string<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "annotation": "",<br>    "name_alias": "",<br>    "vlan_pool": ""<br>  }<br>}</pre> | no |
 | <a name="input_port_security_policies"></a> [port\_security\_policies](#input\_port\_security\_policies) | Key: Name of the Port Security Policy.<br>* annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.<br>* description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.<br>* maximum\_endpoints: (Default value is 0).  The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.<br>* name\_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name\_alias is a field that can be changed.<br>* port\_security\_timeout: (Default value is 60).  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600. | <pre>map(object(<br>    {<br>      annotation            = optional(string)<br>      description           = optional(string)<br>      maximum_endpoints     = optional(number)<br>      name_alias            = optional(string)<br>      port_security_timeout = optional(number)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "annotation": "",<br>    "description": "",<br>    "maximum_endpoints": 0,<br>    "name_alias": "",<br>    "port_security_timeout": 60<br>  }<br>}</pre> | no |
 | <a name="input_privateKey"></a> [privateKey](#input\_privateKey) | Cisco ACI Private Key for SSL Based Authentication. | `string` | `""` | no |

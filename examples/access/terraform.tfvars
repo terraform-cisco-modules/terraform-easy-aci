@@ -53,11 +53,11 @@ mcp_interface_policies = {}
 port_security_policies = {}
 spanning_tree_interface_policies = {
   "filter_and_guard" = {
-    alias               = ""
-    annotation          = ""
+    alias       = ""
+    annotation  = ""
     bpdu_filter = "enabled"
     bpdu_guard  = "enabled"
-    description         = "BPDU Filter and Guard Enabled"
+    description = "BPDU Filter and Guard Enabled"
   }
 }
 
@@ -93,9 +93,9 @@ leaf_policy_groups = {
 }
 leaf_profiles = {
   "201" = {
-    alias            = ""
-    annotation       = ""
-    description      = ""
+    alias       = ""
+    annotation  = ""
+    description = ""
     interfaces = {
       "1/1" = {
         interface_description  = "Connected to Server."
@@ -129,8 +129,8 @@ leaf_profiles = {
     two_slot_leaf     = false
   }
   "202" = {
-    alias            = ""
-    description      = ""
+    alias       = ""
+    description = ""
     interfaces = {
       "1/1" = {
         interface_description  = "Connected to Server."

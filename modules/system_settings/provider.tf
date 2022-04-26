@@ -3,11 +3,7 @@ terraform {
   required_providers {
     aci = {
       source  = "CiscoDevNet/aci"
-      version = ">= 2.0.0"
-    }
-    mso = {
-      source  = "CiscoDevNet/mso"
-      version = ">= 0.4.1"
+      version = ">= 2.1.0"
     }
   }
 }
@@ -19,13 +15,4 @@ provider "aci" {
   url         = "https://${var.apicHostname}"
   username    = var.apicUser
   insecure    = true
-}
-
-provider "mso" {
-  domain   = var.ndoDomain
-  insecure = true
-  password = var.ndoPass
-  platform = "nd"
-  url      = "https://${var.ndoHostname}"
-  username = var.ndoUser
 }
