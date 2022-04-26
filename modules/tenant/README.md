@@ -65,6 +65,7 @@ No modules.
 | [aci_ospf_timers.ospf_timers_policies](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/ospf_timers) | resource |
 | [aci_rest_managed.contract_subject_filter_atrributes](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.contract_to_epgs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
+| [aci_rest_managed.epg_to_static_paths](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.external_epg_contracts](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.external_epg_intra_epg_contracts](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.oob_contract_subjects](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
@@ -171,7 +172,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_bd"></a> [bd](#output\_bd) | n/a |
 | <a name="output_bridge_domains"></a> [bridge\_domains](#output\_bridge\_domains) | n/a |
 | <a name="output_contracts"></a> [contracts](#output\_contracts) | n/a |
 | <a name="output_endpoint_retention_policies"></a> [endpoint\_retention\_policies](#output\_endpoint\_retention\_policies) | n/a |

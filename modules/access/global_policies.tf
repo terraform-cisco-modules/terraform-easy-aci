@@ -11,6 +11,7 @@ ________________________________________________________________________________
 variable "aaep_policies" {
   default = {
     "default" = {
+      annotation       = ""
       description      = ""
       layer3_domains   = []
       name_alias       = ""
@@ -28,6 +29,7 @@ variable "aaep_policies" {
   EOT
   type = map(object(
     {
+      annotation       = optional(string)
       description      = optional(string)
       layer3_domains   = optional(list(string))
       name_alias       = optional(string)
@@ -47,11 +49,23 @@ GUI Location:
  - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {name}
 _______________________________________________________________________________________________________________________
 */
+variable "aaep" {
+  default = {
+    "default" = {
+      name = "dummy"
+    }
+  }
+  type = map(object(
+    {
+      name = string
+    }
+  ))
+}
 resource "aci_attachable_access_entity_profile" "aaep_policies" {
   depends_on = [
-    # aci_l3_domain_profile.layer3_domains,
-    # aci_physical_domain.physical_domains,
-    # aci_vmm_domain.vmm_domains
+    aci_l3_domain_profile.layer3_domains,
+    aci_physical_domain.physical_domains,
+    aci_vmm_domain.vmm_domains
   ]
   for_each                = local.aaep_policies
   annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation

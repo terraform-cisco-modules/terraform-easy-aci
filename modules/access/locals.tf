@@ -13,7 +13,7 @@ locals {
   }
 
   physical_domains = {
-    for k, v in var.layer3_domains : k => {
+    for k, v in var.physical_domains : k => {
       annotation = v.annotation != null ? v.annotation : ""
       name_alias = v.name_alias != null ? v.name_alias : ""
       vlan_pool  = v.vlan_pool
@@ -124,12 +124,15 @@ locals {
 
   aaep_policies_loop_2 = {
     for k, v in local.aaep_policies_loop_1 : k => {
-      name_alias       = v.name_alias != null ? v.name_alias : ""
-      annotation       = v.annotation != null ? v.annotation : ""
-      description      = v.description != null ? v.description : ""
-      layer3_domains   = [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"]]
-      physical_domains = [for s in v.physical_domains : aci_physical_domain.physical_domains["${s}"]]
-      vmm_domains      = [for s in v.vmm_domains : aci_vmm_domain.vmm_domains["${s}"]]
+      name_alias  = v.name_alias != null ? v.name_alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      layer3_domains = length(v.layer3_domains
+      ) > 0 ? [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"].id] : []
+      physical_domains = length(v.physical_domains
+      ) > 0 ? [for s in v.physical_domains : aci_physical_domain.physical_domains["${s}"].id] : []
+      vmm_domains = length(v.vmm_domains
+      ) > 0 ? [for s in v.vmm_domains : aci_vmm_domain.vmm_domains["${s}"].id] : []
     }
   }
 
@@ -254,17 +257,29 @@ locals {
 
   lacp_interface_policies = {
     for k, v in var.lacp_interface_policies : k => {
-      annotation                = v.annotation != null ? v.annotation : ""
-      description               = v.description != null ? v.description : ""
-      fast_select_standby_ports = v.fast_select_standby_ports != null ? v.fast_select_standby_ports : true
-      graceful_convergence      = v.graceful_convergence != null ? v.graceful_convergence : true
-      load_defer_member_ports   = v.load_defer_member_ports != null ? v.load_defer_member_ports : false
-      maximum_number_of_links   = v.maximum_number_of_links != null ? v.maximum_number_of_links : 16
-      minimum_number_of_links   = v.minimum_number_of_links != null ? v.minimum_number_of_links : 1
-      mode                      = v.mode != null ? v.mode : "off"
-      name_alias                = v.name_alias != null ? v.name_alias : ""
-      suspend_individual_port   = v.suspend_individual_port != null ? v.suspend_individual_port : true
-      symmetric_hashing         = v.symmetric_hashing != null ? v.symmetric_hashing : false
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      control = v.control != null ? [
+        for a in v.control : {
+          fast_select_hot_standby_ports = a.fast_select_hot_standby_ports != null ? a.fast_select_hot_standby_ports : true
+          graceful_convergence          = a.graceful_convergence != null ? a.graceful_convergence : true
+          load_defer_member_ports       = a.load_defer_member_ports != null ? a.load_defer_member_ports : false
+          suspend_individual_port       = a.suspend_individual_port != null ? a.suspend_individual_port : true
+          symmetric_hashing             = a.symmetric_hashing != null ? a.symmetric_hashing : false
+        }
+        ] : [
+        {
+          fast_select_hot_standby_ports = true
+          graceful_convergence          = true
+          load_defer_member_ports       = false
+          suspend_individual_port       = true
+          symmetric_hashing             = false
+        }
+      ]
+      maximum_number_of_links = v.maximum_number_of_links != null ? v.maximum_number_of_links : 16
+      minimum_number_of_links = v.minimum_number_of_links != null ? v.minimum_number_of_links : 1
+      mode                    = v.mode != null ? v.mode : "off"
+      name_alias              = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -397,11 +412,10 @@ locals {
       data_plane_policing_policy_egress  = v.data_plane_policing_policy_egress != null ? v.data_plane_policing_policy_egress : ""
       data_plane_policing_policy_ingress = v.data_plane_policing_policy_ingress != null ? v.data_plane_policing_policy_ingress : ""
       description                        = v.description != null ? v.description : ""
-      dot1x_port_policy                  = v.dot1x_port_policy != null ? v.dot1x_port_policy : ""
-      dwdm_policy                        = v.dwdm_policy != null ? v.dwdm_policy : ""
       fc_interface_policy                = v.fc_interface_policy != null ? v.fc_interface_policy : ""
       l2_interface_policy                = v.l2_interface_policy != null ? v.l2_interface_policy : ""
-      link_level_policy                  = v.link_level_policy != null ? v.link_level_policy : ""
+      lacp_interface_policy              = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
+      link_aggregation_type              = v.link_aggregation_type != null ? v.link_aggregation_type : "node"
       lldp_interface_policy              = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
       macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
@@ -720,7 +734,7 @@ locals {
     ]
   ])
 
-  vmm_credentials = { for k, v in local.vmm_credential_loop_1 : "${v.key1}_${v.key_2}" => v }
+  vmm_credentials = { for k, v in local.vmm_credential_loop_1 : "${v.key1}_${v.key2}" => v }
 
   vmm_controller_loop_1 = flatten([
     for key, value in var.virtual_networking : [
@@ -744,7 +758,7 @@ locals {
     ]
   ])
 
-  vmm_controllers = { for k, v in local.vmm_controller_loop_1 : "${v.key1}_${v.key_2}" => v }
+  vmm_controllers = { for k, v in local.vmm_controller_loop_1 : "${v.key1}_${v.key2}" => v }
 
 
   vswitch_policies_loop_1 = flatten([
@@ -763,7 +777,7 @@ locals {
     ]
   ])
 
-  vswitch_policies = { for k, v in local.vswitch_policies_loop_1 : "${v.key1}_${v.key_2}" => v }
+  vswitch_policies = { for k, v in local.vswitch_policies_loop_1 : "${v.key1}_${v.key2}" => v }
 
 
   #__________________________________________________________

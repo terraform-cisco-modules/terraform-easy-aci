@@ -232,9 +232,6 @@ resource "aci_bridge_domain" "bridge_domains" {
   # relation_fv_rs_igmpsn                    = each.value.igmp_snooping_policy
 }
 
-output "bd" {
-  value = local.bridge_domains["Apps"]["l3_configurations"][0]["associated_l3outs"][0]
-}
 
 /*_____________________________________________________________________________________________________________________
 

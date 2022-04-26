@@ -210,26 +210,33 @@ ________________________________________________________________________________
 variable "lacp_interface_policies" {
   default = {
     "default" = {
-      annotation                = ""
-      description               = ""
-      fast_select_standby_ports = true
-      graceful_convergence      = true
-      load_defer_member_ports   = false
-      maximum_number_of_links   = 16
-      minimum_number_of_links   = 1
-      mode                      = "off"
-      name_alias                = ""
-      suspend_individual_port   = true
-      symmetric_hashing         = false
+      annotation = ""
+      control = [
+        {
+          fast_select_hot_standby_ports = true
+          graceful_convergence          = true
+          load_defer_member_ports       = false
+          suspend_individual_port       = true
+          symmetric_hashing             = false
+        }
+      ]
+      description             = ""
+      maximum_number_of_links = 16
+      minimum_number_of_links = 1
+      mode                    = "off"
+      name_alias              = ""
     }
   }
   description = <<-EOT
   Key: Name of the LACP Interface Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * control: LACP Control Parameters:
+    - fast_select_hot_standby_ports: (Default value is true).  Configures fast select for hot standby ports. Enabling this feature will allow fast selection of a hot standby port when last active port in the port-channel is going down.
+    - graceful_convergence: (Default value is true).  Configures port-channel LACP graceful convergence. Disable this only with LACP ports connected to a Non-Nexus peer. Disabling this with Nexus peer can lead to port suspension.
+    - load_defer_member_ports: (Default value is false).  Configures the load-balancing algorithm for port channels that applies to the entire device or to only one module.
+    - suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
+    - symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * fast_select_standby_ports: (Default value is true).  Configures fast select for hot standby ports. Enabling this feature will allow fast selection of a hot standby port when last active port in the port-channel is going down.
-  * graceful_convergence: (Default value is true).  Configures port-channel LACP graceful convergence. Disable this only with LACP ports connected to a Non-Nexus peer. Disabling this with Nexus peer can lead to port suspension.
-  * load_defer_member_ports: (Default value is false).  Configures the load-balancing algorithm for port channels that applies to the entire device or to only one module.
   * maximum_number_of_links: (Default value is 16).  Maximum number of links. Allowed value range is 1-16.
   * minimum_number_of_links: (Default value is 1).  Minimum number of links in port channel. Allowed value range is 1-16. 
   * mode: (Default value is "off").  policy mode. Allowed values are "off", "active", "passive", "mac-pin" and "mac-pin-nicload".
@@ -239,22 +246,24 @@ variable "lacp_interface_policies" {
     - off: All static port channels (that are not running LACP) remain in this mode. If you attempt to change the channel mode to active or passive before enabling LACP, the device displays an error message.
     - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
   * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
-  * symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
   EOT
   type = map(object(
     {
-      annotation                = optional(string)
-      description               = optional(string)
-      fast_select_standby_ports = optional(bool)
-      graceful_convergence      = optional(bool)
-      load_defer_member_ports   = optional(bool)
-      maximum_number_of_links   = optional(number)
-      minimum_number_of_links   = optional(number)
-      mode                      = optional(string)
-      name_alias                = optional(string)
-      suspend_individual_port   = optional(bool)
-      symmetric_hashing         = optional(bool)
+      annotation = optional(string)
+      control = optional(list(object(
+        {
+          fast_select_hot_standby_ports = optional(bool)
+          graceful_convergence          = optional(bool)
+          load_defer_member_ports       = optional(bool)
+          suspend_individual_port       = optional(bool)
+          symmetric_hashing             = optional(bool)
+        }
+      )))
+      description             = optional(string)
+      maximum_number_of_links = optional(number)
+      minimum_number_of_links = optional(number)
+      mode                    = optional(string)
+      name_alias              = optional(string)
     }
   ))
 }
@@ -270,9 +279,25 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_lacp_policy" "lacp_interface_policies" {
-  for_each    = local.lacp_interface_policies
-  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl        = [each.value.control]
+  for_each   = local.lacp_interface_policies
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  ctrl = anytrue(
+    [each.value.control[0]["fast_select_hot_standby_ports"
+      ], each.value.control[0]["graceful_convergence"
+      ], each.value.control[0]["load_defer_member_ports"
+      ], each.value.control[0]["suspend_individual_port"
+      ], each.value.control[0]["symmetric_hashing"]]) ? compact(concat(
+      [length(regexall(true, each.value.control[0].fast_select_hot_standby_ports)
+        ) > 0 ? "fast-sel-hot-stdby" : ""
+        ], [length(regexall(true, each.value.control[0].graceful_convergence)
+        ) > 0 ? "graceful-conv" : ""
+        ], [length(regexall(true, each.value.control[0].load_defer_member_ports)
+        ) > 0 ? "load-defer" : ""
+        ], [length(regexall(true, each.value.control[0].suspend_individual_port)
+        ) > 0 ? "susp-individual" : ""
+        ], [length(regexall(true, each.value.control[0].symmetric_hashing)
+    ) > 0 ? "symmetric-hash" : ""])) : [
+  "fast-sel-hot-stdby", "graceful-conv", "susp-individual"]
   description = each.value.description
   max_links   = each.value.maximum_number_of_links
   min_links   = each.value.minimum_number_of_links

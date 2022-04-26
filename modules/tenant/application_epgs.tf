@@ -438,41 +438,41 @@ GUI Location:
 Tenants > {Tenant} > Application Profiles > {App_Profile} > Application EPGs > {EPG} > Static Ports > {GUI_Static}
 _______________________________________________________________________________________________________________________
 */
-# resource "aci_rest_managed" "epg_to_static_paths" {
-#   depends_on = [
-#     aci_application_epg.application_epgs
-#   ]
-#   for_each = local.epg_to_static_paths
-#   dn = length(
-#     regexall("pc", each.value.path_type)
-#     ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]]" : length(
-#     regexall("port", each.value.path_type)
-#     ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]]" : length(
-#     regexall("vpc", each.value.path_type)
-#   ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]]" : ""
-#   class_name = "fvRsPathAtt"
-#   content = {
-#     encap = length(
-#       regexall("micro_seg", each.value.encapsulation_type)
-#       ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : length(
-#       regexall("qinq", each.value.encapsulation_type)
-#       ) > 0 ? "qinq-${element(each.value.vlans, 0)}-${element(each.value.vlans, 1)}" : length(
-#       regexall("vlan", each.value.encapsulation_type)
-#       ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : length(
-#       regexall("vxlan", each.value.encapsulation_type)
-#     ) > 0 ? "vxlan-${element(each.value.vlans, 0)}" : ""
-#     mode = length(
-#       regexall("dot1p", each.value.mode)
-#       ) > 0 ? "native" : length(
-#       regexall("access", each.value.mode)
-#     ) > 0 ? "untagged" : "regular"
-#     primaryEncap = each.value.encapsulation_type == "micro_seg" ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
-#     tDn = length(
-#       regexall("pc", each.value.path_type)
-#       ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]" : length(
-#       regexall("port", each.value.path_type)
-#       ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]" : length(
-#       regexall("vpc", each.value.path_type)
-#     ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]" : ""
-#   }
-# }
+resource "aci_rest_managed" "epg_to_static_paths" {
+  depends_on = [
+    aci_application_epg.application_epgs
+  ]
+  for_each = local.epg_to_static_paths
+  dn = length(
+    regexall("pc", each.value.path_type)
+    ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]]" : length(
+    regexall("port", each.value.path_type)
+    ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]]" : length(
+    regexall("vpc", each.value.path_type)
+  ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]]" : ""
+  class_name = "fvRsPathAtt"
+  content = {
+    encap = length(
+      regexall("micro_seg", each.value.encapsulation_type)
+      ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : length(
+      regexall("qinq", each.value.encapsulation_type)
+      ) > 0 ? "qinq-${element(each.value.vlans, 0)}-${element(each.value.vlans, 1)}" : length(
+      regexall("vlan", each.value.encapsulation_type)
+      ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : length(
+      regexall("vxlan", each.value.encapsulation_type)
+    ) > 0 ? "vxlan-${element(each.value.vlans, 0)}" : ""
+    mode = length(
+      regexall("dot1p", each.value.mode)
+      ) > 0 ? "native" : length(
+      regexall("access", each.value.mode)
+    ) > 0 ? "untagged" : "regular"
+    primaryEncap = each.value.encapsulation_type == "micro_seg" ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
+    tDn = length(
+      regexall("pc", each.value.path_type)
+      ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]" : length(
+      regexall("port", each.value.path_type)
+      ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]" : length(
+      regexall("vpc", each.value.path_type)
+    ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]" : ""
+  }
+}
