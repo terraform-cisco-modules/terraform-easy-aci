@@ -61,20 +61,20 @@ locals {
       static_paths = v.static_paths != null ? compact(flatten([
         for s in v.static_paths : [
           length(regexall("vpc", s.path_type)
-          ) > 0 ? "topology/pod-${s.pod}/protpaths-${element(s.nodes, 0)}-${element(s.nodes, 1)}/pathep-[${s.name}]": length(
+            ) > 0 ? "topology/pod-${s.pod}/protpaths-${element(s.nodes, 0)}-${element(s.nodes, 1)}/pathep-[${s.name}]" : length(
             regexall("pc", s.path_type)
-          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[${s.name}]": length(
+            ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[${s.name}]" : length(
             regexall("port", s.path_type)
-          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[eth${s.name}]": ""
+          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[eth${s.name}]" : ""
         ]
       ])) : []
-      static_paths_for_loop  = v.static_paths != null ? v.static_paths : []
-      template               = v.template != null ? v.template : "common"
-      tenant                 = v.tenant != null ? v.tenant : "common"
-      useg_epg               = v.useg_epg != null ? v.useg_epg : false
-      vrf                    = v.vrf != null ? v.vrf : "default"
-      vrf_schema             = v.vrf_schema != null ? v.vrf_schema : "common"
-      vrf_template           = v.vrf_template != null ? v.vrf_template : "common"
+      static_paths_for_loop = v.static_paths != null ? v.static_paths : []
+      template              = v.template != null ? v.template : "common"
+      tenant                = v.tenant != null ? v.tenant : "common"
+      useg_epg              = v.useg_epg != null ? v.useg_epg : false
+      vrf                   = v.vrf != null ? v.vrf : "default"
+      vrf_schema            = v.vrf_schema != null ? v.vrf_schema : "common"
+      vrf_template          = v.vrf_template != null ? v.vrf_template : "common"
     }
   }
 

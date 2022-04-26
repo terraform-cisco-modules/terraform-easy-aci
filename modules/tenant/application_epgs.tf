@@ -177,23 +177,23 @@ resource "aci_application_epg" "application_epgs" {
     aci_application_profile.application_profiles,
     aci_bridge_domain.bridge_domains
   ]
-  for_each               = { for k, v in local.application_epgs : k => v if v.epg_type == "standard" && v.controller_type == "apic" }
-  annotation             = each.value.annotation
-  application_profile_dn = aci_application_profile.application_profiles[each.value.application_profile].id
-  description            = each.value.description
-  exception_tag          = each.value.contract_exception_tag
-  flood_on_encap         = each.value.flood_in_encapsulation
-  fwd_ctrl               = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
-  has_mcast_source       = each.value.has_multicast_source == true ? "yes" : "no"
-  is_attr_based_epg      = each.value.useg_epg == true ? "yes" : "no"
-  match_t                = each.value.label_match_criteria
-  name                   = each.key
-  name_alias             = each.value.name_alias
-  pc_enf_pref            = each.value.intra_epg_isolation
-  pref_gr_memb           = each.value.preferred_group_member == true ? "include" : "exclude"
-  prio                   = each.value.qos_class
-  shutdown               = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
-  relation_fv_rs_bd      = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
+  for_each                = { for k, v in local.application_epgs : k => v if v.epg_type == "standard" && v.controller_type == "apic" }
+  annotation              = each.value.annotation
+  application_profile_dn  = aci_application_profile.application_profiles[each.value.application_profile].id
+  description             = each.value.description
+  exception_tag           = each.value.contract_exception_tag
+  flood_on_encap          = each.value.flood_in_encapsulation
+  fwd_ctrl                = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
+  has_mcast_source        = each.value.has_multicast_source == true ? "yes" : "no"
+  is_attr_based_epg       = each.value.useg_epg == true ? "yes" : "no"
+  match_t                 = each.value.label_match_criteria
+  name                    = each.key
+  name_alias              = each.value.name_alias
+  pc_enf_pref             = each.value.intra_epg_isolation
+  pref_gr_memb            = each.value.preferred_group_member == true ? "include" : "exclude"
+  prio                    = each.value.qos_class
+  shutdown                = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
+  relation_fv_rs_bd       = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
   relation_fv_rs_path_att = length(each.value.static_paths) > 0 ? each.value.static_paths : []
   # relation_fv_rs_sec_inherited = ["{Master_fvEPg}"].id
   # relation_fv_rs_cust_qos_pol  = "custom_qos"
