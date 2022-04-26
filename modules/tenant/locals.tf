@@ -251,52 +251,108 @@ locals {
   #__________________________________________________________
 
   bridge_domains = {
-    for k, v in var.bridge_domains : k => {
-      advertise_host_routes                  = lookup(v.general[0], "advertise_host_routes", false)
-      alias                                  = lookup(v.general[0], "alias", "")
-      annotation                             = lookup(v.general[0], "annotation", "")
-      arp_flooding                           = lookup(v.general[0], "arp_flooding", false)
-      controller_type                        = v.controller_type != null ? v.controller_type : "apic"
-      description                            = lookup(v.general[0], "description", "")
-      endpoint_clear                         = lookup(v.general[0], "endpoint_clear", false)
-      endpoint_retention_policy              = lookup(v.general[0], "endpoint_retention_policy", "")
-      ep_move_detection_mode                 = lookup(v.general[0], "ep_move_detection_mode", "disable")
-      igmp_snooping_policy                   = lookup(v.general[0], "igmp_snooping_policy", "")
-      ipv6_l3_unknown_multicast              = lookup(v.general[0], "ipv6_l3_unknown_multicast", "flood")
-      l2_unknown_unicast                     = lookup(v.general[0], "l2_unknown_unicast", "flood")
-      l3_unknown_multicast_flooding          = lookup(v.general[0], "l3_unknown_multicast_flooding", "flood")
-      limit_ip_learn_to_subnets              = lookup(v.general[0], "limit_ip_learn_to_subnets", true)
-      mld_snoop_policy                       = lookup(v.general[0], "mld_snoop_policy", "")
-      multi_destination_flooding             = lookup(v.general[0], "multi_destination_flooding", "bd-flood")
-      name_alias                             = lookup(v.general[0], "name_alias", "")
-      pim                                    = lookup(v.general[0], "pim", false)
-      pimv6                                  = lookup(v.general[0], "pimv6", false)
-      tenant                                 = lookup(v.general[0], "tenant", "common")
-      type                                   = lookup(v.general[0], "type", "regular")
-      vrf                                    = lookup(v.general[0], "vrf", "default")
-      vrf_tenant                             = lookup(v.general[0], "vrf_tenant", "common")
-      unicast_routing                        = lookup(v.l3_configurations[0], "unicast_routing", true)
-      custom_mac_address                     = lookup(v.l3_configurations[0], "custom_mac_address", "")
-      link_local_ipv6_address                = lookup(v.l3_configurations[0], "link_local_ipv6_address", "::")
-      schema                                 = v.schema != null ? v.schema : "common"
-      sites                                  = v.sites != null ? v.sites : []
-      subnets                                = lookup(v.l3_configurations[0], "subnets", [])
-      virtual_mac_address                    = lookup(v.l3_configurations[0], "virtual_mac_address", ["not-applicable"])
-      intersite_bum_traffic_allow            = lookup(v.troubleshooting_advanced[0], "intersite_bum_traffic_allow", false)
-      intersite_l2_stretch                   = lookup(v.troubleshooting_advanced[0], "intersite_l2_stretch", false)
-      optimize_wan_bandwidth                 = lookup(v.troubleshooting_advanced[0], "optimize_wan_bandwidth", false)
-      disable_ip_data_plane_learning_for_pbr = lookup(v.troubleshooting_advanced[0], "disable_ip_data_plane_learning_for_pbr", false)
-      first_hop_security_policy              = lookup(v.troubleshooting_advanced[0], "first_hop_security_policy", "")
-      monitoring_policy                      = lookup(v.troubleshooting_advanced[0], "monitoring_policy", "")
-      netflow_monitor_policies               = lookup(v.troubleshooting_advanced[0], "netflow_monitor_policies", [])
-      rogue_coop_exception_list              = lookup(v.troubleshooting_advanced[0], "rogue_coop_exception_list", [])
+    for key, value in var.bridge_domains : key => {
+      controller_type = value.controller_type != null ? value.controller_type : "apic"
+      general = value.general != null ? [
+        for k, v in value.general : {
+          advertise_host_routes         = v.advertise_host_routes != null ? v.advertise_host_routes : false
+          alias                         = v.alias != null ? v.alias : ""
+          annotation                    = v.annotation != null ? v.annotation : ""
+          arp_flooding                  = v.arp_flooding != null ? v.arp_flooding : false
+          description                   = v.description != null ? v.description : ""
+          endpoint_retention_policy     = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : ""
+          igmp_snooping_policy          = v.igmp_snooping_policy != null ? v.igmp_snooping_policy : ""
+          ipv6_l3_unknown_multicast     = v.ipv6_l3_unknown_multicast != null ? v.ipv6_l3_unknown_multicast : "flood"
+          l2_unknown_unicast            = v.l2_unknown_unicast != null ? v.l2_unknown_unicast : "flood"
+          l3_unknown_multicast_flooding = v.l3_unknown_multicast_flooding != null ? v.l3_unknown_multicast_flooding : "flood"
+          limit_ip_learn_to_subnets     = v.limit_ip_learn_to_subnets != null ? v.limit_ip_learn_to_subnets : true
+          mld_snoop_policy              = v.mld_snoop_policy != null ? v.mld_snoop_policy : ""
+          multi_destination_flooding    = v.multi_destination_flooding != null ? v.multi_destination_flooding : "bd-flood"
+          name_alias                    = v.name_alias != null ? v.name_alias : ""
+          pim                           = v.pim != null ? v.pim : false
+          pimv6                         = v.pimv6 != null ? v.pimv6 : false
+          tenant                        = v.tenant != null ? v.tenant : "common"
+          type                          = v.type != null ? v.type : "regular"
+          vrf                           = v.vrf != null ? v.vrf : "default"
+          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : v.tenant
+        }
+        ] : [
+        {
+          advertise_host_routes         = false
+          alias                         = ""
+          annotation                    = ""
+          arp_flooding                  = false
+          description                   = ""
+          endpoint_retention_policy     = ""
+          igmp_snooping_policy          = ""
+          ipv6_l3_unknown_multicast     = "flood"
+          l2_unknown_unicast            = "flood"
+          l3_unknown_multicast_flooding = "flood"
+          limit_ip_learn_to_subnets     = true
+          mld_snoop_policy              = ""
+          multi_destination_flooding    = "bd-flood"
+          name_alias                    = ""
+          pim                           = false
+          pimv6                         = false
+          tenant                        = "common"
+          type                          = "regular"
+          vrf                           = "default"
+          vrf_tenant                    = "common"
+        }
+      ]
+      l3_configurations = value.l3_configurations != null ? [
+        for k, v in value.l3_configurations : {
+          unicast_routing         = v.unicast_routing != null ? v.unicast_routing : true
+          custom_mac_address      = v.custom_mac_address != null ? v.custom_mac_address : ""
+          link_local_ipv6_address = v.link_local_ipv6_address != null ? v.link_local_ipv6_address : "::"
+          subnets                 = v.subnets != null ? v.subnets : []
+          virtual_mac_address     = v.virtual_mac_address != null ? v.virtual_mac_address : "not-applicable"
+        }
+        ] : [
+        {
+          unicast_routing         = true
+          custom_mac_address      = ""
+          link_local_ipv6_address = "::"
+          subnets                 = []
+          virtual_mac_address     = "not-applicable"
+        }
+      ]
+      schema = value.schema != null ? value.schema : "common"
+      sites  = value.sites != null ? value.sites : []
+      troubleshooting_advanced = value.troubleshooting_advanced != null ? [
+        for k, v in value.troubleshooting_advanced : {
+          endpoint_clear                         = v.endpoint_clear != null ? v.endpoint_clear : false
+          ep_move_detection_mode                 = v.ep_move_detection_mode != null ? v.ep_move_detection_mode : "disable"
+          intersite_bum_traffic_allow            = v.intersite_bum_traffic_allow != null ? v.intersite_bum_traffic_allow : false
+          intersite_l2_stretch                   = v.intersite_l2_stretch != null ? v.intersite_l2_stretch : false
+          optimize_wan_bandwidth                 = v.optimize_wan_bandwidth != null ? v.optimize_wan_bandwidth : false
+          disable_ip_data_plane_learning_for_pbr = v.disable_ip_data_plane_learning_for_pbr != null ? v.disable_ip_data_plane_learning_for_pbr : false
+          first_hop_security_policy              = v.first_hop_security_policy != null ? v.first_hop_security_policy : ""
+          monitoring_policy                      = v.monitoring_policy != null ? v.monitoring_policy : "default"
+          netflow_monitor_policies               = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
+          rogue_coop_exception_list              = v.rogue_coop_exception_list != null ? v.rogue_coop_exception_list : []
+        }
+        ] : [
+        {
+          endpoint_clear                         = false
+          ep_move_detection_mode                 = "disable"
+          intersite_bum_traffic_allow            = false
+          intersite_l2_stretch                   = false
+          optimize_wan_bandwidth                 = false
+          disable_ip_data_plane_learning_for_pbr = false
+          first_hop_security_policy              = ""
+          monitoring_policy                      = "default"
+          netflow_monitor_policies               = []
+          rogue_coop_exception_list              = []
+        }
+      ]
     }
   }
 
 
   subnets_loop_1 = flatten([
     for key, value in local.bridge_domains : [
-      for k, v in value.subnets : {
+      for k, v in value.l3_configurations[0].subnets : {
         bridge_domain                = key
         controller_type              = value.controller_type
         description                  = v.description != null ? v.description : ""
@@ -306,17 +362,28 @@ locals {
         make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
         schema                       = value.schema
         sites                        = value.sites
-        scope = [
+        scope = v.scope != null ? [
+          for b, a in v.scope : {
+            advertise_externally = a.shared_between_vrfs != null ? a.shared_between_vrfs : false
+            shared_between_vrfs  = a.advertise_externally != null ? a.advertise_externally : false
+          }
+          ] : [
           {
-            advertise_externally = lookup(v.scope[0], "shared_between_vrfs", false)
-            shared_between_vrfs  = lookup(v.scope[0], "advertise_externally", false)
+            advertise_externally = false
+            shared_between_vrfs  = false
           }
         ]
-        subnet_control = [
+        subnet_control = v.subnet_control != null ? [
+          for b, a in v.subnet_control : {
+            neighbor_discovery     = a.neighbor_discovery != null ? a.neighbor_discovery : false
+            no_default_svi_gateway = a.no_default_svi_gateway != null ? a.no_default_svi_gateway : false
+            querier_ip             = a.querier_ip != null ? a.querier_ip : false
+          }
+          ] : [
           {
-            neighbor_discovery     = lookup(v.subnet_control[0], "neighbor_discovery", false)
-            no_default_svi_gateway = lookup(v.subnet_control[0], "no_default_svi_gateway", false)
-            querier_ip             = lookup(v.subnet_control[0], "querier_ip", false)
+            neighbor_discovery     = false
+            no_default_svi_gateway = false
+            querier_ip             = false
           }
         ]
         treat_as_virtual_ip_address = v.treat_as_virtual_ip_address != null ? v.treat_as_virtual_ip_address : false
@@ -628,14 +695,13 @@ locals {
           tenant         = value.tenant != null ? value.tenant : v.tenant
         }
       ] : []
-      target_dscp       = v.target_dscp != null ? v.target_dscp : "unspecified"
-      sites             = v.sites != null ? v.sites : []
-      tags              = v.tags != null ? v.tags : []
-      template          = v.template != null ? v.template : "common"
-      tenant            = v.tenant != null ? v.tenant : "common"
-      controller_vendor = v.controller_vendor != null ? v.controller_vendor : "cisco"
-      vrf               = v.vrf != null ? v.vrf : "default"
-      vrf_tenant        = v.vrf_tenant != null ? v.vrf_tenant : "common"
+      target_dscp = v.target_dscp != null ? v.target_dscp : "unspecified"
+      sites       = v.sites != null ? v.sites : []
+      tags        = v.tags != null ? v.tags : []
+      template    = v.template != null ? v.template : "common"
+      tenant      = v.tenant != null ? v.tenant : "common"
+      vrf         = v.vrf != null ? v.vrf : "default"
+      vrf_tenant  = v.vrf_tenant != null ? v.vrf_tenant : "common"
     }
   }
 
@@ -1152,7 +1218,6 @@ locals {
       communities                     = v.communities != null ? v.communities : []
       contracts                       = v.contracts != null ? v.contracts : []
       controller_type                 = v.controller_type != null ? v.controller_type : "apic"
-      controller_vendor               = v.controller_vendor != null ? v.controller_vendor : "cisco"
       description                     = v.description != null ? v.description : ""
       endpoint_retention_policy       = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : "default"
       eigrp_timers_per_address_family = v.eigrp_timers_per_address_family != null ? v.eigrp_timers_per_address_family : []

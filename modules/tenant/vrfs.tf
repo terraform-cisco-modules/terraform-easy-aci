@@ -8,7 +8,6 @@ variable "vrfs" {
       communities                     = []
       contracts                       = []
       controller_type                 = "apic"
-      controller_vendor               = "cisco"
       description                     = ""
       eigrp_timers_per_address_family = []
       endpoint_retention_policy       = "default"
@@ -37,10 +36,6 @@ variable "vrfs" {
   * controller_type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
-  * controller_vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
-    - aws
-    - azure
-    - cisco (Default)
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
@@ -71,9 +66,8 @@ variable "vrfs" {
           type       = string
         }
       )))
-      controller_type   = optional(string)
-      controller_vendor = optional(string)
-      description       = optional(string)
+      controller_type = optional(string)
+      description     = optional(string)
       eigrp_timers_per_address_family = optional(list(object(
         {
           address_family = optional(string)
@@ -170,9 +164,9 @@ resource "aci_vrf" "vrfs" {
   name_alias             = each.value.name_alias
   pc_enf_dir             = each.value.policy_enforcement_direction
   pc_enf_pref            = each.value.policy_enforcement_preference
-  relation_fv_rs_ctx_to_ep_ret = length(regexall(
-    "[[:alnum:]]", each.value.endpoint_retention_policy)
-  ) > 0 ? aci_end_point_retention_policy.endpoint_retention_policies[each.value.endpoint_retention_policy].id : ""
+  # relation_fv_rs_ctx_to_ep_ret = length(regexall(
+  #   "[[:alnum:]]", each.value.endpoint_retention_policy)
+  # ) > 0 ? aci_end_point_retention_policy.endpoint_retention_policies[each.value.endpoint_retention_policy].id : ""
   relation_fv_rs_ctx_mon_pol = length(regexall(
     "uni\\/tn\\-", each.value.monitoring_policy)
     ) > 0 ? each.value.monitoring_policy : length(regexall(

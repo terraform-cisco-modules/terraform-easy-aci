@@ -1,10 +1,9 @@
 variable "l3outs" {
   default = {
     "default" = {
-      annotation        = ""
-      controller_type   = "apic"
-      controller_vendor = "cisco"
-      description       = ""
+      annotation      = ""
+      controller_type = "apic"
+      description     = ""
       external_epgs = [
         {
           contract_exception_tag = 0
@@ -22,7 +21,7 @@ variable "l3outs" {
           match_type             = "AtleastOne"
           name                   = "default"
           name_alias             = ""
-          preferred_group_member = "exclude"
+          preferred_group_member = false
           qos_class              = "unspecified"
           subnets = [
             {
@@ -221,10 +220,9 @@ variable "l3outs" {
   EOT
   type = map(object(
     {
-      annotation        = optional(string)
-      controller_type   = optional(string)
-      controller_vendor = optional(string)
-      description       = optional(string)
+      annotation      = optional(string)
+      controller_type = optional(string)
+      description     = optional(string)
       external_epgs = optional(list(object(
         {
           contract_exception_tag = optional(number)
@@ -242,7 +240,7 @@ variable "l3outs" {
           match_type             = optional(string)
           name                   = string
           name_alias             = optional(string)
-          preferred_group_member = optional(string)
+          preferred_group_member = optional(bool)
           qos_class              = optional(string)
           subnets = list(object(
             {
@@ -501,7 +499,7 @@ resource "aci_l3_outside" "l3outs" {
   ) > 0 ? local.rs_vrfs[each.value.vrf].id : ""
   relation_l3ext_rs_l3_dom_att = length(regexall(
     "[[:alnum:]]+", each.value.l3_domain)
-  ) > 0 ? local.rs_l3_domains[each.value.l3_domain].id : ""
+  ) > 0 ? "uni/l3dom-${each.value.l3_domain}" : ""
   dynamic "relation_l3ext_rs_dampening_pol" {
     for_each = each.value.route_control_for_dampening
     content {
@@ -535,7 +533,7 @@ resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   match_t        = each.value.match_type
   name_alias     = each.value.name_alias
   name           = each.value.name
-  pref_gr_memb   = each.value.preferred_group_member
+  pref_gr_memb   = each.value.preferred_group_member == true ? "include" : "exclude"
   prio           = each.value.qos_class
   target_dscp    = each.value.target_dscp
   dynamic "relation_l3ext_rs_inst_p_to_profile" {

@@ -9,9 +9,7 @@ variable "bridge_domains" {
           annotation                    = ""
           arp_flooding                  = false
           description                   = ""
-          endpoint_clear                = false
           endpoint_retention_policy     = ""
-          ep_move_detection_mode        = "disable"
           igmp_snooping_policy          = ""
           ipv6_l3_unknown_multicast     = "flood"
           l2_unknown_unicast            = "flood"
@@ -72,6 +70,8 @@ variable "bridge_domains" {
           intersite_bum_traffic_allow            = false
           intersite_l2_stretch                   = false
           disable_ip_data_plane_learning_for_pbr = false
+          endpoint_clear                         = false
+          ep_move_detection_mode                 = "disable"
           first_hop_security_policy              = ""
           monitoring_policy                      = ""
           netflow_monitor_policies               = []
@@ -91,9 +91,7 @@ variable "bridge_domains" {
           annotation                    = optional(string)
           arp_flooding                  = optional(bool)
           description                   = optional(string)
-          endpoint_clear                = optional(bool)
           endpoint_retention_policy     = optional(string)
-          ep_move_detection_mode        = optional(string)
           igmp_snooping_policy          = optional(string)
           ipv6_l3_unknown_multicast     = optional(string)
           l2_unknown_unicast            = optional(string)
@@ -153,6 +151,8 @@ variable "bridge_domains" {
           intersite_bum_traffic_allow            = optional(bool)
           intersite_l2_stretch                   = optional(bool)
           disable_ip_data_plane_learning_for_pbr = optional(bool)
+          endpoint_clear                         = optional(bool)
+          ep_move_detection_mode                 = optional(string)
           first_hop_security_policy              = optional(string)
           monitoring_policy                      = optional(string)
           netflow_monitor_policies               = optional(list(string))
@@ -180,37 +180,37 @@ resource "aci_bridge_domain" "bridge_domains" {
   ]
   for_each = local.bridge_domains
   # General
-  annotation         = each.value.annotation
-  arp_flood          = each.value.arp_flooding == true ? "yes" : "no"
-  bridge_domain_type = each.value.type
-  description        = each.value.description
-  host_based_routing = each.value.advertise_host_routes == true ? "yes" : "no"
-  ipv6_mcast_allow   = each.value.pimv6 == true ? "yes" : "no"
-  mcast_allow        = each.value.pim == true ? "yes" : "no"
-  name               = each.key
-  name_alias         = each.value.name_alias
-  multi_dst_pkt_act  = each.value.multi_destination_flooding
-  unk_mac_ucast_act  = each.value.l2_unknown_unicast
-  unk_mcast_act      = each.value.l3_unknown_multicast_flooding
-  v6unk_mcast_act    = each.value.ipv6_l3_unknown_multicast
+  annotation                = each.value.general[0].annotation
+  arp_flood                 = each.value.general[0].arp_flooding == true ? "yes" : "no"
+  bridge_domain_type        = each.value.general[0].type
+  description               = each.value.general[0].description
+  host_based_routing        = each.value.general[0].advertise_host_routes == true ? "yes" : "no"
+  ipv6_mcast_allow          = each.value.general[0].pimv6 == true ? "yes" : "no"
+  limit_ip_learn_to_subnets = each.value.general[0].limit_ip_learn_to_subnets == true ? "yes" : "no"
+  mcast_allow               = each.value.general[0].pim == true ? "yes" : "no"
+  name                      = each.key
+  name_alias                = each.value.general[0].name_alias
+  multi_dst_pkt_act         = each.value.general[0].multi_destination_flooding
+  unk_mac_ucast_act         = each.value.general[0].l2_unknown_unicast
+  unk_mcast_act             = each.value.general[0].l3_unknown_multicast_flooding
+  v6unk_mcast_act           = each.value.general[0].ipv6_l3_unknown_multicast
+  relation_fv_rs_ctx = each.value.general[0
+  ].vrf != "" ? "uni/tn-${each.value.general[0].vrf_tenant}/ctx-${each.value.general[0].vrf}" : ""
+  tenant_dn = aci_tenant.tenants[each.value.general[0].tenant].id
   # L3 Configurations
-  ip_learning               = each.value.disable_ip_data_plane_learning_for_pbr == true ? "yes" : "no"
-  limit_ip_learn_to_subnets = each.value.limit_ip_learn_to_subnets == true ? "yes" : "no"
-  ll_addr                   = each.value.link_local_ipv6_address
-  mac                       = each.value.custom_mac_address
-  unicast_route             = each.value.unicast_routing == true ? "yes" : "no"
-  vmac                      = "not-applicable"
-  # vmac                      = each.value.virtual_mac_address
+  ll_addr       = each.value.l3_configurations[0].link_local_ipv6_address
+  mac           = each.value.l3_configurations[0].custom_mac_address
+  unicast_route = each.value.l3_configurations[0].unicast_routing == true ? "yes" : "no"
+  vmac          = each.value.l3_configurations[0].virtual_mac_address
   # Advanced/Troubleshooting
-  ep_clear            = each.value.endpoint_clear == true ? "yes" : "no"
-  ep_move_detect_mode = each.value.ep_move_detection_mode
+  ep_clear            = each.value.troubleshooting_advanced[0].endpoint_clear == true ? "yes" : "no"
+  ep_move_detect_mode = each.value.troubleshooting_advanced[0].ep_move_detection_mode
+  ip_learning         = each.value.troubleshooting_advanced[0].disable_ip_data_plane_learning_for_pbr == true ? "yes" : "no"
   intersite_bum_traffic_allow = length(regexall(
-    true, each.value.intersite_l2_stretch)
-  ) > 0 && length(regexall(true, each.value.intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
-  intersite_l2_stretch   = each.value.intersite_l2_stretch == true ? "yes" : "no"
-  optimize_wan_bandwidth = length(regexall(true, each.value.optimize_wan_bandwidth)) > 0 ? "yes" : "no"
-  relation_fv_rs_ctx     = each.value.vrf != "" ? "uni/tn-${each.value.vrf_tenant}/ctx-${each.value.vrf}" : ""
-  tenant_dn              = aci_tenant.tenants[each.value.tenant].id
+    true, each.value.troubleshooting_advanced[0].intersite_l2_stretch)
+  ) > 0 && length(regexall(true, each.value.troubleshooting_advanced[0].intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
+  intersite_l2_stretch   = each.value.troubleshooting_advanced[0].intersite_l2_stretch == true ? "yes" : "no"
+  optimize_wan_bandwidth = length(regexall(true, each.value.troubleshooting_advanced[0].optimize_wan_bandwidth)) > 0 ? "yes" : "no"
   # relation_fv_rs_ctx = length(regexall(
   #   each.value.tenant, each.value.vrf_tenant)
   #   ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
@@ -275,9 +275,6 @@ resource "aci_subnet" "subnets" {
   virtual = each.value.treat_as_virtual_ip_address == true ? "yes" : "no"
 }
 
-output "bridge_domains" {
-  value = local.bridge_domains
-}
 
 resource "mso_schema_template_bd" "bridge_domains" {
   provider = mso

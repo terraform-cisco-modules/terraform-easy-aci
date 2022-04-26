@@ -164,14 +164,3 @@ resource "mso_tenant" "tenants" {
     }
   }
 }
-
-output "tenants" {
-  value = {
-    apic_tenants = var.tenants != {} ? { for v in sort(
-      keys(aci_tenant.tenants)
-    ) : v => aci_tenant.tenants[v].id } : {}
-    ndo_tenants = var.tenants != {} ? { for v in sort(
-      keys(mso_tenant.tenants)
-    ) : v => mso_tenant.tenants[v].id } : {}
-  }
-}
