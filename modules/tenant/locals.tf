@@ -58,7 +58,17 @@ locals {
       preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : false
       qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
       schema                 = v.schema != null ? v.schema : "common"
-      static_paths           = v.static_paths != null ? v.static_paths : []
+      static_paths = v.static_paths != null ? compact(flatten([
+        for s in v.static_paths : [
+          length(regexall("vpc", s.path_type)
+          ) > 0 ? "topology/pod-${s.pod}/protpaths-${element(s.nodes, 0)}-${element(s.nodes, 1)}/pathep-[${s.name}]": length(
+            regexall("pc", s.path_type)
+          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[${s.name}]": length(
+            regexall("port", s.path_type)
+          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[eth${s.name}]": ""
+        ]
+      ])) : []
+      static_paths_for_loop  = v.static_paths != null ? v.static_paths : []
       template               = v.template != null ? v.template : "common"
       tenant                 = v.tenant != null ? v.tenant : "common"
       useg_epg               = v.useg_epg != null ? v.useg_epg : false
@@ -101,6 +111,25 @@ locals {
   ])
 
   epg_to_domains = { for k, v in local.epg_to_domains_loop : "${v.application_epg}_${v.domain}" => v }
+
+
+  epg_to_static_paths_loop = flatten([
+    for key, value in local.application_epgs : [
+      for k, v in value.static_paths_for_loop : {
+        epg                = key
+        key1               = k
+        encapsulation_type = v.encapsulation_type != null ? v.encapsulation_type : "vlan"
+        mode               = v.mode != null ? v.mode : "trunk"
+        name               = v.name != null ? v.name : "1/1"
+        nodes              = v.nodes != null ? v.nodes : [201]
+        path_type          = v.path_type != null ? v.path_type : "port"
+        pod                = v.pod != null ? v.pod : 1
+        vlans              = v.vlans != null ? v.vlans : [1]
+      }
+    ]
+  ])
+
+  epg_to_static_paths = { for k, v in local.epg_to_static_paths_loop : "${v.epg}_${k}" => v }
 
 
   contract_to_epgs_loop = flatten([

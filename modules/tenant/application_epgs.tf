@@ -52,7 +52,6 @@ variable "application_epgs" {
       static_paths = [
         {
           encapsulation_type = "vlan"
-          epg                = "default"
           mode               = "trunk"
           name               = "1/1"
           nodes              = [201]
@@ -146,7 +145,6 @@ variable "application_epgs" {
       static_paths = optional(list(object(
         {
           encapsulation_type = optional(string)
-          epg                = string
           mode               = optional(string)
           name               = string
           nodes              = list(string)
@@ -196,6 +194,7 @@ resource "aci_application_epg" "application_epgs" {
   prio                   = each.value.qos_class
   shutdown               = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
   relation_fv_rs_bd      = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
+  relation_fv_rs_path_att = length(each.value.static_paths) > 0 ? each.value.static_paths : []
   # relation_fv_rs_sec_inherited = ["{Master_fvEPg}"].id
   # relation_fv_rs_cust_qos_pol  = "custom_qos"
   # relation_fv_rs_dpp_pol       = each.value.data_plane_policer
@@ -203,6 +202,7 @@ resource "aci_application_epg" "application_epgs" {
   # relation_fv_rs_trust_ctrl    = "{fhsTrustCtrlPol}"
   # relation_fv_rs_graph_def     = ["{vzGraphCont}"]
 }
+
 
 resource "mso_schema_template_anp_epg" "application_epgs" {
   provider = mso
@@ -333,9 +333,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
     "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
   ) > 0 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
-  res_imedcy = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.resolution_immediacy : "lazy" # resolution_immediacy
+  res_imedcy = each.value.resolution_immediacy
   # secondary_encap_inner = length(
   #   regexall("vmm", each.value.domain_type)
   # ) > 0 ? each.value.secondary_encap_inner : "unknown"
@@ -444,11 +442,11 @@ resource "aci_rest_managed" "epg_to_static_paths" {
   ]
   for_each = local.epg_to_static_paths
   dn = length(
-    regexall("pc", each.value.path_type)
+    regexall("^pc$", each.value.path_type)
     ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]]" : length(
-    regexall("port", each.value.path_type)
+    regexall("^port$", each.value.path_type)
     ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]]" : length(
-    regexall("vpc", each.value.path_type)
+    regexall("^vpc$", each.value.path_type)
   ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]]" : ""
   class_name = "fvRsPathAtt"
   content = {
@@ -468,11 +466,11 @@ resource "aci_rest_managed" "epg_to_static_paths" {
     ) > 0 ? "untagged" : "regular"
     primaryEncap = each.value.encapsulation_type == "micro_seg" ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
     tDn = length(
-      regexall("pc", each.value.path_type)
+      regexall("^pc$", each.value.path_type)
       ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.name}]" : length(
-      regexall("port", each.value.path_type)
+      regexall("^port$", each.value.path_type)
       ) > 0 ? "topology/pod-${each.value.pod}/paths-${element(each.value.nodes, 0)}/pathep-[eth${each.value.name}]" : length(
-      regexall("vpc", each.value.path_type)
+      regexall("^vpc$", each.value.path_type)
     ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]" : ""
   }
 }

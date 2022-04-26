@@ -209,7 +209,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   # Advanced/Troubleshooting
   ep_clear            = each.value.troubleshooting_advanced[0].endpoint_clear == true ? "yes" : "no"
   ep_move_detect_mode = each.value.troubleshooting_advanced[0].ep_move_detection_mode
-  ip_learning         = each.value.troubleshooting_advanced[0].disable_ip_data_plane_learning_for_pbr == true ? "yes" : "no"
+  ip_learning         = each.value.troubleshooting_advanced[0].disable_ip_data_plane_learning_for_pbr == true ? "no" : "yes"
   intersite_bum_traffic_allow = length(regexall(
     true, each.value.troubleshooting_advanced[0].intersite_l2_stretch)
   ) > 0 && length(regexall(true, each.value.troubleshooting_advanced[0].intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
