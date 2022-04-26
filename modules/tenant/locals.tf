@@ -74,6 +74,7 @@ locals {
         annotation               = v.annotation != null ? v.annotation : ""
         allow_micro_segmentation = v.allow_micro_segmentation != null ? v.allow_micro_segmentation : false
         application_epg          = key
+        controller_type          = value.controller_type
         delimiter                = v.delimiter != null ? v.delimiter : ""
         domain                   = v.domain
         domain_type              = v.domain_type != null ? v.domain_type : "physical"
@@ -86,8 +87,14 @@ locals {
             forged_transmits  = v.forged_transmits != null ? v.forged_transmits : "reject"
             mac_changes       = v.mac_changes != null ? v.mac_changes : "reject"
           }
-        } : []
-        vlan_mode = v.vlan_mode != null ? v.vlan_mode : "auto"
+          } : [
+          {
+            allow_promiscuous = "reject"
+            forged_transmits  = "reject"
+            mac_changes       = "reject"
+          }
+        ]
+        vlan_mode = v.vlan_mode != null ? v.vlan_mode : "dynamic"
         vlans     = v.vlans != null ? v.vlans : []
       }
     ]
@@ -121,7 +128,7 @@ locals {
       }
     ]
   ])
-  contract_to_epgs = { for k, v in local.contract_to_epgs_loop : "${v.application_epg}_${v.contract}" => v }
+  contract_to_epgs = { for k, v in local.contract_to_epgs_loop : "${v.application_epg}_${k}_${v.contract}" => v }
 
   #__________________________________________________________
   #
@@ -302,6 +309,12 @@ locals {
       ]
       l3_configurations = value.l3_configurations != null ? [
         for k, v in value.l3_configurations : {
+          associated_l3outs = [
+            for a in v.associated_l3outs : {
+              l3out        = a.l3out != null ? a.l3out : ""
+              l3out_tenant = a.l3out_tenant != null ? a.l3out_tenant : ""
+            }
+          ]
           unicast_routing         = v.unicast_routing != null ? v.unicast_routing : true
           custom_mac_address      = v.custom_mac_address != null ? v.custom_mac_address : ""
           link_local_ipv6_address = v.link_local_ipv6_address != null ? v.link_local_ipv6_address : "::"
@@ -310,6 +323,7 @@ locals {
         }
         ] : [
         {
+          associated_l3outs       = []
           unicast_routing         = true
           custom_mac_address      = ""
           link_local_ipv6_address = "::"
@@ -358,14 +372,13 @@ locals {
         description                  = v.description != null ? v.description : ""
         gateway_ip                   = v.gateway_ip != null ? v.gateway_ip : "198.18.5.1/24"
         l3_out_for_route_profile     = v.l3_out_for_route_profile != null ? v.l3_out_for_route_profile : ""
-        associated_l3outs            = v.associated_l3outs != null ? v.associated_l3outs : []
         make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
         schema                       = value.schema
         sites                        = value.sites
         scope = v.scope != null ? [
           for b, a in v.scope : {
-            advertise_externally = a.shared_between_vrfs != null ? a.shared_between_vrfs : false
-            shared_between_vrfs  = a.advertise_externally != null ? a.advertise_externally : false
+            advertise_externally = a.advertise_externally != null ? a.advertise_externally : false
+            shared_between_vrfs  = a.shared_between_vrfs != null ? a.shared_between_vrfs : false
           }
           ] : [
           {
@@ -424,16 +437,15 @@ locals {
   apic_contract_filters_loop = flatten([
     for key, value in local.contracts : [
       for k, v in value.filters : {
+        action   = v.action != null ? v.action : "permit"
         contract = key
-        filter = length(regexall(
-          v.tenant, value.tenant)
-        ) > 0 ? aci_filter.filters[v.name].id : local.rs_filters[v.name].id
-        name = v.name
+        filter   = "uni/tn-${value.tenant}/flt-${v.name}"
+        name     = v.name
       }
     ] if value.controller_type == "apic"
   ])
 
-  apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${v.name}" => v }
+  apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${k}_${v.name}" => v }
 
   contract_subjects = {
     for k, v in local.contracts : k => {

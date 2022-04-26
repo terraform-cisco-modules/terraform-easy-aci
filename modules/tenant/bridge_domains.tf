@@ -28,21 +28,21 @@ variable "bridge_domains" {
       ]
       l3_configurations = [
         {
+          associated_l3outs = [
+            {
+              l3out        = "default"
+              l3out_tenant = "common"
+            }
+          ]
           unicast_routing         = true
           custom_mac_address      = ""
           link_local_ipv6_address = "::"
           subnets = [
             {
 
-              description              = ""
-              gateway_ip               = "198.18.5.1/24"
-              l3_out_for_route_profile = ""
-              associated_l3outs = [
-                {
-                  l3out        = "default"
-                  l3out_tenant = "common"
-                }
-              ]
+              description                  = ""
+              gateway_ip                   = "198.18.5.1/24"
+              l3_out_for_route_profile     = ""
               make_this_ip_address_primary = false
               scope = [
                 {
@@ -110,20 +110,20 @@ variable "bridge_domains" {
       ))
       l3_configurations = list(object(
         {
+          associated_l3outs = optional(list(object(
+            {
+              l3out        = string
+              l3out_tenant = string
+            }
+          )))
           unicast_routing         = optional(bool)
           custom_mac_address      = optional(string)
           link_local_ipv6_address = optional(string)
           subnets = optional(list(object(
             {
-              description              = optional(string)
-              gateway_ip               = string
-              l3_out_for_route_profile = optional(string)
-              associated_l3outs = optional(list(object(
-                {
-                  l3out        = optional(string)
-                  l3out_tenant = optional(string)
-                }
-              )))
+              description                  = optional(string)
+              gateway_ip                   = string
+              l3_out_for_route_profile     = optional(string)
               make_this_ip_address_primary = optional(bool)
               scope = optional(list(object(
                 {
@@ -146,7 +146,7 @@ variable "bridge_domains" {
       ))
       schema = optional(string)
       sites  = optional(list(string))
-      troubleshooting_advanced = list(object(
+      troubleshooting_advanced = optional(list(object(
         {
           intersite_bum_traffic_allow            = optional(bool)
           intersite_l2_stretch                   = optional(bool)
@@ -159,7 +159,7 @@ variable "bridge_domains" {
           optimize_wan_bandwidth                 = optional(bool)
           rogue_coop_exception_list              = optional(list(string))
         }
-      ))
+      )))
     }
   ))
 }
@@ -198,8 +198,12 @@ resource "aci_bridge_domain" "bridge_domains" {
   ].vrf != "" ? "uni/tn-${each.value.general[0].vrf_tenant}/ctx-${each.value.general[0].vrf}" : ""
   tenant_dn = aci_tenant.tenants[each.value.general[0].tenant].id
   # L3 Configurations
-  ll_addr       = each.value.l3_configurations[0].link_local_ipv6_address
-  mac           = each.value.l3_configurations[0].custom_mac_address
+  ll_addr = each.value.l3_configurations[0].link_local_ipv6_address
+  mac     = each.value.l3_configurations[0].custom_mac_address
+  relation_fv_rs_bd_to_out = length(compact(
+    [each.value.l3_configurations[0].associated_l3outs[0].l3out])
+    ) > 0 ? ["uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
+  ].l3out_tenant}/out-${each.value.l3_configurations[0].associated_l3outs[0].l3out}"] : []
   unicast_route = each.value.l3_configurations[0].unicast_routing == true ? "yes" : "no"
   vmac          = each.value.l3_configurations[0].virtual_mac_address
   # Advanced/Troubleshooting
@@ -211,13 +215,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   ) > 0 && length(regexall(true, each.value.troubleshooting_advanced[0].intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
   intersite_l2_stretch   = each.value.troubleshooting_advanced[0].intersite_l2_stretch == true ? "yes" : "no"
   optimize_wan_bandwidth = length(regexall(true, each.value.troubleshooting_advanced[0].optimize_wan_bandwidth)) > 0 ? "yes" : "no"
-  # relation_fv_rs_ctx = length(regexall(
-  #   each.value.tenant, each.value.vrf_tenant)
-  #   ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
-  #   "[[:alnum:]]+", each.value.vrf_tenant)
-  # ) > 0 ? local.common_vrfs[each.value.vrf].id : ""
   # relation_fv_rs_abd_pol_mon_pol = "{monEPGPol}"
-  # relation_fv_rs_bd_to_out = each.value.l3out != "" ? "uni/tn-${each.value.l3out_tenant}/out-${each.value.l3out}" : ""
   # relation_fv_rs_bd_to_out = length(regexall(
   #   each.value.tenant, each.value.l3out_tenant)
   #   ) > 0 ? [aci_l3_outside.l3outs[each.value.l3out].id] : length(regexall(
@@ -234,6 +232,9 @@ resource "aci_bridge_domain" "bridge_domains" {
   # relation_fv_rs_igmpsn                    = each.value.igmp_snooping_policy
 }
 
+output "bd" {
+  value = local.bridge_domains["Apps"]["l3_configurations"][0]["associated_l3outs"][0]
+}
 
 /*_____________________________________________________________________________________________________________________
 
@@ -263,6 +264,7 @@ resource "aci_subnet" "subnets" {
   description = each.value.description
   ip          = each.value.gateway_ip
   preferred   = each.value.make_this_ip_address_primary == true ? "yes" : "no"
+  # relation_fv_rs_bd_to_out = each.value.l3out != "" ? "uni/tn-${each.value.l3out_tenant}/out-${each.value.l3out}" : ""
   # relation_fv_rs_bd_subnet_to_out     = [each.value.l3_out_for_route_profile]
   # relation_fv_rs_bd_subnet_to_profile = each.value.route_profile
   # relation_fv_rs_nd_pfx_pol           = each.value.nd_ra_prefix_policy

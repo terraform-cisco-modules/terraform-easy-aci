@@ -1,4 +1,3 @@
-
 variable "application_epgs" {
   default = {
     "default" = {
@@ -33,6 +32,8 @@ variable "application_epgs" {
               mac_changes       = "reject"
             }
           ]
+          vlan_mode = "dynamic"
+          vlans     = []
         }
       ]
       */
@@ -297,55 +298,57 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   encap = each.value.vlan_mode != "dynamic" && length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
-  encap_mode = each.value.vlan_mode != "dynamic" && length(
+  encap_mode = each.value.vlan_mode == "static" && length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "vlan" : "auto"
   epg_cos = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.epg_cos : "Cos0"
+  ) > 0 ? "Cos0" : "Cos0"
   epg_cos_pref = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.epg_cos_pref : "disabled"
+  ) > 0 ? "disabled" : "disabled"
   instr_imedcy = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? "immediate" : "lazy" # deploy_immediacy
-  lag_policy_name = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.enhanced_lag_policy : 0
+  ) > 0 ? "immediate" : "lazy"
+  # lag_policy_name = length(
+  #   regexall("vmm", each.value.domain_type)
+  # ) > 0 ? each.value.enhanced_lag_policy : 0
   netflow_dir = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.netflow_direction : "both"
+  ) > 0 ? "both" : "both"
   netflow_pref = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.netflow : "disabled"
+  ) > 0 ? "disabled" : "disabled"
   num_ports = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.num_ports : 0
-  port_allocation = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.port_allocation : "none"
+  ) > 0 ? 0 : 0
+  # port_allocation = length(
+  #   regexall("vmm", each.value.domain_type)
+  # ) > 0 ? each.value.port_allocation : "none"
   primary_encap = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
+    regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
+    "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
+  ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
   primary_encap_inner = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.primary_encap_inner : "unknown"
+    regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
+    "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
+  ) > 0 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
   res_imedcy = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.resolution_immediacy : "lazy" # resolution_immediacy
-  secondary_encap_inner = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.secondary_encap_inner : "unknown"
+  # secondary_encap_inner = length(
+  #   regexall("vmm", each.value.domain_type)
+  # ) > 0 ? each.value.secondary_encap_inner : "unknown"
   switching_mode = "native"
   vmm_allow_promiscuous = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.security[0]["allow_promiscuous"] : "" # "reject"
+  ) > 0 ? each.value.security[0]["allow_promiscuous"] : ""
   vmm_forged_transmits = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.security[0]["forged_transmits"] : "" # "reject"
+  ) > 0 ? each.value.security[0]["forged_transmits"] : ""
   vmm_mac_changes = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.security[0]["mac_changes"] : "" # "reject"
+  ) > 0 ? each.value.security[0]["mac_changes"] : ""
 }
 
 
@@ -393,7 +396,6 @@ resource "aci_rest_managed" "contract_to_epgs" {
   dn         = "uni/tn-${each.value.tenant}/ap-${each.value.application_profile}/epg-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
   class_name = each.value.contract_class
   content = {
-    tDn = "uni/tn-${each.value.contract_tenant}/${each.value.contract_tdn}-${each.value.contract}"
     # matchT = each.value.match_type
     prio = each.value.qos_class
   }

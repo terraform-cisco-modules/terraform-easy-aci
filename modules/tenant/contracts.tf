@@ -8,6 +8,7 @@ variable "contracts" {
       description         = ""
       filters = [
         {
+          action   = "permit"
           name     = "default"
           tenant   = "common"
           template = "common"
@@ -45,6 +46,7 @@ variable "contracts" {
       description         = optional(string)
       filters = optional(list(object(
         {
+          action   = optional(string)
           name     = optional(string)
           tenant   = optional(string)
           template = optional(string)
@@ -70,27 +72,6 @@ variable "contracts" {
     }
   ))
 }
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "vzRsSubjFiltAtt"
- - Distinguished Name: "uni/tn-{tenant}/oobbrc-{name}/subj-{subject}/rssubjFiltAtt-{filter}"
-GUI Location:
- - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {contract}: Subjects
-_______________________________________________________________________________________________________________________
-*/
-# resource "aci_rest_managed" "oob_contract_subject_filters" {
-#   depends_on  = [
-#     aci_rest_managed.oob_contract_subjects
-#   ]
-#   for_each   = local.oob_contract_subject_filters
-#   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}"
-#   class_name = "vzRsSubjFiltAtt"
-#   content = {
-#     tnVzFilterName = each.value.filter
-#   }
-# }
 
 #------------------------------------------
 # Create a Standard Contract
@@ -229,9 +210,9 @@ ________________________________________________________________________________
 resource "aci_contract_subject" "contract_subjects" {
   depends_on = [
     aci_contract.contracts,
+    aci_filter.filters,
     aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
-    aci_filter.filters,
   ]
   for_each   = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" }
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -242,16 +223,39 @@ resource "aci_contract_subject" "contract_subjects" {
     ) > 0 ? aci_contract.contracts[each.key].id : length(regexall(
     "taboo", each.value.contract_type)
   ) > 0 ? aci_taboo_contract.contracts[each.key].id : ""
-  cons_match_t                 = each.value.consumer_match_type
-  description                  = each.value.description
-  name                         = each.key
-  name_alias                   = each.value.name_alias
-  prio                         = each.value.qos_class
-  prov_match_t                 = each.value.provider_match_type
-  rev_flt_ports                = each.value.reverse_filter_ports == true ? "yes" : "no"
-  target_dscp                  = each.value.target_dscp
-  relation_vz_rs_subj_filt_att = each.value.filters
+  cons_match_t  = each.value.consumer_match_type
+  description   = each.value.description
+  name          = each.key
+  name_alias    = each.value.name_alias
+  prio          = each.value.qos_class
+  prov_match_t  = each.value.provider_match_type
+  rev_flt_ports = each.value.reverse_filter_ports == true ? "yes" : "no"
+  target_dscp   = each.value.target_dscp
 }
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "vzRsSubjFiltAtt"
+ - Distinguished Name: "uni/tn-{tenant}/oobbrc-{name}/subj-{subject}/rssubjFiltAtt-{filter}"
+GUI Location:
+ - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {contract}: Subjects
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "contract_subject_filter_atrributes" {
+  depends_on = [
+    aci_contract_subject.contract_subjects
+  ]
+  for_each   = local.apic_contract_filters
+  dn         = "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.contract}/rssubjFiltAtt-${each.value.name}"
+  class_name = "vzRsSubjFiltAtt"
+  content = {
+    action = each.value.action
+    # tDn            = each.value.filter
+    tnVzFilterName = each.value.name
+  }
+}
+
 
 
 /*_____________________________________________________________________________________________________________________
