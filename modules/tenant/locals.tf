@@ -49,6 +49,14 @@ locals {
       description            = v.description != null ? v.description : ""
       domains                = v.domains != null ? v.domains : []
       epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
+      epg_to_aaeps = v.epg_to_aaeps != null ? [
+        for s in v.epg_to_aaeps : {
+          aaep                      = s.aaep
+          instrumentation_immediacy = s.instrumentation_immediacy != null ? s.instrumentation_immediacy : "lazy"
+          mode                      = s.mode != null ? s.mode : "regular"
+          vlans                     = s.vlans != null ? s.vlans : []
+        }
+      ] : []
       epg_type               = v.epg_type != null ? v.epg_type : "standard"
       flood_in_encapsulation = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
       has_multicast_source   = v.has_multicast_source != null ? v.has_multicast_source : false
@@ -130,6 +138,21 @@ locals {
   ])
 
   epg_to_static_paths = { for k, v in local.epg_to_static_paths_loop : "${v.epg}_${k}" => v }
+
+
+  epg_to_aaeps_loop = flatten([
+    for key, value in local.application_epgs : [
+      for k, v in value.epg_to_aaeps : {
+        epg                       = key
+        aaep                      = v.aaep
+        instrumentation_immediacy = v.instrumentation_immediacy
+        mode                      = v.mode
+        vlans                     = v.vlans
+      }
+    ]
+  ])
+
+  epg_to_aaeps = { for k, v in local.epg_to_aaeps_loop : "${v.epg}_${v.aaep}" => v }
 
 
   contract_to_epgs_loop = flatten([

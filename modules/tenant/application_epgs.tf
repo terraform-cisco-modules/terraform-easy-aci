@@ -37,7 +37,18 @@ variable "application_epgs" {
         }
       ]
       */
-      epg_admin_state        = "admin_up"
+      epg_admin_state = "admin_up"
+      epg_to_aaeps    = []
+      /*
+      epg_to_aaeps = [
+        {
+          aaep                      = "default"
+          instrumentation_immediacy = "lazy"
+          mode                      = "regular"
+          vlans                     = ["unknown"]
+        }
+      ]
+      */
       epg_type               = "standard"
       flood_in_encapsulation = "disabled"
       has_multicast_source   = false
@@ -132,7 +143,15 @@ variable "application_epgs" {
           vlans     = optional(list(number))
         }
       )))
-      epg_admin_state        = optional(string)
+      epg_admin_state = optional(string)
+      epg_to_aaeps = optional(list(object(
+        {
+          aaep                      = string
+          instrumentation_immediacy = optional(string)
+          mode                      = optional(string)
+          vlans                     = list(number)
+        }
+      )))
       epg_type               = optional(string)
       flood_in_encapsulation = optional(string)
       has_multicast_source   = optional(bool)
@@ -473,4 +492,29 @@ resource "aci_rest_managed" "epg_to_static_paths" {
       regexall("^vpc$", each.value.path_type)
     ) > 0 ? "topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]" : ""
   }
+}
+
+
+#------------------------------------------------------
+# Create Attachable Access Entity Generic Encap Policy
+#------------------------------------------------------
+
+/*
+API Information:
+ - Class: "infraAttEntityP"
+ - Distinguished Name: "uni/infra/attentp-{{AAEP}}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {{AAEP}}
+*/
+resource "aci_epgs_using_function" "epg_to_aaeps" {
+  depends_on = [
+    aci_application_epg.application_epgs
+  ]
+  for_each          = local.epg_to_aaeps
+  access_generic_dn = "uni/infra/attentp-${each.value.aaep}/gen-default"
+  encap             = length(each.value.vlans) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
+  instr_imedcy      = each.value.instrumentation_immediacy
+  mode              = each.value.mode
+  primary_encap     = length(each.value.vlans) > 1 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
+  tdn               = aci_application_epg.application_epgs[each.value.epg].id
 }
