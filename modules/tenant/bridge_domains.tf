@@ -249,9 +249,7 @@ resource "aci_subnet" "subnets" {
   ]
   for_each  = { for k, v in local.subnets : k => v if v.controller_type == "apic" }
   parent_dn = aci_bridge_domain.bridge_domains[each.value.bridge_domain].id
-  ctrl = alltrue([each.value.subnet_control[0]["neighbor_discovery"
-    ], each.value.subnet_control[0]["no_default_svi_gateway"], each.value.subnet_control[0]["querier_ip"]
-    ]) ? ["nd", "no-default-gateway", "querier"] : anytrue([each.value.subnet_control[0]["neighbor_discovery"
+  ctrl = anytrue([each.value.subnet_control[0]["neighbor_discovery"
     ], each.value.subnet_control[0]["no_default_svi_gateway"], each.value.subnet_control[0]["querier_ip"]
     ]) ? compact(concat([
       length(regexall(true, each.value.subnet_control[0]["neighbor_discovery"])) > 0 ? "nd" : ""], [
@@ -265,8 +263,7 @@ resource "aci_subnet" "subnets" {
   # relation_fv_rs_bd_subnet_to_out     = [each.value.l3_out_for_route_profile]
   # relation_fv_rs_bd_subnet_to_profile = each.value.route_profile
   # relation_fv_rs_nd_pfx_pol           = each.value.nd_ra_prefix_policy
-  scope = alltrue([each.value.scope[0]["advertise_externally"], each.value.scope[0]["shared_between_vrfs"]
-    ]) ? ["public", "shared"] : anytrue([each.value.scope[0]["advertise_externally"
+  scope = anytrue([each.value.scope[0]["advertise_externally"
       ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
       length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
     length(regexall(true, each.value.scope[0]["shared_between_vrfs"])) > 0 ? "shared" : ""]

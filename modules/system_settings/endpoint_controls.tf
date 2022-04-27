@@ -111,9 +111,7 @@ resource "aci_rest_managed" "ep_loop_protection" {
   dn         = "uni/infra/epLoopProtectP-default"
   class_name = "epLoopProtectP"
   content = {
-    action = alltrue(
-      [each.value.action_bd, each.value.action_port]
-      ) ? "bd-learn-disable,port-disable" : anytrue(
+    action = anytrue(
       [each.value.action_bd, each.value.action_port]
       ) ? trim(join(",", compact(concat(
         [length(regexall(true, each.value.action_bd)) > 0 ? "bd-learn-disable" : ""

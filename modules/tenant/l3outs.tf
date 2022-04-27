@@ -675,9 +675,7 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
   description                          = each.value.description
   external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.ext_epg].id
   ip                                   = each.value.subnet
-  scope = alltrue(
-    [each.value.scope_export, each.value.scope_isec, each.value.scope_ishared, each.value.scope_shared]
-    ) ? ["export-rtctrl", "import-security", "shared-security", "shared-rtctrl"] : anytrue(
+  scope = anytrue(
     [each.value.scope_export, each.value.scope_isec, each.value.scope_ishared, each.value.scope_shared]
     ) ? compact(concat([
       length(regexall(true, each.value.scope_export)) > 0 ? "export-rtctrl" : ""], [
@@ -1025,9 +1023,7 @@ resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
   for_each   = local.l3out_ospf_external_policies
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   area_cost  = each.value.ospf_area_cost
-  area_ctrl = alltrue(
-    [each.value.redistribute, each.value.summary, each.value.suppress_fa]
-    ) ? ["redistribute", "summary", "suppress-fa"] : anytrue(
+  area_ctrl = anytrue(
     [each.value.redistribute, each.value.summary, each.value.suppress_fa]
     ) ? replace(trim(join(",", concat([
       length(regexall(true, each.value.redistribute)) > 0 ? "redistribute" : ""], [

@@ -82,9 +82,7 @@ resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
     leafOpflexpAuthenticateClients = each.value.leaf_opflex_client_authentication == true ? "yes" : "no"
     leafOpflexpUseSsl              = each.value.leaf_ssl_opflex == true ? "yes" : "no"
     opflexpAuthenticateClients     = each.value.spine_opflex_client_authentication == true ? "yes" : "no"
-    opflexpSslProtocols = alltrue(
-      [each.value.ssl_opflex_version1_0, each.value.ssl_opflex_version1_1, each.value.ssl_opflex_version1_2]
-      ) ? "TLSv1,TLSv1.1,TLSv1.2" : anytrue(
+    opflexpSslProtocols = anytrue(
       [each.value.ssl_opflex_version1_0, each.value.ssl_opflex_version1_1, each.value.ssl_opflex_version1_2]
       ) ? replace(trim(join(",", concat([
         length(regexall(true, each.value.ssl_opflex_version1_0)) > 0 ? "TLSv1" : ""], [

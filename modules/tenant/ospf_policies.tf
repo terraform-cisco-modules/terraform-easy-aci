@@ -223,9 +223,7 @@ resource "aci_ospf_interface_policy" "ospf_interface_policies" {
   name_alias  = each.value.name_alias
   cost        = each.value.cost_of_interface == 0 ? "unspecified" : each.value.cost_of_interface
   # Bug 805 Submitted
-  ctrl = alltrue(
-    [each.value.advertise_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
-    ) ? ["advert-subnet", "bfd", "mtu-ignore", "passive"] : anytrue(
+  ctrl = anytrue(
     [each.value.advertise_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
     ) ? compact(concat([
       length(regexall(true, each.value.advertise_subnet)) > 0 ? "advert-subnet" : ""], [
@@ -265,9 +263,7 @@ resource "aci_ospf_timers" "ospf_timers_policies" {
   for_each = local.ospf_timers_policies
   # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   bw_ref = each.value.bandwidth_reference
-  ctrl = alltrue(
-    [each.value.name_lookup, each.value.prefix_suppress]
-    ) ? ["name-lookup", "pfx-suppress"] : anytrue(
+  ctrl = anytrue(
     [each.value.name_lookup, each.value.prefix_suppress]
     ) ? compact(concat([
       length(regexall(true, each.value.name_lookup)) > 0 ? "name-lookup" : ""], [

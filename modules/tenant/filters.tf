@@ -136,9 +136,7 @@ resource "aci_filter_entry" "filter_entries" {
   d_from_port   = each.value.destination_port_from
   d_to_port     = each.value.destination_port_to
   stateful      = each.value.stateful == true ? "yes" : "no"
-  tcp_rules = alltrue(
-    [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
-    ) ? ["ack", "est", "fin", "rst", "syn"] : anytrue(
+  tcp_rules = anytrue(
     [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
     ) ? compact(concat([
       length(regexall(true, each.value.tcp_ack)) > 0 ? "ack" : ""], [
@@ -170,9 +168,7 @@ resource "mso_schema_template_filter_entry" "filter_entries" {
   destination_from     = each.value.destination_port_from
   destination_to       = each.value.destination_port_to
   stateful             = each.value.stateful
-  tcp_session_rules = alltrue(
-    [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
-    ) ? ["acknowledgement", "established", "finish", "reset", "synchronize"] : anytrue(
+  tcp_session_rules = anytrue(
     [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
     ) ? compact(concat([
       length(regexall(true, each.value.tcp_ack)) > 0 ? "acknowledgement" : ""], [
