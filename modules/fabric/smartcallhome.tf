@@ -8,7 +8,7 @@ variable "smart_callhome" {
       customer_contact_email = ""
       customer_id            = ""
       description            = ""
-      destinations = [
+      smart_destinations = [
         {
           admin_state   = "enabled"
           email         = "admin@example.com"
@@ -50,7 +50,7 @@ variable "smart_callhome" {
       customer_contact_email = optional(string)
       customer_id            = optional(string)
       description            = optional(string)
-      destinations = list(object(
+      smart_destinations = list(object(
         {
           admin_state   = optional(string)
           email         = optional(string)
@@ -128,7 +128,7 @@ resource "aci_rest_managed" "smart_callhome_destination_groups_callhome_profile"
     replyTo    = each.value.reply_to_email
     phone      = each.value.phone_contact
     port       = each.value.port_number
-    pwd        = var.smtp_password
+    pwd        = each.value.secure_smtp == true ? var.smtp_password : ""
     secureSmtp = each.value.secure_smtp == true ? "yes" : "no"
     site       = each.value.site_id
     username   = each.value.username

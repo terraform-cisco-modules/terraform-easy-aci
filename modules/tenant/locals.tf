@@ -1280,27 +1280,36 @@ locals {
       bgp_timers_per_address_family   = v.bgp_timers_per_address_family != null ? v.bgp_timers_per_address_family : []
       bgp_timers                      = v.bgp_timers != null ? v.bgp_timers : "default"
       communities                     = v.communities != null ? v.communities : []
-      contracts                       = v.contracts != null ? v.contracts : []
       controller_type                 = v.controller_type != null ? v.controller_type : "apic"
       description                     = v.description != null ? v.description : ""
-      endpoint_retention_policy       = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : "default"
       eigrp_timers_per_address_family = v.eigrp_timers_per_address_family != null ? v.eigrp_timers_per_address_family : []
-      ip_data_plane_learning          = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
-      layer3_multicast                = v.layer3_multicast != null ? v.layer3_multicast : true
-      level                           = v.level != null ? v.level : "template"
-      monitoring_policy               = v.monitoring_policy != null ? v.monitoring_policy : ""
-      name_alias                      = v.name_alias != null ? v.name_alias : ""
-      ospf_timers_per_address_family  = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
-      ospf_timers                     = v.ospf_timers != null ? v.ospf_timers : "default"
-      policy_enforcement_direction    = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
-      policy_enforcement_preference   = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
-      preferred_group                 = v.preferred_group != null ? v.preferred_group : "disabled"
-      sites                           = v.sites != null ? v.sites : []
-      schema                          = v.schema != null ? v.schema : "common"
-      tags                            = v.tags != null ? v.tags : []
-      template                        = v.template != null ? v.template : ""
-      tenant                          = v.tenant != null ? v.tenant : "common"
-      transit_route_tag_policy        = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
+      endpoint_retention_policy       = v.endpoint_retention_policy != null ? v.endpoint_retention_policy : "default"
+      epg_esg_collection_for_vrfs = v.epg_esg_collection_for_vrfs != null ? [
+        for s in v.epg_esg_collection_for_vrfs : {
+          contracts  = s.contracts != null ? s.contracts : []
+          match_type = s.match_type != null ? s.match_type : "AtleastOne"
+        }
+        ] : [
+        {
+          match_type = "AtleastOne"
+        }
+      ]
+      ip_data_plane_learning         = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
+      layer3_multicast               = v.layer3_multicast != null ? v.layer3_multicast : true
+      level                          = v.level != null ? v.level : "template"
+      monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
+      name_alias                     = v.name_alias != null ? v.name_alias : ""
+      ospf_timers_per_address_family = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
+      ospf_timers                    = v.ospf_timers != null ? v.ospf_timers : "default"
+      policy_enforcement_direction   = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
+      policy_enforcement_preference  = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
+      preferred_group                = v.preferred_group != null ? v.preferred_group : "disabled"
+      sites                          = v.sites != null ? v.sites : []
+      schema                         = v.schema != null ? v.schema : "common"
+      tags                           = v.tags != null ? v.tags : []
+      template                       = v.template != null ? v.template : ""
+      tenant                         = v.tenant != null ? v.tenant : "common"
+      transit_route_tag_policy       = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
     }
   }
 
@@ -1331,14 +1340,14 @@ locals {
 
   vzany_contracts_loop = flatten([
     for key, value in local.vrfs : [
-      for k, v in value.contracts : {
+      for k, v in value.epg_esg_collection_for_vrfs[0].contracts : {
         annotation        = value.annotation
         contract          = v.name != null ? v.name : ""
         contract_type     = v.type != null ? v.type : "consumer" # interface|provider
         contract_schema   = v.schema != null ? v.schema : value.schema
         contract_tenant   = v.tenant != null ? v.tenant : value.tenant
         contract_template = v.template != null ? v.template : value.template
-        match_type        = v.match_type != null ? v.match_type : "AtleastOne"
+        match_type        = value.epg_esg_collection_for_vrfs[0].match_type
         qos_class         = v.qos_class != null ? v.qos_class : "unspecified"
         schema            = value.schema
         template          = value.template
@@ -1349,6 +1358,6 @@ locals {
     ]
   ])
 
-  vzany_contracts = { for k, v in local.vzany_contracts_loop : "${v.vrf}_${v.contract_type}" => v }
+  vzany_contracts = { for k, v in local.vzany_contracts_loop : "${v.vrf}_${v.contract}_${v.contract_type}" => v }
 
 }

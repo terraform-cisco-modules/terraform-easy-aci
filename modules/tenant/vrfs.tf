@@ -2,31 +2,37 @@ variable "vrfs" {
   default = {
     "default" = {
       annotation                      = ""
+      annotations                     = []
       bd_enforcement_status           = false
       bgp_timers                      = "default"
       bgp_timers_per_address_family   = []
       communities                     = []
-      contracts                       = []
       controller_type                 = "apic"
       description                     = ""
       eigrp_timers_per_address_family = []
       endpoint_retention_policy       = "default"
-      ip_data_plane_learning          = "enabled"
-      layer3_multicast                = true
-      level                           = "template"
-      monitoring_policy               = ""
-      name_alias                      = ""
-      ospf_timers                     = "default"
-      ospf_timers_per_address_family  = []
-      policy_enforcement_direction    = "ingress"  # "egress"
-      policy_enforcement_preference   = "enforced" # unenforced
-      preferred_group                 = "disabled"
-      schema                          = "common"
-      sites                           = []
-      tags                            = []
-      template                        = ""
-      tenant                          = "common"
-      transit_route_tag_policy        = ""
+      epg_esg_collection_for_vrfs = [
+        {
+          contracts  = []
+          match_type = "AtleastOne"
+        }
+      ]
+      ip_data_plane_learning         = "enabled"
+      layer3_multicast               = true
+      level                          = "template"
+      monitoring_policy              = ""
+      name_alias                     = ""
+      ospf_timers                    = "default"
+      ospf_timers_per_address_family = []
+      policy_enforcement_direction   = "ingress"  # "egress"
+      policy_enforcement_preference  = "enforced" # unenforced
+      preferred_group                = "disabled"
+      schema                         = "common"
+      sites                          = []
+      tags                           = []
+      template                       = ""
+      tenant                         = "common"
+      transit_route_tag_policy       = ""
     }
   }
   description = <<-EOT
@@ -41,7 +47,13 @@ variable "vrfs" {
   EOT
   type = map(object(
     {
-      annotation            = optional(string)
+      annotation = optional(string)
+      annotations = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
       bd_enforcement_status = optional(bool)
       bgp_timers            = optional(string)
       bgp_timers_per_address_family = optional(list(object(
@@ -55,17 +67,6 @@ variable "vrfs" {
           community = number
         }
       )))
-      contracts = optional(list(object(
-        {
-          match_type = optional(string)
-          name       = string
-          qos_class  = optional(string)
-          schema     = optional(string)
-          template   = optional(string)
-          tenant     = string
-          type       = string
-        }
-      )))
       controller_type = optional(string)
       description     = optional(string)
       eigrp_timers_per_address_family = optional(list(object(
@@ -75,12 +76,27 @@ variable "vrfs" {
         }
       )))
       endpoint_retention_policy = optional(string)
-      ip_data_plane_learning    = optional(string)
-      layer3_multicast          = optional(bool)
-      level                     = optional(string)
-      name_alias                = optional(string)
-      monitoring_policy         = optional(string)
-      ospf_timers               = optional(string)
+      epg_esg_collection_for_vrfs = optional(list(object(
+        {
+          contracts = optional(list(object(
+            {
+              name      = string
+              qos_class = optional(string)
+              schema    = optional(string)
+              template  = optional(string)
+              tenant    = string
+              type      = string
+            }
+          )))
+          match_type = optional(string)
+        }
+      )))
+      ip_data_plane_learning = optional(string)
+      layer3_multicast       = optional(bool)
+      level                  = optional(string)
+      name_alias             = optional(string)
+      monitoring_policy      = optional(string)
+      ospf_timers            = optional(string)
       ospf_timers_per_address_family = optional(list(object(
         {
           address_family = optional(string)
@@ -301,7 +317,7 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "vzany_provider_contracts" {
   for_each   = { for k, v in local.vzany_contracts : k => v if v.controller_type == "apic" && v.contract_type == "provider" }
-  dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}"
+  dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToProv-${each.value.contract}"
   class_name = "vzRsAnyToProv"
   content = {
     tDn    = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
@@ -316,7 +332,7 @@ resource "aci_rest_managed" "vzany_contracts" {
     "consumer", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}" : length(regexall(
     "interface", each.value.contract_type)
-  ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}" : ""
+  ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToConsif-${each.value.contract}" : ""
   class_name = length(regexall(
     "consumer", each.value.contract_type)
     ) > 0 ? "vzRsAnyToCons" : length(regexall(

@@ -264,8 +264,8 @@ resource "aci_subnet" "subnets" {
   # relation_fv_rs_bd_subnet_to_profile = each.value.route_profile
   # relation_fv_rs_nd_pfx_pol           = each.value.nd_ra_prefix_policy
   scope = anytrue([each.value.scope[0]["advertise_externally"
-      ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
-      length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
+    ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
+    length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
     length(regexall(true, each.value.scope[0]["shared_between_vrfs"])) > 0 ? "shared" : ""]
   )) : ["private"]
   virtual = each.value.treat_as_virtual_ip_address == true ? "yes" : "no"
