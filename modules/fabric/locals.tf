@@ -657,7 +657,6 @@ locals {
     for k, v in var.snmp_policies : k => {
       admin_state        = v.admin_state != null ? v.admin_state : "enabled"
       annotation         = v.annotation != null ? v.annotation : ""
-      communities        = v.communities != null ? v.communities : []
       contact            = v.contact != null ? v.contact : ""
       description        = v.description != null ? v.description : ""
       include_a          = v.include_types != null ? lookup(v.include_types[0], "audit_logs", false) : false
@@ -666,7 +665,8 @@ locals {
       include_s          = v.include_types != null ? lookup(v.include_types[0], "session_logs", false) : false
       location           = v.location != null ? v.location : ""
       snmp_client_groups = v.snmp_client_groups
-      trap_destinations  = v.trap_destinations != null ? v.trap_destinations : []
+      snmp_communities   = v.snmp_communities != null ? v.snmp_communities : []
+      snmp_destinations  = v.snmp_destinations != null ? v.snmp_destinations : []
       users              = v.users != null ? v.users : []
     }
   }
@@ -699,18 +699,18 @@ locals {
 
   snmp_client_group_clients = { for k, v in local.snmp_client_group_clients_loop : "${v.key1}_${v.address}" => v }
 
-  snmp_policies_communities_loop = flatten([
+  snmp_communities_loop = flatten([
     for key, value in local.snmp_policies : [
-      for k, v in value.communities : {
+      for k, v in value.snmp_communities : {
         community          = v.community
         community_variable = v.community_variable != null ? v.community_variable : 1
         description        = v.description != null ? v.description : ""
-        key1               = key
+        snmp_policy        = key
       }
     ]
   ])
 
-  snmp_policies_communities = { for k, v in local.snmp_policies_communities_loop : "${v.key1}_${v.community}" => v }
+  snmp_policies_communities = { for k, v in local.snmp_policies_communities_loop : "${v.snmp_policy}_${v.community}" => v }
 
   snmp_policies_users_loop = flatten([
     for key, value in local.snmp_policies : [
@@ -729,7 +729,7 @@ locals {
 
   snmp_trap_destinations_loop = flatten([
     for key, value in local.snmp_policies : [
-      for k, v in value.trap_destinations : {
+      for k, v in value.snmp_destinations : {
         community           = v.community != null ? v.community : 0
         host                = v.host
         management_epg      = v.management_epg != null ? v.management_epg : "default"
@@ -742,7 +742,7 @@ locals {
     ]
   ])
 
-  snmp_trap_destinations = { for k, v in local.snmp_trap_destinations_loop : "${v.key1}_${v.host}" => v }
+  snmp_destinations = { for k, v in local.snmp_destinations_loop : "${v.key1}_${v.host}" => v }
 
   #__________________________________________________________
   #

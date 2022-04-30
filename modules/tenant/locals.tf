@@ -46,26 +46,30 @@ locals {
       contract_exception_tag = v.contract_exception_tag != null ? v.contract_exception_tag : ""
       contracts              = v.contracts != null ? v.contracts : []
       controller_type        = v.controller_type != null ? v.controller_type : "apic"
+      custom_qos             = v.custom_qos != null ? v.custom_qos : ""
+      data_plane_policer     = v.data_plane_policer != null ? v.data_plane_policer : ""
       description            = v.description != null ? v.description : ""
       domains                = v.domains != null ? v.domains : []
       epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
+      epg_contract_master    = v.epg_contract_master != null ? v.epg_contract_master : ""
       epg_to_aaeps = v.epg_to_aaeps != null ? [
         for s in v.epg_to_aaeps : {
           aaep                      = s.aaep
-          instrumentation_immediacy = s.instrumentation_immediacy != null ? s.instrumentation_immediacy : "lazy"
+          instrumentation_immediacy = s.instrumentation_immediacy != null ? s.instrumentation_immediacy : "on-demand"
           mode                      = s.mode != null ? s.mode : "regular"
           vlans                     = s.vlans != null ? s.vlans : []
         }
       ] : []
-      epg_type               = v.epg_type != null ? v.epg_type : "standard"
-      flood_in_encapsulation = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
-      has_multicast_source   = v.has_multicast_source != null ? v.has_multicast_source : false
-      label_match_criteria   = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
-      name_alias             = v.name_alias != null ? v.name_alias : ""
-      intra_epg_isolation    = v.intra_epg_isolation != null ? v.intra_epg_isolation : "unenforced"
-      preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : false
-      qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
-      schema                 = v.schema != null ? v.schema : "common"
+      epg_type                 = v.epg_type != null ? v.epg_type : "standard"
+      fhs_trust_control_policy = v.fhs_trust_control_policy != null ? v.fhs_trust_control_policy : ""
+      flood_in_encapsulation   = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
+      has_multicast_source     = v.has_multicast_source != null ? v.has_multicast_source : false
+      label_match_criteria     = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
+      name_alias               = v.name_alias != null ? v.name_alias : ""
+      intra_epg_isolation      = v.intra_epg_isolation != null ? v.intra_epg_isolation : "unenforced"
+      preferred_group_member   = v.preferred_group_member != null ? v.preferred_group_member : false
+      qos_class                = v.qos_class != null ? v.qos_class : "unspecified"
+      schema                   = v.schema != null ? v.schema : "common"
       static_paths = v.static_paths != null ? compact(flatten([
         for s in v.static_paths : [
           length(regexall("vpc", s.path_type)
@@ -83,6 +87,7 @@ locals {
       vrf                   = v.vrf != null ? v.vrf : "default"
       vrf_schema            = v.vrf_schema != null ? v.vrf_schema : "common"
       vrf_template          = v.vrf_template != null ? v.vrf_template : "common"
+      vzGraphCont           = v.vzGraphCont != null ? v.vzGraphCont : ""
     }
   }
 

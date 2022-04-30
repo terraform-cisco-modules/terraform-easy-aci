@@ -1,4 +1,4 @@
-variable "security" {
+variable "global_security" {
   default = {
     "default" = {
       annotation = ""
@@ -51,13 +51,13 @@ variable "security" {
 }
 /*
 API Information:
- - Class: "aaaUserEp"
+ - Classes: "aaaPwdProfile", "aaaUserEp", "pkiWebTokenData"
  - Distinguished Name: "uni/userext"
 GUI Location:
  - Admin > AAA > Security
 */
-resource "aci_global_security" "security" {
-  for_each                   = local.security
+resource "aci_global_security" "global_security" {
+  for_each                   = local.global_security
   annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
   block_duration             = each.value.lockout_duration
   change_count               = each.value.password_changes_within_interval

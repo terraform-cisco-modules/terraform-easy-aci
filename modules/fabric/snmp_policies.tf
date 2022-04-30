@@ -3,7 +3,6 @@ variable "snmp_policies" {
     "default" = {
       admin_state = "enabled"
       annotation  = ""
-      communities = []
       contact     = ""
       description = ""
       include_types = [
@@ -24,7 +23,8 @@ variable "snmp_policies" {
           name                = "default"
         }
       ]
-      trap_destinations = []
+      snmp_communities  = []
+      snmp_destinations = []
       users             = []
     }
   }
@@ -32,12 +32,6 @@ variable "snmp_policies" {
     {
       admin_state = optional(string)
       annotation  = optional(string)
-      communities = optional(list(object(
-        {
-          community_variable = number
-          description        = optional(string)
-        }
-      )))
       contact     = optional(string)
       description = optional(string)
       include_types = list(object(
@@ -63,7 +57,13 @@ variable "snmp_policies" {
           name                = string
         }
       ))
-      trap_destinations = optional(list(object(
+      snmp_communities = optional(list(object(
+        {
+          community_variable = number
+          description        = optional(string)
+        }
+      )))
+      snmp_destinations = optional(list(object(
         {
           community           = optional(number)
           host                = string
@@ -281,12 +281,12 @@ GUI Location:
  - Fabric > Fabric Policies > Policies > Pod > SNMP > {snmp_policy} > Community Policies
 _______________________________________________________________________________________________________________________
 */
-resource "aci_snmp_community" "communities" {
+resource "aci_snmp_community" "snmp_communities" {
   depends_on = [
     aci_rest_managed.snmp_policies
   ]
-  for_each  = local.snmp_policies_communities
-  parent_dn = aci_snmp_policy.example.id
+  for_each  = local.snmp_communities
+  parent_dn = aci_rest_managed.snmp_policies[each.value.snmp_policy].id
   name = length(regexall(
     5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
     4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
@@ -378,11 +378,11 @@ GUI Location:
  - Admin > External Data Collectors > Monitoring Destinations > SNMP > {snmp_monitoring_destination_group}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "snmp_trap_destinations" {
+resource "aci_rest_managed" "snmp_destinations" {
   depends_on = [
     aci_rest_managed.snmp_monitoring_destination_groups
   ]
-  for_each   = local.snmp_trap_destinations
+  for_each   = local.snmp_destinations
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
   class_name = "snmpTrapDest"
   content = {

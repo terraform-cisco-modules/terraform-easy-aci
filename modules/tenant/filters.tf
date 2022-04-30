@@ -9,6 +9,8 @@ variable "filters" {
           annotation            = ""
           arp_flag              = "unspecified"
           description           = ""
+          destination_port_from = "unspecified"
+          destination_port_to   = "unspecified"
           ethertype             = "unspecified"
           icmpv4_type           = "unspecified"
           icmpv6_type           = "unspecified"
@@ -17,11 +19,9 @@ variable "filters" {
           match_only_fragments  = false
           name                  = "default"
           name_alias            = ""
-          stateful              = false
           source_port_from      = "unspecified"
           source_port_to        = "unspecified"
-          destination_port_from = "unspecified"
-          destination_port_to   = "unspecified"
+          stateful              = false
           tcp_session_rules = [
             {
               acknowledgement = false

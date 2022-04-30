@@ -126,6 +126,31 @@ locals {
 
   #__________________________________________________________
   #
+  # Global Security Variables
+  #__________________________________________________________
+
+  global_security = {
+    for k, v in var.global_security : k => {
+      annotation                       = v.annotation != null ? v.annotation : ""
+      enable_lockout                   = v.lockout_user != null ? lookup(v.lockout_user[0], "enable_lockout", "disable") : "disable"
+      lockout_duration                 = v.lockout_user != null ? lookup(v.lockout_user[0], "lockout_duration", 60) : 60
+      max_failed_attempts              = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts", 5) : 5
+      max_failed_attempts_window       = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts_window", 5) : 5
+      maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
+      no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
+      password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"
+      password_change_interval         = v.password_change_interval != null ? v.password_change_interval : 48
+      password_changes_within_interval = v.password_changes_within_interval != null ? v.password_changes_within_interval : 2
+      password_expiration_warn_time    = v.password_expiration_warn_time != null ? v.password_expiration_warn_time : 15
+      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : true
+      user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
+      web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
+      web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600
+    }
+  }
+
+  #__________________________________________________________
+  #
   # RADIUS Variables
   #__________________________________________________________
 
@@ -165,31 +190,6 @@ locals {
   ])
 
   radius_hosts = { for k, v in local.radius_hosts_loop : "${v.key1}_${v.host}" => v }
-
-  #__________________________________________________________
-  #
-  # Security Variables
-  #__________________________________________________________
-
-  security = {
-    for k, v in var.security : k => {
-      annotation                       = v.annotation != null ? v.annotation : ""
-      enable_lockout                   = v.lockout_user != null ? lookup(v.lockout_user[0], "enable_lockout", "disable") : "disable"
-      lockout_duration                 = v.lockout_user != null ? lookup(v.lockout_user[0], "lockout_duration", 60) : 60
-      max_failed_attempts              = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts", 5) : 5
-      max_failed_attempts_window       = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts_window", 5) : 5
-      maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
-      no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
-      password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"
-      password_change_interval         = v.password_change_interval != null ? v.password_change_interval : 48
-      password_changes_within_interval = v.password_changes_within_interval != null ? v.password_changes_within_interval : 2
-      password_expiration_warn_time    = v.password_expiration_warn_time != null ? v.password_expiration_warn_time : 15
-      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : true
-      user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
-      web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
-      web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600
-    }
-  }
 
   #__________________________________________________________
   #

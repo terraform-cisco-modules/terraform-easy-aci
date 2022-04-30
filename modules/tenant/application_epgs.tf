@@ -10,6 +10,8 @@ variable "application_epgs" {
       contract_exception_tag = null
       contracts              = []
       controller_type        = "apic"
+      custom_qos             = ""
+      data_plane_policer     = ""
       description            = ""
       domains                = []
       /* 
@@ -24,7 +26,6 @@ variable "application_epgs" {
         {
           domain        = "vds_example"
           domain_type   = "vmm"
-          domain_vendor = "VMware"
           security = [
             {
               allow_promiscuous = "accept"
@@ -32,33 +33,37 @@ variable "application_epgs" {
               mac_changes       = "reject"
             }
           ]
-          vlan_mode = "dynamic"
-          vlans     = []
+          vlan_mode  = "dynamic"
+          vlans      = []
+          vmm_vendor = "VMware"
         }
       ]
       */
-      epg_admin_state = "admin_up"
-      epg_to_aaeps    = []
+      epg_admin_state     = "admin_up"
+      epg_contract_master = ""
+      epg_to_aaeps        = []
       /*
       epg_to_aaeps = [
         {
           aaep                      = "default"
-          instrumentation_immediacy = "lazy"
+          instrumentation_immediacy = "on-demand"
           mode                      = "regular"
           vlans                     = ["unknown"]
         }
       ]
       */
-      epg_type               = "standard"
-      flood_in_encapsulation = "disabled"
-      has_multicast_source   = false
-      label_match_criteria   = "AtleastOne"
-      name_alias             = ""
-      intra_epg_isolation    = "unenforced"
-      preferred_group_member = false
-      qos_class              = "unspecified"
-      schema                 = "common"
-      static_paths           = []
+      epg_type                 = "standard"
+      fhs_trust_control_policy = ""
+      flood_in_encapsulation   = "disabled"
+      has_multicast_source     = false
+      label_match_criteria     = "AtleastOne"
+      name_alias               = ""
+      intra_epg_isolation      = "unenforced"
+      preferred_group_member   = false
+      qos_class                = "unspecified"
+      schema                   = "common"
+      sites                    = []
+      static_paths             = []
       /* example
       static_paths = [
         {
@@ -78,6 +83,7 @@ variable "application_epgs" {
       vrf          = "default"
       vrf_schema   = "common"
       vrf_template = "common"
+      vzGraphCont  = ""
     }
   }
   description = <<-EOT
@@ -120,8 +126,10 @@ variable "application_epgs" {
 
         }
       )))
-      controller_type = optional(string)
-      description     = optional(string)
+      controller_type    = optional(string)
+      custom_qos         = optional(string)
+      data_plane_policer = optional(string)
+      description        = optional(string)
       domains = optional(list(object(
         {
           annotation               = optional(string)
@@ -129,7 +137,6 @@ variable "application_epgs" {
           delimiter                = optional(string)
           domain                   = string
           domain_type              = optional(string)
-          domain_vendor            = optional(string)
           port_binding             = optional(string)
           resolution_immediacy     = optional(string)
           security = optional(list(object(
@@ -139,11 +146,13 @@ variable "application_epgs" {
               mac_changes       = string
             }
           )))
-          vlan_mode = optional(string)
-          vlans     = optional(list(number))
+          vlan_mode  = optional(string)
+          vlans      = optional(list(number))
+          vmm_vendor = optional(string)
         }
       )))
-      epg_admin_state = optional(string)
+      epg_admin_state     = optional(string)
+      epg_contract_master = optional(string)
       epg_to_aaeps = optional(list(object(
         {
           aaep                      = string
@@ -152,15 +161,17 @@ variable "application_epgs" {
           vlans                     = list(number)
         }
       )))
-      epg_type               = optional(string)
-      flood_in_encapsulation = optional(string)
-      has_multicast_source   = optional(bool)
-      label_match_criteria   = optional(string)
-      name_alias             = optional(string)
-      intra_epg_isolation    = optional(string)
-      preferred_group_member = optional(bool)
-      qos_class              = optional(string)
-      schema                 = optional(string)
+      epg_type                 = optional(string)
+      fhs_trust_control_policy = optional(string)
+      flood_in_encapsulation   = optional(string)
+      has_multicast_source     = optional(bool)
+      label_match_criteria     = optional(string)
+      name_alias               = optional(string)
+      intra_epg_isolation      = optional(string)
+      preferred_group_member   = optional(bool)
+      qos_class                = optional(string)
+      schema                   = optional(string)
+      sites                    = optional(list(string))
       static_paths = optional(list(object(
         {
           encapsulation_type = optional(string)
@@ -178,6 +189,7 @@ variable "application_epgs" {
       vrf          = optional(string)
       vrf_schema   = optional(string)
       vrf_template = optional(string)
+      vzGraphCont  = optional(string)
     }
   ))
 }
@@ -196,30 +208,30 @@ resource "aci_application_epg" "application_epgs" {
     aci_application_profile.application_profiles,
     aci_bridge_domain.bridge_domains
   ]
-  for_each                = { for k, v in local.application_epgs : k => v if v.epg_type == "standard" && v.controller_type == "apic" }
-  annotation              = each.value.annotation
-  application_profile_dn  = aci_application_profile.application_profiles[each.value.application_profile].id
-  description             = each.value.description
-  exception_tag           = each.value.contract_exception_tag
-  flood_on_encap          = each.value.flood_in_encapsulation
-  fwd_ctrl                = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
-  has_mcast_source        = each.value.has_multicast_source == true ? "yes" : "no"
-  is_attr_based_epg       = each.value.useg_epg == true ? "yes" : "no"
-  match_t                 = each.value.label_match_criteria
-  name                    = each.key
-  name_alias              = each.value.name_alias
-  pc_enf_pref             = each.value.intra_epg_isolation
-  pref_gr_memb            = each.value.preferred_group_member == true ? "include" : "exclude"
-  prio                    = each.value.qos_class
-  shutdown                = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
-  relation_fv_rs_bd       = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
-  relation_fv_rs_path_att = length(each.value.static_paths) > 0 ? each.value.static_paths : []
-  # relation_fv_rs_sec_inherited = ["{Master_fvEPg}"].id
-  # relation_fv_rs_cust_qos_pol  = "custom_qos"
-  # relation_fv_rs_dpp_pol       = each.value.data_plane_policer
-  # relation_fv_rs_aepg_mon_pol  = each.value.monitoring_policy
-  # relation_fv_rs_trust_ctrl    = "{fhsTrustCtrlPol}"
-  # relation_fv_rs_graph_def     = ["{vzGraphCont}"]
+  for_each                     = { for k, v in local.application_epgs : k => v if v.epg_type == "standard" && v.controller_type == "apic" }
+  annotation                   = each.value.annotation
+  application_profile_dn       = aci_application_profile.application_profiles[each.value.application_profile].id
+  description                  = each.value.description
+  exception_tag                = each.value.contract_exception_tag
+  flood_on_encap               = each.value.flood_in_encapsulation
+  fwd_ctrl                     = each.value.intra_epg_isolation == true ? "proxy-arp" : "none"
+  has_mcast_source             = each.value.has_multicast_source == true ? "yes" : "no"
+  is_attr_based_epg            = each.value.useg_epg == true ? "yes" : "no"
+  match_t                      = each.value.label_match_criteria
+  name                         = each.key
+  name_alias                   = each.value.name_alias
+  pc_enf_pref                  = each.value.intra_epg_isolation
+  pref_gr_memb                 = each.value.preferred_group_member == true ? "include" : "exclude"
+  prio                         = each.value.qos_class
+  shutdown                     = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
+  relation_fv_rs_bd            = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
+  relation_fv_rs_path_att      = length(each.value.static_paths) > 0 ? each.value.static_paths : []
+  relation_fv_rs_sec_inherited = each.value.epg_contract_master
+  relation_fv_rs_cust_qos_pol  = each.value.custom_qos
+  relation_fv_rs_dpp_pol       = each.value.data_plane_policer
+  relation_fv_rs_aepg_mon_pol  = each.value.monitoring_policy
+  relation_fv_rs_trust_ctrl    = each.value.fhs_trust_control_policy
+  relation_fv_rs_graph_def     = each.value.vzGraphCont
 }
 
 
@@ -278,8 +290,6 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   prio                     = each.value.qos_class
   type                     = each.value.epg_type
   relation_mgmt_rs_mgmt_bd = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
-  # relation_fv_rs_cons        = each.value.epg_type == "in_band" ? each.value.consumed_contracts : []
-  # relation_fv_rs_prov        = each.value.epg_type == "in_band" ? each.value.provided_contracts : []
   # relation_mgmt_rs_oo_b_prov = each.value.epg_type == "out_of_band" ? each.value.consumed_contracts : []
 }
 
@@ -303,7 +313,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     regexall("physical", each.value.domain_type)
     ) > 0 ? "uni/phys-${each.value.domain}" : length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? "uni/vmmp-${each.value.domain_vendor}/dom-${each.value.domain}" : ""
+  ) > 0 ? "uni/vmmp-${each.value.vmm_vendor}/dom-${each.value.domain}" : ""
   annotation = each.value.annotation
   binding_type = length(
     regexall("vmm", each.value.domain_type)
@@ -326,9 +336,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   epg_cos_pref = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "disabled" : "disabled"
-  instr_imedcy = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? "immediate" : "lazy"
+  instr_imedcy = each.value.deploy_immediacy == "on-demand" ? "lazy" : each.value.deploy_immediacy
   # lag_policy_name = length(
   #   regexall("vmm", each.value.domain_type)
   # ) > 0 ? each.value.enhanced_lag_policy : 0
@@ -347,15 +355,16 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   primary_encap = length(
     regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
     "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
-  ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
+  ) > 1 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
   primary_encap_inner = length(
     regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
     "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
-  ) > 0 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
-  res_imedcy = each.value.resolution_immediacy
-  # secondary_encap_inner = length(
-  #   regexall("vmm", each.value.domain_type)
-  # ) > 0 ? each.value.secondary_encap_inner : "unknown"
+  ) > 2 ? "vlan-${element(each.value.vlans, 2)}" : "unknown"
+  res_imedcy = each.value.resolution_immediacy == "on-demand" ? "lazy" : each.value.resolution_immediacy
+  secondary_encap_inner = length(
+    regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
+    "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
+  ) > 3 ? "vlan-${element(each.value.vlans, 3)}" : "unknown"
   switching_mode = "native"
   vmm_allow_promiscuous = length(
     regexall("vmm", each.value.domain_type)
