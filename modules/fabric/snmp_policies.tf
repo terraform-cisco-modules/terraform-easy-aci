@@ -65,7 +65,7 @@ variable "snmp_policies" {
       )))
       snmp_destinations = optional(list(object(
         {
-          community           = optional(number)
+          community_variable  = optional(number)
           host                = string
           management_epg      = optional(string)
           management_epg_type = optional(string)
@@ -390,11 +390,11 @@ resource "aci_rest_managed" "snmp_destinations" {
     host       = each.value.host
     port       = each.value.port
     secName = each.value.version != "v3" && length(regexall(
-      5, each.value.community)) > 0 ? var.snmp_community_5 : each.value.version != "v3" && length(regexall(
-      4, each.value.community)) > 0 ? var.snmp_community_4 : each.value.version != "v3" && length(regexall(
-      3, each.value.community)) > 0 ? var.snmp_community_3 : each.value.version != "v3" && length(regexall(
-      2, each.value.community)) > 0 ? var.snmp_community_2 : each.value.version != "v3" && length(regexall(
-    1, each.value.community)) > 0 ? var.snmp_community_1 : each.value.version == "v3" ? each.value.username : "unknown"
+      5, each.value.community_variable)) > 0 ? var.snmp_community_5 : each.value.version != "v3" && length(regexall(
+      4, each.value.community_variable)) > 0 ? var.snmp_community_4 : each.value.version != "v3" && length(regexall(
+      3, each.value.community_variable)) > 0 ? var.snmp_community_3 : each.value.version != "v3" && length(regexall(
+      2, each.value.community_variable)) > 0 ? var.snmp_community_2 : each.value.version != "v3" && length(regexall(
+    1, each.value.community_variable)) > 0 ? var.snmp_community_1 : each.value.version == "v3" ? each.value.username : "unknown"
     v3SecLvl = each.value.version == "v3" ? each.value.v3_security_level : "noauth"
     ver      = each.value.version
   }
@@ -448,14 +448,24 @@ resource "aci_rest_managed" "snmp_trap_source" {
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      [
+        each.value.include_types[0].audit_logs,
+        each.value.include_types[0].events,
+        each.value.include_types[0].faults,
+        each.value.include_types[0].session_logs
+      ]
       ) ? "all" : anytrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      [
+        each.value.include_types[0].audit_logs,
+        each.value.include_types[0].events,
+        each.value.include_types[0].faults,
+        each.value.include_types[0].session_logs
+      ]
       ) ? replace(trim(join(",", concat([
-        length(regexall(true, each.value.include_a)) > 0 ? "audit" : ""], [
-        length(regexall(true, each.value.include_e)) > 0 ? "events" : ""], [
-        length(regexall(true, each.value.include_f)) > 0 ? "faults" : ""], [
-        length(regexall(true, each.value.include_s)) > 0 ? "session" : ""]
+        length(regexall(true, each.value.include_types[0].audit_logs)) > 0 ? "audit" : ""], [
+        length(regexall(true, each.value.include_types[0].events)) > 0 ? "events" : ""], [
+        length(regexall(true, each.value.include_types[0].faults)) > 0 ? "faults" : ""], [
+        length(regexall(true, each.value.include_types[0].session_logs)) > 0 ? "session" : ""]
     )), ","), ",,", ",") : "none"
     name = each.key
   }

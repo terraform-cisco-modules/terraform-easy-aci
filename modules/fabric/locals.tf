@@ -603,18 +603,29 @@ locals {
       description            = v.description != null ? v.description : ""
       destinations           = v.destinations
       from_email             = v.from_email != null ? v.from_email : ""
-      include_a              = v.include_types != null ? lookup(v.include_types[0], "audit_logs", false) : false
-      include_e              = v.include_types != null ? lookup(v.include_types[0], "events", false) : false
-      include_f              = v.include_types != null ? lookup(v.include_types[0], "faults", true) : true
-      include_s              = v.include_types != null ? lookup(v.include_types[0], "session_logs", false) : false
-      phone_contact          = v.phone_contact != null ? v.phone_contact : ""
-      port_number            = lookup(v.smtp_server[0], "port_number", 25)
-      reply_to_email         = v.reply_to_email != null ? v.reply_to_email : ""
-      secure_smtp            = lookup(v.smtp_server[0], "secure_smtp", false)
-      site_id                = v.site_id != null ? v.site_id : ""
-      street_address         = v.street_address != null ? v.street_address : ""
-      smtp_server            = v.smtp_server
-      username               = lookup(v.smtp_server[0], "username", "")
+      include_types = v.include_types != null ? [
+        for s in v.include_types : {
+          audit_logs   = s.audit_logs != null ? s.audit_logs : false
+          events       = s.events != null ? s.events : false
+          faults       = s.faults != null ? s.faults : true
+          session_logs = s.session_logs != null ? s.session_logs : false
+        }
+        ] : [
+        {
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+        }
+      ]
+      phone_contact  = v.phone_contact != null ? v.phone_contact : ""
+      port_number    = lookup(v.smtp_server[0], "port_number", 25)
+      reply_to_email = v.reply_to_email != null ? v.reply_to_email : ""
+      secure_smtp    = lookup(v.smtp_server[0], "secure_smtp", false)
+      site_id        = v.site_id != null ? v.site_id : ""
+      street_address = v.street_address != null ? v.street_address : ""
+      smtp_server    = v.smtp_server
+      username       = lookup(v.smtp_server[0], "username", "")
     }
   }
 
@@ -655,14 +666,25 @@ locals {
 
   snmp_policies = {
     for k, v in var.snmp_policies : k => {
-      admin_state        = v.admin_state != null ? v.admin_state : "enabled"
-      annotation         = v.annotation != null ? v.annotation : ""
-      contact            = v.contact != null ? v.contact : ""
-      description        = v.description != null ? v.description : ""
-      include_a          = v.include_types != null ? lookup(v.include_types[0], "audit_logs", false) : false
-      include_e          = v.include_types != null ? lookup(v.include_types[0], "events", false) : false
-      include_f          = v.include_types != null ? lookup(v.include_types[0], "faults", true) : true
-      include_s          = v.include_types != null ? lookup(v.include_types[0], "session_logs", false) : false
+      admin_state = v.admin_state != null ? v.admin_state : "enabled"
+      annotation  = v.annotation != null ? v.annotation : ""
+      contact     = v.contact != null ? v.contact : ""
+      description = v.description != null ? v.description : ""
+      include_types = v.include_types != null ? [
+        for s in v.include_types : {
+          audit_logs   = s.audit_logs != null ? s.audit_logs : false
+          events       = s.events != null ? s.events : false
+          faults       = s.faults != null ? s.faults : true
+          session_logs = s.session_logs != null ? s.session_logs : false
+        }
+        ] : [
+        {
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+        }
+      ]
       location           = v.location != null ? v.location : ""
       snmp_client_groups = v.snmp_client_groups
       snmp_communities   = v.snmp_communities != null ? v.snmp_communities : []
@@ -730,7 +752,7 @@ locals {
   snmp_trap_destinations_loop = flatten([
     for key, value in local.snmp_policies : [
       for k, v in value.snmp_destinations : {
-        community           = v.community != null ? v.community : 0
+        community_variable  = v.community_variable != null ? v.community_variable : 0
         host                = v.host
         management_epg      = v.management_epg != null ? v.management_epg : "default"
         management_epg_type = v.management_epg_type != null ? v.management_epg_type : "oob"
@@ -751,16 +773,27 @@ locals {
 
   syslog = {
     for k, v in var.syslog : k => {
-      admin_state                    = v.admin_state != null ? v.admin_state : "enabled"
-      annotation                     = v.annotation != null ? v.annotation : ""
-      description                    = v.description != null ? v.description : ""
-      console_admin_state            = v.console_destination != null ? lookup(v.console_destination[0], "admin_state", "enabled") : "enabled"
-      console_severity               = v.console_destination != null ? lookup(v.console_destination[0], "severity", "critical") : "critical"
-      format                         = v.format != null ? v.format : "aci"
-      include_a                      = v.include_types != null ? lookup(v.include_types[0], "audit_logs", false) : false
-      include_e                      = v.include_types != null ? lookup(v.include_types[0], "events", false) : false
-      include_f                      = v.include_types != null ? lookup(v.include_types[0], "faults", false) : false
-      include_s                      = v.include_types != null ? lookup(v.include_types[0], "session_logs", false) : false
+      admin_state         = v.admin_state != null ? v.admin_state : "enabled"
+      annotation          = v.annotation != null ? v.annotation : ""
+      description         = v.description != null ? v.description : ""
+      console_admin_state = v.console_destination != null ? lookup(v.console_destination[0], "admin_state", "enabled") : "enabled"
+      console_severity    = v.console_destination != null ? lookup(v.console_destination[0], "severity", "critical") : "critical"
+      format              = v.format != null ? v.format : "aci"
+      include_types = v.include_types != null ? [
+        for s in v.include_types : {
+          audit_logs   = s.audit_logs != null ? s.audit_logs : false
+          events       = s.events != null ? s.events : false
+          faults       = s.faults != null ? s.faults : true
+          session_logs = s.session_logs != null ? s.session_logs : false
+        }
+        ] : [
+        {
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+        }
+      ]
       local_admin_state              = v.local_file_destination != null ? lookup(v.local_file_destination[0], "admin_state", "enabled") : "enabled"
       local_severity                 = v.local_file_destination != null ? lookup(v.local_file_destination[0], "severity", "warnings") : "warnings"
       min_severity                   = v.min_severity != null ? v.min_severity : "warnings"

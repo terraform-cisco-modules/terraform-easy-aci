@@ -195,14 +195,24 @@ resource "aci_rest_managed" "syslog_sources" {
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      [
+        each.value.include_types[0].audit_logs,
+        each.value.include_types[0].events,
+        each.value.include_types[0].faults,
+        each.value.include_types[0].session_logs
+      ]
       ) ? "all" : anytrue(
-      [each.value.include_a, each.value.include_e, each.value.include_f, each.value.include_s]
+      [
+        each.value.include_types[0].audit_logs,
+        each.value.include_types[0].events,
+        each.value.include_types[0].faults,
+        each.value.include_types[0].session_logs
+      ]
       ) ? replace(trim(join(",", concat([
-        length(regexall(true, each.value.include_a)) > 0 ? "audit" : ""], [
-        length(regexall(true, each.value.include_e)) > 0 ? "events" : ""], [
-        length(regexall(true, each.value.include_f)) > 0 ? "faults" : ""], [
-        length(regexall(true, each.value.include_s)) > 0 ? "session" : ""]
+        length(regexall(true, each.value.include_types[0].audit_logs)) > 0 ? "audit" : ""], [
+        length(regexall(true, each.value.include_types[0].events)) > 0 ? "events" : ""], [
+        length(regexall(true, each.value.include_types[0].faults)) > 0 ? "faults" : ""], [
+        length(regexall(true, each.value.include_types[0].session_logs)) > 0 ? "session" : ""]
     )), ","), ",,", ",") : "none"
     minSev = each.value.min_severity
     name   = each.key

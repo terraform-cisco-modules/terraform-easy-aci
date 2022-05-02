@@ -4,34 +4,48 @@ locals {
   # Authentication Variables
   #__________________________________________________________
 
-  authentication_properties = {
-    for k, v in var.authentication : k => {
-      annotation                    = v.annotation != null ? v.annotation : ""
-      icmp_reachable_providers_only = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "icmp_reachable_providers_only", true) : true
-      retries                       = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "retries", 1) : 1
-      timeout                       = v.icmp_reachability != null ? lookup(v.icmp_reachability[0], "timeout", 5) : 5
-      remote_user_login_policy      = v.remote_user_login_policy != null ? v.remote_user_login_policy : "no-login"
-    }
-  }
+  authentication_properties_flatten = flatten([
+    for k, v in var.authentication : [
+      for s in v.icmp_reachability : {
+        annotation = v.annotation != null ? v.annotation : ""
+        key        = k
+        retries    = s.retries != null ? s.retries : 1
+        timeout    = s.timeout != null ? s.timeout : 5
+        remote_user_login_policy = length(compact([v.remote_user_login_policy])
+        ) > 0 ? v.remote_user_login_policy : "no-login"
+        use_icmp_reachable_providers_only = length(compact([s.use_icmp_reachable_providers_only])
+        ) > 0 ? s.use_icmp_reachable_providers_only : true
+      }
+    ]
+  ])
+  authentication_properties = { for k, v in local.authentication_properties_flatten : "${v.key}" => v }
 
-  console_authentication = {
-    for k, v in var.authentication : k => {
-      annotation     = v.annotation != null ? v.annotation : ""
-      provider_group = v.console_authentication != null ? lookup(v.console_authentication[0], "provider_group", "") : ""
-      realm          = v.console_authentication != null ? lookup(v.console_authentication[0], "realm", "local") : "local"
-      realm_sub_type = v.console_authentication != null ? lookup(v.console_authentication[0], "realm_sub_type", "default") : "default"
-    }
-  }
+  console_authentication_flatten = flatten([
+    for k, v in var.authentication : [
+      for s in v.console_authentication : {
+        annotation     = v.annotation != null ? v.annotation : ""
+        key            = k
+        annotation     = v.annotation != null ? v.annotation : ""
+        provider_group = s.provider_group != null ? s.provider_group : ""
+        realm          = s.realm != null ? s.realm : "local"
+      }
+    ]
+  ])
+  console_authentication = { for k, v in local.console_authentication_flatten : "${v.key}" => v }
 
-  default_authentication = {
-    for k, v in var.authentication : k => {
-      annotation                   = v.annotation != null ? v.annotation : ""
-      fallback_domain_avialability = v.default_authentication != null ? lookup(v.default_authentication[0], "fallback_domain_avialability", false) : false
-      provider_group               = v.default_authentication != null ? lookup(v.default_authentication[0], "provider_group", "") : ""
-      realm                        = v.default_authentication != null ? lookup(v.default_authentication[0], "realm", "local") : "local"
-      realm_sub_type               = v.default_authentication != null ? lookup(v.default_authentication[0], "realm_sub_type", "default") : "default"
-    }
-  }
+  default_authentication_flatten = flatten([
+    for k, v in var.authentication : [
+      for s in v.default_authentication : {
+        annotation                   = v.annotation != null ? v.annotation : ""
+        key                          = k
+        annotation                   = v.annotation != null ? v.annotation : ""
+        fallback_domain_avialability = s.fallback_domain_avialability != null ? s.fallback_domain_avialability : false
+        provider_group               = s.provider_group != null ? s.provider_group : ""
+        realm                        = s.realm != null ? s.realm : "local"
+      }
+    ]
+  ])
+  default_authentication = { for k, v in local.default_authentication_flatten : "${v.key}" => v }
 
 
   #__________________________________________________________
@@ -198,10 +212,21 @@ locals {
 
   tacacs = {
     for k, v in var.tacacs : k => {
-      accounting_a           = v.accounting_include != null ? lookup(v.accounting_include[0], "audit_logs", true) : true
-      accounting_e           = v.accounting_include != null ? lookup(v.accounting_include[0], "events", false) : false
-      accounting_f           = v.accounting_include != null ? lookup(v.accounting_include[0], "faults", false) : false
-      accounting_s           = v.accounting_include != null ? lookup(v.accounting_include[0], "session_logs", true) : true
+      include_types = v.include_types != null ? [
+        for s in v.include_types : {
+          audit_logs   = s.audit_logs != null ? s.audit_logs : true
+          events       = s.events != null ? s.events : false
+          faults       = s.faults != null ? s.faults : false
+          session_logs = s.session_logs != null ? s.session_logs : true
+        }
+        ] : [
+        {
+          audit_logs   = true
+          events       = false
+          faults       = false
+          session_logs = true
+        }
+      ]
       annotation             = v.annotation != null ? v.annotation : ""
       authorization_protocol = v.authorization_protocol != null ? v.authorization_protocol : "pap"
       hosts                  = v.hosts
