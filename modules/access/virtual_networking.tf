@@ -19,7 +19,7 @@ variable "virtual_networking" {
           port                   = 0
           sequence_number        = 0
           stats_collection       = "disabled"
-          switch_mode            = "vm"
+          switch_scope           = "vm"
           trigger_inventory_sync = "untriggered"
           vxlan_pool             = ""
         }
@@ -45,8 +45,8 @@ variable "virtual_networking" {
           enforcement                     = "hw"
           name_alias                      = ""
           preferred_encapsulation         = "unspecified"
-          switch_type                     = "default"
-          switch_vendor                   = "VMware"
+          switch_mode                     = "default"
+          switch_provider                 = "VMware"
           uplink_names                    = []
           vlan_pool                       = ""
         }
@@ -106,7 +106,7 @@ variable "virtual_networking" {
     - stats_collection: (Optional) - The statistics mode. Allowed values are:
       * disabled
       * enabled
-    - switch_mode: (Optional) - The VMM control policy scope. Allowed values are:
+    - switch_scope: (Optional) - The VMM control policy scope. Allowed values are:
       * MicrosoftSCVMM: SCVMM
       * cloudfoundry: Cloud Foundry
       * iaas: vShield
@@ -141,7 +141,7 @@ variable "virtual_networking" {
     - enforcement: (Optional) - The switching enforcement preference. This determines whether switches can be done within the virtual switch (Local Switching) or whether all switched traffic must go through the fabric (No Local Switching). Allowed values are "hw", "sw" and "unknown". Default is "hw".
     - endpoint_inventory_type: (Optional) - Determines which end point inventory type to use for object VMM domain. Allowed values are "none" and "on-link". Default is "on-link".
     - endpoint_retention_time: (Optional) - End point retention time for object vmm domain. Allowed value range is "0" - "600". Default value is "0".
-    - switch_type: (Optional) - The switch to be used for the domain profile. Allowed values are:
+    - switch_mode: (Optional) - The switch mode for the vmm domain profile. Allowed values are:
       * cf
       * default
       * k8s
@@ -151,6 +151,14 @@ variable "virtual_networking" {
       * rhev
       * openshift
       * unknown
+    - switch_provider: (Optional) - The switch to be used for the vmm domain profile. Allowed values are:
+      * CloudFoundry
+      * Kubernetes
+      * Microsoft
+      * OpenShift
+      * OpenStack
+      * Redhat
+      * VMware
     - name_alias: (Optional) - Name alias for object VMM domain.
     - preferred_encapsulation: (Optional) - The preferred encapsulation mode for object VMM domain. Allowed values are "unspecified", "vlan" and "vxlan". Default is "unspecified".
     - vlan_pool: (Optional) - Relation to class fvnsVlanInstP. Cardinality - N_TO_ONE. Type - String.
@@ -209,7 +217,7 @@ variable "virtual_networking" {
           port                   = optional(number)
           sequence_number        = optional(number)
           stats_collection       = optional(string)
-          switch_mode            = optional(string)
+          switch_scope           = optional(string)
           trigger_inventory_sync = optional(string)
           vxlan_pool             = optional(string)
         }
@@ -235,8 +243,8 @@ variable "virtual_networking" {
           enforcement                     = optional(string)
           name_alias                      = optional(string)
           preferred_encapsulation         = optional(string)
-          switch_type                     = optional(string)
-          switch_vendor                   = optional(string)
+          switch_mode                     = optional(string)
+          switch_provider                 = optional(string)
           uplink_names                    = optional(list(string))
           vlan_pool                       = string
         }
@@ -334,11 +342,11 @@ resource "aci_vmm_domain" "domains" {
   enf_pref            = each.value.enforcement
   ep_inventory_type   = each.value.endpoint_inventory_type
   ep_ret_time         = each.value.endpoint_retention_time
-  mode                = each.value.switch_type
+  mode                = each.value.switch_mode
   name                = each.key
   name_alias          = each.value.name_alias
   pref_encap_mode     = each.value.preferred_encapsulation
-  provider_profile_dn = "uni/vmmp-${each.value.switch_vendor}"
+  provider_profile_dn = "uni/vmmp-${each.value.switch_provider}"
   relation_infra_rs_vlan_ns = length(compact([each.value.vlan_pool])
   ) > 0 ? aci_vlan_pool.vlan_pools[each.value.vlan_pool].id : ""
 }
@@ -419,10 +427,10 @@ resource "aci_vmm_controller" "controllers" {
   dvs_version         = each.value.dvs_version
   host_or_ip          = each.value.hostname
   inventory_trig_st   = each.value.trigger_inventory_sync
-  mode                = each.value.switch_type
+  mode                = each.value.switch_mode
   port                = each.value.port
   root_cont_name      = each.value.datacenter
-  scope               = each.value.switch_mode
+  scope               = each.value.switch_scope
   seq_num             = each.value.sequence_number
   stats_mode          = each.value.stats_collection
   vxlan_depl_pref     = each.value.switch_mode == "nsx" ? "nsx" : "vxlan"

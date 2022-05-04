@@ -705,8 +705,8 @@ locals {
         enforcement                     = v.enforcement != null ? v.enforcement : "hw"
         name_alias                      = v.name_alias != null ? v.name_alias : ""
         preferred_encapsulation         = v.preferred_encapsulation != null ? v.preferred_encapsulation : "unspecified"
-        switch_vendor                   = v.switch_vendor != null ? v.switch_vendor : "VMware"
-        switch_type                     = v.switch_type != null ? v.switch_type : "default"
+        switch_provider                 = v.switch_provider != null ? v.switch_provider : "VMware"
+        switch_mode                     = v.switch_mode != null ? v.switch_mode : "default"
         uplink_names                    = length(compact(v.uplink_names)) > 0 ? v.uplink_names : ["uplink1", "uplink2"]
         vlan_pool                       = v.vlan_pool
       }
@@ -744,8 +744,8 @@ locals {
         port                   = v.port != null ? v.port : 0
         sequence_number        = v.sequence_number != null ? v.sequence_number : 0
         stats_collection       = v.stats_collection != null ? v.stats_collection : "disabled"
-        switch_mode            = v.switch_mode != null ? v.switch_mode : "vm"
-        switch_type            = local.vmm_domains["${key}"].switch_type
+        switch_mode            = local.vmm_domains["${key}"].switch_mode
+        switch_scope           = v.switch_scope != null ? v.switch_scope : "vm"
         trigger_inventory_sync = v.trigger_inventory_sync != null ? v.trigger_inventory_sync : "untriggered"
         vxlan_pool             = v.vxlan_pool != null ? v.vxlan_pool : ""
       }
