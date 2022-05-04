@@ -1,7 +1,7 @@
 # Global Variables
-annotation = "easy-aci:0.9.5"
-apicUrl    = "https://64.100.14.15"
-apicUser   = "admin"
+annotation   = "easy-aci:0.9.5"
+apicHostname = "64.100.14.15"
+apicUser     = "admin"
 
 # BGP
 autonomous_system_number = 65501

@@ -1,9 +1,9 @@
 # Global Variables
-annotation = "easy-aci:0.9.5"
-apicUrl    = "https://64.100.14.15"
-apicUser   = "admin"
-ndoUrl     = "https://64.100.14.14"
-ndoUser    = "admin"
+annotation   = "easy-aci:0.9.5"
+apicHostname = "64.100.14.15"
+apicUser     = "admin"
+ndoHostname  = "64.100.14.14"
+ndoUser      = "admin"
 
 # Nexus Dashboard Sites/Users
 sites = ["Asgard", "Wakanda"]

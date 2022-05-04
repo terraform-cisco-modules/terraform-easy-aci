@@ -55,21 +55,22 @@ variable "virtual_networking" {
         {
           annotation           = ""
           cdp_interface_policy = ""
+          enhanced_lag_policy  = []
+          /* **Example
           enhanced_lag_policy = [
             {
               load_balancing_mode = "src-dst-ip"
               mode                = "active"
               number_of_links     = 2
             }
-          ]
+          ] */
           firewall_policy           = "default"
           lldp_interface_policy     = ""
           mtu_policy                = "default"
-          name                      = "Default Name is the Top-Level Map Name"
           name_alias                = ""
           port_channel_policy       = ""
           vmm_netflow_export_policy = []
-          /* Example
+          /* **Example
           vmm_netflow_export_policy = [
             {
               active_flow_timeout = 60
@@ -77,8 +78,7 @@ variable "virtual_networking" {
               netflow_policy      = "**REQUIRED**"
               sample_rate         = 0
             }
-          ]
-          */
+          ] */
         }
       ]
     }
@@ -321,9 +321,9 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vmm_domain" "domains" {
-  # depends_on = [
-  #   aci_vlan_pool.vlan_pools
-  # ]
+  depends_on = [
+    aci_vlan_pool.vlan_pools
+  ]
   for_each            = local.vmm_domains
   access_mode         = each.value.access_mode
   annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -340,7 +340,7 @@ resource "aci_vmm_domain" "domains" {
   pref_encap_mode     = each.value.preferred_encapsulation
   provider_profile_dn = "uni/vmmp-${each.value.switch_vendor}"
   relation_infra_rs_vlan_ns = length(compact([each.value.vlan_pool])
-  ) > 0 ? "uni/infra/vlanns-[${each.value.vlan_pool}]-dynamic" : ""
+  ) > 0 ? aci_vlan_pool.vlan_pools[each.value.vlan_pool].id : ""
 }
 
 resource "aci_rest_managed" "vmm_domains_uplinks" {
