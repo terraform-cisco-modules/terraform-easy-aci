@@ -8,12 +8,12 @@ variable "authentication" {
         use_icmp_reachable_providers_only = true
       }]
       console_authentication = [{
-        provider_group = ""
-        realm          = "local"
+        login_domain = ""
+        realm        = "local"
       }]
       default_authentication = [{
         fallback_domain_avialability = false
-        provider_group               = ""
+        login_domain                 = ""
         realm                        = "local"
       }]
       remote_user_login_policy = "no-login"
@@ -34,14 +34,14 @@ variable "authentication" {
       )))
       console_authentication = optional(list(object(
         {
-          provider_group = optional(string)
-          realm          = optional(string)
+          login_domain = optional(string)
+          realm        = optional(string)
         }
       )))
       default_authentication = optional(list(object(
         {
           fallback_domain_avialability = optional(bool)
-          provider_group               = optional(string)
+          login_domain                 = optional(string)
           realm                        = optional(string)
         }
       )))
@@ -62,7 +62,7 @@ resource "aci_authentication_properties" "authentication_properties" {
 resource "aci_console_authentication" "console_authentication" {
   for_each       = local.console_authentication
   annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
-  provider_group = each.value.provider_group
+  provider_group = each.value.login_domain
   realm = length(regexall(
     "duo_proxy_ldap", each.value.realm)) > 0 ? "ldap" : length(regexall(
   "duo_proxy_radius", each.value.realm)) > 0 ? "radius" : each.value.realm
@@ -73,7 +73,7 @@ resource "aci_default_authentication" "default_authentication" {
   for_each       = local.default_authentication
   annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   fallback_check = each.value.fallback_domain_avialability
-  provider_group = each.value.provider_group
+  provider_group = each.value.login_domain
   realm = length(regexall(
     "duo_proxy_ldap", each.value.realm)) > 0 ? "ldap" : length(regexall(
   "duo_proxy_radius", each.value.realm)) > 0 ? "radius" : each.value.realm

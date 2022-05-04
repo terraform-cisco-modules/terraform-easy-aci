@@ -2,14 +2,14 @@ terraform {
   experiments = [module_variable_optional_attrs]
 }
 
-variable "certName" {
+variable "annotation" {
   default     = ""
-  description = "Cisco ACI Certificate Name for SSL Based Authentication"
-  sensitive   = true
+  description = "workspace tag value."
   type        = string
 }
 
 variable "apicHostname" {
+  default     = "apic.example.com"
   description = "Cisco APIC Hostname"
   type        = string
 }
@@ -22,7 +22,7 @@ variable "apicPass" {
 }
 
 variable "apicUser" {
-  default     = ""
+  default     = "admin"
   description = "Username for User based Authentication."
   type        = string
 }
@@ -30,6 +30,13 @@ variable "apicUser" {
 variable "apic_version" {
   default     = "5.2(1g)"
   description = "The Version of ACI Running in the Environment."
+  type        = string
+}
+
+variable "certName" {
+  default     = ""
+  description = "Cisco ACI Certificate Name for SSL Based Authentication"
+  sensitive   = true
   type        = string
 }
 
@@ -41,7 +48,7 @@ variable "ndoDomain" {
 }
 
 variable "ndoHostname" {
-  default     = "https://nxo.example.com"
+  default     = "nxo.example.com"
   description = "Cisco Nexus Dashboard Orchestrator Hostname"
   type        = string
 }
@@ -63,11 +70,5 @@ variable "privateKey" {
   default     = ""
   description = "Cisco ACI Private Key for SSL Based Authentication."
   sensitive   = true
-  type        = string
-}
-
-variable "annotation" {
-  default     = ""
-  description = "workspace tag value."
   type        = string
 }

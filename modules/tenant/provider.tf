@@ -7,7 +7,7 @@ terraform {
     }
     mso = {
       source  = "CiscoDevNet/mso"
-      version = ">= 0.4.1"
+      version = ">= 0.6.0"
     }
   }
 }

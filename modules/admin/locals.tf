@@ -23,11 +23,11 @@ locals {
   console_authentication_flatten = flatten([
     for k, v in var.authentication : [
       for s in v.console_authentication : {
-        annotation     = v.annotation != null ? v.annotation : ""
-        key            = k
-        annotation     = v.annotation != null ? v.annotation : ""
-        provider_group = s.provider_group != null ? s.provider_group : ""
-        realm          = s.realm != null ? s.realm : "local"
+        annotation   = v.annotation != null ? v.annotation : ""
+        key          = k
+        annotation   = v.annotation != null ? v.annotation : ""
+        login_domain = s.login_domain != null ? s.login_domain : ""
+        realm        = s.realm != null ? s.realm : "local"
       }
     ]
   ])
@@ -40,7 +40,7 @@ locals {
         key                          = k
         annotation                   = v.annotation != null ? v.annotation : ""
         fallback_domain_avialability = s.fallback_domain_avialability != null ? s.fallback_domain_avialability : false
-        provider_group               = s.provider_group != null ? s.provider_group : ""
+        login_domain                 = s.login_domain != null ? s.login_domain : ""
         realm                        = s.realm != null ? s.realm : "local"
       }
     ]

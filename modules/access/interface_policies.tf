@@ -1,6 +1,10 @@
 /*_____________________________________________________________________________________________________________________
 
-CDP Interface Policy Variables
+API Information:
+ - Class: "cdpIfPol"
+ - Distinguished Name: "uni/infra/cdpIfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
 _______________________________________________________________________________________________________________________
 */
 variable "cdp_interface_policies" {
@@ -30,15 +34,6 @@ variable "cdp_interface_policies" {
 }
 
 
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "cdpIfPol"
- - Distinguished Name: "uni/infra/cdpIfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
-_______________________________________________________________________________________________________________________
-*/
 resource "aci_cdp_interface_policy" "cdp_interface_policies" {
   for_each    = local.cdp_interface_policies
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation

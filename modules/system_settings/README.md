@@ -57,6 +57,7 @@ This module will create the following Access Policies in an APIC Controller:
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.0 |
 | <a name="requirement_aci"></a> [aci](#requirement\_aci) | >= 2.1.0 |
+| <a name="requirement_mso"></a> [mso](#requirement\_mso) | >= 0.6.0 |
 
 ## Providers
 
@@ -91,9 +92,9 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_aes_passphrase"></a> [aes\_passphrase](#input\_aes\_passphrase) | Global AES Passphrase. | `string` | n/a | yes |
 | <a name="input_annotation"></a> [annotation](#input\_annotation) | workspace tag value. | `string` | `""` | no |
-| <a name="input_apicHostname"></a> [apicHostname](#input\_apicHostname) | Cisco APIC Hostname | `string` | n/a | yes |
+| <a name="input_apicHostname"></a> [apicHostname](#input\_apicHostname) | Cisco APIC Hostname | `string` | `"apic.example.com"` | no |
 | <a name="input_apicPass"></a> [apicPass](#input\_apicPass) | Password for User based Authentication. | `string` | `""` | no |
-| <a name="input_apicUser"></a> [apicUser](#input\_apicUser) | Username for User based Authentication. | `string` | `""` | no |
+| <a name="input_apicUser"></a> [apicUser](#input\_apicUser) | Username for User based Authentication. | `string` | `"admin"` | no |
 | <a name="input_apic_connectivity_preference"></a> [apic\_connectivity\_preference](#input\_apic\_connectivity\_preference) | * The preferred management connectivity preference. Options are:<br>  - inband: Executes in-band management connectivity between the APIC server to external devices through leaf switches on the ACI fabric.<br>  - ooband: Executes out-of-band management connectivity between the APIC server to external devices through connections external to the ACI fabric. | `string` | `"inband"` | no |
 | <a name="input_apic_version"></a> [apic\_version](#input\_apic\_version) | The Version of ACI Running in the Environment. | `string` | `"5.2(1g)"` | no |
 | <a name="input_autonomous_system_number"></a> [autonomous\_system\_number](#input\_autonomous\_system\_number) | BGP Autonomous System Number. | `number` | `65000` | no |
@@ -105,7 +106,7 @@ No modules.
 | <a name="input_global_aes_encryption_settings"></a> [global\_aes\_encryption\_settings](#input\_global\_aes\_encryption\_settings) | Key - This should be default.<br>* clear\_passphrase: <br>* enable\_encryption: <br>* passphrase\_key\_derivation\_version: | <pre>map(object(<br>    {<br>      clear_passphrase                  = optional(bool)<br>      enable_encryption                 = optional(bool)<br>      passphrase_key_derivation_version = optional(string)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "clear_passphrase": false,<br>    "enable_encryption": true,<br>    "passphrase_key_derivation_version": "v1"<br>  }<br>}</pre> | no |
 | <a name="input_isis_policy"></a> [isis\_policy](#input\_isis\_policy) | n/a | <pre>map(object(<br>    {<br>      annotation                                      = optional(string)<br>      isis_mtu                                        = optional(number)<br>      isis_metric_for_redistributed_routes            = optional(number)<br>      lsp_fast_flood_mode                             = optional(string)<br>      lsp_generation_initial_wait_interval            = optional(number)<br>      lsp_generation_maximum_wait_interval            = optional(number)<br>      lsp_generation_second_wait_interval             = optional(number)<br>      sfp_computation_frequency_initial_wait_interval = optional(number)<br>      sfp_computation_frequency_maximum_wait_interval = optional(number)<br>      sfp_computation_frequency_second_wait_interval  = optional(number)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "annotation": "",<br>    "isis_metric_for_redistributed_routes": 63,<br>    "isis_mtu": 1492,<br>    "lsp_fast_flood_mode": "enabled",<br>    "lsp_generation_initial_wait_interval": 50,<br>    "lsp_generation_maximum_wait_interval": 8000,<br>    "lsp_generation_second_wait_interval": 50,<br>    "sfp_computation_frequency_initial_wait_interval": 50,<br>    "sfp_computation_frequency_maximum_wait_interval": 50,<br>    "sfp_computation_frequency_second_wait_interval": 50<br>  }<br>}</pre> | no |
 | <a name="input_ndoDomain"></a> [ndoDomain](#input\_ndoDomain) | Authentication Domain for Nexus Dashboard Orchestrator Authentication. | `string` | `"local"` | no |
-| <a name="input_ndoHostname"></a> [ndoHostname](#input\_ndoHostname) | Cisco Nexus Dashboard Orchestrator Hostname | `string` | `"https://nxo.example.com"` | no |
+| <a name="input_ndoHostname"></a> [ndoHostname](#input\_ndoHostname) | Cisco Nexus Dashboard Orchestrator Hostname | `string` | `"nxo.example.com"` | no |
 | <a name="input_ndoPass"></a> [ndoPass](#input\_ndoPass) | Password for Nexus Dashboard Orchestrator Authentication. | `string` | `""` | no |
 | <a name="input_ndoUser"></a> [ndoUser](#input\_ndoUser) | Username for Nexus Dashboard Orchestrator Authentication. | `string` | `"admin"` | no |
 | <a name="input_port_tracking"></a> [port\_tracking](#input\_port\_tracking) | n/a | <pre>map(object(<br>    {<br>      annotation             = optional(string)<br>      delay_restore_timer    = optional(number)<br>      include_apic_ports     = optional(bool)<br>      number_of_active_ports = optional(number)<br>      port_tracking_state    = optional(string)<br>    }<br>  ))</pre> | <pre>{<br>  "default": {<br>    "annotation": "",<br>    "delay_restore_timer": 120,<br>    "include_apic_ports": false,<br>    "number_of_active_ports": 0,<br>    "port_tracking_state": "on"<br>  }<br>}</pre> | no |

@@ -20,38 +20,6 @@ locals {
     }
   }
 
-  vmm_domains = {
-    for k, v in var.vmm_domains : k => {
-      access_mode                    = v.access_mode != null ? v.access_mode : "read-write"
-      annotation                     = v.annotation != null ? v.annotation : ""
-      arp_learning                   = v.arp_learning != null ? v.arp_learning : "disabled"
-      cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
-      configure_infra_port_groups    = v.configure_infra_port_groups != null ? v.configure_infra_port_groups : ""
-      control                        = v.control != null ? v.control : "epDpVerify"
-      delimiter                      = v.delimiter != null ? v.delimiter : ""
-      enable_tag_collection          = v.enable_tag_collection != null ? v.enable_tag_collection : false
-      encapsulation                  = v.encapsulation != null ? v.encapsulation : "vlan"
-      endpoint_inventory_type        = v.endpoint_inventory_type != null ? v.endpoint_inventory_type : "on-link"
-      endpoint_retention_time        = v.endpoint_retention_time != null ? v.endpoint_retention_time : 0
-      enforcement                    = v.enforcement != null ? v.enforcement : "hw"
-      enhanced_lag_policy            = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
-      firewall_policy                = v.firewall_policy != null ? v.firewall_policy : ""
-      host_availability_monitor      = v.host_availability_monitor != null ? v.host_availability_monitor : false
-      lacp_interface_policy          = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
-      lldp_interface_policy          = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
-      multicast_address              = v.multicast_address != null ? v.multicast_address : ""
-      multicast_pool                 = v.multicast_pool != null ? v.multicast_pool : ""
-      mtu_policy                     = v.mtu_policy != null ? v.mtu_policy : "default"
-      name_alias                     = v.name_alias != null ? v.name_alias : ""
-      preferred_encapsulation        = v.preferred_encapsulation != null ? v.preferred_encapsulation : "unspecified"
-      provider_type                  = v.provider_type != null ? v.provider_type : "VMware"
-      spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
-      virtual_switch_type            = v.virtual_switch_type != null ? v.virtual_switch_type : "default"
-      vlan_pool                      = v.vlan_pool != null ? v.vlan_pool : ""
-    }
-  }
-
-
   #__________________________________________________________
   #
   # Firmware Management Variables
@@ -718,71 +686,132 @@ locals {
 
   #__________________________________________________________
   #
-  # Virtual Networking Managed Variables
+  # Virtual Networking Variables
   #__________________________________________________________
 
-  vmm_credential_loop_1 = flatten([
+  vmm_domains_loop = flatten([
     for key, value in var.virtual_networking : [
-      for k, v in value.vmm_credentials : {
-        vmm_domain  = value.vmm_domain
-        key1        = key
-        key2        = k
+      for k, v in value.domain : {
+        access_mode                     = v.access_mode != null ? v.access_mode : "read-write"
+        annotation                      = v.annotation != null ? v.annotation : ""
+        control_knob                    = v.control_knob != null ? v.control_knob : "epDpVerify"
+        delimiter                       = v.delimiter != null ? v.delimiter : "|"
+        domain                          = key
+        enable_tag_collection           = v.enable_tag_collection != null ? v.enable_tag_collection : false
+        enable_vm_folder_data_retrieval = v.enable_vm_folder_data_retrieval != null ? v.enable_vm_folder_data_retrieval : false
+        encapsulation                   = v.encapsulation != null ? v.encapsulation : "vlan"
+        endpoint_inventory_type         = v.endpoint_inventory_type != null ? v.endpoint_inventory_type : "on-link"
+        endpoint_retention_time         = v.endpoint_retention_time != null ? v.endpoint_retention_time : 0
+        enforcement                     = v.enforcement != null ? v.enforcement : "hw"
+        name_alias                      = v.name_alias != null ? v.name_alias : ""
+        preferred_encapsulation         = v.preferred_encapsulation != null ? v.preferred_encapsulation : "unspecified"
+        switch_vendor                   = v.switch_vendor != null ? v.switch_vendor : "VMware"
+        switch_type                     = v.switch_type != null ? v.switch_type : "default"
+        uplink_names                    = length(compact(v.uplink_names)) > 0 ? v.uplink_names : ["uplink1", "uplink2"]
+        vlan_pool                       = v.vlan_pool
+      }
+    ]
+  ])
+  vmm_domains = { for k, v in local.vmm_domains_loop : "${v.domain}" => v }
+
+
+
+  vmm_credentials_loop = flatten([
+    for key, value in var.virtual_networking : [
+      for k, v in value.credentials : {
+        annotation  = local.vmm_domains["${key}"].annotation
+        domain      = key
         description = v.description != null ? v.description : ""
         password    = v.password != null ? v.password : 1
-        username    = v.username != null ? v.username : "**REQUIRED**"
+        username    = v.username
       }
     ]
   ])
 
-  vmm_credentials = { for k, v in local.vmm_credential_loop_1 : "${v.key1}_${v.key2}" => v }
+  vmm_credentials = { for k, v in local.vmm_credentials_loop : "${v.domain}" => v }
 
-  vmm_controller_loop_1 = flatten([
+  vmm_controller_loop = flatten([
     for key, value in var.virtual_networking : [
-      for k, v in value.vmm_controller : {
+      for k, v in value.controllers : {
         annotation             = v.annotation != null ? v.annotation : ""
-        datacenter             = v.datacenter != null ? v.datacenter : "**REQUIRED**"
+        datacenter             = v.datacenter
+        domain                 = key
         dvs_version            = v.dvs_version != null ? v.dvs_version : "unmanaged"
-        hostname               = v.hostname != null ? v.hostname : "**REQUIRED**"
-        key1                   = key
-        key2                   = k
-        management_epg         = v.management_epg != null ? v.management_epg : ""
+        hostname               = v.hostname
+        management_epg         = v.management_epg != null ? v.management_epg : "default"
+        management_epg_type    = v.management_epg_type != null ? v.management_epg_type : "oob"
         monitoring_policy      = v.monitoring_policy != null ? v.monitoring_policy : "default"
-        policy_scope           = v.policy_scope != null ? v.policy_scope : "vm"
         port                   = v.port != null ? v.port : 0
         sequence_number        = v.sequence_number != null ? v.sequence_number : 0
         stats_collection       = v.stats_collection != null ? v.stats_collection : "disabled"
+        switch_mode            = v.switch_mode != null ? v.switch_mode : "vm"
+        switch_type            = local.vmm_domains["${key}"].switch_type
         trigger_inventory_sync = v.trigger_inventory_sync != null ? v.trigger_inventory_sync : "untriggered"
-        virtual_switch_type    = v.virtual_switch_type != null ? v.virtual_switch_type : "default"
-        vmm_domain             = value.vmm_domain
+        vxlan_pool             = v.vxlan_pool != null ? v.vxlan_pool : ""
       }
     ]
   ])
+  vmm_controllers = { for k, v in local.vmm_controller_loop : "${v.domain}_${v.hostname}" => v }
 
-  vmm_controllers = { for k, v in local.vmm_controller_loop_1 : "${v.key1}_${v.key2}" => v }
 
-
-  vswitch_policies_loop_1 = flatten([
+  vswitch_policies_loop = flatten([
     for key, value in var.virtual_networking : [
       for k, v in value.vswitch_policy : {
-        active_flow_timeout   = v.active_flow_timeout != null ? v.active_flow_timeout : 60
-        annotation            = v.annotation != null ? v.annotation : ""
-        idle_flow_timeout     = v.idle_flow_timeout != null ? v.idle_flow_timeout : 15
-        key1                  = key
-        key2                  = k
-        sample_rate           = v.sample_rate != null ? v.sample_rate : 0
+        annotation           = v.annotation != null ? v.annotation : ""
+        cdp_interface_policy = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+        enhanced_lag_policy = length(v.enhanced_lag_policy) > 0 ? [
+          for s in v.enhanced_lag_policy : {
+            load_balancing_mode = s.load_balancing_mode != null ? s.load_balancing_mode : "src-dst-ip"
+            mode                = s.mode != null ? s.mode : "active"
+            name                = s.name != null ? s.name : key
+            number_of_links     = s.number_of_links != null ? s.number_of_links : 2
+          }
+        ] : []
+        firewall_policy       = v.firewall_policy != null ? v.firewall_policy : "default"
+        domain                = key
+        lacp_interface_policy = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
+        lldp_interface_policy = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+        mtu_policy            = v.mtu_policy != null ? v.mtu_policy : "default"
         name_alias            = v.name_alias != null ? v.name_alias : ""
-        netflow_export_policy = v.netflow_export_policy != null ? v.netflow_export_policy : ""
-        vmm_domain            = value.vmm_domain
+        netflow_export_policy = v.vmm_netflow_export_policy != null ? [
+          for s in v.netflow_export_policy : {
+            active_flow_timeout = s.active_flow_timeout != null ? s.active_flow_timeout : 60
+            idle_flow_timeout   = s.idle_flow_timeout != null ? s.idle_flow_timeout : 15
+            netflow_policy      = s.netflow_policy
+            sample_rate         = s.sample_rate != null ? s.sample_rate : 0
+          }
+        ] : []
       }
     ]
   ])
+  vswitch_policies = { for k, v in local.vswitch_policies_loop : "${v.domain}" => v }
 
-  vswitch_policies = { for k, v in local.vswitch_policies_loop_1 : "${v.key1}_${v.key2}" => v }
+
+  vmm_uplinks = {
+    for k, v in local.vmm_domains : k => {
+      domain        = k
+      numOfUplinks  = length(v.uplink_names) > 0 ? length(v.uplink_names) : 2
+      switch_vendor = v.switch_vendor
+    } if v.access_mode == "read-write"
+  }
+
+
+  vmm_uplink_names_loop = flatten([
+    for k, v in local.vmm_domains : [
+      for s in v.uplink_names : {
+        domain        = k
+        switch_vendor = v.switch_vendor
+        uplinkId      = index(v.uplink_names, s) + 1
+        uplinkName    = s
+      }
+    ] if v.access_mode == "read-write"
+  ])
+  vmm_uplink_names = { for k, v in local.vmm_uplink_names_loop : "${v.domain}_${v.uplinkName}" => v }
 
 
   #__________________________________________________________
   #
-  # Virtual Networking Managed Variables
+  # VPC Domains Variables
   #__________________________________________________________
 
   vpc_domain_policies = {

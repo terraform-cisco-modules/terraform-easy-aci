@@ -1,119 +1,280 @@
 
 /*_____________________________________________________________________________________________________________________
 
-Leaf Policy Group Variables
+Virtual Networking Variables
 _______________________________________________________________________________________________________________________
 */
 variable "virtual_networking" {
   default = {
     "default" = {
-      vmm_domain = "**REQUIRED**"
-      vmm_credentials = {
-        "default" = {
-          description = ""
-          password    = 1
-          username    = "**REQUIRED**"
-        }
-      }
-      vmm_controller = {
-        "default" = {
+      controllers = [
+        {
           annotation             = ""
           datacenter             = "**REQUIRED**"
           dvs_version            = "unmanaged"
           hostname               = "**REQUIRED**"
-          management_epg         = ""
+          management_epg         = "default"
+          management_epg_type    = "oob"
           monitoring_policy      = "default"
-          policy_scope           = "vm"
           port                   = 0
           sequence_number        = 0
           stats_collection       = "disabled"
+          switch_mode            = "vm"
           trigger_inventory_sync = "untriggered"
-          virtual_switch_type    = "default"
+          vxlan_pool             = ""
         }
-      }
-      vswitch_policy = {
-        "default" = {
-          active_flow_timeout   = 60
-          annotation            = ""
-          idle_flow_timeout     = 15
-          name_alias            = ""
-          sample_rate           = 0
-          netflow_export_policy = ""
+      ]
+      credentials = [
+        {
+          description = ""
+          password    = 1
+          username    = "**REQUIRED**"
         }
-      }
+      ]
+      domain = [
+        {
+          access_mode                     = "read-write"
+          annotation                      = ""
+          control_knob                    = "epDpVerify"
+          delimiter                       = ""
+          enable_tag_collection           = false
+          enable_vm_folder_data_retrieval = false
+          encapsulation                   = "vlan"
+          endpoint_inventory_type         = "on-link"
+          endpoint_retention_time         = 0
+          enforcement                     = "hw"
+          name_alias                      = ""
+          preferred_encapsulation         = "unspecified"
+          switch_type                     = "default"
+          switch_vendor                   = "VMware"
+          uplink_names                    = []
+          vlan_pool                       = ""
+        }
+      ]
+      vswitch_policy = [
+        {
+          annotation           = ""
+          cdp_interface_policy = ""
+          enhanced_lag_policy = [
+            {
+              load_balancing_mode = "src-dst-ip"
+              mode                = "active"
+              number_of_links     = 2
+            }
+          ]
+          firewall_policy           = "default"
+          lldp_interface_policy     = ""
+          mtu_policy                = "default"
+          name                      = "Default Name is the Top-Level Map Name"
+          name_alias                = ""
+          port_channel_policy       = ""
+          vmm_netflow_export_policy = []
+          /* Example
+          vmm_netflow_export_policy = [
+            {
+              active_flow_timeout = 60
+              idle_flow_timeout   = 15
+              netflow_policy      = "**REQUIRED**"
+              sample_rate         = 0
+            }
+          ]
+          */
+        }
+      ]
     }
   }
   description = <<-EOT
-  key - Name of the Leaf Policy Group.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-  * bfd_ipv4_policy: The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-  * bfd_ipv6_policy: The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-  * bfd_multihop_ipv4_policy: The BFD multihop IPv4 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv4 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
-  * bfd_multihop_ipv6_policy: The BFD multihop IPv6 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv6 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
-  * cdp_policy: The CDP policy name.  CDP is used to obtain protocol addresses of neighboring devices and discover those devices. CDP is also be used to display information about the interfaces connecting to the neighboring devices. CDP is media- and protocol-independent, and runs on all Cisco-manufactured equipments including routers, bridges, access servers, and switches.
-  * copp_leaf_policy: The leaf CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
-  * copp_pre_filter: The CoPP Pre-Filter name.  A CoPP prefilter profile is used on spine and leaf switches to filter access to authentication services based on specified sources and TCP ports to protect against DDoS attacks. When deployed on a switch, control plane traffic is denied by default. Only the traffic specified in the CoPP prefilter profile is permitted.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * dot1x_authentication_policy: The 802.1x node authentication policy name.  An 802.1x node authorization policy is a client and server-based access control and authentication protocol that restricts unauthorized clients from connecting to a LAN through publicly accessible ports.
-  * equipment_flash_config: Flash Configuration Policy.
-  * fast_link_failover_policy: The fast link failover policy name.  A fast link failover policy provides better convergence of the network.  Fast link failover policies are not supported on the same port as port profiles or remote leaf switch connections.
-  * fibre_channel_node_policy: The default Fibre Channel node policy name.  Fibre channel node policies specify FCoE-related settings, such as the load balance options and FIP keep alive intervals. 
-  * fibre_channel_san_policy: The Fibre Channel SAN policy name.  Fibre Channel SAN policies specify FCoE-related settings: Error detect timeout values (EDTOV), resource allocation timeout values (RATOV), and the MAC address prefix (also called FC map) used by the leaf switch. Typically the default value 0E:FC:00 is used. 
-  * forward_scale_profile_policy: The forwarding scale profile policy name.  The forwarding scale profile policy provides different scalability options. The scaling types are:
-    - Dual Stack: Provides scalability of up to 12,000 endpoints for IPv6 configurations and up to 24,000 endpoints for IPv4 configurations.
-    - High LPM: Provides scalability similar to the dual-stack policy, except that the longest prefix match (LPM) scale is 128,000 and the policy scale is 8,000.
-    - IPv4 Scale: Enables systems with no IPv6 configurations to increase scalability to 48,000 IPv4 endpoints.
-    - High Dual Stack: Provides scalability of up to 64,000 MAC endpoints, 64,000 IPv4 endpoints, and 24,000 IPv6 endpoints.
-    For more information about this feature, see the Cisco APIC Forwarding Scale Profiles document.
-  * lldp_policy: The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
-  * monitoring_policy: The monitoring policy name.  Monitoring policies can include policies such as event/fault severity or the fault lifecycle. 
-  * netflow_node_policy: The NetFlow node policy name.  The node-level policy deploys two different NetFlow timers that specify the rate at which flow records are sent to the external collector.
-  * ptp_node_policy: The PTP node policy name.  The Precision Time Protocol (PTP) synchronizes distributed clocks in a system using Ethernet networks.
-  * poe_node_policy: The PoE node policy name.  PoE node policies control the overall power setting for the switch.
-  * spanning_tree_interface_policy: The spanning tree policy name.  A spanning tree protocol (STP) policy prevents loops caused by redundant paths in your network.
-  * synce_node_policy: The SyncE Node policy name.  Synchronous Ethernet (SyncE) provides high-quality clock synchronization over Ethernet ports by using known common precision frequency references.
-  * usb_configuration_policy: The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
+  Key - Name of the Virtual Networking Policy
+  * controllers: List of Controllers to add to the Virtual Networking Policy
+    - annotation: (Optional) - Annotation of object VMM Controller.
+    - datacenter: (Required) - Top level container name.
+    - dvs_version: (Optional) -  Dvs Version. Allowed values are:
+      * 7.0
+      * 6.6
+      * 6.5
+      * 6.0
+      * 5.5
+      * 5.1
+      * unmanaged
+    - hostname: (Required) - Hostname or IP Address. [Create Only]
+    - management_epg: (Required) - Name of the Management EPG.
+    - management_epg_type: (Required) - Type of Management EPG.  Options are:
+      * inb: This is an Inband EPG.
+      * oob: This is an Out-of-Band EPG.
+    - monitoring_policy: (class monInfraPol) (Optional) - Name of the Monitoring Policy.
+    - sequence_number: (Optional) - An ISIS link-state packet sequence number. Default value is "0".
+    - stats_collection: (Optional) - The statistics mode. Allowed values are:
+      * disabled
+      * enabled
+    - switch_mode: (Optional) - The VMM control policy scope. Allowed values are:
+      * MicrosoftSCVMM: SCVMM
+      * cloudfoundry: Cloud Foundry
+      * iaas: vShield
+      * kubernetes: Kubernetes
+      * network: vCD
+      * nsx: VMware NSX
+      * openshift: Openshift
+      * openstack: Openstack
+      * rhev: Redhat Enterprise Virtualization
+      * unmanaged: Unmanaged
+      * vm: vCenter DVS
+    - trigger_inventory_sync: (Optional) - Triggered Inventory Sync Status. It will sync the status of inventory if value is set to triggered. Once sync is done, value is reset back to untriggered. Allowed values are "autoTriggered", "triggered", "untriggered", and default value is "untriggered". Type: String.
+    - vxlan_pool: (class fvnsVxlanInstP) (Optional) - Name of the VxLAN Pool.
+  * credentials: List of credential policies to add to the Virtual Networking Policy
+    * annotation: (Optional) - Annotation of object VMM Credential.
+    * description: (Optional) - Description of object VMM Credential.
+    * name_alias: (Optional) - Name alias of object VMM Credential.
+    * password: (Required) - Password Identifier in the range of 1 to 5 to identify the vmm_password_{number} variable.
+    * username: (Required) - Username to use for login to the controller.
+  * domain: List of Arguments for the virtual networking domain.
+    - name - (Required) Name of Object vmm domain.
+    - access_mode: (Optional) - Access mode for object vmm domain. Allowed values are:
+      * read-only
+      * read-write
+    - annotation: (Optional) - Annotation for object vmm domain.
+    - control_knob: (Optional) - Type pf control knob to use. Allowed values are:
+      * none
+      * epDpVerify
+    - delimiter: (Optional) - Delimiter for object vmm domain.
+    - enable_tag_collection: (Optional) - Flag enable tagging for object vmm domain.
+    - encapsulation: (Optional) - The layer 2 encapsulation protocol to use with the virtual switch. Allowed values are "unknown", "vlan" and "vxlan". Default is "unknown".
+    - enforcement: (Optional) - The switching enforcement preference. This determines whether switches can be done within the virtual switch (Local Switching) or whether all switched traffic must go through the fabric (No Local Switching). Allowed values are "hw", "sw" and "unknown". Default is "hw".
+    - endpoint_inventory_type: (Optional) - Determines which end point inventory type to use for object VMM domain. Allowed values are "none" and "on-link". Default is "on-link".
+    - endpoint_retention_time: (Optional) - End point retention time for object vmm domain. Allowed value range is "0" - "600". Default value is "0".
+    - switch_type: (Optional) - The switch to be used for the domain profile. Allowed values are:
+      * cf
+      * default
+      * k8s
+      * nsx
+      * ovs
+      * rancher
+      * rhev
+      * openshift
+      * unknown
+    - name_alias: (Optional) - Name alias for object VMM domain.
+    - preferred_encapsulation: (Optional) - The preferred encapsulation mode for object VMM domain. Allowed values are "unspecified", "vlan" and "vxlan". Default is "unspecified".
+    - vlan_pool: (Optional) - Relation to class fvnsVlanInstP. Cardinality - N_TO_ONE. Type - String.
+  * vswitch_policy: Virtual Switch Policy to assign to the Virtual Networking Policy.
+    - annotation: (Optional) - Annotation of object VSwitch Policy Group.
+    - cdp_interface_policy: (Optional) - (class cdpIfPol) - Name of the CDP Interface Policy.
+    - description: (Optional) - Description of object VSwitch Policy Group.
+    - enhanced_lag_policy: (Optional) - (class lacpEnhancedLagPol) A List of ehnanced lag policy attributes:
+      * load_balancing_mode:
+        - dst-ip: Destination IP Address
+        - dst-ip-l4port: Destination IP Address and TCP/UDP Port
+        - dst-ip-l4port-vlan: Destination IP Address, TCP/UDP Port and VLAN
+        - dst-ip-vlan: Destination IP Address and VLAN
+        - dst-l4port: Destination TCP/UDP Port
+        - dst-mac: Destination MAC Address
+        - src-dst-ip: Source and Destination IP Address
+        - src-dst-ip-l4port: Source and Destination IP Address and TCP/UDP Port
+        - src-dst-ip-l4port-vlan: Source and Destination IP Address, TCP/UDP Port and VLAN
+        - src-dst-ip-vlan: Source and Destination IP Address and VLAN
+        - src-dst-l4port: Source and Destination TCP/UDP Port
+        - src-dst-mac: Source and Destination MAC Address
+        - src-ip: Source IP Address
+        - src-ip-l4port: Source IP Address and TCP/UDP Port
+        - src-ip-l4port-vlan: Source IP Address, TCP/UDP Port and VLAN
+        - src-ip-vlan: Source IP Address and VLAN
+        - src-l4port: Source TCP/UDP Port
+        - src-mac: Source MAC Address
+        - src-port-id: Source Port ID
+        - vlan: VLAN
+      * mode: Options are:
+        - active: LACP Active.
+        - passive: LACP Passive.
+      * number_of_links: (Optional) - The number of uplinks to create in the enhanced Lag Policy.
+    - firewall_policy: (Optional) - (class nwsFwPol) - Name of the Firewall Policy.
+    - lldp_interface_policy: (Optional) - (class lldpIfPol) - Name of the LLDP Interface Policy
+    - mtu_policy: (Optional) - (class l2InstPol) - Name of the L2 Interface Policy.
+    - name_alias: (Optional) - Name Alias of object VSwitch Policy Group.
+    - port_channel_policy: (Optional) - (class lacpLagPol) - Name of the Port-Channel (LACP) Interface Policy.
+    - vmm_netflow_export_policy - (Optional) - 
+      * active_flow_time_out: (Optional) - The range of allowed values is "0" to "3600". Default value is "60".
+      * idle_flow_time_out: (Optional) - The range of allowed values is "0" to "600". Default value is "15".
+      * netflow_policy: (class netflowVmmExporterPol) (Required) - The Name of the Netflow Exporters for VM Networking Policy.
+      * sampling_rate: (Optional) - The range of allowed values is "0" to "1000". Default value is "0".
   EOT
   type = map(object(
     {
-      vmm_domain = string
-      vmm_credentials = map(object(
-        {
-          description = optional(string)
-          password    = number
-          username    = string
-        }
-      ))
-      vmm_controller = map(object(
+      controllers = list(object(
         {
           annotation             = optional(string)
           datacenter             = string
           dvs_version            = optional(string)
           hostname               = string
           management_epg         = optional(string)
+          management_epg_type    = optional(string)
           monitoring_policy      = optional(string)
-          policy_scope           = optional(string)
           port                   = optional(number)
           sequence_number        = optional(number)
           stats_collection       = optional(string)
+          switch_mode            = optional(string)
           trigger_inventory_sync = optional(string)
-          virtual_switch_type    = optional(string)
+          vxlan_pool             = optional(string)
         }
       ))
-      vswitch_policy = map(object(
+      credentials = list(object(
         {
-          annotation            = optional(string)
-          active_flow_timeout   = optional(number)
+          description = optional(string)
+          password    = number
+          username    = string
+        }
+      ))
+      domain = list(object(
+        {
+          access_mode                     = optional(string)
+          annotation                      = optional(string)
+          control_knob                    = optional(string)
+          delimiter                       = optional(string)
+          enable_tag_collection           = optional(bool)
+          enable_vm_folder_data_retrieval = optional(bool)
+          encapsulation                   = optional(string)
+          endpoint_inventory_type         = optional(string)
+          endpoint_retention_time         = optional(number)
+          enforcement                     = optional(string)
+          name_alias                      = optional(string)
+          preferred_encapsulation         = optional(string)
+          switch_type                     = optional(string)
+          switch_vendor                   = optional(string)
+          uplink_names                    = optional(list(string))
+          vlan_pool                       = string
+        }
+      ))
+      vswitch_policy = list(object(
+        {
+          annotation           = optional(string)
+          active_flow_timeout  = optional(number)
+          cdp_interface_policy = optional(string)
+          enhanced_lag_policy = optional(list(object(
+            {
+              load_balancing_mode = optional(string)
+              mode                = optional(string)
+              number_of_links     = optional(number)
+            }
+          )))
           idle_flow_timeout     = optional(number)
+          firewall_policy       = optional(string)
+          lldp_interface_policy = optional(string)
+          mtu_policy            = optional(string)
           name_alias            = optional(string)
+          port_channel_policy   = optional(string)
           sample_rate           = optional(number)
-          netflow_export_policy = optional(string)
+          vmm_netflow_export_policy = optional(list(object(
+            {
+              active_flow_timeout = optional(number)
+              idle_flow_timeout   = optional(number)
+              netflow_policy      = string
+              sample_rate         = optional(number)
+            }
+          )))
         }
       ))
     }
   ))
 }
+
+
 
 variable "vmm_password_1" {
   default     = ""
@@ -150,33 +311,89 @@ variable "vmm_password_5" {
   type        = string
 }
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "vmmDomP"
+ - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}
+GUI Location:
+ - Virtual Networking -> {switch_vendor} -> {domain_name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_vmm_domain" "domains" {
+  # depends_on = [
+  #   aci_vlan_pool.vlan_pools
+  # ]
+  for_each            = local.vmm_domains
+  access_mode         = each.value.access_mode
+  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
+  ctrl_knob           = each.value.control_knob
+  delimiter           = each.value.delimiter
+  enable_tag          = each.value.enable_tag_collection == true ? "yes" : "no"
+  encap_mode          = each.value.encapsulation
+  enf_pref            = each.value.enforcement
+  ep_inventory_type   = each.value.endpoint_inventory_type
+  ep_ret_time         = each.value.endpoint_retention_time
+  mode                = each.value.switch_type
+  name                = each.key
+  name_alias          = each.value.name_alias
+  pref_encap_mode     = each.value.preferred_encapsulation
+  provider_profile_dn = "uni/vmmp-${each.value.switch_vendor}"
+  relation_infra_rs_vlan_ns = length(compact([each.value.vlan_pool])
+  ) > 0 ? "uni/infra/vlanns-[${each.value.vlan_pool}]-dynamic" : ""
+}
+
+resource "aci_rest_managed" "vmm_domains_uplinks" {
+  depends_on = [
+    aci_vmm_domain.domains
+  ]
+  for_each   = local.vmm_uplinks
+  dn         = "uni/vmmp-${each.value.switch_vendor}/dom-${each.value.domain}/uplinkpcont"
+  class_name = "vmmUplinkPCont"
+  content = {
+    numOfUplinks = each.value.numOfUplinks
+  }
+}
+
+resource "aci_rest_managed" "vmm_uplink_names" {
+  depends_on = [
+    aci_rest_managed.vmm_domains_uplinks
+  ]
+  for_each   = local.vmm_uplink_names
+  dn         = "uni/vmmp-${each.value.switch_vendor}/dom-${each.value.domain}/uplinkpcont/uplinkp-${each.value.uplinkId}"
+  class_name = "vmmUplinkP"
+  content = {
+    uplinkId   = each.value.uplinkId
+    uplinkName = each.value.uplinkName
+  }
+}
 
 /*_____________________________________________________________________________________________________________________
 
 API Information:
  - Class: "vmmUsrAccP"
- - Distinguished Name: "uni/vmmp-{vendor}/dom-{name}/usracc-{name}"
+ - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/usracc-{name}"
 GUI Location:
- - Virtual Networking -> {vendor} -> {domain_name} -> vCenter Credentials
+ - Virtual Networking -> {switch_vendor} -> {domain_name} -> Credentials
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vmm_credential" "vmm_credentials" {
+resource "aci_vmm_credential" "credentials" {
   depends_on = [
-    aci_vmm_domain.vmm_domains
+    aci_vmm_domain.domains
   ]
   for_each      = local.vmm_credentials
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
-  name          = "${each.key}-creds"
-  vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
-  pwd = length(
-    regexall(5, coalesce(each.value.password, 10))
-    ) > 0 ? var.vmm_password_5 : length(
-    regexall(4, coalesce(each.value.password, 10))
-    ) > 0 ? var.vmm_password_4 : length(
-    regexall(3, coalesce(each.value.password, 10))
-    ) > 0 ? var.vmm_password_3 : length(
-    regexall(2, coalesce(each.value.password, 10))
+  name          = each.value.domain
+  vmm_domain_dn = aci_vmm_domain.domains[each.value.domain].id
+  pwd = length(regexall(
+    5, coalesce(each.value.password, 10))
+    ) > 0 ? var.vmm_password_5 : length(regexall(
+    4, coalesce(each.value.password, 10))
+    ) > 0 ? var.vmm_password_4 : length(regexall(
+    3, coalesce(each.value.password, 10))
+    ) > 0 ? var.vmm_password_3 : length(regexall(
+    2, coalesce(each.value.password, 10))
   ) > 0 ? var.vmm_password_2 : var.vmm_password_1
   usr = each.value.username
 }
@@ -185,60 +402,72 @@ resource "aci_vmm_credential" "vmm_credentials" {
 
 API Information:
  - Class: "vmmCtrlrP"
- - Distinguished Name: "uni/vmmp-{vendor}/dom-{name}/ctrlr-{name}"
+ - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/ctrlr-{name}"
 GUI Location:
- - Virtual Networking -> {vendor} -> {domain_name} -> {controller_name}
+ - Virtual Networking -> {switch_vendor} -> {domain_name} -> {controller_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vmm_controller" "vmm_controllers" {
+resource "aci_vmm_controller" "controllers" {
   depends_on = [
-    aci_vmm_credential.vmm_credentials,
-    aci_vmm_domain.vmm_domains
+    aci_vmm_credential.credentials,
+    aci_vmm_domain.domains
   ]
-  for_each                        = local.vmm_controllers
-  vmm_domain_dn                   = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
-  name                            = "${each.key}-controller"
-  annotation                      = each.value.annotation != "" ? each.value.annotation : var.annotation
-  dvs_version                     = each.value.dvs_version
-  host_or_ip                      = each.value.hostname
-  inventory_trig_st               = each.value.trigger_inventory_sync
-  mode                            = each.value.virtual_switch_type
-  port                            = each.value.port
-  root_cont_name                  = each.value.datacenter
-  scope                           = each.value.policy_scope
-  seq_num                         = each.value.sequence_number
-  stats_mode                      = each.value.stats_collection
-  relation_vmm_rs_acc             = aci_vmm_credential.vmm_credentials[each.key].id
-  relation_vmm_rs_ctrlr_p_mon_pol = each.value.monitoring_policy
-  relation_vmm_rs_mgmt_e_pg       = each.value.management_epg
+  for_each            = local.vmm_controllers
+  vmm_domain_dn       = aci_vmm_domain.domains[each.value.domain].id
+  name                = each.value.hostname
+  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
+  dvs_version         = each.value.dvs_version
+  host_or_ip          = each.value.hostname
+  inventory_trig_st   = each.value.trigger_inventory_sync
+  mode                = each.value.switch_type
+  port                = each.value.port
+  root_cont_name      = each.value.datacenter
+  scope               = each.value.switch_mode
+  seq_num             = each.value.sequence_number
+  stats_mode          = each.value.stats_collection
+  vxlan_depl_pref     = each.value.switch_mode == "nsx" ? "nsx" : "vxlan"
+  relation_vmm_rs_acc = aci_vmm_credential.credentials[each.value.domain].id
+  relation_vmm_rs_ctrlr_p_mon_pol = length(compact([each.value.monitoring_policy])
+  ) > 0 ? "uni/infra/moninfra-${each.value.monitoring_policy}" : ""
+  relation_vmm_rs_mgmt_e_pg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
   # relation_vmm_rs_to_ext_dev_mgr  = [each.value.external_device_manager]
+  relation_vmm_rs_vxlan_ns = length(compact([each.value.vxlan_pool])
+  ) > 0 ? "uni/infra/vxlanns-${each.value.vxlan_pool}" : ""
 }
 
 /*_____________________________________________________________________________________________________________________
 
 API Information:
  - Class: "vmmVSwitchPolicyCont"
- - Distinguished Name: "uni/vmmp-{vendor}/dom-{name}/vswitchpolcont"
+ - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/vswitchpolcont"
 GUI Location:
- - Virtual Networking -> {vendor} -> {domain_name} -> VSwitch Policy
+ - Virtual Networking -> {switch_vendor} -> {domain_name} -> VSwitch Policy
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vswitch_policy" "vswitch_policies" {
   depends_on = [
-    aci_vmm_credential.vmm_credentials,
-    aci_vmm_domain.vmm_domains
+    aci_vmm_domain.domains
   ]
   for_each      = local.vswitch_policies
-  vmm_domain_dn = aci_vmm_domain.vmm_domains[each.value.vmm_domain].id
+  vmm_domain_dn = aci_vmm_domain.domains[each.value.domain].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description   = each.value.description
   name_alias    = each.value.name_alias
-  relation_vmm_rs_vswitch_exporter_pol {
-    active_flow_time_out = each.value.active_flow_timeout
-    idle_flow_time_out   = each.value.idle_flow_timeout
-    sampling_rate        = each.value.sampling_rate
-    target_dn = length(
-      regexall("[a-zA-Z\\d]", each.value.netfow_export_policy)
-    ) > 0 ? "uni/infra/vmmexporterpol-${each.value.netflow_export_policy}" : ""
+  dynamic "relation_vmm_rs_vswitch_exporter_pol" {
+    for_each = each.value.netflow_export_policy
+    content {
+      active_flow_time_out = relation_vmm_rs_vswitch_exporter_pol.value.active_flow_timeout
+      idle_flow_time_out   = relation_vmm_rs_vswitch_exporter_pol.value.idle_flow_timeout
+      sampling_rate        = relation_vmm_rs_vswitch_exporter_pol.value.sampling_rate
+      target_dn            = "uni/infra/vmmexporterpol-${relation_vmm_rs_vswitch_exporter_pol.value.netflow_policy}"
+    }
   }
+  relation_vmm_rs_vswitch_override_cdp_if_pol = length(compact([each.value.cdp_interface_policy])
+  ) > 0 ? "uni/infra/cdpIfP-${each.value.cdp_interface_policy}" : ""
+  relation_vmm_rs_vswitch_override_fw_pol = length(compact([each.value.firewall_policy])
+  ) > 0 ? "uni/infra/fwP-${each.value.firewall_policy}" : ""
+  relation_vmm_rs_vswitch_override_lacp_pol = length(compact([each.value.port_channel_policy])
+  ) > 0 ? "uni/infra/lacplagp-${each.value.port_channel_policy}" : ""
+  relation_vmm_rs_vswitch_override_lldp_if_pol = length(compact([each.value.lldp_interface_policy])
+  ) > 0 ? "uni/infra/lldpIfP-${each.value.lldp_interface_policy}" : ""
+  relation_vmm_rs_vswitch_override_mtu_pol = "uni/fabric/l2pol-${each.value.mtu_policy}"
 }
