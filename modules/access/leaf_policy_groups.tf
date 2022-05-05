@@ -23,7 +23,6 @@ variable "leaf_policy_groups" {
       forward_scale_profile_policy   = "default"
       lldp_policy                    = "default"
       monitoring_policy              = "default"
-      name_alias                     = ""
       netflow_node_policy            = "default"
       ptp_node_policy                = "default"
       poe_node_policy                = "default"
@@ -56,7 +55,6 @@ variable "leaf_policy_groups" {
     For more information about this feature, see the Cisco APIC Forwarding Scale Profiles document.
   * lldp_policy: The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
   * monitoring_policy: The monitoring policy name.  Monitoring policies can include policies such as event/fault severity or the fault lifecycle. 
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * netflow_node_policy: The NetFlow node policy name.  The node-level policy deploys two different NetFlow timers that specify the rate at which flow records are sent to the external collector.
   * ptp_node_policy: The PTP node policy name.  The Precision Time Protocol (PTP) synchronizes distributed clocks in a system using Ethernet networks.
   * poe_node_policy: The PoE node policy name.  PoE node policies control the overall power setting for the switch.
@@ -83,7 +81,6 @@ variable "leaf_policy_groups" {
       forward_scale_profile_policy   = optional(string)
       lldp_policy                    = optional(string)
       monitoring_policy              = optional(string)
-      name_alias                     = optional(string)
       netflow_node_policy            = optional(string)
       ptp_node_policy                = optional(string)
       poe_node_policy                = optional(string)
@@ -168,7 +165,6 @@ resource "aci_access_switch_policy_group" "leaf_policy_groups" {
   annotation                          = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                         = each.value.description
   name                                = each.key
-  name_alias                          = each.value.name_alias
   relation_infra_rs_bfd_ipv4_inst_pol = "uni/infra/bfdIpv4Inst-${each.value.bfd_ipv4_policy}"
   relation_infra_rs_bfd_ipv6_inst_pol = "uni/infra/bfdIpv6Inst-${each.value.bfd_ipv6_policy}"
   relation_infra_rs_bfd_mh_ipv4_inst_pol = length(regexall(

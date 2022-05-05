@@ -525,7 +525,6 @@ locals {
       description        = v.description != null ? v.description : ""
       enable_dom         = v.enable_dom != null ? v.enable_dom : "Dom"
       feature_selections = v.feature_selections != null ? v.feature_selections : "telemetry"
-      name_alias         = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -539,7 +538,6 @@ locals {
       annotation                    = v.annotation != null ? v.annotation : ""
       bfd_isis_policy_configuration = v.bfd_isis_policy_configuration != null ? v.bfd_isis_policy_configuration : "enabled"
       description                   = v.description != null ? v.description : ""
-      name_alias                    = v.name_alias != null ? v.name_alias : ""
     }
   }
 
@@ -558,7 +556,6 @@ locals {
       isis_policy                = v.isis_policy != null ? v.isis_policy : "default"
       macsec_policy              = v.macsec_policy != null ? v.macsec_policy : "default"
       management_access_policy   = v.management_access_policy != null ? v.management_access_policy : "default"
-      name_alias                 = v.name_alias != null ? v.name_alias : ""
       snmp_policy                = v.snmp_policy != null ? v.snmp_policy : "default"
     }
   }
@@ -567,7 +564,6 @@ locals {
     for k, v in var.pod_profiles : k => {
       annotation    = v.annotation != null ? v.annotation : ""
       description   = v.description != null ? v.description : ""
-      name_alias    = v.name_alias != null ? v.name_alias : ""
       pod_selectors = v.pod_selectors
     }
   }

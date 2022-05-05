@@ -4,7 +4,6 @@ variable "l3_interface" {
       annotation                    = ""
       bfd_isis_policy_configuration = "enabled"
       description                   = ""
-      name_alias                    = ""
     }
   }
   description = <<-EOT
@@ -14,14 +13,12 @@ variable "l3_interface" {
     - enabled: Enables BFD-IS-IS policy.
     - disabled: Disables BFD-IS-IS policy.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       annotation                    = optional(string)
       bfd_isis_policy_configuration = optional(string)
       description                   = optional(string)
-      name_alias                    = optional(string)
     }
   ))
 }
@@ -42,5 +39,4 @@ resource "aci_l3_interface_policy" "l3_interface" {
   bfd_isis    = each.value.bfd_isis_policy_configuration
   description = each.value.description
   name        = "default"
-  name_alias  = each.value.name_alias
 }

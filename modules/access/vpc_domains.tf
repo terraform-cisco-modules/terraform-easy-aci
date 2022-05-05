@@ -9,7 +9,6 @@ variable "vpc_domain_policies" {
       annotation    = ""
       dead_interval = 200
       description   = ""
-      name_alias    = ""
     }
   }
   description = <<-EOT
@@ -17,14 +16,12 @@ variable "vpc_domain_policies" {
     * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
     * dead_interval: The VPC peer dead interval time of object VPC Domain Policy. Range: 5-600. Default value is 200.
     * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-    * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       annotation    = optional(string)
       dead_interval = optional(number)
       description   = optional(string)
-      name_alias    = optional(string)
     }
   ))
 }
@@ -44,7 +41,6 @@ resource "aci_vpc_domain_policy" "vpc_domain_policies" {
   dead_intvl  = each.value.dead_interval
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 /*_____________________________________________________________________________________________________________________

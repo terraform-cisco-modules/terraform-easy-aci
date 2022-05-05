@@ -16,13 +16,13 @@ variable "leaf_port_group_access" {
       dot1x_port_policy                  = ""
       dwdm_policy                        = ""
       fc_interface_policy                = ""
+      group_alias                        = ""
       l2_interface_policy                = ""
       link_level_policy                  = ""
       lldp_interface_policy              = ""
       macsec_policy                      = ""
       mcp_interface_policy               = ""
       monitoring_policy                  = ""
-      name_alias                         = ""
       netflow_policy                     = []
       port_security_policy               = ""
       priority_flow_control_policy       = ""
@@ -37,7 +37,7 @@ variable "leaf_port_group_access" {
   Key: Name of the Attachable Access Entity Profile Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   EOT
   type = map(object(
     {
@@ -52,13 +52,13 @@ variable "leaf_port_group_access" {
       dot1x_port_policy                  = optional(string)
       dwdm_policy                        = optional(string)
       fc_interface_policy                = optional(string)
+      global_alias                       = optional(string)
       l2_interface_policy                = optional(string)
       link_level_policy                  = optional(string)
       lldp_interface_policy              = optional(string)
       macsec_policy                      = optional(string)
       mcp_interface_policy               = optional(string)
       monitoring_policy                  = optional(string)
-      name_alias                         = optional(string)
       netflow_policy                     = optional(list(string))
       port_security_policy               = optional(string)
       priority_flow_control_policy       = optional(string)
@@ -223,21 +223,18 @@ variable "leaf_port_group_breakout" {
       annotation   = ""
       breakout_map = "10g-4x"
       description  = ""
-      name_alias   = ""
     }
   }
   description = <<-EOT
   Key: Name of the Attachable Access Entity Profile Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       annotation   = optional(string)
       breakout_map = optional(string)
       description  = optional(string)
-      name_alias   = optional(string)
     }
   ))
 }
@@ -259,7 +256,6 @@ resource "aci_leaf_breakout_port_group" "policy_groups" {
   brkout_map  = each.value.breakout_map
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 
@@ -282,7 +278,6 @@ variable "leaf_port_group_bundle" {
       macsec_policy                      = ""
       mcp_interface_policy               = ""
       monitoring_policy                  = ""
-      name_alias                         = ""
       port_security_policy               = ""
       priority_flow_control_policy       = ""
       slow_drain_policy                  = ""
@@ -295,7 +290,6 @@ variable "leaf_port_group_bundle" {
   Key: Name of the Attachable Access Entity Profile Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
@@ -315,7 +309,6 @@ variable "leaf_port_group_bundle" {
       macsec_policy                      = optional(string)
       mcp_interface_policy               = optional(string)
       monitoring_policy                  = optional(string)
-      name_alias                         = optional(string)
       port_security_policy               = optional(string)
       priority_flow_control_policy       = optional(string)
       slow_drain_policy                  = optional(string)
@@ -355,7 +348,6 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
   description = each.value.description
   lag_t       = each.value.link_aggregation_type
   name        = each.key
-  name_alias  = each.value.name_alias
   # class: infraAttEntityP
   # DN: "uni/infra/attentp-{aaep_policy}"
   relation_infra_rs_att_ent_p = length(

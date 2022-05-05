@@ -14,7 +14,6 @@ variable "aaep_policies" {
       annotation       = ""
       description      = ""
       layer3_domains   = []
-      name_alias       = ""
       physical_domains = []
       vmm_domains      = []
     }
@@ -23,7 +22,6 @@ variable "aaep_policies" {
   Key: Name of the Attachable Access Entity Profile Policy.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * layer3_domains: A List of Layer3 Domains to Attach to this AAEP Policy.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * physical_domains: A List of Physical Domains to Attach to this AAEP Policy.
   * vmm_domains: A List of Virtual Domains to Attach to this AAEP Policy.
   EOT
@@ -32,7 +30,6 @@ variable "aaep_policies" {
       annotation       = optional(string)
       description      = optional(string)
       layer3_domains   = optional(list(string))
-      name_alias       = optional(string)
       physical_domains = optional(list(string))
       vmm_domains      = optional(list(string))
     }
@@ -118,7 +115,6 @@ variable "error_disabled_recovery_policy" {
       link_flap                         = true
       loopback                          = true
       loop_indication_by_mcp            = true
-      name_alias                        = ""
       port_security_violation           = true
       security_violation                = true
       set_port_state_failed             = true
@@ -148,7 +144,6 @@ variable "error_disabled_recovery_policy" {
   * link_flap                         = true
   * loopback                          = true
   * loop_indication_by_mcp            = true
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * port_security_violation           = true
   * security_violation                = true
   * set_port_state_failed             = true
@@ -177,7 +172,6 @@ variable "error_disabled_recovery_policy" {
       link_flap                         = optional(bool)
       loopback                          = optional(bool)
       loop_indication_by_mcp            = optional(bool)
-      name_alias                        = optional(string)
       port_security_violation           = optional(bool)
       security_violation                = optional(bool)
       set_port_state_failed             = optional(bool)
@@ -205,7 +199,6 @@ resource "aci_error_disable_recovery" "error_disabled_recovery_policy" {
   annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   description         = each.value.description
   err_dis_recov_intvl = each.value.error_disable_recovery_interval
-  name_alias          = each.value.name_alias
   edr_event {
     event   = "event-arp-inspection"
     recover = each.value.arp_inspection == true ? "yes" : "no"
@@ -320,7 +313,6 @@ variable "mcp_instance_policy" {
       initial_delay                     = 180
       loop_detect_multiplication_factor = 3
       loop_protect_action               = true
-      name_alias                        = ""
       transmission_frequency_seconds    = 2
       transmission_frequency_msec       = 0
     }
@@ -334,7 +326,6 @@ variable "mcp_instance_policy" {
   * initial_delay                     = 180
   * loop_detect_multiplication_factor = 3
   * loop_protection_disable_port               = true
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * transmission_frequency_seconds    = 2
   * transmission_frequency_msec       = 0
   EOT
@@ -347,7 +338,6 @@ variable "mcp_instance_policy" {
       initial_delay                     = optional(number)
       loop_detect_multiplication_factor = optional(number)
       loop_protection_disable_port      = optional(bool)
-      name_alias                        = optional(string)
       transmission_frequency_seconds    = optional(number)
       transmission_frequency_msec       = optional(number)
     }
@@ -380,7 +370,6 @@ resource "aci_mcp_instance_policy" "mcp_instance_policy" {
   key              = var.mcp_instance_key
   loop_detect_mult = each.value.loop_detect_multiplication_factor
   loop_protect_act = each.value.loop_protection_disable_port == true ? "yes" : "no"
-  name_alias       = each.value.name_alias
   tx_freq          = each.value.transmission_frequency_seconds
   tx_freq_msec     = each.value.transmission_frequency_msec
 }
@@ -403,7 +392,6 @@ variable "global_qos_class" {
       fabric_flush_state                = false
       micro_burst_spine_queues          = 0
       micro_burst_leaf_queues           = 0
-      name_alias                        = ""
       preserve_cos                      = true
       annotation                        = ""
     }
@@ -411,7 +399,6 @@ variable "global_qos_class" {
   description = <<-EOT
   Key: Name of the Layer2 Interface Policy.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * qinq: (Default value is "disabled").  To enable or disable an interface for Dot1q Tunnel or Q-in-Q encapsulation modes, select one of the following:
     - corePort: Configure this core-switch interface to be included in a Dot1q Tunnel.  You can configure multiple corePorts, for multiple customers, to be used in a Dot1q Tunnel.
     - disabled: Disable this interface to be used in a Dot1q Tunnel.
@@ -435,7 +422,6 @@ variable "global_qos_class" {
       fabric_flush_state                = optional(bool)
       micro_burst_spine_queues          = optional(string)
       micro_burst_leaf_queues           = optional(string)
-      name_alias                        = optional(string)
       preserve_cos                      = optional(bool)
       annotation                        = optional(string)
     }
@@ -463,7 +449,6 @@ resource "aci_qos_instance_policy" "global_qos_class" {
   etrap_st              = each.value.elephant_trap_state
   fabric_flush_interval = each.value.fabric_flush_interval
   fabric_flush_st       = each.value.fabric_flush_state
-  name_alias            = each.value.name_alias
   uburst_spine_queues   = each.value.micro_burst_spine_queues
   uburst_tor_queues     = each.value.micro_burst_leaf_queues
 }

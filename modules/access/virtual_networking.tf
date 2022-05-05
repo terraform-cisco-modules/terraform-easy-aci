@@ -43,7 +43,6 @@ variable "virtual_networking" {
           endpoint_inventory_type         = "on-link"
           endpoint_retention_time         = 0
           enforcement                     = "hw"
-          name_alias                      = ""
           preferred_encapsulation         = "unspecified"
           switch_mode                     = "default"
           switch_provider                 = "VMware"
@@ -67,7 +66,6 @@ variable "virtual_networking" {
           firewall_policy           = "default"
           lldp_interface_policy     = ""
           mtu_policy                = "default"
-          name_alias                = ""
           port_channel_policy       = ""
           vmm_netflow_export_policy = []
           /* **Example
@@ -123,7 +121,6 @@ variable "virtual_networking" {
   * credentials: List of credential policies to add to the Virtual Networking Policy
     * annotation: (Optional) - Annotation of object VMM Credential.
     * description: (Optional) - Description of object VMM Credential.
-    * name_alias: (Optional) - Name alias of object VMM Credential.
     * password: (Required) - Password Identifier in the range of 1 to 5 to identify the vmm_password_{number} variable.
     * username: (Required) - Username to use for login to the controller.
   * domain: List of Arguments for the virtual networking domain.
@@ -159,7 +156,6 @@ variable "virtual_networking" {
       * OpenStack
       * Redhat
       * VMware
-    - name_alias: (Optional) - Name alias for object VMM domain.
     - preferred_encapsulation: (Optional) - The preferred encapsulation mode for object VMM domain. Allowed values are "unspecified", "vlan" and "vxlan". Default is "unspecified".
     - vlan_pool: (Optional) - Relation to class fvnsVlanInstP. Cardinality - N_TO_ONE. Type - String.
   * vswitch_policy: Virtual Switch Policy to assign to the Virtual Networking Policy.
@@ -195,7 +191,6 @@ variable "virtual_networking" {
     - firewall_policy: (Optional) - (class nwsFwPol) - Name of the Firewall Policy.
     - lldp_interface_policy: (Optional) - (class lldpIfPol) - Name of the LLDP Interface Policy
     - mtu_policy: (Optional) - (class l2InstPol) - Name of the L2 Interface Policy.
-    - name_alias: (Optional) - Name Alias of object VSwitch Policy Group.
     - port_channel_policy: (Optional) - (class lacpLagPol) - Name of the Port-Channel (LACP) Interface Policy.
     - vmm_netflow_export_policy - (Optional) - 
       * active_flow_time_out: (Optional) - The range of allowed values is "0" to "3600". Default value is "60".
@@ -241,7 +236,6 @@ variable "virtual_networking" {
           endpoint_inventory_type         = optional(string)
           endpoint_retention_time         = optional(number)
           enforcement                     = optional(string)
-          name_alias                      = optional(string)
           preferred_encapsulation         = optional(string)
           switch_mode                     = optional(string)
           switch_provider                 = optional(string)
@@ -265,7 +259,6 @@ variable "virtual_networking" {
           firewall_policy       = optional(string)
           lldp_interface_policy = optional(string)
           mtu_policy            = optional(string)
-          name_alias            = optional(string)
           port_channel_policy   = optional(string)
           sample_rate           = optional(number)
           vmm_netflow_export_policy = optional(list(object(
@@ -344,7 +337,6 @@ resource "aci_vmm_domain" "domains" {
   ep_ret_time         = each.value.endpoint_retention_time
   mode                = each.value.switch_mode
   name                = each.key
-  name_alias          = each.value.name_alias
   pref_encap_mode     = each.value.preferred_encapsulation
   provider_profile_dn = "uni/vmmp-${each.value.switch_provider}"
   relation_infra_rs_vlan_ns = length(compact([each.value.vlan_pool])
@@ -459,7 +451,6 @@ resource "aci_vswitch_policy" "vswitch_policies" {
   for_each      = local.vswitch_policies
   vmm_domain_dn = aci_vmm_domain.domains[each.value.domain].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
-  name_alias    = each.value.name_alias
   dynamic "relation_vmm_rs_vswitch_exporter_pol" {
     for_each = each.value.netflow_export_policy
     content {

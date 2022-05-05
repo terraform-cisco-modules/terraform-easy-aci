@@ -1,3 +1,12 @@
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "fabricNodeControl"
+ - Distinguished Named "uni/fabric/nodecontrol-default"
+GUI Location:
+ - Fabric > Fabric Policies > Policies > Monitoring > Fabric Node Controls > default
+_______________________________________________________________________________________________________________________
+*/
 variable "fabric_node_controls" {
   default = {
     "default" = {
@@ -5,7 +14,6 @@ variable "fabric_node_controls" {
       description        = ""
       enable_dom         = "Dom"
       feature_selections = "telemetry"
-      name_alias         = ""
     }
   }
   description = <<-EOT
@@ -19,7 +27,6 @@ variable "fabric_node_controls" {
     - analytics: Analytic priority downloads the Cisco Tetration Analytics sensor software for installation on the switches.
     - netflow: Netflow priority downloads and installs the Cisco Netflow configuration on the switches to analyze network traffic.
     - telemetry: Telemetry priority is used in conjunction with the Network Insight Resources APIC App. This policy enables Cisco Telemetry configuration on the switches to analyze network traffic.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
@@ -27,20 +34,10 @@ variable "fabric_node_controls" {
       description        = optional(string)
       enable_dom         = optional(string)
       feature_selections = optional(string)
-      name_alias         = optional(string)
     }
   ))
 }
 
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "fabricNodeControl"
- - Distinguished Named "uni/fabric/nodecontrol-default"
-GUI Location:
- - Fabric > Fabric Policies > Policies > Monitoring > Fabric Node Controls > default
-_______________________________________________________________________________________________________________________
-*/
 resource "aci_fabric_node_control" "fabric_node_controls" {
   for_each    = local.fabric_node_controls
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -48,5 +45,4 @@ resource "aci_fabric_node_control" "fabric_node_controls" {
   description = each.value.description
   feature_sel = each.value.feature_selections
   name        = "default"
-  name_alias  = each.value.name_alias
 }

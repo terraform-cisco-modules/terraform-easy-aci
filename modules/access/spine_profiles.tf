@@ -16,7 +16,6 @@ variable "spine_profiles" {
       }
       monitoring_policy  = "default"
       name               = "**REQUIRED**"
-      name_alias         = ""
       spine_policy_group = "**REQUIRED**"
       pod_id             = 1
       serial             = "**REQUIRED**"
@@ -33,7 +32,6 @@ variable "spine_profiles" {
       * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
   * name: Hostname of the Spine plus Name of the Spine Profile, Spine Interface Profile, and Spine Profile Selector.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
   * serial: Manufacturing Serial Number of the Switch.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
@@ -51,7 +49,6 @@ variable "spine_profiles" {
       ))
       monitoring_policy  = optional(string)
       name               = string
-      name_alias         = optional(string)
       spine_policy_group = string
       node_type          = optional(string)
       pod_id             = optional(number)
@@ -76,7 +73,6 @@ resource "aci_spine_interface_profile" "spine_interface_profiles" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
-  name_alias  = each.value.name_alias
 }
 
 
@@ -139,7 +135,6 @@ resource "aci_spine_profile" "spine_profiles" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
-  name_alias  = each.value.name_alias
   relation_infra_rs_sp_acc_port_p = [
     aci_spine_interface_profile.spine_interface_profiles[each.key].id
   ]
@@ -165,7 +160,6 @@ resource "aci_spine_switch_association" "spine_profiles" {
   spine_profile_dn                       = aci_spine_profile.spine_profiles[each.key].id
   description                            = each.value.description
   name                                   = each.value.name
-  name_alias                             = each.value.name_alias
   relation_infra_rs_spine_acc_node_p_grp = aci_spine_switch_policy_group.spine_policy_groups[each.value.spine_policy_group].id
   spine_switch_association_type          = "range"
 }

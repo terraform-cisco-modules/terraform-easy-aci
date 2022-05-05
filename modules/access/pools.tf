@@ -17,7 +17,6 @@ variable "vlan_pools" {
           vlan_range      = "**REQUIRED**"
         }
       }
-      name_alias = ""
     }
   }
   description = <<-EOT
@@ -38,7 +37,6 @@ variable "vlan_pools" {
       * external (Default): Used for allocating VLANs for each EPG assigned to the domain. The VLANs are used when packets are sent to or from leafs.
       * Internal: Used for private VLAN allocations in the internal vSwitch by the Cisco ACI Virtual Edge (AVE). The VLANs are not seen outside the ESX host or on the wire.
     - vlan_range: single vlan; i.e. 1.  range of vlans; i.e. 1-5. Or List of Vlans; i.e. 1-5,10-15
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
@@ -53,7 +51,6 @@ variable "vlan_pools" {
           vlan_range      = string
         }
       ))
-      name_alias = optional(string)
     }
   ))
 }
@@ -74,7 +71,6 @@ resource "aci_vlan_pool" "vlan_pools" {
   alloc_mode  = each.value.allocation_mode
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 resource "aci_ranges" "vlans" {

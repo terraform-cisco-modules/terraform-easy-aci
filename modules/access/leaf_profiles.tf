@@ -21,7 +21,6 @@ variable "leaf_profiles" {
       leaf_policy_group = "**REQUIRED**"
       monitoring_policy = "default"
       name              = "**REQUIRED**"
-      name_alias        = ""
       node_type         = "unspecified"
       pod_id            = 1
       role              = "unspecified"
@@ -47,7 +46,6 @@ variable "leaf_profiles" {
       * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
   * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
   * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * node_type:
     - leaf
     - remote-leaf-wan
@@ -75,7 +73,6 @@ variable "leaf_profiles" {
       leaf_policy_group = string
       monitoring_policy = optional(string)
       name              = string
-      name_alias        = optional(string)
       node_type         = optional(string)
       pod_id            = optional(number)
       role              = optional(string)
@@ -100,7 +97,6 @@ resource "aci_leaf_interface_profile" "leaf_interface_profiles" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
-  name_alias  = each.value.name_alias
 }
 
 
@@ -209,7 +205,6 @@ resource "aci_leaf_profile" "leaf_profiles" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.value.name
-  name_alias  = each.value.name_alias
   relation_infra_rs_acc_port_p = [
     aci_leaf_interface_profile.leaf_interface_profiles[each.key].id
   ]
@@ -236,7 +231,6 @@ resource "aci_leaf_selector" "leaf_selectors" {
   description                      = each.value.description
   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
   name                             = each.value.name
-  name_alias                       = each.value.name_alias
   relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.leaf_policy_group].id
   switch_association_type          = "range"
 }
@@ -250,7 +244,6 @@ resource "aci_node_block" "leaf_profile_blocks" {
   description           = each.value.description
   from_                 = each.key
   name                  = "blk${each.key}-${each.key}"
-  name_alias            = each.value.name_alias
   switch_association_dn = aci_leaf_selector.leaf_selectors[each.key].id
   to_                   = each.key
 }

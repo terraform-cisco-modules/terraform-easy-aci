@@ -10,10 +10,10 @@ ________________________________________________________________________________
 variable "cdp_interface_policies" {
   default = {
     "default" = {
-      admin_state = "enabled"
-      annotation  = ""
-      description = ""
-      name_alias  = ""
+      admin_state  = "enabled"
+      annotation   = ""
+      description  = ""
+      global_alias = ""
     }
   }
   description = <<-EOT
@@ -21,14 +21,15 @@ variable "cdp_interface_policies" {
   * admin_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   EOT
   type = map(object(
     {
       admin_state = optional(string)
+      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
-      name_alias  = optional(string)
+      global_alias = ""
     }
   ))
 }
@@ -40,7 +41,6 @@ resource "aci_cdp_interface_policy" "cdp_interface_policies" {
   admin_st    = each.value.admin_state
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 
@@ -56,7 +56,6 @@ variable "fc_interface_policies" {
       auto_max_speed        = "32G"
       description           = ""
       fill_pattern          = "ARBFF"
-      name_alias            = ""
       port_mode             = "f"
       receive_buffer_credit = 64
       speed                 = "auto"
@@ -75,7 +74,6 @@ variable "fc_interface_policies" {
   * fill_pattern: (Default value is "ARBFF").  Fill Pattern for native FC ports. Allowed values are:
     - ARBFF
     - IDLE
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * port_mode: (Default value is "f").  In which mode Ports should be used. Allowed values are "f" and "np".
   * receive_buffer_credit: (Default value is 64).  Receive buffer credits for native FC ports Range:(16 - 64).
   * speed: (Default value is "auto").  CPU or port speed. All the supported values are:
@@ -93,7 +91,6 @@ variable "fc_interface_policies" {
   EOT
   type = map(object(
     {
-      name_alias            = optional(string)
       auto_max_speed        = optional(string)
       description           = optional(string)
       fill_pattern          = optional(string)
@@ -123,7 +120,6 @@ resource "aci_interface_fc_policy" "fc_interface_policies" {
   description  = each.value.description
   fill_pattern = each.value.fill_pattern
   name         = each.key
-  name_alias   = each.value.name_alias
   port_mode    = each.value.port_mode
   rx_bb_credit = each.value.receive_buffer_credit
   speed        = each.value.speed
@@ -141,7 +137,6 @@ variable "l2_interface_policies" {
     "default" = {
       annotation       = ""
       description      = ""
-      name_alias       = ""
       qinq             = "disabled"
       reflective_relay = "disabled"
       vlan_scope       = "global"
@@ -151,7 +146,6 @@ variable "l2_interface_policies" {
   Key: Name of the Layer2 Interface Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * qinq: (Default value is "disabled").  To enable or disable an interface for Dot1q Tunnel or Q-in-Q encapsulation modes, select one of the following:
     - corePort: Configure this core-switch interface to be included in a Dot1q Tunnel.  You can configure multiple corePorts, for multiple customers, to be used in a Dot1q Tunnel.
     - disabled: Disable this interface to be used in a Dot1q Tunnel.
@@ -168,7 +162,6 @@ variable "l2_interface_policies" {
     {
       annotation       = optional(string)
       description      = optional(string)
-      name_alias       = optional(string)
       qinq             = optional(string)
       reflective_relay = optional(string)
       vlan_scope       = optional(string)
@@ -190,7 +183,6 @@ resource "aci_l2_interface_policy" "l2_interface_policies" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
   qinq        = each.value.qinq
   vepa        = each.value.reflective_relay
   vlan_scope  = each.value.vlan_scope
@@ -216,10 +208,10 @@ variable "lacp_interface_policies" {
         }
       ]
       description             = ""
+      global_alias              = ""
       maximum_number_of_links = 16
       minimum_number_of_links = 1
       mode                    = "off"
-      name_alias              = ""
     }
   }
   description = <<-EOT
@@ -232,6 +224,7 @@ variable "lacp_interface_policies" {
     - suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
     - symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   * maximum_number_of_links: (Default value is 16).  Maximum number of links. Allowed value range is 1-16.
   * minimum_number_of_links: (Default value is 1).  Minimum number of links in port channel. Allowed value range is 1-16. 
   * mode: (Default value is "off").  policy mode. Allowed values are "off", "active", "passive", "mac-pin" and "mac-pin-nicload".
@@ -240,7 +233,6 @@ variable "lacp_interface_policies" {
     - mac-pin-nicload: Pins VM traffic in a round-robin fashion to each uplink based on the MAC address of the physical NIC.
     - off: All static port channels (that are not running LACP) remain in this mode. If you attempt to change the channel mode to active or passive before enabling LACP, the device displays an error message.
     - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
@@ -255,10 +247,10 @@ variable "lacp_interface_policies" {
         }
       )))
       description             = optional(string)
+      global_alias              = optional(string)
       maximum_number_of_links = optional(number)
       minimum_number_of_links = optional(number)
       mode                    = optional(string)
-      name_alias              = optional(string)
     }
   ))
 }
@@ -297,7 +289,6 @@ resource "aci_lacp_policy" "lacp_interface_policies" {
   max_links   = each.value.maximum_number_of_links
   min_links   = each.value.minimum_number_of_links
   name        = each.key
-  name_alias  = each.value.name_alias
   mode        = each.value.mode
 }
 
@@ -314,8 +305,8 @@ variable "link_level_policies" {
       auto_negotiation            = "on"
       description                 = ""
       forwarding_error_correction = "inherit"
+      global_alias                  = ""
       link_debounce_interval      = 100
-      name_alias                  = ""
       speed                       = "inherit"
     }
   }
@@ -326,6 +317,7 @@ variable "link_level_policies" {
     - on
     - off
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   * forwarding_error_correction: (Default value is "inherit").  Forwarding error correction for object fabric if pol. Allowed values: 
     - inherit
     - cl91-rs-fec
@@ -335,7 +327,6 @@ variable "link_level_policies" {
     - kp-fec
     - disable-fec
   * link_debounce_interval: (Default value is 100).  Link debounce interval for object fabric if pol. Range of allowed values: 0-5000.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * speed: (Default value is "inherit").  Port speed for object fabric if pol. Allowed values: 
     - unknown
     - 100M
@@ -355,8 +346,8 @@ variable "link_level_policies" {
       auto_negotiation            = optional(string)
       description                 = optional(string)
       forwarding_error_correction = optional(string)
+      global_alias                  = optional(string)
       link_debounce_interval      = optional(number)
-      name_alias                  = optional(string)
       speed                       = optional(string)
     }
   ))
@@ -380,7 +371,6 @@ resource "aci_fabric_if_pol" "link_level_policies" {
   fec_mode      = each.value.forwarding_error_correction
   link_debounce = each.value.link_debounce_interval
   name          = each.key
-  name_alias    = each.value.name_alias
   speed         = each.value.speed
 }
 
@@ -395,7 +385,7 @@ variable "lldp_interface_policies" {
     "default" = {
       annotation     = ""
       description    = ""
-      name_alias     = ""
+      global_alias     = ""
       receive_state  = "enabled"
       transmit_state = "enabled"
     }
@@ -404,7 +394,7 @@ variable "lldp_interface_policies" {
   Key: Name of the LLDP Interface Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   * receive_state: (Default value is "enabled").  The reception of LLDP packets on an interface. 
   * transmit_state: (Default value is "enabled").  The transmission of LLDP packets on an interface. 
   EOT
@@ -412,7 +402,7 @@ variable "lldp_interface_policies" {
     {
       annotation     = optional(string)
       description    = optional(string)
-      name_alias     = optional(string)
+      global_alias     = optional(string)
       receive_state  = optional(string)
       transmit_state = optional(string)
     }
@@ -436,7 +426,6 @@ resource "aci_lldp_interface_policy" "lldp_interface_policies" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 
@@ -451,7 +440,6 @@ variable "mcp_interface_policies" {
       admin_state = "enabled"
       annotation  = ""
       description = ""
-      name_alias  = ""
     }
   }
   description = <<-EOT
@@ -459,14 +447,12 @@ variable "mcp_interface_policies" {
   * admin_state: (Default value is "enabled").  The administrative state of the MCP interface policy. The state can be:
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   EOT
   type = map(object(
     {
       admin_state = optional(string)
       annotation  = optional(string)
       description = optional(string)
-      name_alias  = optional(string)
     }
   ))
 }
@@ -487,7 +473,6 @@ resource "aci_miscabling_protocol_interface_policy" "mcp_interface_policies" {
   admin_st    = each.value.admin_state
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
 
 
@@ -502,7 +487,6 @@ variable "port_security_policies" {
       annotation            = ""
       description           = ""
       maximum_endpoints     = 0
-      name_alias            = ""
       port_security_timeout = 60
     }
   }
@@ -511,7 +495,6 @@ variable "port_security_policies" {
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * maximum_endpoints: (Default value is 0).  The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * port_security_timeout: (Default value is 60).  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
   EOT
   type = map(object(
@@ -519,7 +502,6 @@ variable "port_security_policies" {
       annotation            = optional(string)
       description           = optional(string)
       maximum_endpoints     = optional(number)
-      name_alias            = optional(string)
       port_security_timeout = optional(number)
     }
   ))
@@ -540,7 +522,6 @@ resource "aci_port_security_policy" "port_security_policies" {
   description = each.value.description
   maximum     = each.value.maximum_endpoints
   name        = each.key
-  name_alias  = each.value.name_alias
   timeout     = each.value.port_security_timeout
   violation   = "protect"
 }
@@ -558,7 +539,7 @@ variable "spanning_tree_interface_policies" {
       bpdu_filter = "disabled"
       bpdu_guard  = "disabled"
       description = ""
-      name_alias  = ""
+      global_alias  = ""
     }
   }
   description = <<-EOT
@@ -567,7 +548,7 @@ variable "spanning_tree_interface_policies" {
   * bpdu_filter_enabled: (Default value is false).  The interface level control that enables the BPDU filter for extended chassis ports.
   * bpdu_guard_enabled: (Default value is false).  The interface level control that enables the BPDU guard for extended chassis ports.
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   EOT
   type = map(object(
     {
@@ -575,7 +556,7 @@ variable "spanning_tree_interface_policies" {
       bpdu_filter = optional(string)
       bpdu_guard  = optional(string)
       description = optional(string)
-      name_alias  = optional(string)
+      global_alias  = optional(string)
     }
   ))
 }
@@ -596,5 +577,4 @@ resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies"
   ctrl        = each.value.control
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
 }
