@@ -140,28 +140,58 @@ locals {
 
   #__________________________________________________________
   #
-  # Global Security Variables
+  # Firmware Management Variables
   #__________________________________________________________
 
-  global_security = {
-    for k, v in var.global_security : k => {
-      annotation                       = v.annotation != null ? v.annotation : ""
-      enable_lockout                   = v.lockout_user != null ? lookup(v.lockout_user[0], "enable_lockout", "disable") : "disable"
-      lockout_duration                 = v.lockout_user != null ? lookup(v.lockout_user[0], "lockout_duration", 60) : 60
-      max_failed_attempts              = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts", 5) : 5
-      max_failed_attempts_window       = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts_window", 5) : 5
-      maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
-      no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
-      password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"
-      password_change_interval         = v.password_change_interval != null ? v.password_change_interval : 48
-      password_changes_within_interval = v.password_changes_within_interval != null ? v.password_changes_within_interval : 2
-      password_expiration_warn_time    = v.password_expiration_warn_time != null ? v.password_expiration_warn_time : 15
-      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : true
-      user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
-      web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
-      web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600
+  firmware = {
+    for k, v in var.firmware : k => {
+      annotation             = v.annotation != null ? v.annotation : ""
+      compatibility_check    = v.compatibility_check != null ? v.compatibility_check : false
+      description            = v.description != null ? v.description : ""
+      policy_type            = v.policy_type != null ? v.policy_type : "switch"
+      graceful_upgrade       = v.graceful_upgrade != null ? v.graceful_upgrade : false
+      maintenance_groups     = v.maintenance_groups
+      notify_conditions      = v.notify_conditions != null ? v.notify_conditions : "notifyOnlyOnFailures"
+      run_mode               = v.run_mode != null ? v.run_mode : "pauseOnlyOnFailures"
+      simulator              = v.simulator != null ? v.simulator : false
+      version                = v.version != null ? v.version : "5.2(3g)"
+      version_check_override = v.version_check_override != null ? v.version_check_override : false
     }
   }
+
+  maintenance_groups_loop = flatten([
+    for k, v in local.firmware : [
+      for key, value in v.maintenance_groups : {
+        annotation             = v.annotation
+        compatibility_check    = v.compatibility_check
+        description            = v.description
+        policy_type            = v.policy_type
+        graceful_upgrade       = v.graceful_upgrade
+        name                   = value.name
+        node_list              = value.node_list != null ? value.node_list : [101, 201]
+        notify_conditions      = v.notify_conditions
+        simulator              = v.simulator
+        start_now              = value.start_now != null ? value.start_now : false
+        run_mode               = v.run_mode
+        version                = v.version
+        version_check_override = v.version_check_override
+      }
+    ]
+  ])
+
+  maintenance_groups = { for k, v in local.maintenance_groups_loop : v.name => v }
+
+  maintenance_group_nodes_loop = flatten([
+    for k, v in local.maintenance_groups : [
+      for s in v.nodes : {
+        name    = v.name
+        node_id = s
+      }
+    ]
+  ])
+
+  maintenance_group_nodes = { for k, v in local.maintenance_group_nodes_loop : "${v.name}_${v.node_id}" => v }
+
 
   #__________________________________________________________
   #
@@ -204,6 +234,32 @@ locals {
   ])
 
   radius_hosts = { for k, v in local.radius_hosts_loop : "${v.key1}_${v.host}" => v }
+
+  #__________________________________________________________
+  #
+  # Security Variables
+  #__________________________________________________________
+
+  security = {
+    for k, v in var.security : k => {
+      annotation                       = v.annotation != null ? v.annotation : ""
+      enable_lockout                   = v.lockout_user != null ? lookup(v.lockout_user[0], "enable_lockout", "disable") : "disable"
+      lockout_duration                 = v.lockout_user != null ? lookup(v.lockout_user[0], "lockout_duration", 60) : 60
+      max_failed_attempts              = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts", 5) : 5
+      max_failed_attempts_window       = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts_window", 5) : 5
+      maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
+      no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
+      password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"
+      password_change_interval         = v.password_change_interval != null ? v.password_change_interval : 48
+      password_changes_within_interval = v.password_changes_within_interval != null ? v.password_changes_within_interval : 2
+      password_expiration_warn_time    = v.password_expiration_warn_time != null ? v.password_expiration_warn_time : 15
+      password_strength_check          = v.password_strength_check != null ? v.password_strength_check : true
+      user_passwords_to_store_count    = v.user_passwords_to_store_count != null ? v.user_passwords_to_store_count : 5
+      web_session_idle_timeout         = v.web_session_idle_timeout != null ? v.web_session_idle_timeout : 1200
+      web_token_timeout                = v.web_token_timeout != null ? v.web_token_timeout : 600
+    }
+  }
+
 
   #__________________________________________________________
   #

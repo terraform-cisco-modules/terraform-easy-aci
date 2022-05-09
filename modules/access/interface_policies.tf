@@ -25,10 +25,10 @@ variable "cdp_interface_policies" {
   EOT
   type = map(object(
     {
-      admin_state = optional(string)
-      alias       = optional(string)
-      annotation  = optional(string)
-      description = optional(string)
+      admin_state  = optional(string)
+      alias        = optional(string)
+      annotation   = optional(string)
+      description  = optional(string)
       global_alias = ""
     }
   ))
@@ -49,7 +49,7 @@ resource "aci_cdp_interface_policy" "cdp_interface_policies" {
 Fibre-Channel Interface Policy Variables
 _______________________________________________________________________________________________________________________
 */
-variable "fc_interface_policies" {
+variable "fibre_channel_interface_policies" {
   default = {
     "default" = {
       annotation            = ""
@@ -113,8 +113,8 @@ GUI Location:
  - Fabric > Access Policies > Policies > Interface > Fibre Channel Interface : {name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_interface_fc_policy" "fc_interface_policies" {
-  for_each     = local.fc_interface_policies
+resource "aci_interface_fc_policy" "fibre_channel_interface_policies" {
+  for_each     = local.fibre_channel_interface_policies
   annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   automaxspeed = each.value.auto_max_speed
   description  = each.value.description
@@ -191,110 +191,6 @@ resource "aci_l2_interface_policy" "l2_interface_policies" {
 
 /*_____________________________________________________________________________________________________________________
 
-LACP Interface Policy Variables
-_______________________________________________________________________________________________________________________
-*/
-variable "lacp_interface_policies" {
-  default = {
-    "default" = {
-      annotation = ""
-      control = [
-        {
-          fast_select_hot_standby_ports = true
-          graceful_convergence          = true
-          load_defer_member_ports       = false
-          suspend_individual_port       = true
-          symmetric_hashing             = false
-        }
-      ]
-      description             = ""
-      global_alias              = ""
-      maximum_number_of_links = 16
-      minimum_number_of_links = 1
-      mode                    = "off"
-    }
-  }
-  description = <<-EOT
-  Key: Name of the LACP Interface Policy.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * control: LACP Control Parameters:
-    - fast_select_hot_standby_ports: (Default value is true).  Configures fast select for hot standby ports. Enabling this feature will allow fast selection of a hot standby port when last active port in the port-channel is going down.
-    - graceful_convergence: (Default value is true).  Configures port-channel LACP graceful convergence. Disable this only with LACP ports connected to a Non-Nexus peer. Disabling this with Nexus peer can lead to port suspension.
-    - load_defer_member_ports: (Default value is false).  Configures the load-balancing algorithm for port channels that applies to the entire device or to only one module.
-    - suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
-    - symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-  * maximum_number_of_links: (Default value is 16).  Maximum number of links. Allowed value range is 1-16.
-  * minimum_number_of_links: (Default value is 1).  Minimum number of links in port channel. Allowed value range is 1-16. 
-  * mode: (Default value is "off").  policy mode. Allowed values are "off", "active", "passive", "mac-pin" and "mac-pin-nicload".
-    - active: LACP mode that places a port into an active negotiating state in which the port initiates negotiations with other ports by sending LACP packets.
-    - mac-pin: Used for pinning VM traffic in a round-robin fashion to each uplink based on the MAC address of the VM. MAC Pinning is the recommended option for channeling when connecting to upstream switches that do not support multichassis EtherChannel (MEC).
-    - mac-pin-nicload: Pins VM traffic in a round-robin fashion to each uplink based on the MAC address of the physical NIC.
-    - off: All static port channels (that are not running LACP) remain in this mode. If you attempt to change the channel mode to active or passive before enabling LACP, the device displays an error message.
-    - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
-  EOT
-  type = map(object(
-    {
-      annotation = optional(string)
-      control = optional(list(object(
-        {
-          fast_select_hot_standby_ports = optional(bool)
-          graceful_convergence          = optional(bool)
-          load_defer_member_ports       = optional(bool)
-          suspend_individual_port       = optional(bool)
-          symmetric_hashing             = optional(bool)
-        }
-      )))
-      description             = optional(string)
-      global_alias              = optional(string)
-      maximum_number_of_links = optional(number)
-      minimum_number_of_links = optional(number)
-      mode                    = optional(string)
-    }
-  ))
-}
-
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "lacpLagPol"
- - Distinguished Name: "uni/infra/lacplagp-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > Port Channel : {name}
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_lacp_policy" "lacp_interface_policies" {
-  for_each   = local.lacp_interface_policies
-  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl = anytrue(
-    [each.value.control[0]["fast_select_hot_standby_ports"
-      ], each.value.control[0]["graceful_convergence"
-      ], each.value.control[0]["load_defer_member_ports"
-      ], each.value.control[0]["suspend_individual_port"
-      ], each.value.control[0]["symmetric_hashing"]]) ? compact(concat(
-      [length(regexall(true, each.value.control[0].fast_select_hot_standby_ports)
-        ) > 0 ? "fast-sel-hot-stdby" : ""
-        ], [length(regexall(true, each.value.control[0].graceful_convergence)
-        ) > 0 ? "graceful-conv" : ""
-        ], [length(regexall(true, each.value.control[0].load_defer_member_ports)
-        ) > 0 ? "load-defer" : ""
-        ], [length(regexall(true, each.value.control[0].suspend_individual_port)
-        ) > 0 ? "susp-individual" : ""
-        ], [length(regexall(true, each.value.control[0].symmetric_hashing)
-    ) > 0 ? "symmetric-hash" : ""])) : [
-  "fast-sel-hot-stdby", "graceful-conv", "susp-individual"]
-  description = each.value.description
-  max_links   = each.value.maximum_number_of_links
-  min_links   = each.value.minimum_number_of_links
-  name        = each.key
-  mode        = each.value.mode
-}
-
-
-/*_____________________________________________________________________________________________________________________
-
 Link Level Policy Variables
 _______________________________________________________________________________________________________________________
 */
@@ -302,10 +198,10 @@ variable "link_level_policies" {
   default = {
     "default" = {
       annotation                  = ""
-      auto_negotiation            = "on"
+      auto_negotiation            = true
       description                 = ""
       forwarding_error_correction = "inherit"
-      global_alias                  = ""
+      global_alias                = ""
       link_debounce_interval      = 100
       speed                       = "inherit"
     }
@@ -313,9 +209,10 @@ variable "link_level_policies" {
   description = <<-EOT
   Key: Name of the Link Level Policy.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * auto_negotiation: (Default value is "on").  Policy auto negotiation for object fabric if pol. Allowed values:
-    - on
+  * auto_negotiation: (Default value is true).  Policy auto negotiation for object fabric if pol. Allowed values:
     - off
+    - on
+    - on-enforce
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
   * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   * forwarding_error_correction: (Default value is "inherit").  Forwarding error correction for object fabric if pol. Allowed values: 
@@ -346,7 +243,7 @@ variable "link_level_policies" {
       auto_negotiation            = optional(string)
       description                 = optional(string)
       forwarding_error_correction = optional(string)
-      global_alias                  = optional(string)
+      global_alias                = optional(string)
       link_debounce_interval      = optional(number)
       speed                       = optional(string)
     }
@@ -385,7 +282,7 @@ variable "lldp_interface_policies" {
     "default" = {
       annotation     = ""
       description    = ""
-      global_alias     = ""
+      global_alias   = ""
       receive_state  = "enabled"
       transmit_state = "enabled"
     }
@@ -402,7 +299,7 @@ variable "lldp_interface_policies" {
     {
       annotation     = optional(string)
       description    = optional(string)
-      global_alias     = optional(string)
+      global_alias   = optional(string)
       receive_state  = optional(string)
       transmit_state = optional(string)
     }
@@ -478,6 +375,110 @@ resource "aci_miscabling_protocol_interface_policy" "mcp_interface_policies" {
 
 /*_____________________________________________________________________________________________________________________
 
+Port-Channel Policy Variables
+_______________________________________________________________________________________________________________________
+*/
+variable "port_channel_policies" {
+  default = {
+    "default" = {
+      annotation = ""
+      control = [
+        {
+          fast_select_hot_standby_ports = true
+          graceful_convergence          = true
+          load_defer_member_ports       = false
+          suspend_individual_port       = true
+          symmetric_hashing             = false
+        }
+      ]
+      description             = ""
+      global_alias            = ""
+      maximum_number_of_links = 16
+      minimum_number_of_links = 1
+      mode                    = "off"
+    }
+  }
+  description = <<-EOT
+  Key: Name of the LACP Interface Policy.
+  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+  * control: LACP Control Parameters:
+    - fast_select_hot_standby_ports: (Default value is true).  Configures fast select for hot standby ports. Enabling this feature will allow fast selection of a hot standby port when last active port in the port-channel is going down.
+    - graceful_convergence: (Default value is true).  Configures port-channel LACP graceful convergence. Disable this only with LACP ports connected to a Non-Nexus peer. Disabling this with Nexus peer can lead to port suspension.
+    - load_defer_member_ports: (Default value is false).  Configures the load-balancing algorithm for port channels that applies to the entire device or to only one module.
+    - suspend_individual_port: (Default value is true).  LACP sets a port to the suspended state if it does not receive an LACP bridge protocol data unit (BPDU) from the peer ports in a port channel. This can cause some servers to fail to boot up as they require LACP to logically bring up the port.
+    - symmetric_hashing: (Default value is false).  Bidirectional traffic is forced to use the same physical interface and each physical interface in the port channel is effectively mapped to a set of flows.
+  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+  * maximum_number_of_links: (Default value is 16).  Maximum number of links. Allowed value range is 1-16.
+  * minimum_number_of_links: (Default value is 1).  Minimum number of links in port channel. Allowed value range is 1-16. 
+  * mode: (Default value is "off").  port-channel policy mode. 
+    - active: LACP mode that places a port into an active negotiating state in which the port initiates negotiations with other ports by sending LACP packets.
+    - mac-pin: Used for pinning VM traffic in a round-robin fashion to each uplink based on the MAC address of the VM. MAC Pinning is the recommended option for channeling when connecting to upstream switches that do not support multichassis EtherChannel (MEC).
+    - mac-pin-nicload: Pins VM traffic in a round-robin fashion to each uplink based on the MAC address of the physical NIC.
+    - off: All static port channels (that are not running LACP) remain in this mode. If you attempt to change the channel mode to active or passive before enabling LACP, the device displays an error message.
+    - passive: LACP mode that places a port into a passive negotiating state in which the port responds to LACP packets that it receives but does not initiate LACP negotiation. Passive mode is useful when you do not know whether the remote system, or partner, supports LACP.
+  EOT
+  type = map(object(
+    {
+      annotation = optional(string)
+      control = optional(list(object(
+        {
+          fast_select_hot_standby_ports = optional(bool)
+          graceful_convergence          = optional(bool)
+          load_defer_member_ports       = optional(bool)
+          suspend_individual_port       = optional(bool)
+          symmetric_hashing             = optional(bool)
+        }
+      )))
+      description             = optional(string)
+      global_alias            = optional(string)
+      maximum_number_of_links = optional(number)
+      minimum_number_of_links = optional(number)
+      mode                    = optional(string)
+    }
+  ))
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "lacpLagPol"
+ - Distinguished Name: "uni/infra/lacplagp-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Port Channel : {name}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_lacp_policy" "port_channel_policies" {
+  for_each   = local.port_channel_policies
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  ctrl = anytrue(
+    [each.value.control[0]["fast_select_hot_standby_ports"
+      ], each.value.control[0]["graceful_convergence"
+      ], each.value.control[0]["load_defer_member_ports"
+      ], each.value.control[0]["suspend_individual_port"
+      ], each.value.control[0]["symmetric_hashing"]]) ? compact(concat(
+      [length(regexall(true, each.value.control[0].fast_select_hot_standby_ports)
+        ) > 0 ? "fast-sel-hot-stdby" : ""
+        ], [length(regexall(true, each.value.control[0].graceful_convergence)
+        ) > 0 ? "graceful-conv" : ""
+        ], [length(regexall(true, each.value.control[0].load_defer_member_ports)
+        ) > 0 ? "load-defer" : ""
+        ], [length(regexall(true, each.value.control[0].suspend_individual_port)
+        ) > 0 ? "susp-individual" : ""
+        ], [length(regexall(true, each.value.control[0].symmetric_hashing)
+    ) > 0 ? "symmetric-hash" : ""])) : [
+  "fast-sel-hot-stdby", "graceful-conv", "susp-individual"]
+  description = each.value.description
+  max_links   = each.value.maximum_number_of_links
+  min_links   = each.value.minimum_number_of_links
+  name        = each.key
+  mode        = each.value.mode
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
 Port Security Policy Variables
 _______________________________________________________________________________________________________________________
 */
@@ -535,11 +536,11 @@ ________________________________________________________________________________
 variable "spanning_tree_interface_policies" {
   default = {
     "default" = {
-      annotation  = ""
-      bpdu_filter = "disabled"
-      bpdu_guard  = "disabled"
-      description = ""
-      global_alias  = ""
+      annotation   = ""
+      bpdu_filter  = "disabled"
+      bpdu_guard   = "disabled"
+      description  = ""
+      global_alias = ""
     }
   }
   description = <<-EOT
@@ -552,11 +553,11 @@ variable "spanning_tree_interface_policies" {
   EOT
   type = map(object(
     {
-      annotation  = optional(string)
-      bpdu_filter = optional(string)
-      bpdu_guard  = optional(string)
-      description = optional(string)
-      global_alias  = optional(string)
+      annotation   = optional(string)
+      bpdu_filter  = optional(string)
+      bpdu_guard   = optional(string)
+      description  = optional(string)
+      global_alias = optional(string)
     }
   ))
 }
@@ -574,7 +575,16 @@ ________________________________________________________________________________
 resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies" {
   for_each    = local.spanning_tree_interface_policies
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl        = each.value.control
+  ctrl        = alltrue(concat(
+    [each.value.bpdu_filter == "enabled" ? true : false],
+    [each.value.bpdu_guard == "enabled" ? true : false]
+    )) ? ["bpdu-filter", "bpdu-guard"] : anytrue(concat(
+    [each.value.bpdu_filter == "enabled" ? true : false],
+    [each.value.bpdu_guard == "enabled" ? true : false]
+    )) ? compact(
+    [each.value.bpdu_filter == "enabled" ? "bpdu-filter" : ""],
+    [each.value.bpdu_guard == "enabled" ? "bpdu-guard" : ""]
+  ) : ["unspecified"]
   description = each.value.description
   name        = each.key
 }

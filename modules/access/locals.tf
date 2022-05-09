@@ -20,60 +20,6 @@ locals {
 
   #__________________________________________________________
   #
-  # Firmware Management Variables
-  #__________________________________________________________
-
-  firmware = {
-    for k, v in var.firmware : k => {
-      annotation             = v.annotation != null ? v.annotation : ""
-      compatibility_check    = v.compatibility_check != null ? v.compatibility_check : false
-      description            = v.description != null ? v.description : ""
-      policy_type            = v.policy_type != null ? v.policy_type : "switch"
-      graceful_upgrade       = v.graceful_upgrade != null ? v.graceful_upgrade : false
-      maintenance_groups     = v.maintenance_groups
-      notify_conditions      = v.notify_conditions != null ? v.notify_conditions : "notifyOnlyOnFailures"
-      run_mode               = v.run_mode != null ? v.run_mode : "pauseOnlyOnFailures"
-      simulator              = v.simulator != null ? v.simulator : false
-      version                = v.version != null ? v.version : "5.2(3g)"
-      version_check_override = v.version_check_override != null ? v.version_check_override : false
-    }
-  }
-
-  maintenance_groups_loop = flatten([
-    for k, v in local.firmware : [
-      for key, value in v.maintenance_groups : {
-        annotation             = v.annotation
-        compatibility_check    = v.compatibility_check
-        description            = v.description
-        policy_type            = v.policy_type
-        graceful_upgrade       = v.graceful_upgrade
-        name                   = value.name
-        nodes                  = value.nodes != null ? value.nodes : [101, 201]
-        notify_conditions      = v.notify_conditions
-        simulator              = v.simulator
-        start_now              = value.start_now != null ? value.start_now : false
-        run_mode               = v.run_mode
-        version                = v.version
-        version_check_override = v.version_check_override
-      }
-    ]
-  ])
-
-  maintenance_groups = { for k, v in local.maintenance_groups_loop : v.name => v }
-
-  maintenance_group_nodes_loop = flatten([
-    for k, v in local.maintenance_groups : [
-      for s in v.nodes : {
-        name    = v.name
-        node_id = s
-      }
-    ]
-  ])
-
-  maintenance_group_nodes = { for k, v in local.maintenance_group_nodes_loop : "${v.name}_${v.node_id}" => v }
-
-  #__________________________________________________________
-  #
   # Global Policies Variables
   #__________________________________________________________
 
@@ -180,16 +126,16 @@ locals {
 
   cdp_interface_policies = {
     for k, v in var.cdp_interface_policies : k => {
-      admin_state = v.admin_state != null ? v.admin_state : "enabled"
-      annotation  = v.annotation != null ? v.annotation : ""
-      description = v.description != null ? v.description : ""
-      global_alias  = v.global_alias != null ? v.global_alias : ""
+      admin_state  = v.admin_state != null ? v.admin_state : "enabled"
+      annotation   = v.annotation != null ? v.annotation : ""
+      description  = v.description != null ? v.description : ""
+      global_alias = v.global_alias != null ? v.global_alias : ""
     }
   }
 
 
-  fc_interface_policies = {
-    for k, v in var.fc_interface_policies : k => {
+  fibre_channel_interface_policies = {
+    for k, v in var.fibre_channel_interface_policies : k => {
       auto_max_speed        = v.auto_max_speed != null ? v.auto_max_speed : "32G"
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
@@ -213,8 +159,41 @@ locals {
   }
 
 
-  lacp_interface_policies = {
-    for k, v in var.lacp_interface_policies : k => {
+  link_level_policies = {
+    for k, v in var.link_level_policies : k => {
+      annotation                  = v.annotation != null ? v.annotation : ""
+      auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : true
+      description                 = v.description != null ? v.description : ""
+      global_alias                = v.global_alias != null ? v.global_alias : ""
+      forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
+      link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : 100
+      speed                       = v.speed != null ? v.speed : "inherit"
+    }
+  }
+
+
+  lldp_interface_policies = {
+    for k, v in var.lldp_interface_policies : k => {
+      annotation     = v.annotation != null ? v.annotation : ""
+      description    = v.description != null ? v.description : ""
+      global_alias   = v.global_alias != null ? v.global_alias : ""
+      receive_state  = v.receive_state != null ? v.receive_state : "enabled"
+      transmit_state = v.transmit_state != null ? v.transmit_state : "enabled"
+    }
+  }
+
+
+  mcp_interface_policies = {
+    for k, v in var.mcp_interface_policies : k => {
+      admin_state = v.admin_state != null ? v.admin_state : "enabled"
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+    }
+  }
+
+
+  port_channel_policies = {
+    for k, v in var.port_channel_policies : k => {
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
       control = v.control != null ? [
@@ -234,43 +213,10 @@ locals {
           symmetric_hashing             = false
         }
       ]
-      global_alias              = v.global_alias != null ? v.global_alias : ""
+      global_alias            = v.global_alias != null ? v.global_alias : ""
       maximum_number_of_links = v.maximum_number_of_links != null ? v.maximum_number_of_links : 16
       minimum_number_of_links = v.minimum_number_of_links != null ? v.minimum_number_of_links : 1
       mode                    = v.mode != null ? v.mode : "off"
-    }
-  }
-
-
-  link_level_policies = {
-    for k, v in var.link_level_policies : k => {
-      annotation                  = v.annotation != null ? v.annotation : ""
-      auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : "on"
-      description                 = v.description != null ? v.description : ""
-      global_alias                  = v.global_alias != null ? v.global_alias : ""
-      forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
-      link_debounce_interval      = v.link_debounce_interval != null ? v.link_debounce_interval : 100
-      speed                       = v.speed != null ? v.speed : "inherit"
-    }
-  }
-
-
-  lldp_interface_policies = {
-    for k, v in var.lldp_interface_policies : k => {
-      annotation     = v.annotation != null ? v.annotation : ""
-      description    = v.description != null ? v.description : ""
-      global_alias     = v.global_alias != null ? v.global_alias : ""
-      receive_state  = v.receive_state != null ? v.receive_state : "enabled"
-      transmit_state = v.transmit_state != null ? v.transmit_state : "enabled"
-    }
-  }
-
-
-  mcp_interface_policies = {
-    for k, v in var.mcp_interface_policies : k => {
-      admin_state = v.admin_state != null ? v.admin_state : "enabled"
-      annotation  = v.annotation != null ? v.annotation : ""
-      description = v.description != null ? v.description : ""
     }
   }
 
@@ -287,16 +233,11 @@ locals {
 
   spanning_tree_interface_policies = {
     for k, v in var.spanning_tree_interface_policies : k => {
-      annotation  = v.annotation != null ? v.annotation : ""
-      control = alltrue(flatten(
-        [v.bpdu_filter == "enabled" ? true : false],[v.bpdu_guard == "enabled" ? true : false])
-        ) ? ["bpdu-filter", "bpdu-guard"] : anytrue(flatten(
-        [v.bpdu_filter == "enabled" ? true : false],[v.bpdu_guard == "enabled" ? true : false])
-        ) ? compact([v.bpdu_filter == "enabled" ? "bpdu-filter" : ""],
-        [v.bpdu_guard == "enabled" ? "bpdu-guard" : ""]
-        ) : ["unspecified"]
-      description = v.description != null ? v.description : ""
-      global_alias  = v.global_alias != null ? v.global_alias : ""
+      annotation = v.annotation != null ? v.annotation : ""
+      bpdu_guard = v.bpdu_guard != null ? v.bpdu_guard : false
+      bpdu_filter = v.bpdu_filter != null ? v.bpdu_filter : false
+      description  = v.description != null ? v.description : ""
+      global_alias = v.global_alias != null ? v.global_alias : ""
     }
   }
 
@@ -307,32 +248,35 @@ locals {
 
   leaf_port_group_access = {
     for k, v in var.leaf_port_group_access : k => {
-      aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
-      annotation                         = v.annotation != null ? v.annotation : ""
-      cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
-      copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
-      data_plane_policing_policy         = v.data_plane_policing_policy != null ? v.data_plane_policing_policy : ""
-      data_plane_policing_policy_egress  = v.data_plane_policing_policy_egress != null ? v.data_plane_policing_policy_egress : ""
-      data_plane_policing_policy_ingress = v.data_plane_policing_policy_ingress != null ? v.data_plane_policing_policy_ingress : ""
-      description                        = v.description != null ? v.description : ""
-      dot1x_port_policy                  = v.dot1x_port_policy != null ? v.dot1x_port_policy : ""
-      dwdm_policy                        = v.dwdm_policy != null ? v.dwdm_policy : ""
-      fc_interface_policy                = v.fc_interface_policy != null ? v.fc_interface_policy : ""
-      global_alias                         = v.global_alias != null ? v.global_alias : ""
-      l2_interface_policy                = v.l2_interface_policy != null ? v.l2_interface_policy : ""
-      link_level_policy                  = v.link_level_policy != null ? v.link_level_policy : ""
-      lldp_interface_policy              = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
-      macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
-      mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
-      monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
-      netflow_policy                     = v.netflow_policy != null ? v.netflow_policy : []
-      port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
-      priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
-      slow_drain_policy                  = v.slow_drain_policy != null ? v.slow_drain_policy : ""
-      span_destination_groups            = v.span_destination_groups != null ? v.span_destination_groups : ""
-      span_source_groups                 = v.span_source_groups != null ? v.span_source_groups : ""
-      spanning_tree_interface_policy     = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
-      storm_control_policy               = v.storm_control_policy != null ? v.storm_control_policy : ""
+      attachable_entity_profile        = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
+      annotation                       = v.annotation != null ? v.annotation : ""
+      cdp_interface_policy             = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+      copp_interface_policy            = v.copp_interface_policy != null ? v.copp_interface_policy : ""
+      data_plane_policing_egress       = v.data_plane_policing_egress != null ? v.data_plane_policing_egress : ""
+      data_plane_policing_ingress      = v.data_plane_policing_ingress != null ? v.data_plane_policing_ingress : ""
+      description                      = v.description != null ? v.description : ""
+      dot1x_port_authentication_policy = v.dot1x_port_authentication_policy != null ? v.dot1x_port_authentication_policy : ""
+      dwdm_policy                      = v.dwdm_policy != null ? v.dwdm_policy : ""
+      fibre_channel_interface_policy   = v.fibre_channel_interface_policy != null ? v.fibre_channel_interface_policy : ""
+      global_alias                     = v.global_alias != null ? v.global_alias : ""
+      l2_interface_policy              = v.l2_interface_policy != null ? v.l2_interface_policy : ""
+      link_flap_policy                 = v.link_flap_policy != null ? v.link_flap_policy : ""
+      link_level_flow_control_policy   = v.link_level_flow_control_policy != null ? v.link_level_flow_control_policy : ""
+      link_level_policy                = v.link_level_policy != null ? v.link_level_policy : ""
+      lldp_interface_policy            = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+      macsec_policy                    = v.macsec_policy != null ? v.macsec_policy : ""
+      mcp_interface_policy             = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
+      monitoring_policy                = v.monitoring_policy != null ? v.monitoring_policy : ""
+      netflow_policy                   = v.netflow_policy != null ? v.netflow_policy : []
+      poe_interface_policy             = v.poe_interface_policy != null ? v.poe_interface_policy : ""
+      port_security_policy             = v.port_security_policy != null ? v.port_security_policy : ""
+      priority_flow_control_policy     = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
+      slow_drain_policy                = v.slow_drain_policy != null ? v.slow_drain_policy : ""
+      span_destination_groups          = v.span_destination_groups != null ? v.span_destination_groups : []
+      span_source_groups               = v.span_source_groups != null ? v.span_source_groups : []
+      spanning_tree_interface_policy   = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      storm_control_policy             = v.storm_control_policy != null ? v.storm_control_policy : ""
+      synce_interface_policy           = v.synce_interface_policy != null ? v.synce_interface_policy : ""
     }
   }
 
@@ -348,29 +292,31 @@ locals {
 
   leaf_port_group_bundle = {
     for k, v in var.leaf_port_group_bundle : k => {
-      aaep_policy                        = v.aaep_policy != null ? v.aaep_policy : ""
-      annotation                         = v.annotation != null ? v.annotation : ""
-      cdp_interface_policy               = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
-      copp_interface_policy              = v.copp_interface_policy != null ? v.copp_interface_policy : ""
-      data_plane_policing_policy         = v.data_plane_policing_policy != null ? v.data_plane_policing_policy : ""
-      data_plane_policing_policy_egress  = v.data_plane_policing_policy_egress != null ? v.data_plane_policing_policy_egress : ""
-      data_plane_policing_policy_ingress = v.data_plane_policing_policy_ingress != null ? v.data_plane_policing_policy_ingress : ""
-      description                        = v.description != null ? v.description : ""
-      fc_interface_policy                = v.fc_interface_policy != null ? v.fc_interface_policy : ""
-      l2_interface_policy                = v.l2_interface_policy != null ? v.l2_interface_policy : ""
-      lacp_interface_policy              = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
-      link_aggregation_type              = v.link_aggregation_type != null ? v.link_aggregation_type : "node"
-      lldp_interface_policy              = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
-      macsec_policy                      = v.macsec_policy != null ? v.macsec_policy : ""
-      mcp_interface_policy               = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
-      monitoring_policy                  = v.monitoring_policy != null ? v.monitoring_policy : ""
-      port_security_policy               = v.port_security_policy != null ? v.port_security_policy : ""
-      priority_flow_control_policy       = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
-      slow_drain_policy                  = v.slow_drain_policy != null ? v.slow_drain_policy : ""
-      span_destination_groups            = v.span_destination_groups != null ? v.span_destination_groups : ""
-      span_source_groups                 = v.span_source_groups != null ? v.span_source_groups : ""
-      spanning_tree_interface_policy     = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
-      storm_control_policy               = v.storm_control_policy != null ? v.storm_control_policy : ""
+      attachable_entity_profile      = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
+      annotation                     = v.annotation != null ? v.annotation : ""
+      cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
+      copp_interface_policy          = v.copp_interface_policy != null ? v.copp_interface_policy : ""
+      data_plane_policing_egress     = v.data_plane_policing_egress != null ? v.data_plane_policing_egress : ""
+      data_plane_policing_ingress    = v.data_plane_policing_ingress != null ? v.data_plane_policing_ingress : ""
+      description                    = v.description != null ? v.description : ""
+      fibre_channel_interface_policy = v.fibre_channel_interface_policy != null ? v.fibre_channel_interface_policy : ""
+      l2_interface_policy            = v.l2_interface_policy != null ? v.l2_interface_policy : ""
+      link_aggregation_policy        = v.link_aggregation_policy != null ? v.link_aggregation_policy : ""
+      link_aggregation_type          = v.link_aggregation_type != null ? v.link_aggregation_type : "node"
+      link_flap_policy               = v.link_flap_policy != null ? v.link_flap_policy : ""
+      link_level_flow_control_policy = v.link_level_flow_control_policy != null ? v.link_level_flow_control_policy : ""
+      link_level_policy              = v.link_level_policy != null ? v.link_level_policy : ""
+      lldp_interface_policy          = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
+      macsec_policy                  = v.macsec_policy != null ? v.macsec_policy : ""
+      mcp_interface_policy           = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
+      monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
+      port_security_policy           = v.port_security_policy != null ? v.port_security_policy : ""
+      priority_flow_control_policy   = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
+      slow_drain_policy              = v.slow_drain_policy != null ? v.slow_drain_policy : ""
+      span_destination_groups        = v.span_destination_groups != null ? v.span_destination_groups : ""
+      span_source_groups             = v.span_source_groups != null ? v.span_source_groups : ""
+      spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      storm_control_policy           = v.storm_control_policy != null ? v.storm_control_policy : ""
     }
   }
 
@@ -382,109 +328,30 @@ locals {
 
   leaf_policy_groups = {
     for k, v in var.leaf_policy_groups : k => {
-      annotation                     = v.annotation != null ? v.annotation : ""
-      bfd_ipv4_policy                = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
-      bfd_ipv6_policy                = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
-      bfd_multihop_ipv4_policy       = v.bfd_multihop_ipv4_policy != null ? v.bfd_multihop_ipv4_policy : "default"
-      bfd_multihop_ipv6_policy       = v.bfd_multihop_ipv6_policy != null ? v.bfd_multihop_ipv6_policy : "default"
-      cdp_policy                     = v.cdp_policy != null ? v.cdp_policy : "default"
-      copp_leaf_policy               = v.copp_leaf_policy != null ? v.copp_leaf_policy : "default"
-      copp_pre_filter                = v.copp_pre_filter != null ? v.copp_pre_filter : "default"
-      description                    = v.description != null ? v.description : ""
-      dot1x_authentication_policy    = v.dot1x_authentication_policy != null ? v.dot1x_authentication_policy : "default"
-      equipment_flash_config         = v.equipment_flash_config != null ? v.equipment_flash_config : "default"
-      fast_link_failover_policy      = v.fast_link_failover_policy != null ? v.fast_link_failover_policy : "default"
-      fibre_channel_node_policy      = v.fibre_channel_node_policy != null ? v.fibre_channel_node_policy : "default"
-      fibre_channel_san_policy       = v.fibre_channel_san_policy != null ? v.fibre_channel_san_policy : "default"
-      forward_scale_profile_policy   = v.forward_scale_profile_policy != null ? v.forward_scale_profile_policy : "default"
-      lldp_policy                    = v.lldp_policy != null ? v.lldp_policy : "default"
-      monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : "default"
-      netflow_node_policy            = v.netflow_node_policy != null ? v.netflow_node_policy : "default"
-      ptp_node_policy                = v.ptp_node_policy != null ? v.ptp_node_policy : "default"
-      poe_node_policy                = v.poe_node_policy != null ? v.poe_node_policy : "default"
-      spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : "default"
-      synce_node_policy              = v.synce_node_policy != null ? v.synce_node_policy : "default"
-      usb_configuration_policy       = v.usb_configuration_policy != null ? v.usb_configuration_policy : "default"
+      annotation                       = v.annotation != null ? v.annotation : ""
+      bfd_ipv4_policy                  = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
+      bfd_ipv6_policy                  = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
+      bfd_multihop_ipv4_policy         = v.bfd_multihop_ipv4_policy != null ? v.bfd_multihop_ipv4_policy : "default"
+      bfd_multihop_ipv6_policy         = v.bfd_multihop_ipv6_policy != null ? v.bfd_multihop_ipv6_policy : "default"
+      cdp_interface_policy             = v.cdp_interface_policy != null ? v.cdp_interface_policy : "default"
+      copp_leaf_policy                 = v.copp_leaf_policy != null ? v.copp_leaf_policy : "default"
+      copp_pre_filter                  = v.copp_pre_filter != null ? v.copp_pre_filter : "default"
+      description                      = v.description != null ? v.description : ""
+      dot1x_node_authentication_policy = v.dot1x_node_authentication_policy != null ? v.dot1x_node_authentication_policy : "default"
+      equipment_flash_config           = v.equipment_flash_config != null ? v.equipment_flash_config : "default"
+      fast_link_failover_policy        = v.fast_link_failover_policy != null ? v.fast_link_failover_policy : "default"
+      fibre_channel_node_policy        = v.fibre_channel_node_policy != null ? v.fibre_channel_node_policy : "default"
+      fibre_channel_san_policy         = v.fibre_channel_san_policy != null ? v.fibre_channel_san_policy : "default"
+      forward_scale_profile_policy     = v.forward_scale_profile_policy != null ? v.forward_scale_profile_policy : "default"
+      lldp_interface_policy            = v.lldp_interface_policy != null ? v.lldp_interface_policy : "default"
+      monitoring_policy                = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      netflow_node_policy              = v.netflow_node_policy != null ? v.netflow_node_policy : "default"
+      poe_node_policy                  = v.poe_node_policy != null ? v.poe_node_policy : "default"
+      ptp_node_policy                  = v.ptp_node_policy != null ? v.ptp_node_policy : "default"
+      spanning_tree_interface_policy   = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : "default"
+      synce_node_policy                = v.synce_node_policy != null ? v.synce_node_policy : "default"
+      usb_configuration_policy         = v.usb_configuration_policy != null ? v.usb_configuration_policy : "default"
     }
-  }
-
-
-  #__________________________________________________________
-  #
-  # Leaf Profiles Variables
-  #__________________________________________________________
-
-  leaf_profiles = {
-    for k, v in var.leaf_profiles : k => {
-      annotation  = v.annotation != null ? v.annotation : ""
-      description = v.description != null ? v.description : ""
-      external_pool_id = length(regexall(
-        "^[[:alnum:]]", coalesce(v.external_pool_id, "_EMPTY"))
-      ) > 0 ? v.external_pool_id : 0
-      interfaces        = v.interfaces != null ? v.interfaces : {}
-      leaf_policy_group = v.leaf_policy_group
-      monitoring_policy = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
-      name              = v.name
-      node_type         = v.node_type != null ? v.node_type : "unspecified"
-      pod_id            = v.pod_id != null ? v.pod_id : 1
-      role              = v.role != null ? v.role : "unspecified"
-      serial            = v.serial
-      two_slot_leaf     = v.two_slot_leaf != null ? v.two_slot_leaf : false
-    }
-  }
-
-  leaf_interface_selectors_loop_1 = flatten([
-    for key, value in local.leaf_profiles : [
-      for k, v in value.interfaces : {
-        annotation             = value.annotation != null ? value.annotation : ""
-        interface_description  = v.interface_description != null ? v.interface_description : ""
-        interface_policy_group = v.interface_policy_group != null ? v.interface_policy_group : ""
-        key1                   = key
-        key2                   = k
-        interface_name = v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-00${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-0${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-00${element(split("/", k), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-0${element(split("/", k), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-${element(split("/", k), 1
-          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-0${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-${element(split("/", k), 1)}-${element(split("/", k), 2
-          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-0${element(split("/", k), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", k), 1))) > 0 ? "Eth${element(split("/", k), 0
-            )}-${element(split("/", k), 1
-        )}" : ""
-
-        module               = element(split("/", k), 0)
-        port                 = element(split("/", k), 1)
-        port_type            = v.port_type != null ? v.port_type : "access"
-        selector_description = v.selector_description != null ? v.selector_description : ""
-        sub_port             = v.sub_port != false ? element(split("/", k), 2) : ""
-      }
-    ]
-  ])
-
-
-  leaf_interface_selectors = {
-    for k, v in local.leaf_interface_selectors_loop_1 : "${v.key1}_${v.key2}" => v
   }
 
 
@@ -495,13 +362,13 @@ locals {
 
   spine_interface_policy_groups = {
     for k, v in var.spine_interface_policy_groups : k => {
-      aaep_policy       = v.aaep_policy
-      annotation        = v.annotation != null ? v.annotation : ""
-      cdp_policy        = v.cdp_policy != null ? v.cdp_policy : "default"
-      description       = v.description != null ? v.description : ""
-      global_alias        = v.global_alias != null ? v.global_alias : ""
-      link_level_policy = v.link_level_policy != null ? v.link_level_policy : "default"
-      macsec_policy     = v.macsec_policy != null ? v.macsec_policy : "default"
+      attachable_entity_profile = v.attachable_entity_profile
+      annotation                = v.annotation != null ? v.annotation : ""
+      cdp_interface_policy      = v.cdp_interface_policy != null ? v.cdp_interface_policy : "default"
+      description               = v.description != null ? v.description : ""
+      global_alias              = v.global_alias != null ? v.global_alias : ""
+      link_level_policy         = v.link_level_policy != null ? v.link_level_policy : "default"
+      macsec_policy             = v.macsec_policy != null ? v.macsec_policy : "default"
     }
   }
 
@@ -516,66 +383,14 @@ locals {
       annotation               = v.annotation != null ? v.annotation : ""
       bfd_ipv4_policy          = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
       bfd_ipv6_policy          = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
-      cdp_policy               = v.cdp_policy != null ? v.cdp_policy : "default"
+      cdp_interface_policy     = v.cdp_interface_policy != null ? v.cdp_interface_policy : "default"
       copp_pre_filter          = v.copp_pre_filter != null ? v.copp_pre_filter : "default"
       copp_spine_policy        = v.copp_spine_policy != null ? v.copp_spine_policy : "default"
       description              = v.description != null ? v.description : ""
-      lldp_policy              = v.lldp_policy != null ? v.lldp_policy : "default"
+      lldp_interface_policy    = v.lldp_interface_policy != null ? v.lldp_interface_policy : "default"
       usb_configuration_policy = v.usb_configuration_policy != null ? v.usb_configuration_policy : "default"
     }
   }
-
-
-  #__________________________________________________________
-  #
-  # Spine Profiles Variables
-  #__________________________________________________________
-
-  spine_profiles = {
-    for k, v in var.spine_profiles : k => {
-      annotation         = v.annotation != null ? v.annotation : ""
-      description        = v.description != null ? v.description : ""
-      external_pool_id   = 0
-      interfaces         = v.interfaces != null ? v.interfaces : {}
-      monitoring_policy  = v.monitoring_policy != null ? "uni/fabric/monfab-${v.monitoring_policy}" : "uni/fabric/monfab-default"
-      name               = v.name
-      node_type          = "unspecified"
-      pod_id             = v.pod_id != null ? v.pod_id : 1
-      role               = "spine"
-      serial             = v.serial
-      spine_policy_group = v.spine_policy_group
-    }
-  }
-
-  spine_interface_selectors_loop_1 = flatten([
-    for key, value in local.spine_profiles : [
-      for k, v in value.interfaces : {
-        annotation            = value.annotation != null ? value.annotation : ""
-        interface_description = v.interface_description != null ? v.interface_description : ""
-        interface_policy_group = coalesce(
-          v.interface_policy_group, "EMPTY"
-        ) != "EMPTY" ? v.interface_policy_group : "default"
-        key1 = key
-        key2 = k
-        interface_name = length(
-          regexall("^\\d{1}$", element(split("/", k), 1))
-          ) > 0 ? "Eth${element(split("/", k), 0)}-0${element(split("/", k), 1)}" : length(
-          regexall("^\\d{2}$", element(split("/", k), 1))
-        ) > 0 ? "Eth${element(split("/", k), 0)}-${element(split("/", k), 1)}" : ""
-        module               = element(split("/", k), 0)
-        name                 = value.name
-        port                 = element(split("/", k), 1)
-        port_type            = v.port_type != null ? v.port_type : "access"
-        selector_description = v.selector_description != null ? v.selector_description : ""
-      }
-    ]
-  ])
-
-  spine_interface_selectors = {
-    for k, v in local.spine_interface_selectors_loop_1 : "${v.key1}_${v.key2}" => v
-  }
-
-  fabric_membership = merge(local.leaf_profiles, local.spine_profiles)
 
 
   #__________________________________________________________

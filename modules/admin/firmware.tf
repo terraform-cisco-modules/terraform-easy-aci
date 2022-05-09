@@ -4,16 +4,16 @@ variable "firmware" {
       annotation          = ""
       compatibility_check = false
       description         = ""
-      policy_type         = "switch"
       graceful_upgrade    = false
       maintenance_groups = [
         {
-          start_now = false
           name      = "MG_A"
-          nodes     = [101, 201]
+          node_list = [101, 201]
+          start_now = false
         }
       ]
       notify_conditions      = "notifyOnlyOnFailures"
+      policy_type            = "switch"
       run_mode               = "pauseOnlyOnFailures"
       simulator              = true
       version                = "5.2(1g)"
@@ -27,16 +27,16 @@ variable "firmware" {
       annotation          = optional(string)
       compatibility_check = optional(bool)
       description         = optional(string)
-      policy_type         = optional(string)
       graceful_upgrade    = optional(bool)
       maintenance_groups = list(object(
         {
-          start_now = optional(bool)
           name      = string
-          nodes     = list(number)
+          node_list = list(number)
+          start_now = optional(bool)
         }
       ))
       notify_conditions      = optional(string)
+      policy_type            = optional(string)
       run_mode               = optional(string)
       simulator              = optional(bool)
       version                = optional(string)
@@ -85,9 +85,9 @@ resource "aci_pod_maintenance_group" "maintenance_groups" {
   annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                = each.value.description
   fwtype                     = each.value.policy_type # controller|switch
-  name                       = each.key
+  name                       = each.value.name
   pod_maintenance_group_type = "range"
-  relation_maint_rs_mgrpp    = aci_maintenance_policy.maintenance_group_policy[each.key].id
+  relation_maint_rs_mgrpp    = aci_maintenance_policy.maintenance_group_policy[each.value.maintenance_policy].id
 }
 
 /*

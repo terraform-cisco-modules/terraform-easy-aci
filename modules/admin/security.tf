@@ -1,4 +1,4 @@
-variable "global_security" {
+variable "security" {
   default = {
     "default" = {
       annotation = ""
@@ -56,8 +56,8 @@ API Information:
 GUI Location:
  - Admin > AAA > Security
 */
-resource "aci_global_security" "global_security" {
-  for_each                   = local.global_security
+resource "aci_global_security" "security" {
+  for_each                   = local.security
   annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
   block_duration             = each.value.lockout_duration
   change_count               = each.value.password_changes_within_interval

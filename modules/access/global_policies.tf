@@ -46,18 +46,6 @@ GUI Location:
  - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {name}
 _______________________________________________________________________________________________________________________
 */
-variable "aaep" {
-  default = {
-    "default" = {
-      name = "dummy"
-    }
-  }
-  type = map(object(
-    {
-      name = string
-    }
-  ))
-}
 resource "aci_attachable_access_entity_profile" "aaep_policies" {
   depends_on = [
     aci_l3_domain_profile.layer3_domains,
