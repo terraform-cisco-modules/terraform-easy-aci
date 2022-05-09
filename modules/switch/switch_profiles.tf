@@ -26,7 +26,7 @@ variable "switch_profiles" {
           interface_description = ""
           name                  = "1/1"
           policy_group          = ""
-          port_type             = "access"
+          policy_group_type     = "access"
           sub_port              = false
         }
       ]
@@ -57,14 +57,13 @@ variable "switch_profiles" {
   * external_pool_id:
   * interfaces:
     - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular leaf port or X/X/X for a breakout sub port.
+      * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
       * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-      * interface_policy_group: Name of the Interface Policy Group
-      * port_type: The type of Policy to Apply to the Port.
+      * policy_group: Name of the Interface Policy Group
+      * policy_group_type: The type of Policy to Apply to the Port.
         - access: Access Port Policy Group
         - breakout: Breakout Port Policy Group
-        - port-channel: Port-Channel Port Policy Group
-        - vpc: Virtual Port-Channel Port Policy Group
-      * selector_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+        - bundle: Port-Channel or Virtual Port-Channel Port Policy Group
       * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
   * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
   * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
@@ -93,11 +92,11 @@ variable "switch_profiles" {
       )))
       interfaces = list(object(
         {
+          description           = optional(string)
           interface_description = optional(string)
           name                  = string
           policy_group          = optional(string)
-          port_type             = optional(string)
-          selector_description  = optional(string)
+          policy_group_type     = optional(string)
           sub_port              = optional(bool)
         }
       ))
@@ -348,16 +347,16 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   for_each                  = { for k, v in local.interface_selectors : k => v if v.node_type != "spine" }
   leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.key1].id
   annotation                = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description               = each.value.selector_description
+  description               = each.value.description
   name                      = each.value.interface_name
   access_port_selector_type = "range"
   relation_infra_rs_acc_base_grp = length(regexall(
-    "access", each.value.port_type)) > 0 && length(compact([each.value.interface_policy_group])
+    "access", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
     ) > 0 ? aci_leaf_access_port_policy_group.policy_groups[each.value.interface_policy_group
     ].id : length(regexall(
-    "breakout", each.value.port_type)) > 0 && length(compact([each.value.interface_policy_group])
+    "breakout", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
     ) > 0 ? aci_leaf_breakout_port_group.policy_groups[each.value.interface_policy_group].id : length(regexall(
-    "(port-channel|vpc)", each.value.port_type)) > 0 && length(compact([each.value.interface_policy_group])
+    "bundle", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
   ) > 0 ? aci_leaf_access_bundle_policy_group.policy_groups[each.value.interface_policy_group].id : ""
 }
 
@@ -435,7 +434,7 @@ resource "aci_rest_managed" "spine_interface_selectors" {
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name  = each.value.interface_name
-    descr = each.value.selector_description
+    descr = each.value.description
   }
   child {
     rn         = "portblk-${each.value.interface_name}"

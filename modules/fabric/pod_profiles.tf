@@ -184,8 +184,8 @@ resource "aci_rest_managed" "pod_profiles" {
   class_name = "fabricPodP"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    descr     = each.value.description
-    name      = each.key
+    descr = each.value.description
+    name  = each.key
   }
 }
 

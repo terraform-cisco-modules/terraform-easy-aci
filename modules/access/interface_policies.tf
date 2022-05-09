@@ -573,9 +573,9 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_spanning_tree_interface_policy" "spanning_tree_interface_policies" {
-  for_each    = local.spanning_tree_interface_policies
-  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl        = alltrue(concat(
+  for_each   = local.spanning_tree_interface_policies
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  ctrl = alltrue(concat(
     [each.value.bpdu_filter == "enabled" ? true : false],
     [each.value.bpdu_guard == "enabled" ? true : false]
     )) ? ["bpdu-filter", "bpdu-guard"] : anytrue(concat(

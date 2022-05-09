@@ -233,9 +233,9 @@ locals {
 
   spanning_tree_interface_policies = {
     for k, v in var.spanning_tree_interface_policies : k => {
-      annotation = v.annotation != null ? v.annotation : ""
-      bpdu_guard = v.bpdu_guard != null ? v.bpdu_guard : false
-      bpdu_filter = v.bpdu_filter != null ? v.bpdu_filter : false
+      annotation   = v.annotation != null ? v.annotation : ""
+      bpdu_guard   = v.bpdu_guard != null ? v.bpdu_guard : false
+      bpdu_filter  = v.bpdu_filter != null ? v.bpdu_filter : false
       description  = v.description != null ? v.description : ""
       global_alias = v.global_alias != null ? v.global_alias : ""
     }
