@@ -1,12 +1,16 @@
 variable "filters" {
   default = {
     "default" = {
+      alias           = ""
       annotation      = ""
+      annotations     = []
       controller_type = "apic"
       description     = ""
       filter_entries = [
         {
+          alias                 = ""
           annotation            = ""
+          annotations           = []
           arp_flag              = "unspecified"
           description           = ""
           destination_port_from = "unspecified"
@@ -15,10 +19,10 @@ variable "filters" {
           icmpv4_type           = "unspecified"
           icmpv6_type           = "unspecified"
           ip_protocol           = "unspecified"
+          global_alias          = ""
           match_dscp            = "unspecified"
           match_only_fragments  = false
           name                  = "default"
-          name_alias            = ""
           source_port_from      = "unspecified"
           source_port_to        = "unspecified"
           stateful              = false
@@ -33,30 +37,44 @@ variable "filters" {
           ]
         }
       ]
-      name_alias = ""
-      schema     = "common"
-      template   = "common"
-      tenant     = "common"
+      global_alias = ""
+      schema       = "common"
+      template     = "common"
+      tenant       = "common"
     }
   }
   type = map(object(
     {
-      annotation      = optional(string)
+      alias      = optional(string)
+      annotation = optional(string)
+      annotations = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
       controller_type = optional(string)
       description     = optional(string)
       filter_entries = list(object(
         {
-          annotation            = optional(string)
+          alias      = optional(string)
+          annotation = optional(string)
+          annotations = optional(list(object(
+            {
+              key   = string
+              value = string
+            }
+          )))
           arp_flag              = optional(string)
           description           = optional(string)
           ethertype             = optional(string)
+          global_alias          = optional(string)
           icmpv4_type           = optional(string)
           icmpv6_type           = optional(string)
           ip_protocol           = optional(string)
           match_dscp            = optional(string)
           match_only_fragments  = optional(bool)
           name                  = string
-          name_alias            = optional(string)
           stateful              = optional(bool)
           source_port_from      = optional(string)
           source_port_to        = optional(string)
@@ -73,10 +91,10 @@ variable "filters" {
           )))
         }
       ))
-      name_alias = optional(string)
-      schema     = optional(string)
-      template   = optional(string)
-      tenant     = optional(string)
+      global_alias = optional(string)
+      schema       = optional(string)
+      template     = optional(string)
+      tenant       = optional(string)
     }
   ))
 }
@@ -99,7 +117,7 @@ resource "aci_filter" "filters" {
   annotation                     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                    = each.value.description
   name                           = each.key
-  name_alias                     = each.value.name_alias
+  name_alias                     = each.value.alias
   relation_vz_rs_filt_graph_att  = ""
   relation_vz_rs_fwd_r_flt_p_att = ""
   relation_vz_rs_rev_r_flt_p_att = ""
@@ -123,7 +141,7 @@ resource "aci_filter_entry" "filter_entries" {
   filter_dn     = aci_filter.filters[each.value.filter_name].id
   description   = each.value.description
   name          = each.key
-  name_alias    = each.value.name_alias
+  name_alias    = each.value.alias
   ether_t       = each.value.ethertype
   prot          = each.value.ip_protocol
   arp_opc       = each.value.arp_flag == "request" ? "req" : each.value.arp_flag

@@ -59,7 +59,7 @@ resource "aci_bfd_interface_policy" "bfd_interface_policies" {
   ]
   for_each   = local.bfd_interface_policies
   admin_st   = each.value.admin_state
-  annotation = each.value.annotation
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   # Bug 803 Submitted
   # ctrl          = each.value.enable_sub_interface_optimization == true ? "opt-subif" : "none"
   description   = each.value.description

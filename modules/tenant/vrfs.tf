@@ -1,6 +1,7 @@
 variable "vrfs" {
   default = {
     "default" = {
+      alias                           = ""
       annotation                      = ""
       annotations                     = []
       bd_enforcement_status           = false
@@ -17,11 +18,11 @@ variable "vrfs" {
           match_type = "AtleastOne"
         }
       ]
+      global_alias                   = ""
       ip_data_plane_learning         = "enabled"
       layer3_multicast               = true
       level                          = "template"
       monitoring_policy              = ""
-      name_alias                     = ""
       ospf_timers                    = "default"
       ospf_timers_per_address_family = []
       policy_enforcement_direction   = "ingress"  # "egress"
@@ -43,10 +44,11 @@ variable "vrfs" {
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   EOT
   type = map(object(
     {
+      alias      = optional(string)
       annotation = optional(string)
       annotations = optional(list(object(
         {
@@ -64,7 +66,8 @@ variable "vrfs" {
       )))
       communities = optional(list(object(
         {
-          community = number
+          community   = number
+          description = optional(string)
         }
       )))
       controller_type = optional(string)
@@ -91,10 +94,10 @@ variable "vrfs" {
           match_type = optional(string)
         }
       )))
+      global_alias           = optional(string)
       ip_data_plane_learning = optional(string)
       layer3_multicast       = optional(bool)
       level                  = optional(string)
-      name_alias             = optional(string)
       monitoring_policy      = optional(string)
       ospf_timers            = optional(string)
       ospf_timers_per_address_family = optional(list(object(
@@ -177,7 +180,7 @@ resource "aci_vrf" "vrfs" {
   ip_data_plane_learning = each.value.ip_data_plane_learning
   knw_mcast_act          = each.value.layer3_multicast == true ? "permit" : "deny"
   name                   = each.key
-  name_alias             = each.value.name_alias
+  name_alias             = each.value.alias
   pc_enf_dir             = each.value.policy_enforcement_direction
   pc_enf_pref            = each.value.policy_enforcement_preference
   # relation_fv_rs_ctx_to_ep_ret = length(regexall(
@@ -284,7 +287,6 @@ resource "aci_vrf_snmp_context" "vrf_snmp_contexts" {
   for_each   = { for k, v in local.vrfs : k => v if v.controller_type == "apic" }
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   name       = each.key
-  name_alias = ""
   vrf_dn     = aci_vrf.vrfs[each.key].id
 }
 
@@ -299,15 +301,15 @@ resource "aci_snmp_community" "vrf_communities" {
   depends_on = [
     aci_vrf_snmp_context.vrf_snmp_contexts
   ]
-  for_each   = local.vrf_communities
-  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each    = local.vrf_communities
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description = each.value.description
   name = length(regexall(
     5, each.value.community)) > 0 ? var.snmp_community_5 : length(regexall(
     4, each.value.community)) > 0 ? var.snmp_community_4 : length(regexall(
     3, each.value.community)) > 0 ? var.snmp_community_3 : length(regexall(
   2, each.value.community)) > 0 ? var.snmp_community_2 : var.snmp_community_1
-  name_alias = ""
-  parent_dn  = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
+  parent_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
 /*_____________________________________________________________________________________________________________________
 
@@ -375,7 +377,7 @@ resource "aci_any" "vrf_preferred_group" {
   for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" && v.preferred_group == "enabled" }
   vrf_dn       = aci_vrf.vrfs[each.value.vrf].id
   description  = each.value.description
-  pref_gr_memb = "enabled"
+  pref_gr_memb = each.value.preferred_group
 }
 
 /*_____________________________________________________________________________________________________________________

@@ -1,15 +1,31 @@
 variable "bridge_domains" {
   default = {
     "default" = {
+      advanced_troubleshooting = [
+        {
+          disable_ip_data_plane_learning_for_pbr = false
+          endpoint_clear                         = false
+          first_hop_security_policy              = ""
+          intersite_bum_traffic_allow            = false
+          intersite_l2_stretch                   = false
+          monitoring_policy                      = ""
+          netflow_monitor_policies               = []
+          optimize_wan_bandwidth                 = false
+          rogue_coop_exception_list              = []
+        }
+      ]
       controller_type = "apic"
       general = [
         {
           advertise_host_routes         = false
           alias                         = ""
           annotation                    = ""
+          annotations                   = ""
           arp_flooding                  = false
           description                   = ""
           endpoint_retention_policy     = ""
+          global_alias                  = ""
+          igmp_interface_policy         = ""
           igmp_snooping_policy          = ""
           ipv6_l3_unknown_multicast     = "flood"
           l2_unknown_unicast            = "flood"
@@ -30,19 +46,20 @@ variable "bridge_domains" {
         {
           associated_l3outs = [
             {
-              l3out        = "default"
-              l3out_tenant = "common"
+              l3out         = "default"
+              l3out_tenant  = "common"
+              route_profile = ""
             }
           ]
-          unicast_routing         = true
           custom_mac_address      = ""
+          ep_move_detection_mode  = false
           link_local_ipv6_address = "::"
           subnets = [
             {
 
               description                  = ""
               gateway_ip                   = "198.18.5.1/24"
-              l3_out_for_route_profile     = ""
+              ip_data_plane_learning       = "enabled"
               make_this_ip_address_primary = false
               scope = [
                 {
@@ -60,38 +77,42 @@ variable "bridge_domains" {
               treat_as_virtual_ip_address = false
             }
           ]
+          unicast_routing     = true
           virtual_mac_address = ""
         }
       ]
-      schema = "common"
-      sites  = []
-      troubleshooting_advanced = [
-        {
-          intersite_bum_traffic_allow            = false
-          intersite_l2_stretch                   = false
-          disable_ip_data_plane_learning_for_pbr = false
-          endpoint_clear                         = false
-          ep_move_detection_mode                 = "disable"
-          first_hop_security_policy              = ""
-          monitoring_policy                      = ""
-          netflow_monitor_policies               = []
-          optimize_wan_bandwidth                 = false
-          rogue_coop_exception_list              = []
-        }
-      ]
+      schema   = ""
+      sites    = []
+      template = ""
     }
   }
   type = map(object(
     {
+      advanced_troubleshooting = optional(list(object(
+        {
+          disable_ip_data_plane_learning_for_pbr = optional(bool)
+          endpoint_clear                         = optional(bool)
+          first_hop_security_policy              = optional(string)
+          intersite_bum_traffic_allow            = optional(bool)
+          intersite_l2_stretch                   = optional(bool)
+          monitoring_policy                      = optional(string)
+          netflow_monitor_policies               = optional(list(string))
+          optimize_wan_bandwidth                 = optional(bool)
+          rogue_coop_exception_list              = optional(list(string))
+        }
+      )))
       controller_type = optional(string)
       general = list(object(
         {
           advertise_host_routes         = optional(bool)
           alias                         = optional(string)
           annotation                    = optional(string)
+          annotations                   = optional(list(map(string)))
           arp_flooding                  = optional(bool)
           description                   = optional(string)
           endpoint_retention_policy     = optional(string)
+          global_alias                  = optional(string)
+          igmp_interface_policy         = optional(string)
           igmp_snooping_policy          = optional(string)
           ipv6_l3_unknown_multicast     = optional(string)
           l2_unknown_unicast            = optional(string)
@@ -112,18 +133,19 @@ variable "bridge_domains" {
         {
           associated_l3outs = optional(list(object(
             {
-              l3out        = string
-              l3out_tenant = string
+              l3out         = string
+              l3out_tenant  = string
+              route_profile = optional(string)
             }
           )))
-          unicast_routing         = optional(bool)
           custom_mac_address      = optional(string)
+          ep_move_detection_mode  = optional(bool)
           link_local_ipv6_address = optional(string)
           subnets = optional(list(object(
             {
               description                  = optional(string)
               gateway_ip                   = string
-              l3_out_for_route_profile     = optional(string)
+              ip_data_plane_learning       = optional(string)
               make_this_ip_address_primary = optional(bool)
               scope = optional(list(object(
                 {
@@ -141,25 +163,13 @@ variable "bridge_domains" {
               treat_as_virtual_ip_address = optional(bool)
             }
           )))
+          unicast_routing     = optional(bool)
           virtual_mac_address = optional(string)
         }
       ))
-      schema = optional(string)
-      sites  = optional(list(string))
-      troubleshooting_advanced = optional(list(object(
-        {
-          intersite_bum_traffic_allow            = optional(bool)
-          intersite_l2_stretch                   = optional(bool)
-          disable_ip_data_plane_learning_for_pbr = optional(bool)
-          endpoint_clear                         = optional(bool)
-          ep_move_detection_mode                 = optional(string)
-          first_hop_security_policy              = optional(string)
-          monitoring_policy                      = optional(string)
-          netflow_monitor_policies               = optional(list(string))
-          optimize_wan_bandwidth                 = optional(bool)
-          rogue_coop_exception_list              = optional(list(string))
-        }
-      )))
+      schema   = optional(string)
+      sites    = optional(list(string))
+      template = optional(string)
     }
   ))
 }
@@ -167,9 +177,9 @@ variable "bridge_domains" {
 
 API Information:
  - Class: "fvBD"
- - Distinguised Name: "/uni/tn-{Tenant}/BD-{Bridge_Domain}"
+ - Distinguised Name: "/uni/tn-{Tenant}/BD-{bridge_domain}"
 GUI Location:
- - Tenants > {Tenant} > Networking > Bridge Domains > {Bridge_Domain}
+ - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_bridge_domain" "bridge_domains" {
@@ -180,7 +190,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   ]
   for_each = local.bridge_domains
   # General
-  annotation                = each.value.general[0].annotation
+  annotation                = each.value.general[0].annotation != "" ? each.value.general[0].annotation : var.annotation
   arp_flood                 = each.value.general[0].arp_flooding == true ? "yes" : "no"
   bridge_domain_type        = each.value.general[0].type
   description               = each.value.general[0].description
@@ -191,45 +201,58 @@ resource "aci_bridge_domain" "bridge_domains" {
   name                      = each.key
   name_alias                = each.value.general[0].name_alias
   multi_dst_pkt_act         = each.value.general[0].multi_destination_flooding
-  unk_mac_ucast_act         = each.value.general[0].l2_unknown_unicast
-  unk_mcast_act             = each.value.general[0].l3_unknown_multicast_flooding
-  v6unk_mcast_act           = each.value.general[0].ipv6_l3_unknown_multicast
+  relation_fv_rs_bd_to_ep_ret = each.value.general[0
+  ].endpoint_retention_policy != "" ? "uni/tn-common/epRPol-${each.value.general[0].endpoint_retention_policy}" : ""
   relation_fv_rs_ctx = each.value.general[0
   ].vrf != "" ? "uni/tn-${each.value.general[0].vrf_tenant}/ctx-${each.value.general[0].vrf}" : ""
-  tenant_dn = aci_tenant.tenants[each.value.general[0].tenant].id
+  relation_fv_rs_igmpsn = each.value.general[0
+  ].each.value.igmp_snooping_policy != "" ? "uni/tn-common/snPol-${each.value.general[0].igmp_snooping_policy}" : ""
+  relation_fv_rs_mldsn = leach.value.general[0
+  ].each.value.mld_snoop_policy != "" ? "uni/tn-common/mldsnoopPol-${each.value.general[0].mld_snoop_policy}" : ""
+  tenant_dn         = aci_tenant.tenants[each.value.general[0].tenant].id
+  unk_mac_ucast_act = each.value.general[0].l2_unknown_unicast
+  unk_mcast_act     = each.value.general[0].l3_unknown_multicast_flooding
+  v6unk_mcast_act   = each.value.general[0].ipv6_l3_unknown_multicast
   # L3 Configurations
-  ll_addr = each.value.l3_configurations[0].link_local_ipv6_address
-  mac     = each.value.l3_configurations[0].custom_mac_address
-  relation_fv_rs_bd_to_out = length(compact(
-    [each.value.l3_configurations[0].associated_l3outs[0].l3out])
-    ) > 0 ? ["uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
+  ep_move_detect_mode = each.value.l3_configurations[0].ep_move_detection_mode == true ? "garp" : "disable"
+  ll_addr             = each.value.l3_configurations[0].link_local_ipv6_address
+  mac                 = each.value.l3_configurations[0].custom_mac_address
+  # class: l3extOut
+  relation_fv_rs_bd_to_out = each.value.l3_configurations[0].associated_l3outs[0
+    ].l3out != "" ? ["uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
   ].l3out_tenant}/out-${each.value.l3_configurations[0].associated_l3outs[0].l3out}"] : []
+  # class: rtctrlProfile
+  relation_fv_rs_bd_to_profile = each.value.l3_configurations[0
+    ].l3out_for_route_profile != "" ? "uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
+      ].l3out_tenant}/out-${each.value.l3_configurations[0].associated_l3outs[0
+  ].l3out}/prof-${each.value.l3_configurations[0].associated_l3outs[0].route_profile}" : ""
+  # class: monEPGPol
+  relation_fv_rs_bd_to_nd_p = length(
+  [each.value.nd_policy]) > 0 ? "uni/tn-common/ndifpol-${each.value.nd_policy}" : ""
   unicast_route = each.value.l3_configurations[0].unicast_routing == true ? "yes" : "no"
   vmac          = each.value.l3_configurations[0].virtual_mac_address
   # Advanced/Troubleshooting
-  ep_clear            = each.value.troubleshooting_advanced[0].endpoint_clear == true ? "yes" : "no"
-  ep_move_detect_mode = each.value.troubleshooting_advanced[0].ep_move_detection_mode
-  ip_learning         = each.value.troubleshooting_advanced[0].disable_ip_data_plane_learning_for_pbr == true ? "no" : "yes"
+  ep_clear    = each.value.advanced_troubleshooting[0].endpoint_clear == true ? "yes" : "no"
+  ip_learning = each.value.advanced_troubleshooting[0].disable_ip_data_plane_learning_for_pbr == true ? "no" : "yes"
   intersite_bum_traffic_allow = length(regexall(
-    true, each.value.troubleshooting_advanced[0].intersite_l2_stretch)
-  ) > 0 && length(regexall(true, each.value.troubleshooting_advanced[0].intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
-  intersite_l2_stretch   = each.value.troubleshooting_advanced[0].intersite_l2_stretch == true ? "yes" : "no"
-  optimize_wan_bandwidth = length(regexall(true, each.value.troubleshooting_advanced[0].optimize_wan_bandwidth)) > 0 ? "yes" : "no"
-  # relation_fv_rs_abd_pol_mon_pol = "{monEPGPol}"
-  # relation_fv_rs_bd_to_out = length(regexall(
-  #   each.value.tenant, each.value.l3out_tenant)
-  #   ) > 0 ? [aci_l3_outside.l3outs[each.value.l3out].id] : length(regexall(
-  #   each.value.tenant, each.value.l3out_tenant)
-  # ) > 0 ? [local.common_l3outs[each.value.l3out].id] : []
-  # relation_fv_rs_bd_to_ep_ret              = each.value.endpoint_retention_policy
-  # relation_fv_rs_bd_to_netflow_monitor_pol = [each.value.netflow_monitor_policies]
-  # relation_fv_rs_bd_to_profile             = each.value.l3out_for_route_profile
-  # relation_fv_rs_mldsn                     = each.value.mld_snoop_policy
-  # relation_fv_rs_bd_to_nd_p                = each.value.nd_policy
-  # relation_fv_rs_bd_flood_to               = [each.value.vzfilter]
-  # relation_fv_rs_bd_to_fhs                 = each.value.first_hop_security_policy
-  # relation_fv_rs_bd_to_relay_p             = each.value.dhcp_relay_policy
-  # relation_fv_rs_igmpsn                    = each.value.igmp_snooping_policy
+    true, each.value.advanced_troubleshooting[0].intersite_l2_stretch)
+  ) > 0 && length(regexall(true, each.value.advanced_troubleshooting[0].intersite_bum_traffic_allow)) > 0 ? "yes" : "no"
+  intersite_l2_stretch   = each.value.advanced_troubleshooting[0].intersite_l2_stretch == true ? "yes" : "no"
+  optimize_wan_bandwidth = length(regexall(true, each.value.advanced_troubleshooting[0].optimize_wan_bandwidth)) > 0 ? "yes" : "no"
+  # class: monEPGPol
+  relation_fv_rs_abd_pol_mon_pol = each.value.advanced_troubleshooting[0
+  ].monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.advanced_troubleshooting[0].monitoring_policy}" : ""
+  # class: netflowMonitorPol
+  relation_fv_rs_bd_to_netflow_monitor_pol = each.value.advanced_troubleshooting[0
+    ].netflow_monitor_policies != "" ? [
+    for s in each.value.advanced_troubleshooting[0
+      ].netflow_monitor_policies : "uni/tn-${each.value.general[0
+    ].tenant}/rsBDToNetflowMonitorPol-[${element(split(":", s), 1)}]-${element(split(":", s), 0)}"
+  ] : []
+  # class: fhsBDPol
+  relation_fv_rs_bd_to_fhs = each.value.advanced_troubleshooting[0
+    ].first_hop_security_policy != "" ? "uni/tn-common/bdpol-${each.value.advanced_troubleshooting[0
+  ].first_hop_security_policy}" : ""
 }
 
 
@@ -237,9 +260,9 @@ resource "aci_bridge_domain" "bridge_domains" {
 
 API Information:
  - Class: "fvSubnet"
- - Distinguished Name: "/uni/tn-{Tenant}/BD-{Bridge_Domain}/subnet-[{Subnet}]"
+ - Distinguished Name: "/uni/tn-{Tenant}/BD-{bridge_domain}/subnet-[{subnet}]"
 GUI Location:
- - Tenants > {Tenant} > Networking > Bridge Domains > {Bridge_Domain} > Subnets
+ - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Subnets
 _______________________________________________________________________________________________________________________
 */
 resource "aci_subnet" "subnets" {
@@ -259,10 +282,13 @@ resource "aci_subnet" "subnets" {
   description = each.value.description
   ip          = each.value.gateway_ip
   preferred   = each.value.make_this_ip_address_primary == true ? "yes" : "no"
-  # relation_fv_rs_bd_to_out = each.value.l3out != "" ? "uni/tn-${each.value.l3out_tenant}/out-${each.value.l3out}" : ""
-  # relation_fv_rs_bd_subnet_to_out     = [each.value.l3_out_for_route_profile]
-  # relation_fv_rs_bd_subnet_to_profile = each.value.route_profile
-  # relation_fv_rs_nd_pfx_pol           = each.value.nd_ra_prefix_policy
+  # class: rtctrlProfile
+  relation_fv_rs_bd_subnet_to_out = length(compact(
+    [each.value.route_profile])
+  ) > 0 ? "uni/tn-${each.value.l3out_tenant}/out-${each.value.l3out}" : ""
+  relation_fv_rs_bd_subnet_to_profile = length(compact(
+    [each.value.route_profile])
+  ) > 0 ? each.value.route_profile : ""
   scope = anytrue([each.value.scope[0]["advertise_externally"
     ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
     length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
@@ -335,7 +361,7 @@ resource "mso_schema_template_bd_subnet" "subnets" {
   depends_on = [
     mso_schema_template_bd.bridge_domains
   ]
-  for_each           = { for k, v in local.subnets : k => v if v.controller_type == "ndo" && v.sites == [] }
+  for_each           = { for k, v in local.subnets : k => v if v.controller_type == "ndo" }
   bd_name            = each.value.bridge_domain
   description        = each.value.description
   ip                 = each.value.gateway_ip
@@ -345,4 +371,26 @@ resource "mso_schema_template_bd_subnet" "subnets" {
   template_name      = each.value.template
   shared             = each.value.scope["shared_between_vrfs"]
   querier            = each.value.subnet_control["querier_ip"]
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "fvRogueExceptionMac"
+ - Distinguished Name: "uni/tn-{tenant}/BD-{bridge_domain}/rgexpmac-{mac_address}"
+GUI Location:
+ - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Policy > Advanced/Troubleshooting > Rogue/Coop Exception List.
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "rogue_coop_exception_list" {
+  depends_on = [
+    aci_bridge_domain.bridge_domains
+  ]
+  for_each   = local.rogue_coop_exception_list
+  dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/rgexpmac-${each.value.mac_address}"
+  class_name = "fvRogueExceptionMac"
+  content = {
+    mac = each.value.mac_address
+  }
 }

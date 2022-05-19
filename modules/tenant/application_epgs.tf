@@ -1,7 +1,9 @@
 variable "application_epgs" {
   default = {
     "default" = {
+      alias                  = ""
       annotation             = ""
+      annotations            = []
       application_profile    = "default"
       bd_schema              = "common"
       bd_template            = "common"
@@ -55,9 +57,9 @@ variable "application_epgs" {
       epg_type                 = "standard"
       fhs_trust_control_policy = ""
       flood_in_encapsulation   = "disabled"
+      global_alias             = ""
       has_multicast_source     = false
       label_match_criteria     = "AtleastOne"
-      name_alias               = ""
       intra_epg_isolation      = "unenforced"
       preferred_group_member   = false
       qos_class                = "unspecified"
@@ -80,6 +82,7 @@ variable "application_epgs" {
       template     = "common"
       tenant       = "common"
       useg_epg     = false
+      vlan         = null # This is just used for the Inband Management EPG
       vrf          = "default"
       vrf_schema   = "common"
       vrf_template = "common"
@@ -110,7 +113,14 @@ variable "application_epgs" {
   EOT
   type = map(object(
     {
-      annotation             = optional(string)
+      alias      = optional(string)
+      annotation = optional(string)
+      annotations = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
       application_profile    = string
       bd_schema              = optional(string)
       bd_template            = optional(string)
@@ -137,6 +147,8 @@ variable "application_epgs" {
           delimiter                = optional(string)
           domain                   = string
           domain_type              = optional(string)
+          number_of_ports          = optional(string)
+          port_allocation          = optional(string)
           port_binding             = optional(string)
           resolution_immediacy     = optional(string)
           security = optional(list(object(
@@ -164,9 +176,9 @@ variable "application_epgs" {
       epg_type                 = optional(string)
       fhs_trust_control_policy = optional(string)
       flood_in_encapsulation   = optional(string)
+      global_alias             = optional(string)
       has_multicast_source     = optional(bool)
       label_match_criteria     = optional(string)
-      name_alias               = optional(string)
       intra_epg_isolation      = optional(string)
       preferred_group_member   = optional(bool)
       qos_class                = optional(string)
@@ -186,6 +198,7 @@ variable "application_epgs" {
       template     = optional(string)
       tenant       = optional(string)
       useg_epg     = optional(bool)
+      vlan         = optional(number)
       vrf          = optional(string)
       vrf_schema   = optional(string)
       vrf_template = optional(string)
@@ -209,7 +222,7 @@ resource "aci_application_epg" "application_epgs" {
     aci_bridge_domain.bridge_domains
   ]
   for_each                     = { for k, v in local.application_epgs : k => v if v.epg_type == "standard" && v.controller_type == "apic" }
-  annotation                   = each.value.annotation
+  annotation                   = each.value.annotation != "" ? each.value.annotation : var.annotation
   application_profile_dn       = aci_application_profile.application_profiles[each.value.application_profile].id
   description                  = each.value.description
   exception_tag                = each.value.contract_exception_tag
@@ -219,7 +232,7 @@ resource "aci_application_epg" "application_epgs" {
   is_attr_based_epg            = each.value.useg_epg == true ? "yes" : "no"
   match_t                      = each.value.label_match_criteria
   name                         = each.key
-  name_alias                   = each.value.name_alias
+  name_alias                   = each.value.alias
   pc_enf_pref                  = each.value.intra_epg_isolation
   pref_gr_memb                 = each.value.preferred_group_member == true ? "include" : "exclude"
   prio                         = each.value.qos_class
@@ -282,14 +295,14 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   for_each                 = { for k, v in local.application_epgs : k => v if length(regexall("band", v.epg_type)) > 0 && v.controller_type == "apic" }
   management_profile_dn    = "uni/tn-mgmt/mgmtp-default"
   name                     = each.key
-  annotation               = each.value.annotation
-  encap                    = each.value.epg_type == "in_band" ? "vlan-${each.value.vlan}" : ""
-  match_t                  = each.value.epg_type == "in_band" ? each.value.label_match_criteria : ""
-  name_alias               = each.value.name_alias
+  annotation               = each.value.annotation != "" ? each.value.annotation : var.annotation
+  encap                    = each.value.epg_type == "inb" ? "vlan-${each.value.vlan}" : ""
+  match_t                  = each.value.epg_type == "inb" ? each.value.label_match_criteria : ""
+  name_alias               = each.value.alias
   pref_gr_memb             = "exclude"
   prio                     = each.value.qos_class
-  type                     = each.value.epg_type
-  relation_mgmt_rs_mgmt_bd = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
+  type                     = each.value.epg_type == "inb" ? "in_band" : "out_of_band"
+  relation_mgmt_rs_mgmt_bd = "uni/tn-mgmt/BD-${each.value.bridge_domain}"
   # relation_mgmt_rs_oo_b_prov = each.value.epg_type == "out_of_band" ? each.value.consumed_contracts : []
 }
 
@@ -316,8 +329,11 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   ) > 0 ? "uni/vmmp-${each.value.vmm_vendor}/dom-${each.value.domain}" : ""
   annotation = each.value.annotation
   binding_type = length(
-    regexall("vmm", each.value.domain_type)
-  ) > 0 ? each.value.port_binding : "none"
+    regexall("physical", each.value.domain_type)
+  ) > 0 ? "none" : length(regexall(
+    "dynamic_binding", each.value.port_binding)) > 0 ? "dynamicBinding" : length(regexall(
+    "default", each.value.port_binding)) > 0 ? "none" : length(regexall(
+    "static_binding", each.value.port_binding)) > 0 ? "staticBinding" : each.value.port_binding
   allow_micro_seg = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.allow_micro_segmentation : false
@@ -337,9 +353,9 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "disabled" : "disabled"
   instr_imedcy = each.value.deploy_immediacy == "on-demand" ? "lazy" : each.value.deploy_immediacy
-  # lag_policy_name = length(
-  #   regexall("vmm", each.value.domain_type)
-  # ) > 0 ? each.value.enhanced_lag_policy : 0
+  lag_policy_name = length(
+    regexall("vmm", each.value.domain_type)
+  ) > 0 ? each.value.enhanced_lag_policy : ""
   netflow_dir = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "both" : "both"
@@ -348,10 +364,10 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   ) > 0 ? "disabled" : "disabled"
   num_ports = length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? 0 : 0
-  # port_allocation = length(
-  #   regexall("vmm", each.value.domain_type)
-  # ) > 0 ? each.value.port_allocation : "none"
+  ) > 0 ? each.value.number_of_ports : 0
+  port_allocation = length(
+    regexall("vmm", each.value.domain_type)
+  ) > 0 ? "none" : each.value.port_allocation
   primary_encap = length(
     regexall("vmm", each.value.domain_type)) > 0 && length(regexall(
     "static", each.value.vlan_mode)) > 0 && length(each.value.vlans
@@ -428,33 +444,6 @@ resource "aci_rest_managed" "contract_to_epgs" {
 }
 
 
-
-#------------------------------------------------------
-# Create Attachable Access Entity Generic Encap Policy
-#------------------------------------------------------
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "infraAttEntityP"
- - Distinguished Name: "uni/infra/attentp-{AAEP}"
-GUI Location:
- - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {AAEP}
-_______________________________________________________________________________________________________________________
-*/
-# resource "aci_epgs_using_function" "epg_to_aaep" {
-#   depends_on = [
-#     aci_application_epg.application_epgs,
-#     # local.aaep_policies
-#   ]
-#   for_each          = local.epg_to_aaep
-#   access_generic_dn = local.aaep_policies[each.value.aaep].id
-#   tdn               = aci_application_epg.application_epgs[each.value.epg].id
-#   encap             = "vlan-${each.value.vlan}"
-#   instr_imedcy      = "immediate"
-#   mode              = "regular"
-# }
-
 /*_____________________________________________________________________________________________________________________
 
 API Information:
@@ -508,12 +497,14 @@ resource "aci_rest_managed" "epg_to_static_paths" {
 # Create Attachable Access Entity Generic Encap Policy
 #------------------------------------------------------
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraAttEntityP"
- - Distinguished Name: "uni/infra/attentp-{{AAEP}}"
+ - Distinguished Name: "uni/infra/attentp-{AAEP}"
 GUI Location:
- - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {{AAEP}}
+ - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {AAEP}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_epgs_using_function" "epg_to_aaeps" {
   depends_on = [

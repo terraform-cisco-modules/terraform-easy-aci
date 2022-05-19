@@ -26,10 +26,9 @@ variable "cdp_interface_policies" {
   type = map(object(
     {
       admin_state  = optional(string)
-      alias        = optional(string)
       annotation   = optional(string)
       description  = optional(string)
-      global_alias = ""
+      global_alias = optional(string)
     }
   ))
 }

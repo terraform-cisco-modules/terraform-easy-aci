@@ -8,7 +8,7 @@ variable "tenants" {
       controller_type   = "apic" # apic or ndo
       description       = ""
       monitoring_policy = ""
-      name_alias        = ""
+      global_alias      = ""
       sites             = []
       users             = []
     }
@@ -22,7 +22,7 @@ variable "tenants" {
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator
   * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+  * global_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
   * sites: When using Nexus Dashboard Orchestrator the sites attribute is used to distinguish the site and cloud types.  Options are:
     - aws_access_key_id: (Optional) - AWS Access Key Id. It must be provided if the AWS account is not trusted. This parameter will only have effect with vendor = aws.
     - aws_account_id: (Optional) - Id of AWS account. It's required when vendor is set to aws. This parameter will only have effect with vendor = aws
@@ -43,13 +43,18 @@ variable "tenants" {
   EOT
   type = map(object(
     {
-      alias             = optional(string)
-      annotation        = optional(string)
-      annotations       = optional(list(map(string)))
+      alias      = optional(string)
+      annotation = optional(string)
+      annotations = optional(list(object(
+        {
+          key   = string
+          value = string
+        }
+      )))
       controller_type   = optional(string)
       description       = optional(string)
+      global_alias      = optional(string)
       monitoring_policy = optional(string)
-      name_alias        = optional(string)
       sites = optional(list(object(
         {
           aws_access_key_id         = optional(string)
@@ -97,7 +102,7 @@ resource "aci_tenant" "tenants" {
   # annotation                    = each.value.annotation != "" ? each.value.annotation : var.annotation
   # description                   = each.value.description
   name                          = each.key
-  name_alias                    = each.value.name_alias
+  name_alias                    = each.value.alias
   relation_fv_rs_tenant_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }
 

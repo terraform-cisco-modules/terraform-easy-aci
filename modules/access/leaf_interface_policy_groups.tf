@@ -15,7 +15,7 @@ variable "leaf_port_group_access" {
       dot1x_port_authentication_policy = ""
       dwdm_policy                      = ""
       fibre_channel_interface_policy   = ""
-      group_alias                      = ""
+      global_alias                     = ""
       l2_interface_policy              = ""
       link_flap_policy                 = ""
       link_level_flow_control_policy   = ""
@@ -98,7 +98,6 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.name_alias
   # class: infraAttEntityP
   relation_infra_rs_att_ent_p = length(compact([each.value.attachable_entity_profile])
   ) > 0 ? "uni/infra/attentp-${each.value.attachable_entity_profile}" : ""
@@ -141,8 +140,8 @@ resource "aci_leaf_access_port_policy_group" "policy_groups" {
   dynamic "relation_infra_rs_netflow_monitor_pol" {
     for_each = toset(each.value.netflow_monitor_policies)
     content {
-      flt_type  = element(relation_infra_rs_netflow_monitor_pol.value, 1)
-      target_dn = "uni/infra/monitorpol-${element(s, 0)}"
+      flt_type  = element(split(":", relation_infra_rs_netflow_monitor_pol.value), 1)
+      target_dn = "uni/infra/monitorpol-${element(split(":", relation_infra_rs_netflow_monitor_pol.value), 0)}"
     }
   }
   # class: poeIfPol
@@ -354,8 +353,8 @@ resource "aci_leaf_access_bundle_policy_group" "policy_groups" {
   dynamic "relation_infra_rs_netflow_monitor_pol" {
     for_each = toset(each.value.netflow_monitor_policies)
     content {
-      flt_type  = element(relation_infra_rs_netflow_monitor_pol.value, 1)
-      target_dn = "uni/infra/monitorpol-${element(s, 0)}"
+      flt_type  = element(split(":", relation_infra_rs_netflow_monitor_pol.value), 1)
+      target_dn = "uni/infra/monitorpol-${element(split(":", relation_infra_rs_netflow_monitor_pol.value), 0)}"
     }
   }
   # class: qosDppPol
