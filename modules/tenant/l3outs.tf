@@ -105,11 +105,22 @@ variable "l3outs" {
               nd_policy                   = ""
               netflow_policies            = []
               nodes                       = [201]
-              ospf_interface_profile      = "default"
-              preferred_address           = "198.18.1.1/24"
-              qos_class                   = "unspecified"
-              secondary_addresses         = [] # "198.18.3.1/24"
-              svi_addresses               = []
+              ospf_interface_profiles     = []
+              # Example
+              # ospf_interface_profiles = [
+              #   {
+              #     description           = ""
+              #     authentication_type   = "none" # md5,none,simple
+              #     name                  = "default"
+              #     ospf_key              = 0
+              #     ospf_interface_policy = "default"
+              #     policy_tenant    = "**l3out_tenant**"
+              #   }
+              # ]
+              preferred_address   = "198.18.1.1/24"
+              qos_class           = "unspecified"
+              secondary_addresses = [] # "198.18.3.1/24"
+              svi_addresses       = []
               # Example
               # svi_addresses               = [
               #   {
@@ -138,9 +149,9 @@ variable "l3outs" {
           pod_id = 1
         }
       ]
-      ospf_external_policies = []
+      ospf_external_profile = []
       # Example
-      # ospf_external_policies = [
+      # ospf_external_profile = [
       #   {
       #     ospf_area_cost = 1
       #     ospf_area_control = [{
@@ -152,20 +163,9 @@ variable "l3outs" {
       #     ospf_area_type = "regular" # nssa, regular, stub
       #   }
       # ]
-      ospf_interface_profiles = []
-      # Example
-      # ospf_interface_profiles = [
-      #   {
-      #     description           = ""
-      #     authentication_type   = "none" # md5,none,simple
-      #     name                  = "default"
-      #     ospf_key              = 0
-      #     ospf_interface_policy = "default"
-      #     policy_tenant    = "**l3out_tenant**"
-      #   }
-      # ]
       route_control_enforcement = [
         {
+          export = true
           import = false
         }
       ]
@@ -316,10 +316,19 @@ variable "l3outs" {
               nd_policy                   = optional(string)
               netflow_policies            = optional(list(string))
               nodes                       = optional(list(string))
-              ospf_interface_profile      = optional(string)
-              preferred_address           = optional(string)
-              qos_class                   = optional(string)
-              secondary_addresses         = optional(list(string))
+              ospf_interface_profile = optional(list(object(
+                {
+                  description           = optional(string)
+                  authentication_type   = optional(string)
+                  name                  = string
+                  ospf_key              = optional(number)
+                  ospf_interface_policy = optional(string)
+                  policy_tenant         = optional(string)
+                }
+              )))
+              preferred_address   = optional(string)
+              qos_class           = optional(string)
+              secondary_addresses = optional(list(string))
               svi_addresses = optional(list(object(
                 {
                   link_local_address  = optional(string)
@@ -341,7 +350,7 @@ variable "l3outs" {
           pod_id = optional(string)
         }
       )))
-      ospf_external_policies = optional(list(object(
+      ospf_external_profile = optional(list(object(
         {
           ospf_area_cost = optional(number)
           ospf_area_control = optional(list(object(
@@ -355,18 +364,9 @@ variable "l3outs" {
           ospf_area_type = optional(string)
         }
       )))
-      ospf_interface_profiles = optional(list(object(
-        {
-          description           = optional(string)
-          authentication_type   = optional(string)
-          name                  = string
-          ospf_key              = optional(number)
-          ospf_interface_policy = optional(string)
-          policy_tenant         = optional(string)
-        }
-      )))
       route_control_enforcement = optional(list(object(
         {
+          export = optional(bool)
           import = optional(bool)
         }
       )))
@@ -475,7 +475,7 @@ API Information:
  - Class: "l3extOut"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out}
+ - tenants > {tenant} > Networking > L3Outs > {l3out}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3_outside" "l3outs" {
@@ -517,7 +517,7 @@ API Information:
  - Class: "l3extInstP"
  - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{Ext_EPG}"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_external_network_instance_profile" "l3out_external_epgs" {
@@ -559,7 +559,7 @@ API Information:
  - Class: "mgmtInstP"
  - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{name}"
 GUI Location:
- - Tenants > mgmt > External Management Network Instance Profiles > {name}
+ - tenants > mgmt > External Management Network Instance Profiles > {name}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "oob_external_epgs" {
@@ -585,7 +585,7 @@ API Information:
  - Class: "fvRsIntraEpg"
  - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsintraEpg-{contract}"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "external_epg_intra_epg_contracts" {
@@ -613,7 +613,7 @@ API Information:
  - Provider Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsprov-{contract}"
  - Taboo Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/rsprotBy-{contract}"
 GUI Location:
- - All Contracts: Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
+ - All Contracts: tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}: Contracts
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "external_epg_contracts" {
@@ -657,7 +657,7 @@ API Information:
  - Class: "l3extSubnet"
  - Distinguised Name: "/uni/tn-{tenant}/out-{l3out}/instP-{ext_epg}/extsubnet-[{subnet}]"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {ext_epg}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3_ext_subnet" "external_epg_subnets" {
@@ -706,7 +706,7 @@ API Information:
  - Class: "mgmtSubnet"
  - Distinguished Name: "uni/tn-mgmt/extmgmt-default/instp-{ext_epg}/subnet-[{subnet}]"
 GUI Location:
- - Tenants > mgmt > External Management Network Instance Profiles > {ext_epg}: Subnets:{subnet}
+ - tenants > mgmt > External Management Network Instance Profiles > {ext_epg}: Subnets:{subnet}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "oob_external_epg_subnets" {
@@ -731,7 +731,7 @@ API Information:
  - Class: "l3extLNodeP"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}"
 GUI Location:
-Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}
+tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_logical_node_profile" "l3out_node_profiles" {
@@ -759,7 +759,7 @@ API Information:
  - Class: "l3extRsNodeL3OutAtt"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/rsnodeL3OutAtt-[topology/pod-{pod_id}/node-{node_id}]"
 GUI Location:
-Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}: Nodes > {node_id}
+tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile}: Nodes > {node_id}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_logical_node_to_fabric_node" "l3out_node_profiles_nodes" {
@@ -784,7 +784,7 @@ API Information:
  - Class: "l3extLIfP"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/lnodep-{name}"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_logical_interface_profile" "l3out_interface_profiles" {
@@ -833,11 +833,11 @@ API Information:
  - Distinguished Name: "uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/lifp-{interface_profile}/rspathL3OutAtt-[topology/pod-{pod_id}/{PATH}/pathep-[{interface_or_pg}]]"
 GUI Location:
 {%- if Interface_Type == 'ext-svi' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
 {%- elif Interface_Type == 'l3-port' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Interfaces
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Interfaces
 {%- elif Interface_Type == 'sub-interface' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Sub-Interfaces
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Sub-Interfaces
 
  - Assign all the default Policies to this Policy Group
 _______________________________________________________________________________________________________________________
@@ -878,7 +878,7 @@ API Information:
  - Class: "l3extRsPathL3OutAtt"
  - Distinguished Name: " uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/lifp-{interface_profile}/rspathL3OutAtt-[topology/pod-{pod_id}/protpaths-{node1_id}-{node2_id}//pathep-[{policy_group}]]/mem-{side}"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3out_vpc_member" "l3out_vpc_member" {
@@ -906,11 +906,11 @@ API Information:
  - Distinguished Name: " uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/lifp-{interface_profile}/rspathL3OutAtt-[topology/pod-{pod_id}/{PATH}/pathep-[{interface_or_pg}]]"
 GUI Location:
 {%- if Interface_Type == 'ext-svi' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: SVI
 {%- elif Interface_Type == 'l3-port' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Interfaces
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Interfaces
 {%- elif Interface_Type == 'sub-interface' %}
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Sub-Interfaces
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile > {node_profile} > Logical Interface Profiles {interface_profile}: Routed Sub-Interfaces
 
 _______________________________________________________________________________________________________________________
 */
@@ -955,52 +955,52 @@ resource "aci_l3out_path_attachment_secondary_ip" "l3out_paths_secondary_ips" {
 /*
 API Information:
  - Class: "bgpPeerP"
- - Distinguished Name: "uni/tn-{Tenant}/out-{L3Out}/lnodep-{Node_Profile}/lifp-{Interface_Profile}/rspathL3OutAtt-[topology/pod-{Pod_ID}/{PATH}/pathep-[{Interface_or_PG}]]/peerP-[{Peer_IP}]"
+ - Distinguished Name: "uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/lifp-{Interface_Profile}/rspathL3OutAtt-[topology/pod-{Pod_ID}/{PATH}/pathep-[{Interface_or_PG}]]/peerP-[{Peer_IP}]"
 GUI Location:
- - Tenants > {Tenant} > Networking > L3Outs > {L3Out} > Logical Node Profile {Node_Profile} > Logical Interface Profile > {Interface_Profile} > OSPF Interface Profile
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile {node_profile} > Logical Interface Profile > {Interface_Profile} > OSPF Interface Profile
 */
-# resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
-#   depends_on = [
-#     aci_logical_node_profile.l3out_node_profiles,
-#     aci_logical_interface_profile.l3out_interface_profiles,
-#     aci_bgp_peer_prefix.bgp_peer_prefix_policies
-#   ]
-#   logical_node_profile_dn = length(
-#     regexall("interface", each.value.peer_level)
-#     ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
-#     regexall("loopback", each.value.peer_level)
-#   ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
-#   addr                = each.value.bgp_peer
-#   addr_t_ctrl         = each.value.address_type_controls
-#   allowed_self_as_cnt = each.value.allowed_self_as_count
-#   as_number           = each.value.remote_as
-#   ctrl                = each.value.bgp_controlls
-#   description         = each.value.description
-#   password = length(
-#     regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
-#     regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
-#     regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
-#     regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
-#   regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
-#   peer_ctrl           = each.value.peer_controls
-#   private_a_sctrl     = each.value.private_as_control
-#   ttl                 = each.value.ebgp_multihop_ttl
-#   weight              = each.value.weight_for_routes_from_neighbor
-#   local_asn           = each.value.local_as_number
-#   local_asn_propagate = each.value.local_as_number_config
-#   relation_bgp_rs_peer_pfx_pol = length(
-#     regexall(each.value.prefix_tenant == each.value.tenant)
-#     ) > 0 ? aci_bgp_peer_prefix.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : length(
-#     regexall("[:alnum:]", each.value.prefix_tenant)
-#   ) > 0 ? rs_bgp_peer_prefix_policy.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : ""
-#   dynamic "relation_bgp_rs_peer_pfx_pol" {
-#     for_each = each.value.route_control_profiles
-#     content {
-#       direction = relation_bgp_rs_peer_to_profile.value.direction
-#       target_dn = "uni/tn-${relation_bgp_rs_peer_pfx_pol.value.tenant}/prof-${relation_bgp_rs_peer_pfx_pol.value.route_map}"
-#     }
-#   }
-# }
+resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
+  depends_on = [
+    aci_logical_node_profile.l3out_node_profiles,
+    aci_logical_interface_profile.l3out_interface_profiles,
+    aci_bgp_peer_prefix.bgp_peer_prefix_policies
+  ]
+  logical_node_profile_dn = length(
+    regexall("interface", each.value.peer_level)
+    ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
+    regexall("loopback", each.value.peer_level)
+  ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
+  addr                = each.value.bgp_peer
+  addr_t_ctrl         = each.value.address_type_controls
+  allowed_self_as_cnt = each.value.allowed_self_as_count
+  as_number           = each.value.remote_as
+  ctrl                = each.value.bgp_controlls
+  description         = each.value.description
+  password = length(
+    regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
+    regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
+    regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
+    regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
+  regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
+  peer_ctrl           = each.value.peer_controls
+  private_a_sctrl     = each.value.private_as_control
+  ttl                 = each.value.ebgp_multihop_ttl
+  weight              = each.value.weight_for_routes_from_neighbor
+  local_asn           = each.value.local_as_number
+  local_asn_propagate = each.value.local_as_number_config
+  relation_bgp_rs_peer_pfx_pol = length(
+    regexall(each.value.prefix_tenant == each.value.tenant)
+    ) > 0 ? aci_bgp_peer_prefix.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : length(
+    regexall("[:alnum:]", each.value.prefix_tenant)
+  ) > 0 ? rs_bgp_peer_prefix_policy.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : ""
+  dynamic "relation_bgp_rs_peer_pfx_pol" {
+    for_each = each.value.route_control_profiles
+    content {
+      direction = relation_bgp_rs_peer_to_profile.value.direction
+      target_dn = "uni/tn-${relation_bgp_rs_peer_pfx_pol.value.tenant}/prof-${relation_bgp_rs_peer_pfx_pol.value.route_map}"
+    }
+  }
+}
 
 
 #------------------------------------------------
@@ -1013,7 +1013,7 @@ API Information:
  - Class: "ospfExtP"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/ospfExtP"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out}: OSPF
+ - tenants > {tenant} > Networking > L3Outs > {l3out}: OSPF
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
@@ -1046,7 +1046,7 @@ API Information:
  - Class: "ospfIfP"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/nodep-{node_profile}/lifp-{interface_profile}/ospfIfP"
 GUI Location:
- - Tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile {node_profile} > Logical Interface Profile > {interface_profile} > OSPF Interface Profile
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile {node_profile} > Logical Interface Profile > {interface_profile} > OSPF Interface Profile
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {

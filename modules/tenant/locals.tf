@@ -142,8 +142,8 @@ locals {
       for k, v in value.epg_to_aaeps : {
         epg                       = key
         aaep                      = v.aaep
-        instrumentation_immediacy = v.instrumentation_immediacy
-        mode                      = v.mode
+        instrumentation_immediacy = v.instrumentation_immediacy != null ? v.instrumentation_immediacy : "immediate"
+        mode                      = v.mode != null ? v.mode : "regular"
         vlans                     = v.vlans
       }
     ]
@@ -376,8 +376,10 @@ locals {
           virtual_mac_address     = "not-applicable"
         }
       ]
-      schema = value.schema != null ? value.schema : "common"
-      sites  = value.sites != null ? value.sites : []
+      policy_source_tenant = value.policy_source_tenant != null ? value.policy_source_tenant : "common"
+      schema               = value.schema != null ? value.schema : "common"
+      sites                = value.sites != null ? value.sites : []
+      template             = value.template != null ? value.template : "common"
     }
   }
 
@@ -473,7 +475,7 @@ locals {
         directives = v.directives != null ? [
           {
             enable_policy_compression = v.enable_policy_compression != null ? v.enable_policy_compression : false
-            log_packets               = v.log_packets               != null ? v.log_packets               : false
+            log_packets               = v.log_packets != null ? v.log_packets : false
           }
           ] : [
           {
@@ -1268,6 +1270,7 @@ locals {
       alias                          = v.alias != null ? v.alias : ""
       ospf_timers_per_address_family = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
       ospf_timers                    = v.ospf_timers != null ? v.ospf_timers : "default"
+      policy_source_tenant           = v.policy_source_tenant != null ? v.policy_source_tenant : "default"
       policy_enforcement_direction   = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
       policy_enforcement_preference  = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
       preferred_group                = v.preferred_group != null ? v.preferred_group : "disabled"

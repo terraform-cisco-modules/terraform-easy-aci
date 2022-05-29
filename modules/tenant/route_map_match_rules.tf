@@ -101,7 +101,6 @@ resource "aci_rest_managed" "route_map_rules_match_regex_community" {
   }
 }
 
-
 resource "aci_match_route_destination_rule" "route_map_rules_match_prefix" {
   # dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/dest-[${each.value.network}]"
   # class_name = "rtctrlMatchRtDest"

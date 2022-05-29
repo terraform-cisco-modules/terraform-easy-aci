@@ -3,7 +3,7 @@
 VLAN pool Variables
 _______________________________________________________________________________________________________________________
 */
-variable "vlan_pools" {
+variable "pools_vlan" {
   default = {
     "default" = {
       allocation_mode = "dynamic"
@@ -65,8 +65,8 @@ GUI Location:
  - Fabric > Access Policies > Pools > VLAN:[{name}]
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vlan_pool" "vlan_pools" {
-  for_each    = local.vlan_pools
+resource "aci_vlan_pool" "pools_vlan" {
+  for_each    = local.pools_vlan
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   alloc_mode  = each.value.allocation_mode
   description = each.value.description
@@ -75,7 +75,7 @@ resource "aci_vlan_pool" "vlan_pools" {
 
 resource "aci_ranges" "vlans" {
   depends_on = [
-    aci_vlan_pool.vlan_pools
+    aci_vlan_pool.pools_vlan
   ]
   for_each     = local.vlan_ranges
   annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -84,5 +84,5 @@ resource "aci_ranges" "vlans" {
   from         = "vlan-${each.value.vlan}"
   to           = "vlan-${each.value.vlan}"
   role         = each.value.role
-  vlan_pool_dn = aci_vlan_pool.vlan_pools[each.value.key1].id
+  vlan_pool_dn = aci_vlan_pool.pools_vlan[each.value.key1].id
 }

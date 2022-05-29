@@ -4,15 +4,15 @@ locals {
   # Domain Variables
   #__________________________________________________________
 
-  layer3_domains = {
-    for k, v in var.layer3_domains : k => {
+  domains_layer3 = {
+    for k, v in var.domains_layer3 : k => {
       annotation = v.annotation != null ? v.annotation : ""
       vlan_pool  = v.vlan_pool
     }
   }
 
-  physical_domains = {
-    for k, v in var.physical_domains : k => {
+  domains_physical = {
+    for k, v in var.domains_physical : k => {
       annotation = v.annotation != null ? v.annotation : ""
       vlan_pool  = v.vlan_pool
     }
@@ -23,8 +23,8 @@ locals {
   # Global Policies Variables
   #__________________________________________________________
 
-  aaep_policies_loop_1 = {
-    for k, v in var.aaep_policies : k => {
+  attachable_access_entity_profiles_1 = {
+    for k, v in var.global_attachable_access_entity_profiles : k => {
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
       layer3_domains   = v.layer3_domains != null ? v.layer3_domains : []
@@ -33,21 +33,21 @@ locals {
     }
   }
 
-  aaep_policies_loop_2 = {
-    for k, v in local.aaep_policies_loop_1 : k => {
+  attachable_access_entity_profiles_2 = {
+    for k, v in local.attachable_access_entity_profiles_1 : k => {
       annotation  = v.annotation
       description = v.description
       layer3_domains = length(v.layer3_domains
-      ) > 0 ? [for s in v.layer3_domains : aci_l3_domain_profile.layer3_domains["${s}"].id] : []
+      ) > 0 ? [for s in v.layer3_domains : aci_l3_domain_profile.domains_layer3["${s}"].id] : []
       physical_domains = length(v.physical_domains
-      ) > 0 ? [for s in v.physical_domains : aci_physical_domain.physical_domains["${s}"].id] : []
+      ) > 0 ? [for s in v.physical_domains : aci_physical_domain.domains_physical["${s}"].id] : []
       vmm_domains = length(v.vmm_domains
-      ) > 0 ? [for s in v.vmm_domains : aci_vmm_domain.vmm_domains["${s}"].id] : []
+      ) > 0 ? [for s in v.vmm_domains : aci_vmm_domain.domains_vmm["${s}"].id] : []
     }
   }
 
-  aaep_policies = {
-    for k, v in local.aaep_policies_loop_2 : k => {
+  global_attachable_access_entity_profiles = {
+    for k, v in local.attachable_access_entity_profiles_2 : k => {
       annotation  = v.annotation
       description = v.description
       domains     = compact(concat(v.layer3_domains, v.physical_domains, v.vmm_domains))
@@ -55,8 +55,8 @@ locals {
   }
 
 
-  error_disabled_recovery_policy = {
-    for k, v in var.error_disabled_recovery_policy : k => {
+  global_error_disabled_recovery_policy = {
+    for k, v in var.global_error_disabled_recovery_policy : k => {
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
       arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : true
@@ -86,8 +86,8 @@ locals {
   }
 
 
-  mcp_instance_policy = {
-    for k, v in var.mcp_instance_policy : k => {
+  global_mcp_instance_policy = {
+    for k, v in var.global_mcp_instance_policy : k => {
       admin_state                       = v.admin_state != null ? v.admin_state : "enabled"
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
@@ -124,8 +124,8 @@ locals {
   # Interface Policies Variables
   #__________________________________________________________
 
-  cdp_interface_policies = {
-    for k, v in var.cdp_interface_policies : k => {
+  policies_cdp_interface = {
+    for k, v in var.policies_cdp_interface : k => {
       admin_state  = v.admin_state != null ? v.admin_state : "enabled"
       annotation   = v.annotation != null ? v.annotation : ""
       description  = v.description != null ? v.description : ""
@@ -134,8 +134,8 @@ locals {
   }
 
 
-  fibre_channel_interface_policies = {
-    for k, v in var.fibre_channel_interface_policies : k => {
+  policies_fibre_channel_interface = {
+    for k, v in var.policies_fibre_channel_interface : k => {
       auto_max_speed        = v.auto_max_speed != null ? v.auto_max_speed : "32G"
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
@@ -148,8 +148,8 @@ locals {
   }
 
 
-  l2_interface_policies = {
-    for k, v in var.l2_interface_policies : k => {
+  policies_l2_interface = {
+    for k, v in var.policies_l2_interface : k => {
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
       qinq             = v.qinq != null ? v.qinq : "disabled"
@@ -159,8 +159,8 @@ locals {
   }
 
 
-  link_level_policies = {
-    for k, v in var.link_level_policies : k => {
+  policies_link_level = {
+    for k, v in var.policies_link_level : k => {
       annotation                  = v.annotation != null ? v.annotation : ""
       auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : true
       description                 = v.description != null ? v.description : ""
@@ -172,8 +172,8 @@ locals {
   }
 
 
-  lldp_interface_policies = {
-    for k, v in var.lldp_interface_policies : k => {
+  policies_lldp_interface = {
+    for k, v in var.policies_lldp_interface : k => {
       annotation     = v.annotation != null ? v.annotation : ""
       description    = v.description != null ? v.description : ""
       global_alias   = v.global_alias != null ? v.global_alias : ""
@@ -183,8 +183,8 @@ locals {
   }
 
 
-  mcp_interface_policies = {
-    for k, v in var.mcp_interface_policies : k => {
+  policies_mcp_interface = {
+    for k, v in var.policies_mcp_interface : k => {
       admin_state = v.admin_state != null ? v.admin_state : "enabled"
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
@@ -192,8 +192,8 @@ locals {
   }
 
 
-  port_channel_policies = {
-    for k, v in var.port_channel_policies : k => {
+  policies_port_channel = {
+    for k, v in var.policies_port_channel : k => {
       annotation  = v.annotation != null ? v.annotation : ""
       description = v.description != null ? v.description : ""
       control = v.control != null ? [
@@ -221,8 +221,8 @@ locals {
   }
 
 
-  port_security_policies = {
-    for k, v in var.port_security_policies : k => {
+  policies_port_security = {
+    for k, v in var.policies_port_security : k => {
       annotation            = v.annotation != null ? v.annotation : ""
       description           = v.description != null ? v.description : ""
       maximum_endpoints     = v.maximum_endpoints != null ? v.maximum_endpoints : 0
@@ -231,8 +231,8 @@ locals {
   }
 
 
-  spanning_tree_interface_policies = {
-    for k, v in var.spanning_tree_interface_policies : k => {
+  policies_spanning_tree_interface = {
+    for k, v in var.policies_spanning_tree_interface : k => {
       annotation   = v.annotation != null ? v.annotation : ""
       bpdu_guard   = v.bpdu_guard != null ? v.bpdu_guard : false
       bpdu_filter  = v.bpdu_filter != null ? v.bpdu_filter : false
@@ -246,8 +246,8 @@ locals {
   # Leaf Interface Policy Group Variables
   #__________________________________________________________
 
-  leaf_port_group_access = {
-    for k, v in var.leaf_port_group_access : k => {
+  leaf_interface_policy_groups_access = {
+    for k, v in var.leaf_interface_policy_groups_access : k => {
       attachable_entity_profile        = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
       annotation                       = v.annotation != null ? v.annotation : ""
       cdp_interface_policy             = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
@@ -281,8 +281,8 @@ locals {
   }
 
 
-  leaf_port_group_breakout = {
-    for k, v in var.leaf_port_group_breakout : k => {
+  leaf_interface_policy_groups_breakout = {
+    for k, v in var.leaf_interface_policy_groups_breakout : k => {
       annotation   = v.annotation != null ? v.annotation : ""
       breakout_map = v.breakout_map != null ? v.breakout_map : "10g-4x"
       description  = v.description != null ? v.description : ""
@@ -290,8 +290,8 @@ locals {
   }
 
 
-  leaf_port_group_bundle = {
-    for k, v in var.leaf_port_group_bundle : k => {
+  leaf_interface_policy_groups_bundle = {
+    for k, v in var.leaf_interface_policy_groups_bundle : k => {
       attachable_entity_profile      = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
@@ -400,8 +400,8 @@ locals {
 
   # This first loop is to handle optional attributes and return 
   # default values if the user doesn't enter a value.
-  vlan_pools = {
-    for k, v in var.vlan_pools : k => {
+  pools_vlan = {
+    for k, v in var.pools_vlan : k => {
       allocation_mode = v.allocation_mode != null ? v.allocation_mode : "dynamic"
       annotation      = v.annotation != null ? v.annotation : ""
       description     = v.description != null ? v.description : ""
@@ -417,7 +417,7 @@ locals {
   And then to return these values as a list
   */
   vlan_ranges_loop_1 = flatten([
-    for key, value in local.vlan_pools : [
+    for key, value in local.pools_vlan : [
       for k, v in value.encap_blocks : {
         allocation_mode = v.allocation_mode != null ? v.allocation_mode : "inherit"
         annotation      = value.annotation
@@ -474,7 +474,7 @@ locals {
   # Virtual Networking Variables
   #__________________________________________________________
 
-  vmm_domains_loop = flatten([
+  domains_vmm_loop = flatten([
     for key, value in var.virtual_networking : [
       for k, v in value.domain : {
         access_mode                     = v.access_mode != null ? v.access_mode : "read-write"
@@ -496,14 +496,14 @@ locals {
       }
     ]
   ])
-  vmm_domains = { for k, v in local.vmm_domains_loop : "${v.domain}" => v }
+  domains_vmm = { for k, v in local.domains_vmm_loop : "${v.domain}" => v }
 
 
 
   vmm_credentials_loop = flatten([
     for key, value in var.virtual_networking : [
       for k, v in value.credentials : {
-        annotation  = local.vmm_domains["${key}"].annotation
+        annotation  = local.domains_vmm["${key}"].annotation
         domain      = key
         description = v.description != null ? v.description : ""
         password    = v.password != null ? v.password : 1
@@ -528,7 +528,7 @@ locals {
         port                   = v.port != null ? v.port : 0
         sequence_number        = v.sequence_number != null ? v.sequence_number : 0
         stats_collection       = v.stats_collection != null ? v.stats_collection : "disabled"
-        switch_mode            = local.vmm_domains["${key}"].switch_mode
+        switch_mode            = local.domains_vmm["${key}"].switch_mode
         switch_scope           = v.switch_scope != null ? v.switch_scope : "vm"
         trigger_inventory_sync = v.trigger_inventory_sync != null ? v.trigger_inventory_sync : "untriggered"
         vxlan_pool             = v.vxlan_pool != null ? v.vxlan_pool : ""
@@ -571,7 +571,7 @@ locals {
 
 
   vmm_uplinks = {
-    for k, v in local.vmm_domains : k => {
+    for k, v in local.domains_vmm : k => {
       domain        = k
       numOfUplinks  = length(v.uplink_names) > 0 ? length(v.uplink_names) : 2
       switch_vendor = v.switch_vendor
@@ -580,7 +580,7 @@ locals {
 
 
   vmm_uplink_names_loop = flatten([
-    for k, v in local.vmm_domains : [
+    for k, v in local.domains_vmm : [
       for s in v.uplink_names : {
         domain        = k
         switch_vendor = v.switch_vendor
@@ -590,29 +590,6 @@ locals {
     ] if v.access_mode == "read-write"
   ])
   vmm_uplink_names = { for k, v in local.vmm_uplink_names_loop : "${v.domain}_${v.uplinkName}" => v }
-
-
-  #__________________________________________________________
-  #
-  # VPC Domains Variables
-  #__________________________________________________________
-
-  vpc_domain_policies = {
-    for k, v in var.vpc_domain_policies : k => {
-      annotation    = v.annotation != null ? v.annotation : ""
-      dead_interval = v.dead_interval != null ? v.dead_interval : 200
-      description   = v.description != null ? v.description : ""
-    }
-  }
-  vpc_domains = {
-    for k, v in var.vpc_domains : k => {
-      annotation        = v.annotation != null ? v.annotation : ""
-      domain_id         = v.domain_id
-      switch_1          = v.switch_1
-      switch_2          = v.switch_2
-      vpc_domain_policy = v.vpc_domain_policy != null ? v.vpc_domain_policy : "default"
-    }
-  }
 
   # End of Local Loops
 }

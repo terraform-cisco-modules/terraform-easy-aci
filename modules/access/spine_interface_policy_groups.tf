@@ -49,9 +49,9 @@ ________________________________________________________________________________
 */
 resource "aci_spine_port_policy_group" "spine_interface_policy_groups" {
   depends_on = [
-    aci_attachable_access_entity_profile.aaep_policies,
-    aci_cdp_interface_policy.cdp_interface_policies,
-    aci_fabric_if_pol.link_level_policies,
+    aci_attachable_access_entity_profile.global_attachable_access_entity_profiles,
+    aci_cdp_interface_policy.policies_cdp_interface,
+    aci_fabric_if_pol.policies_link_level,
   ]
   for_each    = local.spine_interface_policy_groups
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation

@@ -15,14 +15,14 @@ variable "contracts" {
           directives = [
             {
               enable_policy_compression = false
-              log_packets               = false
+              log                       = false
             }
           ]
           name = "default"
         }
       ]
       global_alias        = ""
-      log_packets         = false
+      log                 = false
       qos_class           = "unspecified"
       provider_match_type = "AtleastOne"
       schema              = "common"
@@ -64,14 +64,14 @@ variable "contracts" {
           directives = optional(list(object(
             {
               enable_policy_compression = bool
-              log_packets               = bool
+              log                       = bool
             }
           )))
           name = optional(string)
         }
       )))
       global_alias        = optional(string)
-      log_packets         = optional(bool)
+      log                 = optional(bool)
       provider_match_type = optional(string)
       qos_class           = optional(string)
       schema              = optional(string)
@@ -194,7 +194,7 @@ resource "mso_schema_template_contract" "contracts" {
       filter_name          = filter_relationship.value.name
     }
   }
-  directives = each.value.log_packets == true ? ["log"] : ["none"]
+  directives = each.value.log == true ? ["log"] : ["none"]
 }
 /*_____________________________________________________________________________________________________________________
 
@@ -265,10 +265,10 @@ resource "aci_rest_managed" "contract_subject_filter_atrributes" {
   content = {
     action = each.value.action
     directives = anytrue(
-      [each.value.directives[0].enable_policy_compression, each.value.directives[0].log_packets]
+      [each.value.directives[0].enable_policy_compression, each.value.directives[0].log]
       ) ? replace(trim(join(",", concat([
         length(regexall(true, each.value.directives[0].enable_policy_compression)) > 0 ? "no_stats" : ""], [
-        length(regexall(true, each.value.directives[0].log_packets)) > 0 ? "log" : ""]
+        length(regexall(true, each.value.directives[0].log)) > 0 ? "log" : ""]
     )), ","), ",,", ",") : "none"
     # tDn            = each.value.filter
     tnVzFilterName = each.value.name

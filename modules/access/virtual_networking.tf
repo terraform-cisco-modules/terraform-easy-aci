@@ -275,8 +275,6 @@ variable "virtual_networking" {
   ))
 }
 
-
-
 variable "vmm_password_1" {
   default     = ""
   description = "Password for VMM Credentials Policy."
@@ -321,11 +319,11 @@ GUI Location:
  - Virtual Networking -> {switch_vendor} -> {domain_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_vmm_domain" "domains" {
+resource "aci_vmm_domain" "domains_vmm" {
   depends_on = [
-    aci_vlan_pool.vlan_pools
+    aci_vlan_pool.pools_vlan
   ]
-  for_each            = local.vmm_domains
+  for_each            = local.domains_vmm
   access_mode         = each.value.access_mode
   annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl_knob           = each.value.control_knob
@@ -340,12 +338,12 @@ resource "aci_vmm_domain" "domains" {
   pref_encap_mode     = each.value.preferred_encapsulation
   provider_profile_dn = "uni/vmmp-${each.value.switch_provider}"
   relation_infra_rs_vlan_ns = length(compact([each.value.vlan_pool])
-  ) > 0 ? aci_vlan_pool.vlan_pools[each.value.vlan_pool].id : ""
+  ) > 0 ? aci_vlan_pool.pools_vlan[each.value.vlan_pool].id : ""
 }
 
 resource "aci_rest_managed" "vmm_domains_uplinks" {
   depends_on = [
-    aci_vmm_domain.domains
+    aci_vmm_domain.domains_vmm
   ]
   for_each   = local.vmm_uplinks
   dn         = "uni/vmmp-${each.value.switch_vendor}/dom-${each.value.domain}/uplinkpcont"
@@ -379,13 +377,13 @@ ________________________________________________________________________________
 */
 resource "aci_vmm_credential" "credentials" {
   depends_on = [
-    aci_vmm_domain.domains
+    aci_vmm_domain.domains_vmm
   ]
   for_each      = local.vmm_credentials
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
   name          = each.value.domain
-  vmm_domain_dn = aci_vmm_domain.domains[each.value.domain].id
+  vmm_domain_dn = aci_vmm_domain.domains_vmm[each.value.domain].id
   pwd = length(regexall(
     5, coalesce(each.value.password, 10))
     ) > 0 ? var.vmm_password_5 : length(regexall(
@@ -410,10 +408,10 @@ ________________________________________________________________________________
 resource "aci_vmm_controller" "controllers" {
   depends_on = [
     aci_vmm_credential.credentials,
-    aci_vmm_domain.domains
+    aci_vmm_domain.domains_vmm
   ]
   for_each            = local.vmm_controllers
-  vmm_domain_dn       = aci_vmm_domain.domains[each.value.domain].id
+  vmm_domain_dn       = aci_vmm_domain.domains_vmm[each.value.domain].id
   name                = each.value.hostname
   annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   dvs_version         = each.value.dvs_version
@@ -446,10 +444,10 @@ ________________________________________________________________________________
 */
 resource "aci_vswitch_policy" "vswitch_policies" {
   depends_on = [
-    aci_vmm_domain.domains
+    aci_vmm_domain.domains_vmm
   ]
   for_each      = local.vswitch_policies
-  vmm_domain_dn = aci_vmm_domain.domains[each.value.domain].id
+  vmm_domain_dn = aci_vmm_domain.domains_vmm[each.value.domain].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   dynamic "relation_vmm_rs_vswitch_exporter_pol" {
     for_each = each.value.netflow_export_policy

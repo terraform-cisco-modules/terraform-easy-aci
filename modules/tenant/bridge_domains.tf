@@ -81,9 +81,10 @@ variable "bridge_domains" {
           virtual_mac_address = ""
         }
       ]
-      schema   = ""
-      sites    = []
-      template = ""
+      policy_source_tenant = "common"
+      schema               = ""
+      sites                = []
+      template             = ""
     }
   }
   type = map(object(
@@ -167,9 +168,10 @@ variable "bridge_domains" {
           virtual_mac_address = optional(string)
         }
       ))
-      schema   = optional(string)
-      sites    = optional(list(string))
-      template = optional(string)
+      policy_source_tenant = optional(string)
+      schema               = optional(string)
+      sites                = optional(list(string))
+      template             = optional(string)
     }
   ))
 }
@@ -202,13 +204,13 @@ resource "aci_bridge_domain" "bridge_domains" {
   name_alias                = each.value.general[0].name_alias
   multi_dst_pkt_act         = each.value.general[0].multi_destination_flooding
   relation_fv_rs_bd_to_ep_ret = each.value.general[0
-  ].endpoint_retention_policy != "" ? "uni/tn-common/epRPol-${each.value.general[0].endpoint_retention_policy}" : ""
+  ].endpoint_retention_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/epRPol-${each.value.general[0].endpoint_retention_policy}" : ""
   relation_fv_rs_ctx = each.value.general[0
   ].vrf != "" ? "uni/tn-${each.value.general[0].vrf_tenant}/ctx-${each.value.general[0].vrf}" : ""
   relation_fv_rs_igmpsn = each.value.general[0
-  ].each.value.igmp_snooping_policy != "" ? "uni/tn-common/snPol-${each.value.general[0].igmp_snooping_policy}" : ""
+  ].each.value.igmp_snooping_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/snPol-${each.value.general[0].igmp_snooping_policy}" : ""
   relation_fv_rs_mldsn = leach.value.general[0
-  ].each.value.mld_snoop_policy != "" ? "uni/tn-common/mldsnoopPol-${each.value.general[0].mld_snoop_policy}" : ""
+  ].each.value.mld_snoop_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/mldsnoopPol-${each.value.general[0].mld_snoop_policy}" : ""
   tenant_dn         = aci_tenant.tenants[each.value.general[0].tenant].id
   unk_mac_ucast_act = each.value.general[0].l2_unknown_unicast
   unk_mcast_act     = each.value.general[0].l3_unknown_multicast_flooding
@@ -228,7 +230,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   ].l3out}/prof-${each.value.l3_configurations[0].associated_l3outs[0].route_profile}" : ""
   # class: monEPGPol
   relation_fv_rs_bd_to_nd_p = length(
-  [each.value.nd_policy]) > 0 ? "uni/tn-common/ndifpol-${each.value.nd_policy}" : ""
+  [each.value.nd_policy]) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.nd_policy}" : ""
   unicast_route = each.value.l3_configurations[0].unicast_routing == true ? "yes" : "no"
   vmac          = each.value.l3_configurations[0].virtual_mac_address
   # Advanced/Troubleshooting
@@ -241,7 +243,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   optimize_wan_bandwidth = length(regexall(true, each.value.advanced_troubleshooting[0].optimize_wan_bandwidth)) > 0 ? "yes" : "no"
   # class: monEPGPol
   relation_fv_rs_abd_pol_mon_pol = each.value.advanced_troubleshooting[0
-  ].monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.advanced_troubleshooting[0].monitoring_policy}" : ""
+  ].monitoring_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/monepg-${each.value.advanced_troubleshooting[0].monitoring_policy}" : ""
   # class: netflowMonitorPol
   relation_fv_rs_bd_to_netflow_monitor_pol = each.value.advanced_troubleshooting[0
     ].netflow_monitor_policies != "" ? [
@@ -251,7 +253,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   ] : []
   # class: fhsBDPol
   relation_fv_rs_bd_to_fhs = each.value.advanced_troubleshooting[0
-    ].first_hop_security_policy != "" ? "uni/tn-common/bdpol-${each.value.advanced_troubleshooting[0
+    ].first_hop_security_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/bdpol-${each.value.advanced_troubleshooting[0
   ].first_hop_security_policy}" : ""
 }
 

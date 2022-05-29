@@ -302,8 +302,10 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   pref_gr_memb             = "exclude"
   prio                     = each.value.qos_class
   type                     = each.value.epg_type == "inb" ? "in_band" : "out_of_band"
-  relation_mgmt_rs_mgmt_bd = "uni/tn-mgmt/BD-${each.value.bridge_domain}"
-  # relation_mgmt_rs_oo_b_prov = each.value.epg_type == "out_of_band" ? each.value.consumed_contracts : []
+  relation_mgmt_rs_mgmt_bd = each.value.epg_type == "inb" ? "uni/tn-mgmt/BD-${each.value.bridge_domain}" : ""
+  relation_mgmt_rs_oo_b_prov = each.value.epg_type == "oob" && length(
+    each.value.contracts
+  ) > 0 ? [for k, v in each.value.contracts : "uni/tn-${v.contract_tenant}/oobbrc-${v.contract}"] : []
 }
 
 
@@ -330,10 +332,10 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   annotation = each.value.annotation
   binding_type = length(
     regexall("physical", each.value.domain_type)
-  ) > 0 ? "none" : length(regexall(
-    "dynamic_binding", each.value.port_binding)) > 0 ? "dynamicBinding" : length(regexall(
-    "default", each.value.port_binding)) > 0 ? "none" : length(regexall(
-    "static_binding", each.value.port_binding)) > 0 ? "staticBinding" : each.value.port_binding
+    ) > 0 ? "none" : length(regexall(
+      "dynamic_binding", each.value.port_binding)) > 0 ? "dynamicBinding" : length(regexall(
+      "default", each.value.port_binding)) > 0 ? "none" : length(regexall(
+  "static_binding", each.value.port_binding)) > 0 ? "staticBinding" : each.value.port_binding
   allow_micro_seg = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.allow_micro_segmentation : false
@@ -514,7 +516,7 @@ resource "aci_epgs_using_function" "epg_to_aaeps" {
   access_generic_dn = "uni/infra/attentp-${each.value.aaep}/gen-default"
   encap             = length(each.value.vlans) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
   instr_imedcy      = each.value.instrumentation_immediacy
-  mode              = each.value.mode
+  mode              = each.value.mode == "trunk" ? "regular" : each.value.mode == "access" ? "untagged" : "native"
   primary_encap     = length(each.value.vlans) > 1 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
   tdn               = aci_application_epg.application_epgs[each.value.epg].id
 }

@@ -25,6 +25,7 @@ variable "vrfs" {
       monitoring_policy              = ""
       ospf_timers                    = "default"
       ospf_timers_per_address_family = []
+      policy_source_tenant           = "common"
       policy_enforcement_direction   = "ingress"  # "egress"
       policy_enforcement_preference  = "enforced" # unenforced
       preferred_group                = "disabled"
@@ -106,6 +107,7 @@ variable "vrfs" {
           policy         = string
         }
       )))
+      policy_source_tenant          = optional(string)
       policy_enforcement_direction  = optional(string)
       policy_enforcement_preference = optional(string)
       preferred_group               = optional(string)
@@ -190,12 +192,12 @@ resource "aci_vrf" "vrfs" {
     "uni\\/tn\\-", each.value.monitoring_policy)
     ) > 0 ? each.value.monitoring_policy : length(regexall(
     "[[:alnum:]]", each.value.monitoring_policy)
-  ) > 0 ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/monepg-${each.value.monitoring_policy}" : ""
   relation_fv_rs_bgp_ctx_pol = length(regexall(
     "uni\\/tn\\-", each.value.bgp_timers)
     ) > 0 ? each.value.bgp_timers : length(regexall(
     "[[:alnum:]]", each.value.bgp_timers)
-  ) > 0 ? "uni/tn-common/bgpCtxP-${each.value.bgp_timers}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/bgpCtxP-${each.value.bgp_timers}" : ""
   dynamic "relation_fv_rs_ctx_to_bgp_ctx_af_pol" {
     for_each = each.value.bgp_timers_per_address_family
     content {
@@ -204,7 +206,7 @@ resource "aci_vrf" "vrfs" {
         "uni\\/tn\\-", relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy : length(regexall(
         "[[:alnum:]]", relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy)
-      ) > 0 ? "uni/tn-common/bgpCtxAfP-${relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy}" : ""
+      ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/bgpCtxAfP-${relation_fv_rs_ctx_to_bgp_ctx_af_pol.value.policy}" : ""
     }
   }
   dynamic "relation_fv_rs_ctx_to_eigrp_ctx_af_pol" {
@@ -215,14 +217,14 @@ resource "aci_vrf" "vrfs" {
         "uni\\/tn\\-", relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy : length(regexall(
         "[[:alnum:]]", relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy)
-      ) > 0 ? "uni/tn-common/eigrpCtxAfP-${relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy}" : ""
+      ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/eigrpCtxAfP-${relation_fv_rs_ctx_to_eigrp_ctx_af_pol.value.policy}" : ""
     }
   }
   relation_fv_rs_ospf_ctx_pol = length(regexall(
     "uni\\/tn\\-", each.value.ospf_timers)
     ) > 0 ? each.value.ospf_timers : length(regexall(
     "[[:alnum:]]", each.value.ospf_timers)
-  ) > 0 ? "uni/tn-common/ospfCtxP-${each.value.ospf_timers}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ospfCtxP-${each.value.ospf_timers}" : ""
   dynamic "relation_fv_rs_ctx_to_ospf_ctx_pol" {
     for_each = each.value.ospf_timers_per_address_family
     content {
@@ -231,14 +233,14 @@ resource "aci_vrf" "vrfs" {
         "uni\\/tn\\-", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy : length(regexall(
         "[[:alnum:]]", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
-      ) > 0 ? "uni/tn-common/ospfCtxAfP-${relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy}" : ""
+      ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ospfCtxAfP-${relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy}" : ""
     }
   }
   relation_fv_rs_ctx_to_ext_route_tag_pol = length(regexall(
     "uni\\/tn\\-", each.value.transit_route_tag_policy)
     ) > 0 ? each.value.transit_route_tag_policy : length(regexall(
     "[[:alnum:]]", each.value.transit_route_tag_policy)
-  ) > 0 ? "uni/tn-common/rttag-${each.value.transit_route_tag_policy}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/rttag-${each.value.transit_route_tag_policy}" : ""
   # relation_fv_rs_ctx_mcast_to             = ["{vzFilter}"]
   tenant_dn = aci_tenant.tenants[each.value.tenant].id
 }

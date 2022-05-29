@@ -157,10 +157,6 @@ Spanning Tree Policy (MSTP)
 _______________________________________________________________________________________________________________________
 */
 resource "aci_access_switch_policy_group" "leaf_policy_groups" {
-  depends_on = [
-    aci_cdp_interface_policy.cdp_interface_policies,
-    aci_lldp_interface_policy.lldp_interface_policies,
-  ]
   for_each    = local.leaf_policy_groups
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description

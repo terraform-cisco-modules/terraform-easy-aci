@@ -74,10 +74,6 @@ LLDP Policy
 _______________________________________________________________________________________________________________________
 */
 resource "aci_spine_switch_policy_group" "spine_policy_groups" {
-  depends_on = [
-    aci_cdp_interface_policy.cdp_interface_policies,
-    aci_lldp_interface_policy.lldp_interface_policies
-  ]
   for_each                                     = local.spine_policy_groups
   annotation                                   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                                  = each.value.description
@@ -86,6 +82,6 @@ resource "aci_spine_switch_policy_group" "spine_policy_groups" {
   relation_infra_rs_spine_bfd_ipv4_inst_pol    = "uni/infra/bfdIpv4Inst-${each.value.bfd_ipv4_policy}"
   relation_infra_rs_spine_bfd_ipv6_inst_pol    = "uni/infra/bfdIpv6Inst-${each.value.bfd_ipv6_policy}"
   relation_infra_rs_spine_copp_profile         = "uni/infra/coppspinep-${each.value.copp_spine_policy}"
-  relation_infra_rs_spine_p_grp_to_cdp_if_pol  = aci_cdp_interface_policy.cdp_interface_policies[each.value.cdp_interface_policy].id
-  relation_infra_rs_spine_p_grp_to_lldp_if_pol = aci_lldp_interface_policy.lldp_interface_policies[each.value.lldp_interface_policy].id
+  relation_infra_rs_spine_p_grp_to_cdp_if_pol  = "uni/infra/cdpIfP-${each.value.cdp_interface_policy}"
+  relation_infra_rs_spine_p_grp_to_lldp_if_pol = "uni/infra/lldpIfP-${each.value.lldp_interface_policy}"
 }
