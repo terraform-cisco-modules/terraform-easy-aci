@@ -24,7 +24,7 @@ variable "switch_profiles" {
         {
           description           = ""
           interface_description = ""
-          name                  = "1/1"
+          port                  = "1/1"
           policy_group          = ""
           policy_group_type     = "access"
           sub_port              = false
@@ -44,9 +44,9 @@ variable "switch_profiles" {
           management_epg = "default"
         }
       ] */
-      policy_group  = "**REQUIRED**"
+      policy_group  = "default"
       pod_id        = 1
-      serial        = "**REQUIRED**"
+      serial_number = "**REQUIRED**"
       two_slot_leaf = false
     }
   }
@@ -73,7 +73,7 @@ variable "switch_profiles" {
     - spine
     - tier-2-leaf
   * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
-  * serial: Manufacturing Serial Number of the Switch.
+  * serial_number: Manufacturing Serial Number of the Switch.
   * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
   type = map(object(
@@ -94,7 +94,7 @@ variable "switch_profiles" {
         {
           description           = optional(string)
           interface_description = optional(string)
-          name                  = string
+          port                  = string
           policy_group          = optional(string)
           policy_group_type     = optional(string)
           sub_port              = optional(bool)
@@ -112,9 +112,9 @@ variable "switch_profiles" {
           management_epg = optional(string)
         }
       )))
-      policy_group  = string
+      policy_group  = optional(string)
       pod_id        = optional(number)
-      serial        = string
+      serial_number = string
       two_slot_leaf = optional(bool)
     }
   ))
@@ -132,7 +132,7 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "fabric_membership" {
   for_each   = local.switch_profiles
-  dn         = "uni/controller/nodeidentpol/nodep-${each.value.serial}"
+  dn         = "uni/controller/nodeidentpol/nodep-${each.value.serial_number}"
   class_name = "fabricNodeIdentP"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -144,7 +144,7 @@ resource "aci_rest_managed" "fabric_membership" {
     "tier-2-leaf", each.value.node_type)) > 0 ? each.value.node_type : "unspecified"
     podId  = each.value.pod_id
     role   = each.value.node_type == "spine" ? "spine" : "leaf"
-    serial = each.value.serial
+    serial = each.value.serial_number
   }
 }
 
@@ -157,7 +157,7 @@ resource "aci_rest_managed" "fabric_membership" {
 #   node_type   = each.value.node_type
 #   pod_id      = each.value.pod_id
 #   role        = each.value.role
-#   serial      = each.value.serial
+#   serial      = each.value.serial_number
 # }
 
 
@@ -214,14 +214,13 @@ ________________________________________________________________________________
 resource "aci_leaf_selector" "leaf_selectors" {
   depends_on = [
     aci_leaf_profile.leaf_profiles,
-    aci_access_switch_policy_group.leaf_policy_groups
   ]
   for_each                         = { for k, v in local.switch_profiles : k => v if v.node_type != "spine" }
   annotation                       = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                      = each.value.description
   leaf_profile_dn                  = aci_leaf_profile.leaf_profiles[each.key].id
   name                             = each.value.name
-  relation_infra_rs_acc_node_p_grp = aci_access_switch_policy_group.leaf_policy_groups[each.value.policy_group].id
+  relation_infra_rs_acc_node_p_grp = "uni/infra/funcprof/accnodepgrp-${each.value.policy_group}"
   switch_association_type          = "range"
 }
 
@@ -290,14 +289,13 @@ ________________________________________________________________________________
 resource "aci_spine_switch_association" "spine_profiles" {
   depends_on = [
     aci_spine_profile.spine_profiles,
-    aci_spine_switch_policy_group.spine_policy_groups
   ]
   for_each                               = { for k, v in local.switch_profiles : k => v if v.node_type == "spine" }
   annotation                             = each.value.annotation != "" ? each.value.annotation : var.annotation
   spine_profile_dn                       = aci_spine_profile.spine_profiles[each.key].id
   description                            = each.value.description
   name                                   = each.value.name
-  relation_infra_rs_spine_acc_node_p_grp = aci_spine_switch_policy_group.spine_policy_groups[each.value.policy_group].id
+  relation_infra_rs_spine_acc_node_p_grp = "uni/infra/funcprof/spaccnodepgrp-${each.value.policy_group}"
   spine_switch_association_type          = "range"
 }
 
@@ -340,9 +338,6 @@ ________________________________________________________________________________
 resource "aci_access_port_selector" "leaf_interface_selectors" {
   depends_on = [
     aci_leaf_interface_profile.leaf_interface_profiles,
-    aci_leaf_access_port_policy_group.policy_groups,
-    aci_leaf_breakout_port_group.policy_groups,
-    aci_leaf_access_bundle_policy_group.policy_groups
   ]
   for_each                  = { for k, v in local.interface_selectors : k => v if v.node_type != "spine" }
   leaf_interface_profile_dn = aci_leaf_interface_profile.leaf_interface_profiles[each.value.key1].id
@@ -351,13 +346,12 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   name                      = each.value.interface_name
   access_port_selector_type = "range"
   relation_infra_rs_acc_base_grp = length(regexall(
-    "access", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
-    ) > 0 ? aci_leaf_access_port_policy_group.policy_groups[each.value.interface_policy_group
-    ].id : length(regexall(
-    "breakout", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
-    ) > 0 ? aci_leaf_breakout_port_group.policy_groups[each.value.interface_policy_group].id : length(regexall(
-    "bundle", each.value.policy_group_type)) > 0 && length(compact([each.value.interface_policy_group])
-  ) > 0 ? aci_leaf_access_bundle_policy_group.policy_groups[each.value.interface_policy_group].id : ""
+    "access", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
+    ) > 0 ? "uni/infra/funcprof/accportgrp-${each.value.interface_policy_group}" : length(regexall(
+    "breakout", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
+    ) > 0 ? "uni/infra/funcprof/brkoutportgrp-${each.value.interface_policy_group}" : length(regexall(
+    "bundle", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
+  ) > 0 ? "uni/infra/funcprof/accbundle-${each.value.interface_policy_group}" : ""
 }
 
 
@@ -451,7 +445,8 @@ resource "aci_rest_managed" "spine_interface_selectors" {
     rn         = "rsspAccGrp"
     class_name = "infraRsSpAccGrp"
     content = {
-      tDn = "uni/infra/funcprof/spaccportgrp-${each.value.interface_policy_group}"
+      tDn = length(compact([each.value.policy_group])
+      ) > 0 ? "uni/infra/funcprof/spaccportgrp-${each.value.policy_group}" : ""
     }
   }
 }
@@ -472,14 +467,14 @@ resource "aci_static_node_mgmt_address" "static_node_mgmt_addresses" {
   depends_on = [
     aci_rest_managed.fabric_membership
   ]
-  for_each          = local.static_node_mgmt_addresses
-  management_epg_dn = "uni/tn-mgmt/mgmtp-default/${management_epg_type}-${management_epg}"
+  for_each   = local.static_node_mgmt_addresses
+  addr       = each.value.ipv4_address
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  # description       = each.value.description
+  gw                = each.value.ipv4_gateway
+  management_epg_dn = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
   t_dn              = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
   type              = each.value.management_epg_type == "inb" ? "in_band" : "out_of_band"
-  description       = each.value.description
-  addr              = each.value.ipv4_address
-  annotation        = each.value.annotation != "" ? each.value.annotation : var.annotation
-  gw                = each.value.ipv4_gateway
   v6_addr           = each.value.ipv6_address
   v6_gw             = each.value.ipv6_gateway
 }

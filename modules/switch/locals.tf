@@ -11,13 +11,13 @@ locals {
       external_pool_id  = length(compact([v.external_pool_id])) > 0 ? v.external_pool_id : 0
       inband_addressing = v.inband_addressing != null ? v.inband_addressing : []
       interfaces        = v.interfaces != null ? v.interfaces : []
-      policy_group      = v.leaf_policy_group
+      policy_group      = v.policy_group != null ? v.policy_group : "default"
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
       name              = v.name
       node_type         = v.node_type != null ? v.node_type : "leaf"
       ooband_addressing = v.ooband_addressing != null ? v.ooband_addressing : []
       pod_id            = v.pod_id != null ? v.pod_id : 1
-      serial            = v.serial
+      serial_number     = v.serial_number
       two_slot_leaf     = v.two_slot_leaf != null ? v.two_slot_leaf : false
     }
   }
@@ -28,57 +28,59 @@ locals {
         annotation            = v.annotation != null ? v.annotation : ""
         description           = s.description != null ? s.description : ""
         interface_description = s.interface_description != null ? s.interface_description : ""
-        policy_group          = s.policy_group != null ? s.policy_group : ""
-        key1                  = k
-        key2                  = s.name
-        interface_name = v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-00${element(split("/", s.name), 1)}-${element(split("/", s.name), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-0${element(split("/", s.name), 1)}-${element(split("/", s.name), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-${element(split("/", s.name), 1)}-${element(split("/", s.name), 2
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-00${element(split("/", s.name), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-0${element(split("/", s.name), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-${element(split("/", s.name), 1
-          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-0${element(split("/", s.name), 1)}-${element(split("/", s.name), 2
-          )}" : v.sub_port == true && value.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-${element(split("/", s.name), 1)}-${element(split("/", s.name), 2
-          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-0${element(split("/", s.name), 1
-          )}" : v.sub_port == false && value.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", s.name), 1))) > 0 ? "Eth${element(split("/", s.name), 0
-            )}-${element(split("/", s.name), 1
+        interface_name = coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
+          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-00${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
+          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-0${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
+          regexall("^\\d{3}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
+          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-00${element(split("/", s.port), 1
+          )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
+          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-0${element(split("/", s.port), 1
+          )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
+          regexall("^\\d{3}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-${element(split("/", s.port), 1
+          )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == false && length(
+          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-0${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == false && length(
+          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == false && length(
+          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-0${element(split("/", s.port), 1
+          )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == false && length(
+          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
+            )}-${element(split("/", s.port), 1
         )}" : ""
-
-        module            = element(split("/", s.name), 0)
-        port              = element(split("/", s.name), 1)
+        key1              = k
+        key2              = s.port
+        module            = element(split("/", s.port), 0)
+        name              = k
+        node_type         = v.node_type
+        port              = element(split("/", s.port), 1)
+        policy_group      = s.policy_group != null ? s.policy_group : ""
         policy_group_type = s.policy_group_type != null ? s.policy_group_type : "access"
-        sub_port          = s.sub_port != false ? element(split("/", s.name), 2) : ""
+        sub_port          = s.sub_port != false ? element(split("/", s.port), 2) : ""
       }
     ]
   ])
 
 
   interface_selectors = {
-    for k, v in local.selectors_loop : "${v.key1}_Eth${v.key2}" => v
+    for k, v in local.interface_selectors_loop : "${v.key1}_Eth${v.key2}" => v
   }
 
   inband_loop = flatten([
     for k, v in local.switch_profiles : [
       for s in v.inband_addressing : {
+        annotation          = v.annotation != null ? v.annotation : ""
         ipv4_address        = s.ipv4_address != null ? s.ipv4_address : ""
         ipv4_gateway        = s.ipv4_gateway != null ? s.ipv4_gateway : ""
         ipv6_address        = s.ipv6_address != null ? s.ipv6_address : ""
@@ -95,6 +97,7 @@ locals {
   ooband_loop = flatten([
     for k, v in local.switch_profiles : [
       for s in v.inband_addressing : {
+        annotation          = v.annotation != null ? v.annotation : ""
         ipv4_address        = s.ipv4_address != null ? s.ipv4_address : ""
         ipv4_gateway        = s.ipv4_gateway != null ? s.ipv4_gateway : ""
         ipv6_address        = s.ipv6_address != null ? s.ipv6_address : ""
