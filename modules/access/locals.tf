@@ -547,7 +547,7 @@ locals {
       for k, v in value.vswitch_policy : {
         annotation           = v.annotation != null ? v.annotation : ""
         cdp_interface_policy = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
-        enhanced_lag_policy = length(v.enhanced_lag_policy) > 0 ? [
+        enhanced_lag_policy = length(compact([v.enhanced_lag_policy])) > 0 ? [
           for s in v.enhanced_lag_policy : {
             load_balancing_mode = s.load_balancing_mode != null ? s.load_balancing_mode : "src-dst-ip"
             mode                = s.mode != null ? s.mode : "active"
