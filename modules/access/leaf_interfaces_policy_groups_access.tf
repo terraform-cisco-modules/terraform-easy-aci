@@ -2,7 +2,7 @@
 # Create Access Port Policy Groups
 #------------------------------------------
 
-variable "leaf_interface_policy_groups_access" {
+variable "leaf_interfaces_policy_groups_access" {
   default = {
     "default" = {
       attachable_entity_profile        = ""
@@ -65,6 +65,7 @@ variable "leaf_interface_policy_groups_access" {
       monitoring_policy                = optional(string)
       netflow_monitor_policies         = optional(list(string))
       port_security_policy             = optional(string)
+      poe_interface_policy             = optional(string)
       priority_flow_control_policy     = optional(string)
       slow_drain_policy                = optional(string)
       span_destination_groups          = optional(list(string))
@@ -82,7 +83,7 @@ API Information:
 GUI Location:
  - Fabric > Interfaces > Leaf Interfaces > Policy Groups > Leaf Access Port > {{Name}}
 */
-resource "aci_leaf_access_port_policy_group" "leaf_interface_policy_groups_access" {
+resource "aci_leaf_access_port_policy_group" "leaf_interfaces_policy_groups_access" {
   depends_on = [
     aci_attachable_access_entity_profile.global_attachable_access_entity_profiles,
     aci_cdp_interface_policy.policies_cdp_interface,
@@ -94,7 +95,7 @@ resource "aci_leaf_access_port_policy_group" "leaf_interface_policy_groups_acces
     aci_port_security_policy.policies_port_security,
     aci_spanning_tree_interface_policy.policies_spanning_tree_interface
   ]
-  for_each    = local.leaf_interface_policy_groups_access
+  for_each    = local.leaf_interfaces_policy_groups_access
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
@@ -145,11 +146,8 @@ resource "aci_leaf_access_port_policy_group" "leaf_interface_policy_groups_acces
     }
   }
   # class: poeIfPol
-  relation_infra_rs_poe_if_pol = length(compact([each.value.poe_policy])
-  ) > 0 ? "uni/infra/poeIfP-${each.value.poe_policy}" : ""
-  # class: qosDppPol
-  relation_infra_rs_qos_dpp_if_pol = length(compact([each.value.data_plane_policing])
-  ) > 0 ? "uni/infra/qosdpppol-${each.value.data_plane_policing}" : ""
+  relation_infra_rs_poe_if_pol = length(compact([each.value.poe_interface_policy])
+  ) > 0 ? "uni/infra/poeIfP-${each.value.poe_interface_policy}" : ""
   # class: qosDppPol
   relation_infra_rs_qos_egress_dpp_if_pol = length(compact([each.value.data_plane_policing_egress])
   ) > 0 ? "uni/infra/qosdpppol-${each.value.data_plane_policing_egress}" : ""
@@ -163,10 +161,10 @@ resource "aci_leaf_access_port_policy_group" "leaf_interface_policy_groups_acces
   relation_infra_rs_qos_sd_if_pol = length(compact([each.value.slow_drain_policy])
   ) > 0 ? "uni/infra/qossdpol-${each.value.slow_drain_policy}" : ""
   # class: spanVDestGrp
-  relation_infra_rs_span_v_dest_grp = length(compact([each.value.span_destination_groups])
+  relation_infra_rs_span_v_dest_grp = length(compact(each.value.span_destination_groups)
   ) > 0 ? [for s in each.value.span_source_groups : "uni/infra/vdestgrp-${s}"] : []
   # class: spanVSrcGrp
-  relation_infra_rs_span_v_src_grp = length(compact([each.value.span_source_groups])
+  relation_infra_rs_span_v_src_grp = length(compact(each.value.span_source_groups)
   ) > 0 ? [for s in each.value.span_source_groups : "uni/infra/vsrcgrp-${s}"] : []
   # class: stormctrlIfPol
   relation_infra_rs_stormctrl_if_pol = length(compact([each.value.storm_control_policy])

@@ -3,7 +3,7 @@
 Leaf Policy Group Variables
 _______________________________________________________________________________________________________________________
 */
-variable "leaf_policy_groups" {
+variable "switches_leaf_policy_groups" {
   default = {
     "default" = {
       annotation                       = ""
@@ -156,8 +156,8 @@ Spanning Tree Policy (MSTP)
  - Distinguished Name: "uni/infra/mstpInstPol-{spanning_tree_policy}"
 _______________________________________________________________________________________________________________________
 */
-resource "aci_access_switch_policy_group" "leaf_policy_groups" {
-  for_each    = local.leaf_policy_groups
+resource "aci_access_switch_policy_group" "switches_leaf_policy_groups" {
+  for_each    = local.switches_leaf_policy_groups
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key

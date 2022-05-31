@@ -1,4 +1,4 @@
-variable "leaf_interface_policy_groups_breakout" {
+variable "leaf_interfaces_policy_groups_breakout" {
   default = {
     "default" = {
       annotation   = ""
@@ -31,8 +31,8 @@ API Information:
 GUI Location:
  - Fabric > Access Policies > Interface > Leaf Interfaces > Policy Groups > Leaf Breakout Port Group:{{Name}}
 */
-resource "aci_leaf_breakout_port_group" "leaf_interface_policy_groups_breakout" {
-  for_each    = local.leaf_interface_policy_groups_breakout
+resource "aci_leaf_breakout_port_group" "leaf_interfaces_policy_groups_breakout" {
+  for_each    = local.leaf_interfaces_policy_groups_breakout
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   brkout_map  = each.value.breakout_map
   description = each.value.description

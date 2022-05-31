@@ -67,7 +67,9 @@ locals {
       debug_4                           = v.debug_4 != null ? v.debug_4 : true
       debug_5                           = v.debug_5 != null ? v.debug_5 : true
       dhcp_rate_limit                   = v.dhcp_rate_limit != null ? v.dhcp_rate_limit : true
+      error_disable_recovery_interval   = v.error_disable_recovery_interval != null ? v.error_disable_recovery_interval : 300
       ethernet_port_module              = v.ethernet_port_module != null ? v.ethernet_port_module : true
+      frequent_endpoint_move            = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
       ip_address_conflict               = v.ip_address_conflict != null ? v.ip_address_conflict : true
       ipqos_dcbxp_compatability_failure = v.ipqos_dcbxp_compatability_failure != null ? v.ipqos_dcbxp_compatability_failure : true
       ipqos_manager_error               = v.ipqos_manager_error != null ? v.ipqos_manager_error : true
@@ -92,7 +94,7 @@ locals {
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
       annotation                        = v.annotation != null ? v.annotation : ""
-      controls                          = v.enable_mcp_pdu_per_vlan == true ? ["pdu-per-vlan", "stateful-ha"] : ["stateful-ha"]
+      enable_mcp_pdu_per_vlan           = v.enable_mcp_pdu_per_vlan != null ? v.enable_mcp_pdu_per_vlan : true
       initial_delay                     = v.initial_delay != null ? v.initial_delay : 180
       loop_detect_multiplication_factor = v.loop_detect_multiplication_factor != null ? v.loop_detect_multiplication_factor : 3
       loop_protection_disable_port      = v.loop_protection_disable_port != null ? v.loop_protection_disable_port : true
@@ -115,6 +117,7 @@ locals {
       fabric_flush_state                = v.fabric_flush_state != null ? v.fabric_flush_state : false
       micro_burst_spine_queues          = v.micro_burst_spine_queues != null ? v.micro_burst_spine_queues : 0
       micro_burst_leaf_queues           = v.micro_burst_leaf_queues != null ? v.micro_burst_leaf_queues : 0
+      preserve_cos                      = v.preserve_cos != null ? v.preserve_cos : true
     }
   }
 
@@ -246,8 +249,8 @@ locals {
   # Leaf Interface Policy Group Variables
   #__________________________________________________________
 
-  leaf_interface_policy_groups_access = {
-    for k, v in var.leaf_interface_policy_groups_access : k => {
+  leaf_interfaces_policy_groups_access = {
+    for k, v in var.leaf_interfaces_policy_groups_access : k => {
       attachable_entity_profile        = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
       annotation                       = v.annotation != null ? v.annotation : ""
       cdp_interface_policy             = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
@@ -267,7 +270,7 @@ locals {
       macsec_policy                    = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy             = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy                = v.monitoring_policy != null ? v.monitoring_policy : ""
-      netflow_policy                   = v.netflow_policy != null ? v.netflow_policy : []
+      netflow_monitor_policies         = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
       poe_interface_policy             = v.poe_interface_policy != null ? v.poe_interface_policy : ""
       port_security_policy             = v.port_security_policy != null ? v.port_security_policy : ""
       priority_flow_control_policy     = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
@@ -281,8 +284,8 @@ locals {
   }
 
 
-  leaf_interface_policy_groups_breakout = {
-    for k, v in var.leaf_interface_policy_groups_breakout : k => {
+  leaf_interfaces_policy_groups_breakout = {
+    for k, v in var.leaf_interfaces_policy_groups_breakout : k => {
       annotation   = v.annotation != null ? v.annotation : ""
       breakout_map = v.breakout_map != null ? v.breakout_map : "10g-4x"
       description  = v.description != null ? v.description : ""
@@ -290,8 +293,8 @@ locals {
   }
 
 
-  leaf_interface_policy_groups_bundle = {
-    for k, v in var.leaf_interface_policy_groups_bundle : k => {
+  leaf_interfaces_policy_groups_bundle = {
+    for k, v in var.leaf_interfaces_policy_groups_bundle : k => {
       attachable_entity_profile      = v.attachable_entity_profile != null ? v.attachable_entity_profile : ""
       annotation                     = v.annotation != null ? v.annotation : ""
       cdp_interface_policy           = v.cdp_interface_policy != null ? v.cdp_interface_policy : ""
@@ -310,6 +313,7 @@ locals {
       macsec_policy                  = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy           = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
+      netflow_monitor_policies       = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
       port_security_policy           = v.port_security_policy != null ? v.port_security_policy : ""
       priority_flow_control_policy   = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
       slow_drain_policy              = v.slow_drain_policy != null ? v.slow_drain_policy : ""
@@ -326,8 +330,8 @@ locals {
   # Leaf Policy Group Variables
   #__________________________________________________________
 
-  leaf_policy_groups = {
-    for k, v in var.leaf_policy_groups : k => {
+  switches_leaf_policy_groups = {
+    for k, v in var.switches_leaf_policy_groups : k => {
       annotation                       = v.annotation != null ? v.annotation : ""
       bfd_ipv4_policy                  = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
       bfd_ipv6_policy                  = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
@@ -378,8 +382,8 @@ locals {
   # Spine Policy Group Variables
   #__________________________________________________________
 
-  spine_policy_groups = {
-    for k, v in var.spine_policy_groups : k => {
+  switches_spine_policy_groups = {
+    for k, v in var.switches_spine_policy_groups : k => {
       annotation               = v.annotation != null ? v.annotation : ""
       bfd_ipv4_policy          = v.bfd_ipv4_policy != null ? v.bfd_ipv4_policy : "default"
       bfd_ipv6_policy          = v.bfd_ipv6_policy != null ? v.bfd_ipv6_policy : "default"
@@ -553,7 +557,6 @@ locals {
         ] : []
         firewall_policy       = v.firewall_policy != null ? v.firewall_policy : "default"
         domain                = key
-        lacp_interface_policy = v.lacp_interface_policy != null ? v.lacp_interface_policy : ""
         lldp_interface_policy = v.lldp_interface_policy != null ? v.lldp_interface_policy : ""
         mtu_policy            = v.mtu_policy != null ? v.mtu_policy : "default"
         netflow_export_policy = v.vmm_netflow_export_policy != null ? [
@@ -564,6 +567,7 @@ locals {
             sample_rate         = s.sample_rate != null ? s.sample_rate : 0
           }
         ] : []
+        port_channel_policy = v.port_channel_policy != null ? v.port_channel_policy : ""
       }
     ]
   ])
@@ -572,9 +576,9 @@ locals {
 
   vmm_uplinks = {
     for k, v in local.domains_vmm : k => {
-      domain        = k
-      numOfUplinks  = length(v.uplink_names) > 0 ? length(v.uplink_names) : 2
-      switch_vendor = v.switch_vendor
+      domain          = k
+      numOfUplinks    = length(v.uplink_names) > 0 ? length(v.uplink_names) : 2
+      switch_provider = v.switch_provider
     } if v.access_mode == "read-write"
   }
 
@@ -582,10 +586,10 @@ locals {
   vmm_uplink_names_loop = flatten([
     for k, v in local.domains_vmm : [
       for s in v.uplink_names : {
-        domain        = k
-        switch_vendor = v.switch_vendor
-        uplinkId      = index(v.uplink_names, s) + 1
-        uplinkName    = s
+        domain          = k
+        switch_provider = v.switch_provider
+        uplinkId        = index(v.uplink_names, s) + 1
+        uplinkName      = s
       }
     ] if v.access_mode == "read-write"
   ])

@@ -64,14 +64,14 @@ GUI Location:
 resource "aci_qos_instance_policy" "global_qos_class" {
   for_each              = local.global_qos_class
   annotation            = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl                  = each.value.control
+  ctrl                  = each.value.preserve_cos == true ? "dot1p-preserve" : "none"
   description           = each.value.description
   etrap_age_timer       = each.value.elephant_trap_age_period
   etrap_bw_thresh       = each.value.elephant_trap_bandwidth_threshold
   etrap_byte_ct         = each.value.elephant_trap_byte_count
-  etrap_st              = each.value.elephant_trap_state
+  etrap_st              = each.value.elephant_trap_state == true ? "yes" : "no"
   fabric_flush_interval = each.value.fabric_flush_interval
-  fabric_flush_st       = each.value.fabric_flush_state
+  fabric_flush_st       = each.value.fabric_flush_state == true ? "yes" : "no"
   uburst_spine_queues   = each.value.micro_burst_spine_queues
   uburst_tor_queues     = each.value.micro_burst_leaf_queues
 }

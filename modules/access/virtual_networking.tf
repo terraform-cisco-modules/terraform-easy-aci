@@ -54,12 +54,13 @@ variable "virtual_networking" {
         {
           annotation           = ""
           cdp_interface_policy = ""
-          enhanced_lag_policy  = []
+          # enhanced_lag_policy  = []
           /* **Example
           enhanced_lag_policy = [
             {
               load_balancing_mode = "src-dst-ip"
               mode                = "active"
+              name                = "default"
               number_of_links     = 2
             }
           ] */
@@ -252,6 +253,7 @@ variable "virtual_networking" {
             {
               load_balancing_mode = optional(string)
               mode                = optional(string)
+              name                = optional(string)
               number_of_links     = optional(number)
             }
           )))
@@ -314,9 +316,9 @@ variable "vmm_password_5" {
 
 API Information:
  - Class: "vmmDomP"
- - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}
+ - Distinguished Name: "uni/vmmp-{switch_provider}/dom-{name}
 GUI Location:
- - Virtual Networking -> {switch_vendor} -> {domain_name}
+ - Virtual Networking -> {switch_provider} -> {domain_name}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vmm_domain" "domains_vmm" {
@@ -346,7 +348,7 @@ resource "aci_rest_managed" "vmm_domains_uplinks" {
     aci_vmm_domain.domains_vmm
   ]
   for_each   = local.vmm_uplinks
-  dn         = "uni/vmmp-${each.value.switch_vendor}/dom-${each.value.domain}/uplinkpcont"
+  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont"
   class_name = "vmmUplinkPCont"
   content = {
     numOfUplinks = each.value.numOfUplinks
@@ -358,7 +360,7 @@ resource "aci_rest_managed" "vmm_uplink_names" {
     aci_rest_managed.vmm_domains_uplinks
   ]
   for_each   = local.vmm_uplink_names
-  dn         = "uni/vmmp-${each.value.switch_vendor}/dom-${each.value.domain}/uplinkpcont/uplinkp-${each.value.uplinkId}"
+  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont/uplinkp-${each.value.uplinkId}"
   class_name = "vmmUplinkP"
   content = {
     uplinkId   = each.value.uplinkId
@@ -370,9 +372,9 @@ resource "aci_rest_managed" "vmm_uplink_names" {
 
 API Information:
  - Class: "vmmUsrAccP"
- - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/usracc-{name}"
+ - Distinguished Name: "uni/vmmp-{switch_provider}/dom-{name}/usracc-{name}"
 GUI Location:
- - Virtual Networking -> {switch_vendor} -> {domain_name} -> Credentials
+ - Virtual Networking -> {switch_provider} -> {domain_name} -> Credentials
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vmm_credential" "credentials" {
@@ -400,9 +402,9 @@ resource "aci_vmm_credential" "credentials" {
 
 API Information:
  - Class: "vmmCtrlrP"
- - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/ctrlr-{name}"
+ - Distinguished Name: "uni/vmmp-{switch_provider}/dom-{name}/ctrlr-{name}"
 GUI Location:
- - Virtual Networking -> {switch_vendor} -> {domain_name} -> {controller_name}
+ - Virtual Networking -> {switch_provider} -> {domain_name} -> {controller_name}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vmm_controller" "controllers" {
@@ -437,9 +439,9 @@ resource "aci_vmm_controller" "controllers" {
 
 API Information:
  - Class: "vmmVSwitchPolicyCont"
- - Distinguished Name: "uni/vmmp-{switch_vendor}/dom-{name}/vswitchpolcont"
+ - Distinguished Name: "uni/vmmp-{switch_provider}/dom-{name}/vswitchpolcont"
 GUI Location:
- - Virtual Networking -> {switch_vendor} -> {domain_name} -> VSwitch Policy
+ - Virtual Networking -> {switch_provider} -> {domain_name} -> VSwitch Policy
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vswitch_policy" "vswitch_policies" {

@@ -64,12 +64,12 @@ resource "aci_mcp_instance_policy" "global_mcp_instance_policy" {
   for_each         = local.global_mcp_instance_policy
   admin_st         = each.value.admin_state
   annotation       = each.value.annotation != "" ? each.value.annotation : var.annotation
-  ctrl             = [each.value.controls]
+  ctrl             = each.value.enable_mcp_pdu_per_vlan == true ? ["pdu-per-vlan", "stateful-ha"] : ["stateful-ha"]
   description      = each.value.description
   init_delay_time  = each.value.initial_delay
   key              = var.mcp_instance_key
   loop_detect_mult = each.value.loop_detect_multiplication_factor
-  loop_protect_act = each.value.loop_protection_disable_port == true ? "yes" : "no"
+  loop_protect_act = each.value.loop_protection_disable_port == true ? "port-disable" : "none"
   tx_freq          = each.value.transmission_frequency_seconds
   tx_freq_msec     = each.value.transmission_frequency_msec
 }

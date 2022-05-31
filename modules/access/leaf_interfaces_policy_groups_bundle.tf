@@ -1,4 +1,4 @@
-variable "leaf_interface_policy_groups_bundle" {
+variable "leaf_interfaces_policy_groups_bundle" {
   default = {
     "default" = {
       attachable_entity_profile      = ""
@@ -75,7 +75,7 @@ API Information:
 GUI Location:
  - Fabric > Interfaces > Leaf Interfaces > Policy Groups > [PC or VPC] Interface > {{Name}}
 */
-resource "aci_leaf_access_bundle_policy_group" "leaf_interface_policy_groups_bundle" {
+resource "aci_leaf_access_bundle_policy_group" "leaf_interfaces_policy_groups_bundle" {
   depends_on = [
     aci_attachable_access_entity_profile.global_attachable_access_entity_profiles,
     aci_cdp_interface_policy.policies_cdp_interface,
@@ -88,7 +88,7 @@ resource "aci_leaf_access_bundle_policy_group" "leaf_interface_policy_groups_bun
     aci_port_security_policy.policies_port_security,
     aci_spanning_tree_interface_policy.policies_spanning_tree_interface
   ]
-  for_each    = local.leaf_interface_policy_groups_bundle
+  for_each    = local.leaf_interfaces_policy_groups_bundle
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   lag_t       = each.value.link_aggregation_type == "pc" ? "node" : "link"
