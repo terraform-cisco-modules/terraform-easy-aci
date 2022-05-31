@@ -453,15 +453,14 @@ locals {
     for key, value in local.date_and_time : [
       for k, v in value.ntp_servers : {
         annotation               = value.annotation != null ? value.annotation : ""
-        authentication_key       = v.authentication_key != null ? v.authentication_key : 0
-        authentication_keys      = value.authentication_keys
         description              = v.description != null ? v.description : ""
         hostname                 = v.hostname
+        key1                     = key
+        key_id                   = v.key_id != null ? v.key_id : 0
         management_epg           = v.management_epg != null ? v.management_epg : "default"
         management_epg_type      = v.management_epg_type != null ? v.management_epg_type : "oob"
         maximum_polling_interval = v.maximum_polling_interval != null ? v.maximum_polling_interval : 6
         minimum_polling_interval = v.minimum_polling_interval != null ? v.minimum_polling_interval : 4
-        key1                     = key
         preferred                = v.preferred != null ? v.preferred : false
       }
     ]
@@ -597,7 +596,6 @@ locals {
       customer_contact_email = v.customer_contact_email != null ? v.customer_contact_email : ""
       customer_id            = v.customer_id != null ? v.customer_id : ""
       description            = v.description != null ? v.description : ""
-      destinations           = v.destinations
       from_email             = v.from_email != null ? v.from_email : ""
       include_types = v.include_types != null ? [
         for s in v.include_types : {
@@ -614,14 +612,15 @@ locals {
           session_logs = false
         }
       ]
-      phone_contact  = v.phone_contact != null ? v.phone_contact : ""
-      port_number    = lookup(v.smtp_server[0], "port_number", 25)
-      reply_to_email = v.reply_to_email != null ? v.reply_to_email : ""
-      secure_smtp    = lookup(v.smtp_server[0], "secure_smtp", false)
-      site_id        = v.site_id != null ? v.site_id : ""
-      street_address = v.street_address != null ? v.street_address : ""
-      smtp_server    = v.smtp_server
-      username       = lookup(v.smtp_server[0], "username", "")
+      phone_contact      = v.phone_contact != null ? v.phone_contact : ""
+      port_number        = lookup(v.smtp_server[0], "port_number", 25)
+      reply_to_email     = v.reply_to_email != null ? v.reply_to_email : ""
+      secure_smtp        = lookup(v.smtp_server[0], "secure_smtp", false)
+      site_id            = v.site_id != null ? v.site_id : ""
+      smart_destinations = v.smart_destinations != null ? v.smart_destinations : []
+      street_address     = v.street_address != null ? v.street_address : ""
+      smtp_server        = v.smtp_server
+      username           = lookup(v.smtp_server[0], "username", "")
     }
   }
 
@@ -641,7 +640,7 @@ locals {
 
   smart_callhome_destinations_loop = flatten([
     for key, value in local.smart_callhome : [
-      for k, v in value.destinations : {
+      for k, v in value.smart_destinations : {
         admin_state   = v.admin_state != null ? v.admin_state : "enabled"
         annotation    = value.annotation != null ? value.annotation : ""
         email         = v.email != null ? v.email : "admin@example.com"
@@ -708,9 +707,11 @@ locals {
   snmp_client_group_clients_loop = flatten([
     for key, value in local.snmp_client_groups : [
       for k, v in value.clients : {
-        address = v.address
-        name    = v.name != null ? v.name : ""
-        key1    = key
+        annotation = value.annotation != null ? value.annotation : ""
+        address    = v.address
+        name       = v.name != null ? v.name : ""
+        key1       = key
+        key2       = k
       }
     ]
   ])
@@ -720,7 +721,6 @@ locals {
   snmp_communities_loop = flatten([
     for key, value in local.snmp_policies : [
       for k, v in value.snmp_communities : {
-        community          = v.community
         community_variable = v.community_variable != null ? v.community_variable : 1
         description        = v.description != null ? v.description : ""
         snmp_policy        = key
@@ -728,11 +728,14 @@ locals {
     ]
   ])
 
-  snmp_policies_communities = { for k, v in local.snmp_policies_communities_loop : "${v.snmp_policy}_${v.community}" => v }
+  snmp_policies_communities = {
+    for k, v in local.snmp_communities_loop : "${v.snmp_policy}_${v.community_variable}" => v
+  }
 
   snmp_policies_users_loop = flatten([
     for key, value in local.snmp_policies : [
       for k, v in value.users : {
+        annotation         = value.annotation != null ? value.annotation : ""
         authorization_key  = v.authorization_key
         authorization_type = v.authorization_type != null ? v.authorization_type : "hmac-sha1-96"
         privacy_key        = v.privacy_key != null ? v.privacy_key : 0
@@ -748,6 +751,7 @@ locals {
   snmp_trap_destinations_loop = flatten([
     for key, value in local.snmp_policies : [
       for k, v in value.snmp_destinations : {
+        annotation          = value.annotation != null ? value.annotation : ""
         community_variable  = v.community_variable != null ? v.community_variable : 0
         host                = v.host
         management_epg      = v.management_epg != null ? v.management_epg : "default"
@@ -755,12 +759,13 @@ locals {
         port                = v.port != null ? v.port : 162
         username            = v.username != null ? v.username : ""
         key1                = key
-        version             = length(regexall("[\\dA-Za-z]+", coalesce(v.username, "##"))) ? "v3" : "v2c"
+        v3_security_level   = v.v3_security_level != null ? v.v3_security_level : "auth"
+        version             = length(regexall("[\\dA-Za-z]+", coalesce(v.username, "##"))) > 0 ? "v3" : "v2c"
       }
     ]
   ])
 
-  snmp_destinations = { for k, v in local.snmp_destinations_loop : "${v.key1}_${v.host}" => v }
+  snmp_trap_destinations = { for k, v in local.snmp_trap_destinations_loop : "${v.key1}_${v.host}" => v }
 
   #__________________________________________________________
   #

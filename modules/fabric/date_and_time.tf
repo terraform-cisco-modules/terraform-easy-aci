@@ -616,7 +616,7 @@ resource "aci_rest_managed" "ntp_servers" {
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
-    keyId      = length(each.value.authentication_keys) > 0 ? each.value.authentication_key : 0
+    keyId      = length(regexall("[1-5]", each.value.key_id)) > 0 ? each.value.key_id : 0
     maxPoll    = each.value.maximum_polling_interval
     minPoll    = each.value.minimum_polling_interval
     name       = each.value.hostname
