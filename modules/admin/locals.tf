@@ -155,7 +155,7 @@ locals {
       run_mode               = v.run_mode != null ? v.run_mode : "pauseOnlyOnFailures"
       simulator              = v.simulator != null ? v.simulator : false
       version                = v.version != null ? v.version : "5.2(3g)"
-      version_check_override = v.version_check_override != null ? v.version_check_override : false
+      version_check_override = v.version_check_override != null ? v.version_check_override : "untriggered"
     }
   }
 
@@ -167,6 +167,7 @@ locals {
         description            = v.description
         policy_type            = v.policy_type
         graceful_upgrade       = v.graceful_upgrade
+        maintenance_policy     = value.name
         name                   = value.name
         node_list              = value.node_list != null ? value.node_list : [101, 201]
         notify_conditions      = v.notify_conditions
@@ -183,7 +184,7 @@ locals {
 
   maintenance_group_nodes_loop = flatten([
     for k, v in local.maintenance_groups : [
-      for s in v.nodes : {
+      for s in v.node_list : {
         name    = v.name
         node_id = s
       }
@@ -221,12 +222,12 @@ locals {
         timeout                = v.timeout
         host                   = value.host
         key                    = value.key
-        key1                   = key
+        key1                   = k
         management_epg         = value.management_epg != null ? value.management_epg : "default"
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
         server_monitoring      = v.server_monitoring != null ? lookup(v.server_monitoring[0], "admin_state", "disabled") : "disabled"
-        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", "") : ""
+        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", 0) : 0
         username               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "username", "admin") : "admin"
         type                   = v.type
       }
@@ -268,8 +269,8 @@ locals {
 
   tacacs = {
     for k, v in var.tacacs : k => {
-      include_types = v.include_types != null ? [
-        for s in v.include_types : {
+      accounting_include = v.accounting_include != null ? [
+        for s in v.accounting_include : {
           audit_logs   = s.audit_logs != null ? s.audit_logs : true
           events       = s.events != null ? s.events : false
           faults       = s.faults != null ? s.faults : false
@@ -308,7 +309,7 @@ locals {
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
         server_monitoring      = v.server_monitoring != null ? lookup(v.server_monitoring[0], "admin_state", "disabled") : "disabled"
-        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", "") : ""
+        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", 0) : 0
         username               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "username", "admin") : "admin"
       }
     ]

@@ -268,10 +268,10 @@ resource "aci_tacacs_source" "tacacs_sources" {
   for_each   = local.tacacs
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   incl = compact(concat([
-    length(regexall(true, each.value.include_types[0].audit_logs)) > 0 ? "audit" : ""], [
-    length(regexall(true, each.value.include_types[0].events)) > 0 ? "events" : ""], [
-    length(regexall(true, each.value.include_types[0].faults)) > 0 ? "faults" : ""], [
-    length(regexall(true, each.value.include_types[0].session_logs)) > 0 ? "session" : ""]
+    length(regexall(true, each.value.accounting_include[0].audit_logs)) > 0 ? "audit" : ""], [
+    length(regexall(true, each.value.accounting_include[0].events)) > 0 ? "events" : ""], [
+    length(regexall(true, each.value.accounting_include[0].faults)) > 0 ? "faults" : ""], [
+    length(regexall(true, each.value.accounting_include[0].session_logs)) > 0 ? "session" : ""]
   ))
   name                          = each.key
   parent_dn                     = "uni/fabric/moncommon"

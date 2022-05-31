@@ -17,7 +17,7 @@ variable "firmware" {
       run_mode               = "pauseOnlyOnFailures"
       simulator              = true
       version                = "5.2(1g)"
-      version_check_override = false
+      version_check_override = "untriggered"
     }
   }
   description = <<-EOT
@@ -40,7 +40,7 @@ variable "firmware" {
       run_mode               = optional(string)
       simulator              = optional(bool)
       version                = optional(string)
-      version_check_override = optional(bool)
+      version_check_override = optional(string)
 
     }
   ))
@@ -67,7 +67,7 @@ resource "aci_maintenance_policy" "maintenance_group_policy" {
   notif_cond             = each.value.notify_conditions # notifyOnlyOnFailures|notifyAlwaysBetweenSets|notifyNever
   run_mode               = each.value.run_mode          # pauseOnlyOnFailures|pauseAlwaysBetweenSets|pauseNever
   version                = each.value.simulator == true ? "simsw-${each.value.version}" : "n9000-1${each.value.version}"
-  version_check_override = each.value.version_check_override == true ? "trigger-immediate" : "untriggered" # trigger-immediate|trigger|triggered|untriggered
+  version_check_override = each.value.version_check_override
 }
 
 /*

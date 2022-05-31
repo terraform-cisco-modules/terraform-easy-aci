@@ -27,14 +27,14 @@ variable "security" {
   type = map(object(
     {
       annotation = optional(string)
-      lockout_user = list(object(
+      lockout_user = optional(list(object(
         {
           enable_lockout             = optional(string)
           lockout_duration           = optional(number)
           max_failed_attempts        = optional(number)
           max_failed_attempts_window = optional(number)
         }
-      ))
+      )))
       maximum_validity_period          = optional(number)
       no_change_interval               = optional(number)
       password_change_interval_enforce = optional(string)
