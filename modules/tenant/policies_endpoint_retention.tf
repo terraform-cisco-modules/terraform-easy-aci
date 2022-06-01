@@ -58,7 +58,6 @@ resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
   remote_ep_age_intvl = each.value.remote_endpoint_aging_interval == "0" ? "infinite" : each.value.remote_endpoint_aging_interval
   tenant_dn           = aci_tenant.tenants[each.value.tenant].id
 }
-
 output "endpoint_retention_policies" {
   value = var.endpoint_retention_policies != {} ? { for v in sort(
     keys(aci_end_point_retention_policy.endpoint_retention_policies)

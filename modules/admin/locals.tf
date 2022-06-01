@@ -226,9 +226,9 @@ locals {
         management_epg         = value.management_epg != null ? value.management_epg : "default"
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
-        server_monitoring      = v.server_monitoring != null ? lookup(v.server_monitoring[0], "admin_state", "disabled") : "disabled"
-        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", 0) : 0
-        username               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "username", "admin") : "admin"
+        server_monitoring      = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["admin_state"], "disabled") : "disabled"
+        password               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["password"], 0) : 0
+        username               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["username"], "admin") : "admin"
         type                   = v.type
       }
     ]
@@ -308,9 +308,9 @@ locals {
         management_epg         = value.management_epg != null ? value.management_epg : "default"
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
-        server_monitoring      = v.server_monitoring != null ? lookup(v.server_monitoring[0], "admin_state", "disabled") : "disabled"
-        password               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "password", 0) : 0
-        username               = v.server_monitoring != null ? lookup(v.server_monitoring[0], "username", "admin") : "admin"
+        server_monitoring      = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["admin_state"], "disabled") : "disabled"
+        password               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["password"], 0) : 0
+        username               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["username"], "admin") : "admin"
       }
     ]
   ])

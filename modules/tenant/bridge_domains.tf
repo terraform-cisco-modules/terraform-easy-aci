@@ -20,7 +20,7 @@ variable "bridge_domains" {
           advertise_host_routes         = false
           alias                         = ""
           annotation                    = ""
-          annotations                   = ""
+          annotations                   = []
           arp_flooding                  = false
           description                   = ""
           endpoint_retention_policy     = ""

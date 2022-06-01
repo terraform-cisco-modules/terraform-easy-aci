@@ -1,4 +1,4 @@
-variable "ospf_interface_policies" {
+variable "policies_ospf_interface" {
   default = {
     "default" = {
       alias             = ""
@@ -79,11 +79,11 @@ GUI Location:
  - Tenants > {tenant} > Networking > Policies > Protocol > OSPF >  OSPF Interface > {policy_name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_ospf_interface_policy" "ospf_interface_policies" {
+resource "aci_ospf_interface_policy" "policies_ospf_interface" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each  = local.ospf_interface_policies
+  for_each  = local.policies_ospf_interface
   tenant_dn = aci_tenant.tenants[each.value.tenant].id
   # annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description

@@ -1,4 +1,4 @@
-variable "bgp_timers_policies" {
+variable "policies_bgp_timers" {
   default = {
     "default" = {
       alias                   = ""
@@ -42,11 +42,11 @@ variable "bgp_timers_policies" {
   ))
 }
 
-resource "aci_bgp_timers" "bgp_timers_policies" {
+resource "aci_bgp_timers" "policies_bgp_timers" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.bgp_timers_policies
+  for_each = local.policies_bgp_timers
   # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = each.value.description
   gr_ctrl      = each.value.graceful_restart_helper == true ? "helper" : "none"

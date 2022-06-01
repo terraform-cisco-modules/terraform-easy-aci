@@ -362,7 +362,7 @@ resource "mso_schema_template_vrf_contract" "vzany_contracts" {
     each.value.tenant, each.value.contract_tenant)
     ) > 0 ? mso_schema.schemas[each.value.contract_schema].id : length(regexall(
     "[[:alnum:]]+", each.value.contract_tenant)
-  ) > 0 ? local.rs_schemas[each.value.contract_schema].id : ""
+  ) > 0 ? local.schemas[each.value.contract_schema].id : ""
   contract_template_name = each.value.contract_template
 }
 

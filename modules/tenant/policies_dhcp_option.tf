@@ -1,7 +1,11 @@
-variable "" {
+variable "policies_dhcp_option" {
   default = {
     "default" = {
-
+      alias       = ""
+      annotation  = ""
+      description = ""
+      options     = []
+      tenant      = "common"
     }
   }
   description = <<-EOT
@@ -20,27 +24,40 @@ variable "" {
   EOT
   type = map(object(
     {
-      tenant = string
+      alias       = optional(string)
+      annotation  = optional(string)
+      description = optional(string)
+      options = optional(list(object(
+        {
+          alias          = optional(string)
+          annotation     = optional(string)
+          data           = string
+          dhcp_option_id = string
+          name           = string
+        }
+      )))
+      tenant = optional(string)
     }
   ))
 }
-resource "aci_dhcp_option_policy" "example" {
+resource "aci_dhcp_option_policy" "policies_dhcp_option" {
   depends_on = [
     aci_tenant.tenants
   ]
+  for_each = local.policies_dhcp_option
   annotation  = each.value.annotation
   description = each.value.description
-  name        = each.value.name
-  name_alias  = each.value.name_alias
+  name        = each.key
+  name_alias  = each.value.alias
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   dynamic "dhcp_option" {
-    for_each = each.value.dhcp_options
+    for_each = each.value.options
     content {
-      annotation     = each.value.annotation
-      data           = each.value.data
-      dhcp_option_id = each.value.dhcp_option_id
-      name           = each.value.name
-      name_alias     = each.value.name_alias
+      annotation     = dhcp_option.value.annotation
+      data           = dhcp_option.value.data
+      dhcp_option_id = dhcp_option.value.dhcp_option_id
+      name           = dhcp_option.value.name
+      name_alias     = dhcp_option.value.alias
     }
   }
 }

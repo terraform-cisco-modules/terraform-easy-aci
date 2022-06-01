@@ -1,4 +1,4 @@
-variable "bgp_route_summarization_policies" {
+variable "policies_bgp_route_summarization" {
   default = {
     "default" = {
       alias                       = ""
@@ -29,11 +29,11 @@ variable "bgp_route_summarization_policies" {
   ))
 }
 
-resource "aci_bgp_route_summarization" "bgp_route_summarization_policies" {
+resource "aci_bgp_route_summarization" "policies_bgp_route_summarization" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.bgp_route_summarization_policies
+  for_each = local.policies_bgp_route_summarization
   #annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   # attrmap     = each.value.attrmap
   ctrl        = each.value.generate_as_set_information == true ? "as-set" : "none"

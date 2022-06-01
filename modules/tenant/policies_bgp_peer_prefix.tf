@@ -9,7 +9,7 @@ API Information:
 GUI Location:
  - Tenants > {tenant} > Networking > Policies > Protocol > BGP >  BGP Peer Prefix > {name}
 */
-variable "bgp_peer_prefix_policies" {
+variable "policies_bgp_peer_prefix" {
   default = {
     "default" = {
       action                     = "reject"
@@ -46,11 +46,11 @@ variable "bgp_peer_prefix_policies" {
   ))
 }
 
-resource "aci_bgp_peer_prefix" "bgp_peer_prefix_policies" {
+resource "aci_bgp_peer_prefix" "policies_bgp_peer_prefix" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.bgp_peer_prefix_policies
+  for_each = local.policies_bgp_peer_prefix
   action   = each.value.action # log|reject|restart|shut default is log
   # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = each.value.description

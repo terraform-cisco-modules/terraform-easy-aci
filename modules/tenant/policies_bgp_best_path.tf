@@ -1,4 +1,4 @@
-variable "bgp_best_path_policies" {
+variable "policies_bgp_best_path" {
   default = {
     "default" = {
       alias                     = ""
@@ -28,11 +28,11 @@ variable "bgp_best_path_policies" {
   ))
 }
 
-resource "aci_bgp_best_path_policy" "bgp_best_path_policies" {
+resource "aci_bgp_best_path_policy" "policies_bgp_best_path" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each    = local.bgp_best_path_policies
+  for_each    = local.policies_bgp_best_path
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   ctrl        = each.value.relax_as_path_restriction == true ? "asPathMultipathRelax" : "0"
   description = each.value.description

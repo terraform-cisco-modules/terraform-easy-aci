@@ -1,4 +1,4 @@
-variable "bgp_address_family_context_policies" {
+variable "policies_bgp_address_family_context" {
   default = {
     "default" = {
       alias                  = ""
@@ -45,12 +45,12 @@ variable "bgp_address_family_context_policies" {
   ))
 }
 
-resource "aci_bgp_address_family_context" "bgp_address_family_context_policies" {
+resource "aci_bgp_address_family_context" "policies_bgp_address_family_context" {
   depends_on = [
     aci_tenant.tenants
   ]
   # Missing Local Max ECMP
-  for_each = local.bgp_address_family_context_policies
+  for_each = local.policies_bgp_address_family_context
   # annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   # Bug 804 Submitted
   # ctrl          = each.value.enable_host_route_leak == true ? "host-rt-leak" : "none"

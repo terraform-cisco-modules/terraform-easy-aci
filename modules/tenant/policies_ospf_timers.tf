@@ -1,5 +1,5 @@
 
-variable "ospf_timers_policies" {
+variable "policies_ospf_timers" {
   default = {
     "default" = {
       alias               = ""
@@ -92,11 +92,11 @@ variable "ospf_timers_policies" {
   ))
 }
 
-resource "aci_ospf_timers" "ospf_timers_policies" {
+resource "aci_ospf_timers" "policies_ospf_timers" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.ospf_timers_policies
+  for_each = local.policies_ospf_timers
   # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   bw_ref = each.value.bandwidth_reference
   ctrl = anytrue(

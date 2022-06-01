@@ -114,7 +114,6 @@ locals {
       }
     ]
   ])
-
   epg_to_domains = { for k, v in local.epg_to_domains_loop : "${v.application_epg}_${v.domain}" => v }
 
 
@@ -133,7 +132,6 @@ locals {
       }
     ]
   ])
-
   epg_to_static_paths = { for k, v in local.epg_to_static_paths_loop : "${v.epg}_${k}" => v }
 
 
@@ -148,7 +146,6 @@ locals {
       }
     ]
   ])
-
   epg_to_aaeps = { for k, v in local.epg_to_aaeps_loop : "${v.epg}_${v.aaep}" => v }
 
 
@@ -179,95 +176,6 @@ locals {
   ])
   contract_to_epgs = { for k, v in local.contract_to_epgs_loop : "${v.application_epg}_${k}_${v.contract}" => v }
 
-  #__________________________________________________________
-  #
-  # BGP Policies Variables
-  #__________________________________________________________
-
-  bgp_address_family_context_policies = {
-    for k, v in var.bgp_address_family_context_policies : k => {
-      alias                  = v.alias != null ? v.alias : ""
-      annotation             = v.annotation != null ? v.annotation : ""
-      description            = v.description != null ? v.description : ""
-      ebgp_distance          = v.ebgp_distance != null ? v.ebgp_distance : 20
-      ebgp_max_ecmp          = v.ebgp_max_ecmp != null ? v.ebgp_max_ecmp : 16
-      enable_host_route_leak = v.enable_host_route_leak != null ? v.enable_host_route_leak : false
-      ibgp_distance          = v.ibgp_distance != null ? v.ibgp_distance : 200
-      ibgp_max_ecmp          = v.ibgp_max_ecmp != null ? v.ibgp_max_ecmp : 16
-      local_distance         = v.local_distance != null ? v.local_distance : 220
-      tenant                 = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  bgp_best_path_policies = {
-    for k, v in var.bgp_best_path_policies : k => {
-      alias                     = v.alias != null ? v.alias : ""
-      annotation                = v.annotation != null ? v.annotation : ""
-      description               = v.description != null ? v.description : ""
-      relax_as_path_restriction = v.relax_as_path_restriction != null ? v.relax_as_path_restriction : false
-      tenant                    = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  bgp_peer_prefix_policies = {
-    for k, v in var.bgp_peer_prefix_policies : k => {
-      action                     = v.action != null ? v.action : "reject"
-      annotation                 = v.annotation != null ? v.annotation : ""
-      description                = v.description != null ? v.description : ""
-      maximum_number_of_prefixes = v.maximum_number_of_prefixes != null ? v.maximum_number_of_prefixes : 20000
-      name                       = v.name != null ? v.name : "default"
-      restart_time               = v.restart_time != null ? v.restart_time : "infinite"
-      tenant                     = v.tenant != null ? v.tenant : "common"
-      threshold                  = v.threshold != null ? v.threshold : 75
-    }
-  }
-
-  bgp_route_summarization_policies = {
-    for k, v in var.bgp_route_summarization_policies : k => {
-      annotation                  = v.annotation != null ? v.annotation : ""
-      description                 = v.description != null ? v.description : ""
-      generate_as_set_information = v.generate_as_set_information != null ? v.generate_as_set_information : false
-      name                        = v.name != null ? v.name : "default"
-      alias                       = v.alias != null ? v.alias : ""
-      tenant                      = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  bgp_timers_policies = {
-    for k, v in var.bgp_timers_policies : k => {
-      annotation              = v.annotation != null ? v.annotation : ""
-      description             = v.description != null ? v.description : ""
-      graceful_restart_helper = v.graceful_restart_helper != null ? v.graceful_restart_helper : true
-      hold_interval           = v.hold_interval != null ? v.hold_interval : 180
-      keepalive_interval      = v.keepalive_interval != null ? v.keepalive_interval : 60
-      maximum_as_limit        = v.maximum_as_limit != null ? v.maximum_as_limit : 0
-      name                    = v.name != null ? v.name : "default"
-      alias                   = v.alias != null ? v.alias : ""
-      stale_interval          = v.stale_interval != null ? v.stale_interval : 300
-      tenant                  = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  #__________________________________________________________
-  #
-  # BFD Interface Policies Variables
-  #__________________________________________________________
-
-  bfd_interface_policies = {
-    for k, v in var.bfd_interface_policies : k => {
-      admin_state                       = v.admin_state != null ? v.admin_state : "enabled"
-      annotation                        = v.annotation != null ? v.annotation : ""
-      description                       = v.description != null ? v.description : ""
-      detection_multiplier              = v.detection_multiplier != null ? v.detection_multiplier : 3
-      echo_admin_state                  = v.echo_admin_state != null ? v.echo_admin_state : "enabled"
-      echo_recieve_interval             = v.echo_recieve_interval != null ? v.echo_recieve_interval : 50
-      enable_sub_interface_optimization = v.enable_sub_interface_optimization != null ? v.enable_sub_interface_optimization : false
-      minimum_recieve_interval          = v.minimum_recieve_interval != null ? v.minimum_recieve_interval : 50
-      minimum_transmit_interval         = v.minimum_transmit_interval != null ? v.minimum_transmit_interval : 50
-      alias                             = v.alias != null ? v.alias : ""
-      tenant                            = v.tenant != null ? v.tenant : "common"
-    }
-  }
 
   #__________________________________________________________
   #
@@ -383,7 +291,6 @@ locals {
     }
   }
 
-
   subnets_loop = flatten([
     for key, value in local.bridge_domains : [
       for k, v in value.l3_configurations[0].subnets : {
@@ -439,6 +346,7 @@ locals {
   ])
   rogue_coop_exception_list = { for k, v in local.rogue_coop_exception_list_loop : "${v.bridge_domain}_${v.mac_address}" => v }
 
+
   #__________________________________________________________
   #
   # Contract Variables
@@ -488,7 +396,6 @@ locals {
       }
     ] if value.controller_type == "apic"
   ])
-
   apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${k}_${v.name}" => v }
 
   contract_subjects = {
@@ -523,54 +430,7 @@ locals {
       }
     ]
   ])
-
   contract_tags = { for k, v in local.contract_tags_loop : "${v.contract}_${v.key}" => v }
-
-  #__________________________________________________________
-  #
-  # Endpoint Retention Policy Variables
-  #__________________________________________________________
-
-  # dhcp_relay_policies = {
-  #   for k, v in var.dhcp_relay_policies : k => {
-  #     annotation  = v.annotation != null ? v.annotation : ""
-  #     description = v.description != null ? v.description : ""
-  #     dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : key =>
-  #       {
-  #         address             = value.address
-  #         application_profile = value.application_profile != null ? value.application_profile : "default"
-  #         epg                 = value.epg != null ? v.epg : "default"
-  #         epg_type            = value.epg_type != null ? v.epg_type : "epg"
-  #         l3out               = value.l3out != null ? v.l3out : ""
-  #         tenant              = value.tenant != null ? v.tenant : ""
-  #       }
-  #     } : {}
-  #     mode       = v.mode != null ? v.mode : "visible"
-  #     alias = v.alias != null ? v.alias : ""
-  #     owner      = v.owner != null ? v.owner : "infra"
-  #     tenant     = v.tenant != null ? v.tenant : "common"
-  #   }
-  # }
-
-  #__________________________________________________________
-  #
-  # Endpoint Retention Policy Variables
-  #__________________________________________________________
-
-  endpoint_retention_policies = {
-    for k, v in var.endpoint_retention_policies : k => {
-      annotation                     = v.annotation != null ? v.annotation : ""
-      bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
-      bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
-      description                    = v.description != null ? v.description : ""
-      hold_interval                  = v.hold_interval != null ? v.hold_interval : "300"
-      local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : "900"
-      move_frequency                 = v.move_frequency != null ? v.move_frequency : "256"
-      alias                          = v.alias != null ? v.alias : ""
-      remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : "300"
-      tenant                         = v.tenant != null ? v.tenant : "common"
-    }
-  }
 
 
   #__________________________________________________________
@@ -623,78 +483,7 @@ locals {
       }
     ]
   ])
-
   filter_entries = { for k, v in local.filter_entries_loop : "${v.filter_name}_${v.name}" => v }
-
-  #__________________________________________________________
-  #
-  # OSPF Policies Variables
-  #__________________________________________________________
-
-  ospf_interface_policies = {
-    for k, v in var.ospf_interface_policies : k => {
-      advertise_subnet      = v.interface_controls != null ? lookup(v.interface_controls[0], "advertise_subnet", false) : false
-      alias                 = v.alias != null ? v.alias : ""
-      annotation            = v.annotation != null ? v.annotation : ""
-      bfd                   = v.interface_controls != null ? lookup(v.interface_controls[0], "bfd", false) : false
-      mtu_ignore            = v.interface_controls != null ? lookup(v.interface_controls[0], "mtu_ignore", false) : false
-      passive               = v.interface_controls != null ? lookup(v.interface_controls[0], "passive_participation", false) : false
-      passive_participation = v.annotation != null ? v.annotation : ""
-      cost_of_interface     = v.cost_of_interface != null ? v.cost_of_interface : 0
-      dead_interval         = v.dead_interval != null ? v.dead_interval : 40
-      description           = v.description != null ? v.description : ""
-      hello_interval        = v.hello_interval != null ? v.hello_interval : 10
-      network_type          = v.network_type != null ? v.network_type : "bcast"
-      priority              = v.priority != null ? v.priority : 1
-      retransmit_interval   = v.retransmit_interval != null ? v.retransmit_interval : 5
-      transmit_delay        = v.transmit_delay != null ? v.transmit_delay : 1
-      tenant                = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  ospf_route_summarization_policies_loop = {
-    for k, v in var.ospf_route_summarization_policies : k => {
-      annotation         = v.annotation != null ? v.annotation : ""
-      cost               = v.cost != null ? v.cost : 0
-      description        = v.description != null ? v.description : ""
-      inter_area_enabled = v.inter_area_enabled != null ? v.inter_area_enabled : false
-      alias              = v.alias != null ? v.alias : ""
-      tenant             = v.tenant != null ? v.tenant : "common"
-    }
-  }
-
-  ospf_timers_policies = {
-    for k, v in var.ospf_timers_policies : k => {
-      alias                                       = v.alias != null ? v.alias : ""
-      annotation                                  = v.annotation != null ? v.annotation : ""
-      bandwidth_reference                         = v.bandwidth_reference != null ? v.bandwidth_reference : 400000
-      description                                 = v.description != null ? v.description : ""
-      admin_distance_preference                   = v.admin_distance_preference != null ? v.admin_distance_preference : 110
-      graceful_restart_helper                     = v.graceful_restart_helper != null ? v.graceful_restart_helper : true
-      initial_spf_scheduled_delay_interval        = v.initial_spf_scheduled_delay_interval != null ? v.initial_spf_scheduled_delay_interval : 200
-      lsa_group_pacing_interval                   = v.lsa_group_pacing_interval != null ? v.lsa_group_pacing_interval : 10
-      lsa_generation_throttle_hold_interval       = v.lsa_generation_throttle_hold_interval != null ? v.lsa_generation_throttle_hold_interval : 5000
-      lsa_generation_throttle_maximum_interval    = v.lsa_generation_throttle_maximum_interval != null ? v.lsa_generation_throttle_maximum_interval : 5000
-      lsa_generation_throttle_start_wait_interval = v.lsa_generation_throttle_start_wait_interval != null ? v.lsa_generation_throttle_start_wait_interval : 0
-      lsa_maximum_action                          = v.lsa_maximum_action != null ? v.lsa_maximum_action : "reject"
-      lsa_threshold                               = v.lsa_threshold != null ? v.lsa_threshold : 75
-      maximum_ecmp                                = v.maximum_ecmp != null ? v.maximum_ecmp : 8
-      maximum_lsa_reset_interval                  = v.maximum_lsa_reset_interval != null ? v.maximum_lsa_reset_interval : 10
-      maximum_lsa_sleep_count                     = v.maximum_lsa_sleep_count != null ? v.maximum_lsa_sleep_count : 5
-      maximum_lsa_sleep_interval                  = v.maximum_lsa_sleep_interval != null ? v.maximum_lsa_sleep_interval : 5
-      maximum_number_of_not_self_generated_lsas   = v.maximum_number_of_not_self_generated_lsas != null ? v.maximum_number_of_not_self_generated_lsas : 20000
-      minimum_hold_time_between_spf_calculations  = v.minimum_hold_time_between_spf_calculations != null ? v.minimum_hold_time_between_spf_calculations : 1000
-      minimum_interval_between_arrival_of_a_lsa   = v.minimum_interval_between_arrival_of_a_lsa != null ? v.minimum_interval_between_arrival_of_a_lsa : 1000
-      maximum_wait_time_between_spf_calculations  = v.maximum_wait_time_between_spf_calculations != null ? v.maximum_wait_time_between_spf_calculations : 5000
-      name_lookup = v.control_knobs != null ? lookup(
-        v.control_knobs[0], "enable_name_lookup_for_router_ids", false
-      ) : false
-      prefix_suppress = v.control_knobs != null ? lookup(
-        v.control_knobs[0], "prefix_suppress", false
-      ) : false
-      tenant = v.tenant != null ? v.tenant : "common"
-    }
-  }
 
 
   #__________________________________________________________
@@ -822,10 +611,9 @@ locals {
   ])
   l3out_external_epg_subnets = { for k, v in local.external_epg_subnets_loop : "${v.ext_epg}_${v.subnet}" => v }
 
-
-  #==================================
-  # L3Outs - Node Profiles
-  #==================================
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles
+  #=======================================================================================
 
   node_profiles_loop = flatten([
     for key, value in local.l3outs : [
@@ -862,9 +650,9 @@ locals {
   ])
   l3out_node_profiles_nodes = { for k, v in local.nodes_loop : "${v.node_profile}_${v.node_id}" => v }
 
-  #==================================
-  # L3Outs - Node Interface Profiles
-  #==================================
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles - Logical Interface Profiles
+  #=======================================================================================
 
   interface_profiles_loop = flatten([
     for key, value in local.l3out_node_profiles : [
@@ -905,7 +693,6 @@ locals {
     ]
   ])
   l3out_interface_profiles = { for k, v in local.interface_profiles_loop : "${v.node_profile}_${v.name}" => v }
-
 
   svi_addressing_loop = flatten([
     for key, value in local.l3out_interface_profiles : [
@@ -952,10 +739,68 @@ locals {
   svi_secondaries           = { for k, v in local.secondaries_loop_2 : "${v.key1}" => v }
   l3out_paths_secondary_ips = merge(local.interface_secondaries, local.svi_secondaries)
 
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles - Logical Interface Profiles - HSRP Interface Profiles
+  #=======================================================================================
 
-  #==================================
-  # L3Outs - OSPF External Policies
-  #==================================
+  hsrp_interface_profile_loop = flatten([
+    for key, value in local.l3out_interface_profiles : [
+      for k, v in value.hsrp_interface_profile : {
+        alias                 = v.alias != null ? v.alias : ""
+        annotation            = v.annotation != null ? v.annotation : ""
+        description           = v.description != null ? v.description : ""
+        groups                = v.groups != null ? v.groups : []
+        hsrp_interface_policy = v.hsrp_interface_policy != null ? v.hsrp_interface_policy : "default"
+        interface_profile     = key
+        key1                  = key
+        policy_tenant         = v.policy_tenant != null ? v.policy_tenant : "common"
+        version               = v.version != null ? v.version : "v1"
+      }
+    ]
+  ])
+  hsrp_interface_profile = {
+    for k, v in local.hsrp_interface_profile_loop : "${v.key1}" => v
+  }
+
+  hsrp_interface_profile_groups_loop = flatten([
+    for key, value in local.l3out_interface_profiles_hsrp : [
+      for k, v in value.groups : {
+        alias                 = v.alias != null ? v.alias : ""
+        annotation            = v.annotation != null ? v.annotation : ""
+        description           = v.description != null ? v.description : ""
+        group_id              = v.group_id != null ? v.group_id : 0
+        group_name            = v.group_name != null ? v.group_name : ""
+        group_type            = v.group_type != null ? v.group_type : "ipv4"
+        hsrp_group_policy     = v.hsrp_group_policy != null ? v.hsrp_group_policy : ""
+        ip_address            = v.ip_address != null ? v.ip_address : ""
+        ip_obtain_mode        = v.ip_obtain_mode != null ? v.ip_obtain_mode : "admin"
+        key1                  = key
+        mac_address           = v.mac_address != null ? v.mac_address : ""
+        name                  = v.name != null ? v.name : "default"
+        policy_tenant         = value.policy_tenant
+        secondary_virtual_ips = v.secondary_virtual_ips != null ? v.secondary_virtual_ips : []
+      }
+    ]
+  ])
+  hsrp_interface_profile_groups = {
+    for k, v in local.hsrp_interface_profile_groups_loop : "${v.key1}_${v.name}" => v
+  }
+
+  hsrp_interface_profile_group_secondaries_loop = flatten([
+    for key, value in local.hsrp_interface_profile_groups : [
+      for s in value.secondary_virtual_ips : {
+        key1         = "${value.key1}_${value.name}"
+        secondary_ip = s
+      }
+    ]
+  ])
+  hsrp_interface_profile_group_secondaries = {
+    for k, v in local.hsrp_interface_profile_group_secondaries_loop : "${v.key1}_${v.name}" => v
+  }
+
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles - Logical Interface Profiles - OSPF External Policies
+  #=======================================================================================
 
   ospf_process_loop = flatten([
     for key, value in local.l3outs : [
@@ -980,9 +825,9 @@ locals {
   ])
   l3out_ospf_external_policies = { for k, v in local.ospf_process_loop : "${v.l3out}_ospf_external" => v }
 
-  #==================================
-  # L3Outs - OSPF Interface Profiles
-  #==================================
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles - Logical Interface Profiles - OSPF Interface Policies
+  #=======================================================================================
 
   ospf_profiles_loop = flatten([
     for key, value in local.l3outs : [
@@ -1020,6 +865,274 @@ locals {
   ])
   l3out_ospf_interface_profiles = { for k, v in local.ospf_profiles_loop_2 : "${v.interface_profile}_${v.name}" => v }
 
+
+  #__________________________________________________________
+  #
+  # Policies - BGP
+  #__________________________________________________________
+
+  policies_bgp_address_family_context = {
+    for k, v in var.policies_bgp_address_family_context : k => {
+      alias                  = v.alias != null ? v.alias : ""
+      annotation             = v.annotation != null ? v.annotation : ""
+      description            = v.description != null ? v.description : ""
+      ebgp_distance          = v.ebgp_distance != null ? v.ebgp_distance : 20
+      ebgp_max_ecmp          = v.ebgp_max_ecmp != null ? v.ebgp_max_ecmp : 16
+      enable_host_route_leak = v.enable_host_route_leak != null ? v.enable_host_route_leak : false
+      ibgp_distance          = v.ibgp_distance != null ? v.ibgp_distance : 200
+      ibgp_max_ecmp          = v.ibgp_max_ecmp != null ? v.ibgp_max_ecmp : 16
+      local_distance         = v.local_distance != null ? v.local_distance : 220
+      tenant                 = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_bgp_best_path = {
+    for k, v in var.policies_bgp_best_path : k => {
+      alias                     = v.alias != null ? v.alias : ""
+      annotation                = v.annotation != null ? v.annotation : ""
+      description               = v.description != null ? v.description : ""
+      relax_as_path_restriction = v.relax_as_path_restriction != null ? v.relax_as_path_restriction : false
+      tenant                    = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_bgp_peer_prefix = {
+    for k, v in var.policies_bgp_peer_prefix : k => {
+      action                     = v.action != null ? v.action : "reject"
+      annotation                 = v.annotation != null ? v.annotation : ""
+      description                = v.description != null ? v.description : ""
+      maximum_number_of_prefixes = v.maximum_number_of_prefixes != null ? v.maximum_number_of_prefixes : 20000
+      name                       = v.name != null ? v.name : "default"
+      restart_time               = v.restart_time != null ? v.restart_time : "infinite"
+      tenant                     = v.tenant != null ? v.tenant : "common"
+      threshold                  = v.threshold != null ? v.threshold : 75
+    }
+  }
+
+  policies_bgp_route_summarization = {
+    for k, v in var.policies_bgp_route_summarization : k => {
+      annotation                  = v.annotation != null ? v.annotation : ""
+      description                 = v.description != null ? v.description : ""
+      generate_as_set_information = v.generate_as_set_information != null ? v.generate_as_set_information : false
+      name                        = v.name != null ? v.name : "default"
+      alias                       = v.alias != null ? v.alias : ""
+      tenant                      = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_bgp_timers = {
+    for k, v in var.policies_bgp_timers : k => {
+      annotation              = v.annotation != null ? v.annotation : ""
+      description             = v.description != null ? v.description : ""
+      graceful_restart_helper = v.graceful_restart_helper != null ? v.graceful_restart_helper : true
+      hold_interval           = v.hold_interval != null ? v.hold_interval : 180
+      keepalive_interval      = v.keepalive_interval != null ? v.keepalive_interval : 60
+      maximum_as_limit        = v.maximum_as_limit != null ? v.maximum_as_limit : 0
+      name                    = v.name != null ? v.name : "default"
+      alias                   = v.alias != null ? v.alias : ""
+      stale_interval          = v.stale_interval != null ? v.stale_interval : 300
+      tenant                  = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Policies - BFD Interface
+  #__________________________________________________________
+
+  policies_bfd_interface = {
+    for k, v in var.policies_bfd_interface : k => {
+      admin_state                       = v.admin_state != null ? v.admin_state : "enabled"
+      annotation                        = v.annotation != null ? v.annotation : ""
+      description                       = v.description != null ? v.description : ""
+      detection_multiplier              = v.detection_multiplier != null ? v.detection_multiplier : 3
+      echo_admin_state                  = v.echo_admin_state != null ? v.echo_admin_state : "enabled"
+      echo_recieve_interval             = v.echo_recieve_interval != null ? v.echo_recieve_interval : 50
+      enable_sub_interface_optimization = v.enable_sub_interface_optimization != null ? v.enable_sub_interface_optimization : false
+      minimum_recieve_interval          = v.minimum_recieve_interval != null ? v.minimum_recieve_interval : 50
+      minimum_transmit_interval         = v.minimum_transmit_interval != null ? v.minimum_transmit_interval : 50
+      alias                             = v.alias != null ? v.alias : ""
+      tenant                            = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Policies - DHCP Variables
+  #__________________________________________________________
+
+  policies_dhcp_option = {
+    for k, v in var.policies_dhcp_option : k => {
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      options = v.options != null ? { for key, value in v.options : v.name =>
+        {
+          alias          = value.alias != null ? value.alias : ""
+          annotation     = value.annotation != null ? value.annotation : ""
+          data           = value.data
+          dhcp_option_id = value.dhcp_option_id
+          name           = value.name
+        }
+      } : {}
+      tenant = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_dhcp_relay = {
+    for k, v in var.policies_dhcp_relay : k => {
+      alias       = v.alias != null ? v.alias : ""
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : key =>
+        {
+          address             = value.address
+          application_profile = value.application_profile != null ? value.application_profile : "default"
+          epg                 = value.epg != null ? v.epg : "default"
+          epg_type            = value.epg_type != null ? v.epg_type : "epg"
+          l3out               = value.l3out != null ? v.l3out : ""
+          tenant              = value.tenant != null ? v.tenant : "common"
+        }
+      } : {}
+      mode   = v.mode != null ? v.mode : "visible"
+      owner  = v.owner != null ? v.owner : "infra"
+      tenant = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Policies - Endpoint Retention Variables
+  #__________________________________________________________
+
+  endpoint_retention_policies = {
+    for k, v in var.endpoint_retention_policies : k => {
+      annotation                     = v.annotation != null ? v.annotation : ""
+      bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
+      bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
+      description                    = v.description != null ? v.description : ""
+      hold_interval                  = v.hold_interval != null ? v.hold_interval : "300"
+      local_endpoint_aging_interval  = v.local_endpoint_aging_interval != null ? v.local_endpoint_aging_interval : "900"
+      move_frequency                 = v.move_frequency != null ? v.move_frequency : "256"
+      alias                          = v.alias != null ? v.alias : ""
+      remote_endpoint_aging_interval = v.remote_endpoint_aging_interval != null ? v.remote_endpoint_aging_interval : "300"
+      tenant                         = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Policies - HSRP
+  #__________________________________________________________
+
+  policies_hsrp_groups = {
+    for k, v in var.policies_hsrp_groups : k => {
+      alias                             = v.alias != null ? v.alias : ""
+      annotation                        = v.annotation != null ? v.annotation : ""
+      description                       = v.description != null ? v.description : ""
+      enable_preemption_for_the_group   = v.enable_preemption_for_the_group != null ? v.enable_preemption_for_the_group : false
+      hello_interval                    = v.hello_interval != null ? v.hello_interval : 3000
+      hold_interval                     = v.hold_interval != null ? v.hold_interval : 10000
+      key                               = v.key != null ? v.key : "cisco"
+      max_seconds_to_prevent_preemption = v.max_seconds_to_prevent_preemption != null ? v.max_seconds_to_prevent_preemption : 0
+      min_preemption_delay              = v.min_preemption_delay != null ? v.min_preemption_delay : 0
+      preemption_delay_after_reboot     = v.preemption_delay_after_reboot != null ? v.preemption_delay_after_reboot : 0
+      priority                          = v.priority != null ? v.priority : 100
+      tenant                            = v.tenant != null ? v.tenant : "common"
+      timeout                           = v.timeout != null ? v.timeout : 0
+      type                              = v.alias != null ? v.type : "simple_authentication"
+    }
+  }
+
+  policies_hsrp_interface = {
+    for k, v in var.policies_hsrp_interface : k => {
+      alias                                     = v.alias != null ? v.alias : ""
+      annotation                                = v.annotation != null ? v.annotation : ""
+      delay                                     = v.delay != null ? v.delay : 0
+      description                               = v.description != null ? v.description : ""
+      enable_bidirectional_forwarding_detection = coalesce(v.control[0].enable_bidirectional_forwarding_detection, false)
+      reload_delay                              = v.reload_delay != null ? v.reload_delay : 0
+      tenant                                    = v.tenant != null ? v.tenant : "common"
+      use_burnt_in_mac_address_of_the_interface = coalesce(v.control[0].use_burnt_in_mac_address_of_the_interface, false)
+    }
+  }
+
+
+  #__________________________________________________________
+  #
+  # Policies - OSPF Variables
+  #__________________________________________________________
+
+  policies_ospf_interface = {
+    for k, v in var.policies_ospf_interface : k => {
+      advertise_subnet      = v.interface_controls != null ? lookup(v.interface_controls[0], "advertise_subnet", false) : false
+      alias                 = v.alias != null ? v.alias : ""
+      annotation            = v.annotation != null ? v.annotation : ""
+      bfd                   = v.interface_controls != null ? lookup(v.interface_controls[0], "bfd", false) : false
+      mtu_ignore            = v.interface_controls != null ? lookup(v.interface_controls[0], "mtu_ignore", false) : false
+      passive               = v.interface_controls != null ? lookup(v.interface_controls[0], "passive_participation", false) : false
+      passive_participation = v.annotation != null ? v.annotation : ""
+      cost_of_interface     = v.cost_of_interface != null ? v.cost_of_interface : 0
+      dead_interval         = v.dead_interval != null ? v.dead_interval : 40
+      description           = v.description != null ? v.description : ""
+      hello_interval        = v.hello_interval != null ? v.hello_interval : 10
+      network_type          = v.network_type != null ? v.network_type : "bcast"
+      priority              = v.priority != null ? v.priority : 1
+      retransmit_interval   = v.retransmit_interval != null ? v.retransmit_interval : 5
+      transmit_delay        = v.transmit_delay != null ? v.transmit_delay : 1
+      tenant                = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_ospf_route_summarization = {
+    for k, v in var.policies_ospf_route_summarization : k => {
+      annotation         = v.annotation != null ? v.annotation : ""
+      cost               = v.cost != null ? v.cost : 0
+      description        = v.description != null ? v.description : ""
+      inter_area_enabled = v.inter_area_enabled != null ? v.inter_area_enabled : false
+      alias              = v.alias != null ? v.alias : ""
+      tenant             = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+  policies_ospf_timers = {
+    for k, v in var.policies_ospf_timers : k => {
+      alias                                       = v.alias != null ? v.alias : ""
+      annotation                                  = v.annotation != null ? v.annotation : ""
+      bandwidth_reference                         = v.bandwidth_reference != null ? v.bandwidth_reference : 400000
+      description                                 = v.description != null ? v.description : ""
+      admin_distance_preference                   = v.admin_distance_preference != null ? v.admin_distance_preference : 110
+      graceful_restart_helper                     = v.graceful_restart_helper != null ? v.graceful_restart_helper : true
+      initial_spf_scheduled_delay_interval        = v.initial_spf_scheduled_delay_interval != null ? v.initial_spf_scheduled_delay_interval : 200
+      lsa_group_pacing_interval                   = v.lsa_group_pacing_interval != null ? v.lsa_group_pacing_interval : 10
+      lsa_generation_throttle_hold_interval       = v.lsa_generation_throttle_hold_interval != null ? v.lsa_generation_throttle_hold_interval : 5000
+      lsa_generation_throttle_maximum_interval    = v.lsa_generation_throttle_maximum_interval != null ? v.lsa_generation_throttle_maximum_interval : 5000
+      lsa_generation_throttle_start_wait_interval = v.lsa_generation_throttle_start_wait_interval != null ? v.lsa_generation_throttle_start_wait_interval : 0
+      lsa_maximum_action                          = v.lsa_maximum_action != null ? v.lsa_maximum_action : "reject"
+      lsa_threshold                               = v.lsa_threshold != null ? v.lsa_threshold : 75
+      maximum_ecmp                                = v.maximum_ecmp != null ? v.maximum_ecmp : 8
+      maximum_lsa_reset_interval                  = v.maximum_lsa_reset_interval != null ? v.maximum_lsa_reset_interval : 10
+      maximum_lsa_sleep_count                     = v.maximum_lsa_sleep_count != null ? v.maximum_lsa_sleep_count : 5
+      maximum_lsa_sleep_interval                  = v.maximum_lsa_sleep_interval != null ? v.maximum_lsa_sleep_interval : 5
+      maximum_number_of_not_self_generated_lsas   = v.maximum_number_of_not_self_generated_lsas != null ? v.maximum_number_of_not_self_generated_lsas : 20000
+      minimum_hold_time_between_spf_calculations  = v.minimum_hold_time_between_spf_calculations != null ? v.minimum_hold_time_between_spf_calculations : 1000
+      minimum_interval_between_arrival_of_a_lsa   = v.minimum_interval_between_arrival_of_a_lsa != null ? v.minimum_interval_between_arrival_of_a_lsa : 1000
+      maximum_wait_time_between_spf_calculations  = v.maximum_wait_time_between_spf_calculations != null ? v.maximum_wait_time_between_spf_calculations : 5000
+      name_lookup = v.control_knobs != null ? lookup(
+        v.control_knobs[0], "enable_name_lookup_for_router_ids", false
+      ) : false
+      prefix_suppress = v.control_knobs != null ? lookup(
+        v.control_knobs[0], "prefix_suppress", false
+      ) : false
+      tenant = v.tenant != null ? v.tenant : "common"
+    }
+  }
+
+
   #__________________________________________________________
   #
   # Route Map Match Rule Variables
@@ -1051,7 +1164,6 @@ locals {
       }
     ]
   ])
-
   match_rule_rules = { for k, v in local.match_rule_rules_loop : "${v.match_rule}_${v.type}" => v }
 
 
@@ -1094,7 +1206,6 @@ locals {
       }
     ]
   ])
-
   set_rule_rules = { for k, v in local.set_rule_rules_loop : "${v.set_rule}_${v.type}" => v }
 
   set_rule_asn_rules = {
@@ -1126,7 +1237,6 @@ locals {
       }
     ]
   ])
-
   set_rule_communities = { for k, v in local.set_rule_communities_loop : "${v.set_rule}_${v.type}_${v.index}" => v }
 
 
@@ -1161,7 +1271,6 @@ locals {
       }
     ]
   ])
-
   route_maps_context_rules = { for k, v in local.route_maps_context_rules_loop : "${v.route_map}_${v.ctx_name}" => v }
 
 
@@ -1190,7 +1299,6 @@ locals {
       }
     ]
   ])
-
   schema_templates = { for k, v in local.schema_templates_loop : "${v.key1}_${v.name}" => v }
 
 
@@ -1204,8 +1312,8 @@ locals {
       }
     ]
   ])
-
   template_sites = { for k, v in local.templates_sites_loop : "${v.key1}_${v.site}" => v }
+
 
   #__________________________________________________________
   #
@@ -1236,6 +1344,7 @@ locals {
       users = v.users != null ? v.users : []
     }
   }
+
 
   #__________________________________________________________
   #
@@ -1293,7 +1402,6 @@ locals {
       }
     ]
   ])
-
   vrf_communities = { for k, v in local.vrf_communities_loop : "${v.vrf}_${v.community}" => v }
 
   vrf_tags_loop = flatten([
@@ -1306,7 +1414,6 @@ locals {
       }
     ]
   ])
-
   vrf_tags = { for k, v in local.vrf_tags_loop : "${v.vrf}_${v.key}" => v }
 
   vzany_contracts_loop = flatten([
@@ -1328,7 +1435,6 @@ locals {
       }
     ]
   ])
-
   vzany_contracts = { for k, v in local.vzany_contracts_loop : "${v.vrf}_${v.contract}_${v.contract_type}" => v }
 
 }

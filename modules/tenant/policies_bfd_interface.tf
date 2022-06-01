@@ -1,6 +1,6 @@
 # Manages ACI BFD Interface Policy
 #
-variable "bfd_interface_policies" {
+variable "policies_bfd_interface" {
   default = {
     "default" = {
       admin_state                       = "enabled"
@@ -53,11 +53,11 @@ variable "bfd_interface_policies" {
 # GUI Information
 # Location - Tenant -> Policies -> Protocol -> BFD
 # Example Usage
-resource "aci_bfd_interface_policy" "bfd_interface_policies" {
+resource "aci_bfd_interface_policy" "policies_bfd_interface" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each   = local.bfd_interface_policies
+  for_each   = local.policies_bfd_interface
   admin_st   = each.value.admin_state
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   # Bug 803 Submitted
