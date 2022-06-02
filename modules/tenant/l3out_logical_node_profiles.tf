@@ -517,9 +517,7 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   mtu         = each.value.mtu
   target_dscp = each.value.target_dscp
 }
-output "l3out" {
-  value = local.l3outs
-}
+
 
 /*_____________________________________________________________________________________________________________________
 
