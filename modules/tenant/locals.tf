@@ -279,7 +279,7 @@ locals {
           unicast_routing         = v.unicast_routing != null ? v.unicast_routing : true
           custom_mac_address      = v.custom_mac_address != null ? v.custom_mac_address : ""
           link_local_ipv6_address = v.link_local_ipv6_address != null ? v.link_local_ipv6_address : "::"
-          subnets                 = v.subnets != null ? v.subnets : []
+          subnets                 = v.subnets != null ? v.subnets : {}
           virtual_mac_address     = v.virtual_mac_address != null ? v.virtual_mac_address : "not-applicable"
         }
         ] : [
@@ -288,7 +288,7 @@ locals {
           custom_mac_address      = ""
           ep_move_detection_mode  = false
           link_local_ipv6_address = "::"
-          subnets                 = []
+          subnets                 = {}
           unicast_routing         = true
           virtual_mac_address     = "not-applicable"
         }
@@ -306,7 +306,7 @@ locals {
         bridge_domain                = key
         controller_type              = value.controller_type
         description                  = v.description != null ? v.description : ""
-        gateway_ip                   = v.gateway_ip != null ? v.gateway_ip : "198.18.5.1/24"
+        gateway_ip                   = k
         ip_data_plane_learning       = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
         make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
         schema                       = value.schema
@@ -1464,7 +1464,7 @@ locals {
       policy_source_tenant           = v.policy_source_tenant != null ? v.policy_source_tenant : "default"
       policy_enforcement_direction   = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
       policy_enforcement_preference  = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
-      preferred_group                = v.preferred_group != null ? v.preferred_group : "disabled"
+      preferred_group                = v.preferred_group != null ? v.preferred_group : false
       sites                          = v.sites != null ? v.sites : []
       schema                         = v.schema != null ? v.schema : "common"
       tags                           = v.tags != null ? v.tags : []

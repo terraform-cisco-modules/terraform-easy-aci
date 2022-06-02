@@ -54,11 +54,10 @@ variable "bridge_domains" {
           custom_mac_address      = ""
           ep_move_detection_mode  = false
           link_local_ipv6_address = "::"
-          subnets = [
-            {
+          subnets = {
+            "198.18.5.1/24" = {
 
               description                  = ""
-              gateway_ip                   = "198.18.5.1/24"
               ip_data_plane_learning       = "enabled"
               make_this_ip_address_primary = false
               scope = [
@@ -76,7 +75,7 @@ variable "bridge_domains" {
               ]
               treat_as_virtual_ip_address = false
             }
-          ]
+          }
           unicast_routing     = true
           virtual_mac_address = ""
         }
@@ -142,7 +141,7 @@ variable "bridge_domains" {
           custom_mac_address      = optional(string)
           ep_move_detection_mode  = optional(bool)
           link_local_ipv6_address = optional(string)
-          subnets = optional(list(object(
+          subnets = optional(map(object(
             {
               description                  = optional(string)
               gateway_ip                   = string

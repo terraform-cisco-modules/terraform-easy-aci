@@ -28,7 +28,7 @@ variable "vrfs" {
       policy_source_tenant           = "common"
       policy_enforcement_direction   = "ingress"  # "egress"
       policy_enforcement_preference  = "enforced" # unenforced
-      preferred_group                = "disabled"
+      preferred_group                = false
       schema                         = "common"
       sites                          = []
       tags                           = []
@@ -110,7 +110,7 @@ variable "vrfs" {
       policy_source_tenant          = optional(string)
       policy_enforcement_direction  = optional(string)
       policy_enforcement_preference = optional(string)
-      preferred_group               = optional(string)
+      preferred_group               = optional(bool)
       schema                        = optional(string)
       sites                         = optional(list(string))
       tags = optional(list(object(
@@ -376,9 +376,9 @@ resource "aci_any" "vrf_preferred_group" {
   depends_on = [
     aci_vrf.vrfs
   ]
-  for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" && v.preferred_group == "enabled" }
+  for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" && v.preferred_group == true }
   description  = each.value.description
-  pref_gr_memb = each.value.preferred_group
+  pref_gr_memb = "enabled"
   vrf_dn       = aci_vrf.vrfs[each.key].id
 }
 
