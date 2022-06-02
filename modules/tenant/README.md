@@ -50,9 +50,7 @@ No modules.
 | [aci_external_network_instance_profile.l3out_external_epgs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/external_network_instance_profile) | resource |
 | [aci_filter.filters](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/filter) | resource |
 | [aci_filter_entry.filter_entries](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/filter_entry) | resource |
-| [aci_hsrp_group_policy.example](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/hsrp_group_policy) | resource |
 | [aci_hsrp_group_policy.policies_hsrp_groups](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/hsrp_group_policy) | resource |
-| [aci_hsrp_interface_policy.example](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/hsrp_interface_policy) | resource |
 | [aci_hsrp_interface_policy.policies_hsrp_interface](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/hsrp_interface_policy) | resource |
 | [aci_l3_ext_subnet.external_epg_subnets](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/l3_ext_subnet) | resource |
 | [aci_l3_outside.l3outs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/l3_outside) | resource |

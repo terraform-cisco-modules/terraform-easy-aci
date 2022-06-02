@@ -54,7 +54,7 @@ variable "virtual_networking" {
         {
           annotation           = ""
           cdp_interface_policy = ""
-          # enhanced_lag_policy  = []
+          enhanced_lag_policy  = []
           /* **Example
           enhanced_lag_policy = [
             {
@@ -249,14 +249,14 @@ variable "virtual_networking" {
           annotation           = optional(string)
           active_flow_timeout  = optional(number)
           cdp_interface_policy = optional(string)
-          enhanced_lag_policy = optional(list(object(
+          enhanced_lag_policy = list(object(
             {
               load_balancing_mode = optional(string)
               mode                = optional(string)
               name                = optional(string)
               number_of_links     = optional(number)
             }
-          )))
+          ))
           idle_flow_timeout     = optional(number)
           firewall_policy       = optional(string)
           lldp_interface_policy = optional(string)
