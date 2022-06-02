@@ -1094,8 +1094,8 @@ locals {
   # Policies - HSRP
   #__________________________________________________________
 
-  policies_hsrp_groups = {
-    for k, v in var.policies_hsrp_groups : k => {
+  policies_hsrp_group = {
+    for k, v in var.policies_hsrp_group : k => {
       alias                             = v.alias != null ? v.alias : ""
       annotation                        = v.annotation != null ? v.annotation : ""
       description                       = v.description != null ? v.description : ""
@@ -1484,7 +1484,7 @@ locals {
       }
     ]
   ])
-  vrf_communities = { for k, v in local.vrf_communities_loop : "${v.vrf}_${v.community}" => v }
+  vrf_communities = { for k, v in local.vrf_communities_loop : "${v.vrf}_${v.community_variable}" => v }
 
   vrf_tags_loop = flatten([
     for key, value in local.vrfs : [

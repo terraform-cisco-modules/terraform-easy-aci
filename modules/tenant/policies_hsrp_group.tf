@@ -3,7 +3,7 @@
 Tenant - HSRP Interface Policy - Variables
 _______________________________________________________________________________________________________________________
 */
-variable "policies_hsrp_groups" {
+variable "policies_hsrp_group" {
   default = {
     "default" = {
       alias                             = ""
@@ -74,11 +74,11 @@ GUI Location:
 tenants > {tenant} > Policies > Protocol > HSRP > Interface Policies > {hsrp_policy}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_hsrp_group_policy" "policies_hsrp_groups" {
+resource "aci_hsrp_group_policy" "policies_hsrp_group" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each               = local.policies_hsrp_groups
+  for_each               = local.policies_hsrp_group
   annotation             = each.value.annotation
   description            = each.value.description
   ctrl                   = each.value.enable_preemption_for_the_group == true ? "preempt" : 0

@@ -121,11 +121,11 @@ variable "application_epgs" {
           value = string
         }
       )))
-      application_profile    = string
+      application_profile    = optional(string)
       bd_schema              = optional(string)
       bd_template            = optional(string)
       bd_tenant              = optional(string)
-      bridge_domain          = string
+      bridge_domain          = optional(string)
       contract_exception_tag = optional(number)
       contracts = optional(list(object(
         {
