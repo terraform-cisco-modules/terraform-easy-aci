@@ -1149,7 +1149,7 @@ locals {
         }
         ] : [
         {
-          advertise_subnet      = s.advertise_subnet != null ? s.advertise_subnet : false
+          advertise_subnet      = false
           bfd                   = false
           mtu_ignore            = false
           passive_participation = false
