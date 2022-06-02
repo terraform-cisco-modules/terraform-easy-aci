@@ -55,12 +55,8 @@ locals {
 
   trigger_schedulers = {
     for k, v in var.configuration_backups : k => {
-      annotation = v.annotation != null ? v.annotation : ""
-      description = v.recurring_window != null ? join(",", [
-        for s in v.recurring_window : {
-          description = s.description != null ? s.description : ""
-        }
-      ]) : ""
+      annotation           = v.annotation != null ? v.annotation : ""
+      description          = coalesce(v.recurring_window[0].description, "")
       configuration_export = v.configuration_export != null ? v.configuration_export : []
       recurring_window     = v.recurring_window != null ? v.recurring_window : []
     }
@@ -255,7 +251,14 @@ locals {
           max_failed_attempts        = s.max_failed_attempts != null ? s.max_failed_attempts : 5
           max_failed_attempts_window = s.max_failed_attempts_window != null ? s.max_failed_attempts_window : 5
         }
-      ] : []
+        ] : [
+        {
+          enable_lockout             = "disable"
+          lockout_duration           = 60
+          max_failed_attempts        = 5
+          max_failed_attempts_window = 5
+        }
+      ]
       maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
       no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
       password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"

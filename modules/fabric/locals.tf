@@ -786,8 +786,8 @@ locals {
       description = v.description != null ? v.description : ""
       console_destination = v.console_destination != null ? [
         for s in v.console_destination : {
-          admin_state = v.admin_state != null ? v.admin_state : "enabled"
-          severity    = v.severity != null ? v.severity : "critical"
+          admin_state = s.admin_state != null ? s.admin_state : "enabled"
+          severity    = s.severity != null ? s.severity : "critical"
         }
         ] : [
         {
@@ -813,8 +813,8 @@ locals {
       ]
       local_file_destination = v.local_file_destination != null ? [
         for s in v.local_file_destination : {
-          admin_state = v.admin_state != null ? v.admin_state : "enabled"
-          severity    = v.severity != null ? v.severity : "critical"
+          admin_state = s.admin_state != null ? s.admin_state : "enabled"
+          severity    = s.severity != null ? s.severity : "critical"
         }
         ] : [
         {

@@ -19,6 +19,6 @@ resource "aci_rest_managed" "bgp_autonomous_system_number" {
   class_name = "bgpAsP"
   content = {
     # annotation = var.annotation
-    asn = var.autonomous_system_number
+    asn = var.bgp_autonomous_system_number
   }
 }

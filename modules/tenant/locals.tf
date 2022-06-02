@@ -1477,10 +1477,10 @@ locals {
   vrf_communities_loop = flatten([
     for key, value in local.vrfs : [
       for k, v in value.communities : {
-        annotation  = value.annotation
-        community   = v.community
-        description = v.description != null ? v.description : ""
-        vrf         = key
+        annotation         = value.annotation
+        community_variable = v.community_variable
+        description        = v.description != null ? v.description : ""
+        vrf                = key
       }
     ]
   ])

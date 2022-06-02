@@ -67,8 +67,8 @@ variable "vrfs" {
       )))
       communities = optional(list(object(
         {
-          community   = number
-          description = optional(string)
+          community_variable = number
+          description        = optional(string)
         }
       )))
       controller_type = optional(string)
@@ -307,10 +307,10 @@ resource "aci_snmp_community" "vrf_communities" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name = length(regexall(
-    5, each.value.community)) > 0 ? var.snmp_community_5 : length(regexall(
-    4, each.value.community)) > 0 ? var.snmp_community_4 : length(regexall(
-    3, each.value.community)) > 0 ? var.snmp_community_3 : length(regexall(
-  2, each.value.community)) > 0 ? var.snmp_community_2 : var.snmp_community_1
+    5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
+    4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
+    3, each.value.community_variable)) > 0 ? var.snmp_community_3 : length(regexall(
+  2, each.value.community_variable)) > 0 ? var.snmp_community_2 : var.snmp_community_1
   parent_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
 /*_____________________________________________________________________________________________________________________
