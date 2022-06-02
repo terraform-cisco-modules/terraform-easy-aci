@@ -83,11 +83,15 @@ resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
     leafOpflexpUseSsl              = each.value.leaf_ssl_opflex == true ? "yes" : "no"
     opflexpAuthenticateClients     = each.value.spine_opflex_client_authentication == true ? "yes" : "no"
     opflexpSslProtocols = anytrue(
-      [each.value.ssl_opflex_version1_0, each.value.ssl_opflex_version1_1, each.value.ssl_opflex_version1_2]
+      [
+        each.value.ssl_opflex_versions[0].TLSv1,
+        each.value.ssl_opflex_versions[0].TLSv1_1,
+        each.value.ssl_opflex_versions[0].TLSv1_2
+      ]
       ) ? replace(trim(join(",", concat([
-        length(regexall(true, each.value.ssl_opflex_version1_0)) > 0 ? "TLSv1" : ""], [
-        length(regexall(true, each.value.ssl_opflex_version1_1)) > 0 ? "TLSv1.1" : ""], [
-        length(regexall(true, each.value.ssl_opflex_version1_2)) > 0 ? "TLSv1.2" : ""]
+        length(regexall(true, each.value.ssl_opflex_versions[0].TLSv1)) > 0 ? "TLSv1" : ""], [
+        length(regexall(true, each.value.ssl_opflex_versions[0].TLSv1_1)) > 0 ? "TLSv1.1" : ""], [
+        length(regexall(true, each.value.ssl_opflex_versions[0].TLSv1_2)) > 0 ? "TLSv1.2" : ""]
     )), ","), ",,", ",") : "TLSv1.1,TLSv1.2"
     opflexpUseSsl            = each.value.spine_ssl_opflex == true ? "yes" : "no"
     reallocateGipo           = each.value.reallocate_gipo == true ? "yes" : "no"

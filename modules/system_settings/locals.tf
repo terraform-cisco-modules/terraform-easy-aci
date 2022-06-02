@@ -24,8 +24,17 @@ locals {
   ep_loop_protection_loop = flatten([
     for key, value in var.endpoint_controls : [
       for k, v in value.ep_loop_protection : {
-        action_bd                 = v.action != null ? lookup(v.action[0], "bd_learn_disable", false) : false
-        action_port               = v.action != null ? lookup(v.action[0], "port_disable", false) : false
+        action = v.action != null ? [
+          for s in v.action : {
+            bd_learn_disable = s.bd_learn_disable != null ? s.bd_learn_disable : false
+            port_disable     = s.port_disable != null ? s.port_disable : false
+          }
+          ] : [
+          {
+            bd_learn_disable = false
+            port_disable     = false
+          }
+        ]
         administrative_state      = v.administrative_state != null ? v.administrative_state : "enabled"
         annotation                = value.annotation != null ? value.annotation : ""
         key1                      = key
@@ -72,18 +81,28 @@ locals {
 
   fabric_wide_settings = {
     for k, v in var.fabric_wide_settings : k => {
-      annotation                         = v.annotation != null ? v.annotation : ""
-      disable_remote_ep_learning         = v.disable_remote_ep_learning != null ? v.disable_remote_ep_learning : true
-      enforce_domain_validation          = v.enforce_domain_validation != null ? v.enforce_domain_validation : true
-      enforce_epg_vlan_validation        = v.enforce_epg_vlan_validation != null ? v.enforce_epg_vlan_validation : false
-      enforce_subnet_check               = v.enforce_subnet_check != null ? v.enforce_subnet_check : true
-      leaf_opflex_client_authentication  = v.leaf_opflex_client_authentication != null ? v.leaf_opflex_client_authentication : true
-      leaf_ssl_opflex                    = v.leaf_ssl_opflex != null ? v.leaf_ssl_opflex : true
-      reallocate_gipo                    = v.reallocate_gipo != null ? v.reallocate_gipo : false
-      restrict_infra_vlan_traffic        = v.restrict_infra_vlan_traffic != null ? v.restrict_infra_vlan_traffic : false
-      ssl_opflex_version1_0              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1", false) : false
-      ssl_opflex_version1_1              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_1", false) : false
-      ssl_opflex_version1_2              = v.ssl_opflex_versions != null ? lookup(v.ssl_opflex_versions[0], "TLSv1_2", true) : true
+      annotation                        = v.annotation != null ? v.annotation : ""
+      disable_remote_ep_learning        = v.disable_remote_ep_learning != null ? v.disable_remote_ep_learning : true
+      enforce_domain_validation         = v.enforce_domain_validation != null ? v.enforce_domain_validation : true
+      enforce_epg_vlan_validation       = v.enforce_epg_vlan_validation != null ? v.enforce_epg_vlan_validation : false
+      enforce_subnet_check              = v.enforce_subnet_check != null ? v.enforce_subnet_check : true
+      leaf_opflex_client_authentication = v.leaf_opflex_client_authentication != null ? v.leaf_opflex_client_authentication : true
+      leaf_ssl_opflex                   = v.leaf_ssl_opflex != null ? v.leaf_ssl_opflex : true
+      reallocate_gipo                   = v.reallocate_gipo != null ? v.reallocate_gipo : false
+      restrict_infra_vlan_traffic       = v.restrict_infra_vlan_traffic != null ? v.restrict_infra_vlan_traffic : false
+      ssl_opflex_versions = v.ssl_opflex_versions != null ? [
+        for s in v.ssl_opflex_versions : {
+          TLSv1   = s.TLSv1 != null ? s.TLSv1 : false
+          TLSv1_1 = s.TLSv1_1 != null ? s.TLSv1_1 : false
+          TLSv1_2 = s.TLSv1_2 != null ? s.TLSv1_2 : true
+        }
+        ] : [
+        {
+          TLSv1   = false
+          TLSv1_1 = false
+          TLSv1_2 = true
+        }
+      ]
       spine_opflex_client_authentication = v.spine_opflex_client_authentication != null ? v.spine_opflex_client_authentication : true
       spine_ssl_opflex                   = v.spine_ssl_opflex != null ? v.spine_ssl_opflex : true
     }

@@ -112,10 +112,13 @@ resource "aci_rest_managed" "ep_loop_protection" {
   class_name = "epLoopProtectP"
   content = {
     action = anytrue(
-      [each.value.action_bd, each.value.action_port]
+      [
+        each.value.action[0].bd_learn_disable,
+        each.value.action[0].port_disable
+      ]
       ) ? trim(join(",", compact(concat(
-        [length(regexall(true, each.value.action_bd)) > 0 ? "bd-learn-disable" : ""
-        ], [length(regexall(true, each.value.action_port)) > 0 ? "port-disable" : ""]
+        [length(regexall(true, each.value.action[0].bd_learn_disable)) > 0 ? "bd-learn-disable" : ""
+        ], [length(regexall(true, each.value.action[0].port_disable)) > 0 ? "port-disable" : ""]
     ))), ",") : ""
     adminSt = each.value.administrative_state
     # annotation      = each.value.annotation != "" ? each.value.annotation : var.annotation

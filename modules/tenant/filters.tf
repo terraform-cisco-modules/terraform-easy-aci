@@ -187,13 +187,19 @@ resource "mso_schema_template_filter_entry" "filter_entries" {
   destination_to       = each.value.destination_port_to
   stateful             = each.value.stateful
   tcp_session_rules = anytrue(
-    [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
+    [
+      each.value.tcp_session_rules[0].acknowledgement,
+      each.value.tcp_session_rules[0].established,
+      each.value.tcp_session_rules[0].finish,
+      each.value.tcp_session_rules[0].reset,
+      each.value.tcp_session_rules[0].synchronize
+    ]
     ) ? compact(concat([
-      length(regexall(true, each.value.tcp_ack)) > 0 ? "acknowledgement" : ""], [
-      length(regexall(true, each.value.tcp_est)) > 0 ? "established" : ""], [
-      length(regexall(true, each.value.tcp_fin)) > 0 ? "finish" : ""], [
-      length(regexall(true, each.value.tcp_rst)) > 0 ? "reset" : ""], [
-      length(regexall(true, each.value.tcp_syn)) > 0 ? "synchronize" : ""]
+      length(regexall(true, each.value.tcp_session_rules[0].acknowledgement)) > 0 ? "acknowledgement" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].established)) > 0 ? "established" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].finish)) > 0 ? "finish" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].reset)) > 0 ? "reset" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].synchronize)) > 0 ? "synchronize" : ""]
   )) : ["unspecified"]
 }
 

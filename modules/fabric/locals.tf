@@ -612,15 +612,22 @@ locals {
           session_logs = false
         }
       ]
-      phone_contact      = v.phone_contact != null ? v.phone_contact : ""
-      port_number        = lookup(v.smtp_server[0], "port_number", 25)
+      phone_contact = v.phone_contact != null ? v.phone_contact : ""
+      smtp_server = v.smtp_server != null ? [
+        for s in v.smtp_server : {
+          management_epg      = s.management_epg != null ? s.management_epg : "default"
+          management_epg_type = s.management_epg_type != null ? s.management_epg_type : "oob"
+          port_number         = s.port_number != null ? s.port_number : 25
+          secure_smtp         = s.secure_smtp != null ? s.secure_smtp : false
+          smtp_server         = s.smtp_server != null ? s.smtp_server : "relay.example.com"
+          username            = s.username != null ? s.username : ""
+        }
+      ] : []
       reply_to_email     = v.reply_to_email != null ? v.reply_to_email : ""
-      secure_smtp        = lookup(v.smtp_server[0], "secure_smtp", false)
       site_id            = v.site_id != null ? v.site_id : ""
       smart_destinations = v.smart_destinations != null ? v.smart_destinations : []
       street_address     = v.street_address != null ? v.street_address : ""
       smtp_server        = v.smtp_server
-      username           = lookup(v.smtp_server[0], "username", "")
     }
   }
 
@@ -629,9 +636,9 @@ locals {
       for k, v in value.smtp_server : {
         annotation          = value.annotation != null ? value.annotation : ""
         key1                = key
-        management_epg      = v.management_epg != null ? v.management_epg : "default"
-        management_epg_type = v.management_epg_type != null ? v.management_epg_type : "oob"
-        smtp_server         = v.smtp_server != null ? v.smtp_server : "relay.example.com"
+        management_epg      = v.management_epg
+        management_epg_type = v.management_epg_type
+        smtp_server         = v.smtp_server
       }
     ]
   ])
@@ -647,7 +654,7 @@ locals {
         format        = v.format != null ? v.format : "short-txt"
         key1          = key
         name          = element(split("@", v.email), 0)
-        rfc_compliant = v.rfc_compliant != null ? v.rfc_compliant : false
+        rfc_compliant = v.rfc_compliant != null ? v.rfc_compliant : true
       }
     ]
   ])
@@ -774,12 +781,21 @@ locals {
 
   syslog = {
     for k, v in var.syslog : k => {
-      admin_state         = v.admin_state != null ? v.admin_state : "enabled"
-      annotation          = v.annotation != null ? v.annotation : ""
-      description         = v.description != null ? v.description : ""
-      console_admin_state = v.console_destination != null ? lookup(v.console_destination[0], "admin_state", "enabled") : "enabled"
-      console_severity    = v.console_destination != null ? lookup(v.console_destination[0], "severity", "critical") : "critical"
-      format              = v.format != null ? v.format : "aci"
+      admin_state = v.admin_state != null ? v.admin_state : "enabled"
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      console_destination = v.console_destination != null ? [
+        for s in v.console_destination : {
+          admin_state = v.admin_state != null ? v.admin_state : "enabled"
+          severity    = v.severity != null ? v.severity : "critical"
+        }
+        ] : [
+        {
+          admin_state = "enabled"
+          severity    = "critical"
+        }
+      ]
+      format = v.format != null ? v.format : "aci"
       include_types = v.include_types != null ? [
         for s in v.include_types : {
           audit_logs   = s.audit_logs != null ? s.audit_logs : false
@@ -795,8 +811,17 @@ locals {
           session_logs = false
         }
       ]
-      local_admin_state              = v.local_file_destination != null ? lookup(v.local_file_destination[0], "admin_state", "enabled") : "enabled"
-      local_severity                 = v.local_file_destination != null ? lookup(v.local_file_destination[0], "severity", "warnings") : "warnings"
+      local_file_destination = v.local_file_destination != null ? [
+        for s in v.local_file_destination : {
+          admin_state = v.admin_state != null ? v.admin_state : "enabled"
+          severity    = v.severity != null ? v.severity : "critical"
+        }
+        ] : [
+        {
+          admin_state = "enabled"
+          severity    = "warnings"
+        }
+      ]
       min_severity                   = v.min_severity != null ? v.min_severity : "warnings"
       remote_destinations            = v.remote_destinations != null ? v.remote_destinations : []
       show_milliseconds_in_timestamp = v.show_milliseconds_in_timestamp != null ? v.show_milliseconds_in_timestamp : false

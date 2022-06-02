@@ -478,13 +478,25 @@ locals {
         source_port_to        = v.source_port_to != null ? v.source_port_to : "unspecified"
         schema                = value.schema
         stateful              = v.stateful != null ? v.stateful : false
-        tcp_ack               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "acknowledgement", false) : false
-        tcp_est               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "established", false) : false
-        tcp_fin               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "finish", false) : false
-        tcp_rst               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "reset", false) : false
-        tcp_syn               = v.tcp_session_rules != null ? lookup(v.tcp_session_rules[0], "synchronize", false) : false
-        template              = value.template
-        tenant                = value.tenant
+        tcp_session_rules = v.tcp_session_rules != null ? [
+          for s in v.tcp_session_rules : {
+            acknowledgement = s.acknowledgement != null ? s.acknowledgement : false
+            established     = s.established != null ? s.established : false
+            finish          = s.finish != null ? s.finish : false
+            reset           = s.reset != null ? s.reset : false
+            synchronize     = s.synchronize != null ? s.synchronize : false
+          }
+          ] : [
+          {
+            acknowledgement = false
+            established     = false
+            finish          = false
+            reset           = false
+            synchronize     = false
+          }
+        ]
+        template = value.template
+        tenant   = value.tenant
       }
     ]
   ])
@@ -727,7 +739,7 @@ locals {
               }
             ] : []
             hsrp_interface_policy = s.hsrp_interface_policy != null ? s.hsrp_interface_policy : "default"
-            policy_tenant         = s.policy_tenant != null ? s.policy_tenant : "common"
+            policy_source_tenant  = s.policy_source_tenant != null ? s.policy_source_tenant : "common"
             version               = s.version != null ? s.version : "v1"
           }
         ] : []
@@ -752,7 +764,7 @@ locals {
             name                  = s.name != null ? s.name : "default"
             ospf_key              = s.ospf_key != null ? s.ospf_key : 0
             ospf_interface_policy = s.ospf_interface_policy != null ? s.ospf_interface_policy : "default"
-            policy_tenant         = s.policy_tenant != null ? s.policy_tenant : value.tenant
+            policy_source_tenant  = s.policy_source_tenant != null ? s.policy_source_tenant : value.tenant
           }
         ] : []
         pod_id              = value.pod_id
@@ -833,7 +845,7 @@ locals {
         groups                = v.groups
         hsrp_interface_policy = v.hsrp_interface_policy
         interface_profile     = key
-        policy_tenant         = v.policy_tenant
+        policy_source_tenant  = v.policy_source_tenant
         version               = v.version
       }
     ]
@@ -857,7 +869,7 @@ locals {
         key1                  = key
         mac_address           = v.mac_address != null ? v.mac_address : ""
         name                  = v.name != null ? v.name : "default"
-        policy_tenant         = value.policy_tenant
+        policy_source_tenant  = value.policy_source_tenant
         secondary_virtual_ips = v.secondary_virtual_ips != null ? v.secondary_virtual_ips : []
       }
     ]
@@ -892,7 +904,7 @@ locals {
         name                  = v.name != null ? v.name : "default"
         ospf_key              = v.ospf_key != null ? v.ospf_key : 0
         ospf_interface_policy = v.ospf_interface_policy != null ? v.ospf_interface_policy : "default"
-        policy_tenant         = v.policy_tenant != null ? v.policy_tenant : "common"
+        policy_source_tenant  = v.policy_source_tenant != null ? v.policy_source_tenant : "common"
         tenant                = value.tenant
         type                  = value.type
       }
@@ -910,7 +922,7 @@ locals {
         name                  = value.name
         ospf_key              = value.ospf_key
         ospf_interface_policy = value.ospf_interface_policy
-        policy_tenant         = value.policy_tenant
+        policy_source_tenant  = value.policy_source_tenant
         tenant                = v.tenant
         type                  = value.type
       } if value.name == v.ospf_interface_profile
@@ -1122,22 +1134,32 @@ locals {
 
   policies_ospf_interface = {
     for k, v in var.policies_ospf_interface : k => {
-      advertise_subnet      = v.interface_controls != null ? lookup(v.interface_controls[0], "advertise_subnet", false) : false
-      alias                 = v.alias != null ? v.alias : ""
-      annotation            = v.annotation != null ? v.annotation : ""
-      bfd                   = v.interface_controls != null ? lookup(v.interface_controls[0], "bfd", false) : false
-      mtu_ignore            = v.interface_controls != null ? lookup(v.interface_controls[0], "mtu_ignore", false) : false
-      passive               = v.interface_controls != null ? lookup(v.interface_controls[0], "passive_participation", false) : false
-      passive_participation = v.annotation != null ? v.annotation : ""
-      cost_of_interface     = v.cost_of_interface != null ? v.cost_of_interface : 0
-      dead_interval         = v.dead_interval != null ? v.dead_interval : 40
-      description           = v.description != null ? v.description : ""
-      hello_interval        = v.hello_interval != null ? v.hello_interval : 10
-      network_type          = v.network_type != null ? v.network_type : "bcast"
-      priority              = v.priority != null ? v.priority : 1
-      retransmit_interval   = v.retransmit_interval != null ? v.retransmit_interval : 5
-      transmit_delay        = v.transmit_delay != null ? v.transmit_delay : 1
-      tenant                = v.tenant != null ? v.tenant : "common"
+      alias             = v.alias != null ? v.alias : ""
+      annotation        = v.annotation != null ? v.annotation : ""
+      cost_of_interface = v.cost_of_interface != null ? v.cost_of_interface : 0
+      dead_interval     = v.dead_interval != null ? v.dead_interval : 40
+      description       = v.description != null ? v.description : ""
+      hello_interval    = v.hello_interval != null ? v.hello_interval : 10
+      interface_controls = v.interface_controls != null ? [
+        for s in v.interface_controls : {
+          advertise_subnet      = s.advertise_subnet != null ? s.advertise_subnet : false
+          bfd                   = s.bfd != null ? s.bfd : false
+          mtu_ignore            = s.mtu_ignore != null ? s.mtu_ignore : false
+          passive_participation = s.passive_participation != null ? s.passive_participation : false
+        }
+        ] : [
+        {
+          advertise_subnet      = s.advertise_subnet != null ? s.advertise_subnet : false
+          bfd                   = false
+          mtu_ignore            = false
+          passive_participation = false
+        }
+      ]
+      network_type        = v.network_type != null ? v.network_type : "bcast"
+      priority            = v.priority != null ? v.priority : 1
+      retransmit_interval = v.retransmit_interval != null ? v.retransmit_interval : 5
+      transmit_delay      = v.transmit_delay != null ? v.transmit_delay : 1
+      tenant              = v.tenant != null ? v.tenant : "common"
     }
   }
 
@@ -1175,12 +1197,18 @@ locals {
       minimum_hold_time_between_spf_calculations  = v.minimum_hold_time_between_spf_calculations != null ? v.minimum_hold_time_between_spf_calculations : 1000
       minimum_interval_between_arrival_of_a_lsa   = v.minimum_interval_between_arrival_of_a_lsa != null ? v.minimum_interval_between_arrival_of_a_lsa : 1000
       maximum_wait_time_between_spf_calculations  = v.maximum_wait_time_between_spf_calculations != null ? v.maximum_wait_time_between_spf_calculations : 5000
-      name_lookup = v.control_knobs != null ? lookup(
-        v.control_knobs[0], "enable_name_lookup_for_router_ids", false
-      ) : false
-      prefix_suppress = v.control_knobs != null ? lookup(
-        v.control_knobs[0], "prefix_suppress", false
-      ) : false
+      control_knobs = v.control_knobs != null ? [
+        for s in v.control_knobs : {
+          enable_name_lookup_for_router_ids = length(compact([s.enable_name_lookup_for_router_ids])
+          ) > 0 ? s.enable_name_lookup_for_router_ids : false
+          prefix_suppress = s.prefix_suppress != null ? s.prefix_suppress : false
+        }
+        ] : [
+        {
+          enable_name_lookup_for_router_ids = false
+          prefix_suppress                   = false
+        }
+      ]
       tenant = v.tenant != null ? v.tenant : "common"
     }
   }

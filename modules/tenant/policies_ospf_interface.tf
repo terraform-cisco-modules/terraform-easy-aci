@@ -92,12 +92,17 @@ resource "aci_ospf_interface_policy" "policies_ospf_interface" {
   cost        = each.value.cost_of_interface == 0 ? "unspecified" : each.value.cost_of_interface
   # Bug 805 Submitted
   ctrl = anytrue(
-    [each.value.advertise_subnet, each.value.bfd, each.value.mtu_ignore, each.value.passive]
+    [
+      each.value.interface_controls[0].advertise_subnet,
+      each.value.interface_controls[0].bfd,
+      each.value.interface_controls[0].mtu_ignore,
+      each.value.interface_controls[0].passive_participation
+    ]
     ) ? compact(concat([
-      length(regexall(true, each.value.advertise_subnet)) > 0 ? "advert-subnet" : ""], [
-      length(regexall(true, each.value.bfd)) > 0 ? "bfd" : ""], [
-      length(regexall(true, each.value.mtu_ignore)) > 0 ? "mtu-ignore" : ""], [
-      length(regexall(true, each.value.passive_participation)) > 0 ? "passive" : ""]
+      length(regexall(true, each.value.interface_controls[0].advertise_subnet)) > 0 ? "advert-subnet" : ""], [
+      length(regexall(true, each.value.interface_controls[0].bfd)) > 0 ? "bfd" : ""], [
+      length(regexall(true, each.value.interface_controls[0].mtu_ignore)) > 0 ? "mtu-ignore" : ""], [
+      length(regexall(true, each.value.interface_controls[0].passive_participation)) > 0 ? "passive" : ""]
   )) : ["unspecified"]
   dead_intvl  = each.value.dead_interval
   hello_intvl = each.value.hello_interval

@@ -47,7 +47,7 @@ variable "l3out_logical_node_profiles" {
                 }
               ]
               hsrp_interface_policy = "default"
-              policy_tenant         = "common"
+              policy_source_tenant  = "common"
               version               = "v1"
             }
           ]
@@ -72,7 +72,7 @@ variable "l3out_logical_node_profiles" {
               name                  = "default"
               ospf_key              = 0
               ospf_interface_policy = "default"
-              policy_tenant    = "**l3out_tenant**"
+              policy_source_tenant  = "**l3out_tenant**"
             }
           ]
           */
@@ -165,7 +165,7 @@ variable "l3out_logical_node_profiles" {
       - name - (Required) Name of L3out HSRP interface group object.
       - secondary_virtual_ips - (Optional) - List of secondary virtual IP's to assign to the group.
     * hsrp_interface_policy - (Optional) Name of the HSRP Interface Policy.
-    * policy_tenant - (Optional) - Name of the tenant that contains the HSRP Interface and Group Policies.
+    * policy_source_tenant - (Optional) - Name of the tenant that contains the HSRP Interface and Group Policies.
     * version - (Optional) Compatibility catalog version.
       - v1
       - v2
@@ -233,7 +233,7 @@ variable "l3out_logical_node_profiles" {
                 }
               )))
               hsrp_interface_policy = optional(string)
-              policy_tenant         = optional(string)
+              policy_source_tenant  = optional(string)
               version               = optional(string)
             }
           )))
@@ -255,7 +255,7 @@ variable "l3out_logical_node_profiles" {
               name                  = string
               ospf_key              = optional(number)
               ospf_interface_policy = optional(string)
-              policy_tenant         = optional(string)
+              policy_source_tenant  = optional(string)
             }
           )))
           preferred_address   = optional(string)
@@ -686,7 +686,7 @@ resource "aci_l3out_hsrp_interface_profile" "hsrp_interface_profile" {
   annotation              = each.value.annotation
   description             = each.value.description
   name_alias              = each.value.alias
-  relation_hsrp_rs_if_pol = "uni/tn-${each.value.policy_tenant}/hsrpIfPol-${each.value.hsrp_interface_policy}"
+  relation_hsrp_rs_if_pol = "uni/tn-${each.value.policy_source_tenant}/hsrpIfPol-${each.value.hsrp_interface_policy}"
   version                 = each.value.version
 }
 
@@ -715,7 +715,7 @@ resource "aci_l3out_hsrp_interface_group" "hsrp_interface_profile_groups" {
   ip_obtain_mode                  = each.value.ip_obtain_mode
   mac                             = each.value.mac_address
   name                            = each.value.name
-  relation_hsrp_rs_group_pol      = "uni/tn-${each.value.policy_tenant}/hsrpGroupPol-${each.value.hsrp_group_policy}"
+  relation_hsrp_rs_group_pol      = "uni/tn-${each.value.policy_source_tenant}/hsrpGroupPol-${each.value.hsrp_group_policy}"
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -772,7 +772,7 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
   auth_type                    = each.value.authentication_type
   description                  = each.value.description
   logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
-  relation_ospf_rs_if_pol      = "uni/tn-${each.value.policy_tenant}/ospfIfPol-${each.value.ospf_interface_policy}"
+  relation_ospf_rs_if_pol      = "uni/tn-${each.value.policy_source_tenant}/ospfIfPol-${each.value.ospf_interface_policy}"
 }
 
 

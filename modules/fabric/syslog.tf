@@ -114,16 +114,16 @@ resource "aci_rest_managed" "syslog_destination_groups" {
     rn         = "console"
     class_name = "syslogConsole"
     content = {
-      adminState = each.value.console_admin_state
-      severity   = each.value.console_severity
+      adminState = each.value.console_destination[0].admin_state
+      severity   = each.value.console_destination[0].severity
     }
   }
   child {
     rn         = "file"
     class_name = "syslogFile"
     content = {
-      adminState = each.value.local_admin_state
-      severity   = each.value.local_severity
+      adminState = each.value.local_file_destination[0].admin_state
+      severity   = each.value.local_file_destination[0].severity
     }
   }
   child {

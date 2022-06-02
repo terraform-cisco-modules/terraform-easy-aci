@@ -100,10 +100,15 @@ resource "aci_ospf_timers" "policies_ospf_timers" {
   # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   bw_ref = each.value.bandwidth_reference
   ctrl = anytrue(
-    [each.value.name_lookup, each.value.prefix_suppress]
+    [
+      each.value.control_knobs[0].enable_name_lookup_for_router_ids,
+      each.value.control_knobs[0].prefix_suppress
+    ]
     ) ? compact(concat([
-      length(regexall(true, each.value.name_lookup)) > 0 ? "name-lookup" : ""], [
-      length(regexall(true, each.value.prefix_suppress)) > 0 ? "pfx-suppress" : ""]
+      length(regexall(true, each.value.control_knobs[0].enable_name_lookup_for_router_ids)
+      ) > 0 ? "name-lookup" : ""], [
+      length(regexall(true, each.value.control_knobs[0].prefix_suppress)
+      ) > 0 ? "pfx-suppress" : ""]
   )) : []
   description         = each.value.description
   dist                = each.value.admin_distance_preference

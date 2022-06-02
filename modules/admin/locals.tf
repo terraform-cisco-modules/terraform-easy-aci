@@ -55,8 +55,12 @@ locals {
 
   trigger_schedulers = {
     for k, v in var.configuration_backups : k => {
-      annotation           = v.annotation != null ? v.annotation : ""
-      description          = v.recurring_window != null ? lookup(v.recurring_window[0], "description", "") : ""
+      annotation = v.annotation != null ? v.annotation : ""
+      description = v.recurring_window != null ? join(",", [
+        for s in v.recurring_window : {
+          description = s.description != null ? s.description : ""
+        }
+      ]) : ""
       configuration_export = v.configuration_export != null ? v.configuration_export : []
       recurring_window     = v.recurring_window != null ? v.recurring_window : []
     }
@@ -243,11 +247,15 @@ locals {
 
   security = {
     for k, v in var.security : k => {
-      annotation                       = v.annotation != null ? v.annotation : ""
-      enable_lockout                   = v.lockout_user != null ? lookup(v.lockout_user[0], "enable_lockout", "disable") : "disable"
-      lockout_duration                 = v.lockout_user != null ? lookup(v.lockout_user[0], "lockout_duration", 60) : 60
-      max_failed_attempts              = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts", 5) : 5
-      max_failed_attempts_window       = v.lockout_user != null ? lookup(v.lockout_user[0], "max_failed_attempts_window", 5) : 5
+      annotation = v.annotation != null ? v.annotation : ""
+      lockout_user = v.lockout_user != null ? [
+        for s in v.lockout_user : {
+          enable_lockout             = s.enable_lockout != null ? s.enable_lockout : "disable"
+          lockout_duration           = s.lockout_duration != null ? s.lockout_duration : 60
+          max_failed_attempts        = s.max_failed_attempts != null ? s.max_failed_attempts : 5
+          max_failed_attempts_window = s.max_failed_attempts_window != null ? s.max_failed_attempts_window : 5
+        }
+      ] : []
       maximum_validity_period          = v.maximum_validity_period != null ? v.maximum_validity_period : 24
       no_change_interval               = v.no_change_interval != null ? v.no_change_interval : 24
       password_change_interval_enforce = v.password_change_interval_enforce != null ? v.password_change_interval_enforce : "enable"

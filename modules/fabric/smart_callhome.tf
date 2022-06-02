@@ -13,7 +13,7 @@ variable "smart_callhome" {
           admin_state   = "enabled"
           email         = "admin@example.com"
           format        = "short-txt" # aml|short-txt|xml
-          rfc_compliant = false
+          rfc_compliant = true
         }
       ]
       from_email = ""
@@ -127,11 +127,11 @@ resource "aci_rest_managed" "smart_callhome_destination_groups_callhome_profile"
     from       = each.value.from_email
     replyTo    = each.value.reply_to_email
     phone      = each.value.phone_contact
-    port       = each.value.port_number
-    pwd        = each.value.secure_smtp == true ? var.smtp_password : ""
-    secureSmtp = each.value.secure_smtp == true ? "yes" : "no"
+    port       = each.value.smtp_server[0].port_number
+    pwd        = each.value.smtp_server[0].secure_smtp == true ? var.smtp_password : ""
+    secureSmtp = each.value.smtp_server[0].secure_smtp == true ? "yes" : "no"
     site       = each.value.site_id
-    username   = each.value.username
+    username   = each.value.smtp_server[0].username
   }
 }
 
