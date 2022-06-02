@@ -3,15 +3,6 @@
 # 
 # Example Usage
 resource "aci_bgp_route_control_profile" "example" {
-  parent_dn                  = aci_tenant.tenentcheck.id
-  name                       = "one"
-  annotation                 = "bgp_route_control_profile_tag"
-  description                = "from terraform"
-  name_alias                 = "example"
-  route_control_profile_type = "global"
-}
-
-resource "aci_bgp_route_control_profile" "example" {
   parent_dn                  = aci_l3_outside.example.id
   name                       = "bgp_route_control_profile_1"
   annotation                 = "bgp_route_control_profile_tag"
