@@ -262,12 +262,12 @@ resource "aci_rest_managed" "snmp_client_group_clients" {
     aci_rest_managed.snmp_client_groups
   ]
   for_each   = local.snmp_client_group_clients
-  dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.key2}/client-[${each.value.address}]"
+  dn         = "uni/fabric/snmppol-${each.value.snmp_policy}/clgrp-${each.value.client_group}/client-[${each.value.address}]"
   class_name = "snmpClientP"
   content = {
-    addr       = each.value.address
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name       = each.value.name
+    addr = each.value.address
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    name = each.value.name
   }
 }
 
@@ -330,7 +330,7 @@ resource "aci_rest_managed" "snmp_policies_users" {
   dn         = "uni/fabric/snmppol-${each.value.key1}/user-[${each.value.username}]"
   class_name = "snmpUserP"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     authKey = length(regexall(
       5, each.value.authorization_key)) > 0 ? var.snmp_authorization_key_5 : length(regexall(
       4, each.value.authorization_key)) > 0 ? var.snmp_authorization_key_4 : length(regexall(
@@ -345,6 +345,12 @@ resource "aci_rest_managed" "snmp_policies_users" {
       2, each.value.privacy_key)) > 0 ? var.snmp_privacy_key_2 : length(regexall(
     1, each.value.privacy_key)) > 0 ? var.snmp_privacy_key_1 : ""
     privType = each.value.privacy_type
+  }
+  lifecycle {
+    ignore_changes = [
+      content.authKey,
+      content.privKey
+    ]
   }
 }
 
@@ -386,9 +392,9 @@ resource "aci_rest_managed" "snmp_trap_destinations" {
   dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
   class_name = "snmpTrapDest"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    host       = each.value.host
-    port       = each.value.port
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    host = each.value.host
+    port = each.value.port
     secName = each.value.version != "v3" && length(regexall(
       5, each.value.community_variable)) > 0 ? var.snmp_community_5 : each.value.version != "v3" && length(regexall(
       4, each.value.community_variable)) > 0 ? var.snmp_community_4 : each.value.version != "v3" && length(regexall(
@@ -422,12 +428,12 @@ resource "aci_rest_managed" "snmp_policies_trap_servers" {
     aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_trap_destinations
-  dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapfwdserver-[${each.value.host}]"
+  dn         = "uni/fabric/snmppol-${each.value.key1}/trapfwdserver-[${each.value.host}]"
   class_name = "snmpTrapFwdServerP"
   content = {
-    addr       = each.value.host
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    port       = each.value.port
+    addr = each.value.host
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    port = each.value.port
   }
 }
 
@@ -454,7 +460,7 @@ resource "aci_rest_managed" "snmp_trap_source" {
         each.value.include_types[0].faults,
         each.value.include_types[0].session_logs
       ]
-      ) ? "all" : anytrue(
+      ) ? "all,audit,events,faults,session" : anytrue(
       [
         each.value.include_types[0].audit_logs,
         each.value.include_types[0].events,

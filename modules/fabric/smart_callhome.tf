@@ -201,26 +201,26 @@ resource "aci_rest_managed" "smart_callhome_source" {
   class_name = "callhomeSmartSrc"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    incl = alltrue(
-      [
-        each.value.include_types[0].audit_logs,
-        each.value.include_types[0].events,
-        each.value.include_types[0].faults,
-        each.value.include_types[0].session_logs
-      ]
-      ) ? "all" : anytrue(
-      [
-        each.value.include_types[0].audit_logs,
-        each.value.include_types[0].events,
-        each.value.include_types[0].faults,
-        each.value.include_types[0].session_logs
-      ]
-      ) ? replace(trim(join(",", concat([
-        length(regexall(true, each.value.include_types[0].audit_logs)) > 0 ? "audit" : ""], [
-        length(regexall(true, each.value.include_types[0].events)) > 0 ? "events" : ""], [
-        length(regexall(true, each.value.include_types[0].faults)) > 0 ? "faults" : ""], [
-        length(regexall(true, each.value.include_types[0].session_logs)) > 0 ? "session" : ""]
-    )), ","), ",,", ",") : "none"
+    # incl = alltrue(
+    #   [
+    #     each.value.include_types[0].audit_logs,
+    #     each.value.include_types[0].events,
+    #     each.value.include_types[0].faults,
+    #     each.value.include_types[0].session_logs
+    #   ]
+    #   ) ? "all" : anytrue(
+    #   [
+    #     each.value.include_types[0].audit_logs,
+    #     each.value.include_types[0].events,
+    #     each.value.include_types[0].faults,
+    #     each.value.include_types[0].session_logs
+    #   ]
+    #   ) ? replace(trim(join(",", concat([
+    #     length(regexall(true, each.value.include_types[0].audit_logs)) > 0 ? "audit" : ""], [
+    #     length(regexall(true, each.value.include_types[0].events)) > 0 ? "events" : ""], [
+    #     length(regexall(true, each.value.include_types[0].faults)) > 0 ? "faults" : ""], [
+    #     length(regexall(true, each.value.include_types[0].session_logs)) > 0 ? "session" : ""]
+    # )), ","), ",,", ",") : "none"
   }
   child {
     rn         = "rssmartdestGroup"

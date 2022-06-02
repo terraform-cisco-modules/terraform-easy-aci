@@ -714,16 +714,18 @@ locals {
   snmp_client_group_clients_loop = flatten([
     for key, value in local.snmp_client_groups : [
       for k, v in value.clients : {
-        annotation = value.annotation != null ? value.annotation : ""
-        address    = v.address
-        name       = v.name != null ? v.name : ""
-        key1       = key
-        key2       = k
+        annotation   = value.annotation != null ? value.annotation : ""
+        address      = v.address
+        name         = v.name != null ? v.name : ""
+        snmp_policy  = value.key1
+        client_group = value.name
       }
     ]
   ])
 
-  snmp_client_group_clients = { for k, v in local.snmp_client_group_clients_loop : "${v.key1}_${v.address}" => v }
+  snmp_client_group_clients = {
+    for k, v in local.snmp_client_group_clients_loop : "${v.snmp_policy}_${v.client_group}_${v.address}" => v
+  }
 
   snmp_communities_loop = flatten([
     for key, value in local.snmp_policies : [

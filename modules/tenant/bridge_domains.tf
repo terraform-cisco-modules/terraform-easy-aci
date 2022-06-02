@@ -144,7 +144,6 @@ variable "bridge_domains" {
           subnets = optional(map(object(
             {
               description                  = optional(string)
-              gateway_ip                   = string
               ip_data_plane_learning       = optional(string)
               make_this_ip_address_primary = optional(bool)
               scope = optional(list(object(

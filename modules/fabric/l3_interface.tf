@@ -34,8 +34,8 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_l3_interface_policy" "l3_interface" {
-  for_each    = local.l3_interface
-  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each = local.l3_interface
+  # annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   bfd_isis    = each.value.bfd_isis_policy_configuration
   description = each.value.description
   name        = "default"

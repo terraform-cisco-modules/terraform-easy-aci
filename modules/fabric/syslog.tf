@@ -201,7 +201,7 @@ resource "aci_rest_managed" "syslog_sources" {
         each.value.include_types[0].faults,
         each.value.include_types[0].session_logs
       ]
-      ) ? "all" : anytrue(
+      ) ? "all,audit,events,faults,session" : anytrue(
       [
         each.value.include_types[0].audit_logs,
         each.value.include_types[0].events,

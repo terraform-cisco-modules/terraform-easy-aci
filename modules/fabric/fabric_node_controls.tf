@@ -39,8 +39,8 @@ variable "fabric_node_controls" {
 }
 
 resource "aci_fabric_node_control" "fabric_node_controls" {
-  for_each    = local.fabric_node_controls
-  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each = local.fabric_node_controls
+  # annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   control     = each.value.enable_dom
   description = each.value.description
   feature_sel = each.value.feature_selections
