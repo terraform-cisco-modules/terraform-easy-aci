@@ -1,4 +1,4 @@
-variable "endpoint_retention_policies" {
+variable "policies_endpoint_retention" {
   default = {
     "default" = {
       annotation                     = ""
@@ -41,11 +41,11 @@ variable "endpoint_retention_policies" {
   ))
 }
 
-resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
+resource "aci_end_point_retention_policy" "policies_endpoint_retention" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.endpoint_retention_policies
+  for_each = local.policies_endpoint_retention
   # annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   bounce_age_intvl    = each.value.bounce_entry_aging_interval
   bounce_trig         = each.value.bounce_trigger
@@ -58,8 +58,8 @@ resource "aci_end_point_retention_policy" "endpoint_retention_policies" {
   remote_ep_age_intvl = each.value.remote_endpoint_aging_interval == "0" ? "infinite" : each.value.remote_endpoint_aging_interval
   tenant_dn           = aci_tenant.tenants[each.value.tenant].id
 }
-output "endpoint_retention_policies" {
-  value = var.endpoint_retention_policies != {} ? { for v in sort(
-    keys(aci_end_point_retention_policy.endpoint_retention_policies)
-  ) : v => aci_end_point_retention_policy.endpoint_retention_policies[v].id } : {}
+output "policies_endpoint_retention" {
+  value = var.policies_endpoint_retention != {} ? { for v in sort(
+    keys(aci_end_point_retention_policy.policies_endpoint_retention)
+  ) : v => aci_end_point_retention_policy.policies_endpoint_retention[v].id } : {}
 }

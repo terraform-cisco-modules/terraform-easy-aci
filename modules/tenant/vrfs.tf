@@ -166,9 +166,9 @@ variable "snmp_community_5" {
 
 API Information:
  - Class: "fvCtx"
- - Distinguished Name: "uni/tn-{Tenant}/ctx-{VRF}"
+ - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}"
 GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF}
+ - Tenants > {tenant} > Networking > VRFs > {vrf}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_vrf" "vrfs" {
@@ -377,9 +377,9 @@ resource "aci_any" "vrf_preferred_group" {
     aci_vrf.vrfs
   ]
   for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" && v.preferred_group == "enabled" }
-  vrf_dn       = aci_vrf.vrfs[each.value.vrf].id
   description  = each.value.description
   pref_gr_memb = each.value.preferred_group
+  vrf_dn       = aci_vrf.vrfs[each.key].id
 }
 
 /*_____________________________________________________________________________________________________________________

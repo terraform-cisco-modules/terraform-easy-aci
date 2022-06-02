@@ -47,8 +47,8 @@ variable "bridge_domains" {
           associated_l3outs = [
             {
               l3out         = "default"
-              l3out_tenant  = "common"
-              route_profile = ""
+              route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
+              tenant        = "common"
             }
           ]
           custom_mac_address      = ""
@@ -135,8 +135,8 @@ variable "bridge_domains" {
           associated_l3outs = optional(list(object(
             {
               l3out         = string
-              l3out_tenant  = string
               route_profile = optional(string)
+              tenant        = string
             }
           )))
           custom_mac_address      = optional(string)
@@ -188,7 +188,7 @@ resource "aci_bridge_domain" "bridge_domains" {
   depends_on = [
     aci_tenant.tenants,
     aci_vrf.vrfs,
-    aci_l3_outside.l3outs
+    # aci_l3_outside.l3outs
   ]
   for_each = local.bridge_domains
   # General
@@ -201,16 +201,16 @@ resource "aci_bridge_domain" "bridge_domains" {
   limit_ip_learn_to_subnets = each.value.general[0].limit_ip_learn_to_subnets == true ? "yes" : "no"
   mcast_allow               = each.value.general[0].pim == true ? "yes" : "no"
   name                      = each.key
-  name_alias                = each.value.general[0].name_alias
+  name_alias                = each.value.general[0].alias
   multi_dst_pkt_act         = each.value.general[0].multi_destination_flooding
   relation_fv_rs_bd_to_ep_ret = each.value.general[0
   ].endpoint_retention_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/epRPol-${each.value.general[0].endpoint_retention_policy}" : ""
   relation_fv_rs_ctx = each.value.general[0
   ].vrf != "" ? "uni/tn-${each.value.general[0].vrf_tenant}/ctx-${each.value.general[0].vrf}" : ""
   relation_fv_rs_igmpsn = each.value.general[0
-  ].each.value.igmp_snooping_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/snPol-${each.value.general[0].igmp_snooping_policy}" : ""
-  relation_fv_rs_mldsn = leach.value.general[0
-  ].each.value.mld_snoop_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/mldsnoopPol-${each.value.general[0].mld_snoop_policy}" : ""
+  ].igmp_snooping_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/snPol-${each.value.general[0].igmp_snooping_policy}" : ""
+  relation_fv_rs_mldsn = each.value.general[0
+  ].mld_snoop_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/mldsnoopPol-${each.value.general[0].mld_snoop_policy}" : ""
   tenant_dn         = aci_tenant.tenants[each.value.general[0].tenant].id
   unk_mac_ucast_act = each.value.general[0].l2_unknown_unicast
   unk_mcast_act     = each.value.general[0].l3_unknown_multicast_flooding
@@ -220,19 +220,18 @@ resource "aci_bridge_domain" "bridge_domains" {
   ll_addr             = each.value.l3_configurations[0].link_local_ipv6_address
   mac                 = each.value.l3_configurations[0].custom_mac_address
   # class: l3extOut
-  relation_fv_rs_bd_to_out = each.value.l3_configurations[0].associated_l3outs[0
-    ].l3out != "" ? ["uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
-  ].l3out_tenant}/out-${each.value.l3_configurations[0].associated_l3outs[0].l3out}"] : []
+  relation_fv_rs_bd_to_out = length(each.value.l3_configurations[0].associated_l3outs
+  ) > 0 ? [for k, v in each.value.l3_configurations[0].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out}"] : []
   # class: rtctrlProfile
-  relation_fv_rs_bd_to_profile = each.value.l3_configurations[0
-    ].l3out_for_route_profile != "" ? "uni/tn-${each.value.l3_configurations[0].associated_l3outs[0
-      ].l3out_tenant}/out-${each.value.l3_configurations[0].associated_l3outs[0
-  ].l3out}/prof-${each.value.l3_configurations[0].associated_l3outs[0].route_profile}" : ""
+  relation_fv_rs_bd_to_profile = join(",", [
+    for k, v in each.value.l3_configurations[0
+    ].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out}/prof-${v.route_profile}" if v.route_profile != ""
+  ])
   # class: monEPGPol
-  relation_fv_rs_bd_to_nd_p = length(
-  [each.value.nd_policy]) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.nd_policy}" : ""
+  # relation_fv_rs_bd_to_nd_p = length(
+  # [each.value.nd_policy]) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.nd_policy}" : ""
   unicast_route = each.value.l3_configurations[0].unicast_routing == true ? "yes" : "no"
-  vmac          = each.value.l3_configurations[0].virtual_mac_address
+  vmac          = each.value.l3_configurations[0].virtual_mac_address != "" ? each.value.l3_configurations[0].virtual_mac_address : "not-applicable"
   # Advanced/Troubleshooting
   ep_clear    = each.value.advanced_troubleshooting[0].endpoint_clear == true ? "yes" : "no"
   ip_learning = each.value.advanced_troubleshooting[0].disable_ip_data_plane_learning_for_pbr == true ? "no" : "yes"
@@ -245,12 +244,13 @@ resource "aci_bridge_domain" "bridge_domains" {
   relation_fv_rs_abd_pol_mon_pol = each.value.advanced_troubleshooting[0
   ].monitoring_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/monepg-${each.value.advanced_troubleshooting[0].monitoring_policy}" : ""
   # class: netflowMonitorPol
-  relation_fv_rs_bd_to_netflow_monitor_pol = each.value.advanced_troubleshooting[0
-    ].netflow_monitor_policies != "" ? [
-    for s in each.value.advanced_troubleshooting[0
-      ].netflow_monitor_policies : "uni/tn-${each.value.general[0
-    ].tenant}/rsBDToNetflowMonitorPol-[${element(split(":", s), 1)}]-${element(split(":", s), 0)}"
-  ] : []
+  dynamic "relation_fv_rs_bd_to_netflow_monitor_pol" {
+    for_each = each.value.advanced_troubleshooting[0].netflow_monitor_policies
+    content {
+      tn_netflow_monitor_pol_name = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy
+      flt_type                    = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.filter_type # ipv4|ipv6|ce
+    }
+  }
   # class: fhsBDPol
   relation_fv_rs_bd_to_fhs = each.value.advanced_troubleshooting[0
     ].first_hop_security_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/bdpol-${each.value.advanced_troubleshooting[0
@@ -267,12 +267,12 @@ GUI Location:
  - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Subnets
 _______________________________________________________________________________________________________________________
 */
-resource "aci_subnet" "subnets" {
+resource "aci_subnet" "bridge_domain_subnets" {
   depends_on = [
     aci_bridge_domain.bridge_domains,
-    aci_l3_outside.l3outs
+    # aci_l3_outside.l3outs
   ]
-  for_each  = { for k, v in local.subnets : k => v if v.controller_type == "apic" }
+  for_each  = { for k, v in local.bridge_domain_subnets : k => v if v.controller_type == "apic" }
   parent_dn = aci_bridge_domain.bridge_domains[each.value.bridge_domain].id
   ctrl = anytrue([each.value.subnet_control[0]["neighbor_discovery"
     ], each.value.subnet_control[0]["no_default_svi_gateway"], each.value.subnet_control[0]["querier_ip"]
@@ -285,12 +285,12 @@ resource "aci_subnet" "subnets" {
   ip          = each.value.gateway_ip
   preferred   = each.value.make_this_ip_address_primary == true ? "yes" : "no"
   # class: rtctrlProfile
-  relation_fv_rs_bd_subnet_to_out = length(compact(
-    [each.value.route_profile])
-  ) > 0 ? "uni/tn-${each.value.l3out_tenant}/out-${each.value.l3out}" : ""
-  relation_fv_rs_bd_subnet_to_profile = length(compact(
-    [each.value.route_profile])
-  ) > 0 ? each.value.route_profile : ""
+  # relation_fv_rs_bd_subnet_to_out = length(compact(
+  #   [each.value.l3out])
+  # ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}" : ""
+  # relation_fv_rs_bd_subnet_to_profile = length(compact(
+  #   [each.value.route_profile])
+  # ) > 0 ? each.value.route_profile : ""
   scope = anytrue([each.value.scope[0]["advertise_externally"
     ], each.value.scope[0]["shared_between_vrfs"]]) ? compact(concat([
     length(regexall(true, each.value.scope[0]["advertise_externally"])) > 0 ? "public" : ""], [
@@ -358,12 +358,12 @@ resource "mso_schema_site_bd" "bridge_domains" {
   host_route    = each.value.advertise_host_routes
 }
 
-resource "mso_schema_template_bd_subnet" "subnets" {
+resource "mso_schema_template_bd_subnet" "bridge_domain_subnets" {
   provider = mso
   depends_on = [
     mso_schema_template_bd.bridge_domains
   ]
-  for_each           = { for k, v in local.subnets : k => v if v.controller_type == "ndo" }
+  for_each           = { for k, v in local.bridge_domain_subnets : k => v if v.controller_type == "ndo" }
   bd_name            = each.value.bridge_domain
   description        = each.value.description
   ip                 = each.value.gateway_ip

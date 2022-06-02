@@ -3,7 +3,7 @@
 Switch Profile Variables
 _______________________________________________________________________________________________________________________
 */
-variable "apics_inband" {
+variable "apics_inband_mgmt_addresses" {
   default     = {}
   description = <<-EOT
   key - Node ID of the APIC
@@ -11,12 +11,12 @@ variable "apics_inband" {
   EOT
   type = map(object(
     {
-      ipv4_address   = string
-      ipv4_gateway   = string
-      ipv6_address   = string
-      ipv6_gateway   = string
+      ipv4_address   = optional(string)
+      ipv4_gateway   = optional(string)
+      ipv6_address   = optional(string)
+      ipv6_gateway   = optional(string)
       management_epg = string
-      pod_id         = number
+      pod_id         = optional(string)
     }
   ))
 }
@@ -33,17 +33,19 @@ GUI Location:
  - Tenants > mgmt > Node Management Addresses > Static Node Management Addresses
 _______________________________________________________________________________________________________________________
 */
-resource "aci_static_node_mgmt_address" "apic_static_node_mgmt_addresses" {
-  depends_on = [
-    aci_rest_managed.fabric_membership
-  ]
-  for_each          = local.apic_static_node_mgmt_addresses
-  management_epg_dn = "uni/tn-mgmt/mgmtp-default/inb-${management_epg}"
-  t_dn              = "topology/pod-${each.value.pod_id}/node-${each.value.node_id}"
-  type              = "in_band"
-  addr              = each.value.ipv4_address
-  annotation        = var.annotation
-  gw                = each.value.ipv4_gateway
-  v6_addr           = each.value.ipv6_address
-  v6_gw             = each.value.ipv6_gateway
+resource "aci_static_node_mgmt_address" "apics_inband_mgmt_addresses" {
+  for_each          = var.apics_inband_mgmt_addresses
+  management_epg_dn = "uni/tn-mgmt/mgmtp-default/inb-${each.value.management_epg}"
+  t_dn = length(compact([each.value.pod_id])
+  ) > 0 ? "topology/pod-${each.value.pod_id}/node-${each.key}" : "topology/pod-1/node-${each.key}"
+  type       = "in_band"
+  annotation = var.annotation
+  addr = length(compact([each.value.ipv4_address])
+  ) > 0 ? each.value.ipv4_address : ""
+  gw = length(compact([each.value.ipv4_gateway])
+  ) > 0 ? each.value.ipv4_gateway : ""
+  v6_addr = length(compact([each.value.ipv6_address])
+  ) > 0 ? each.value.ipv6_address : ""
+  v6_gw = length(compact([each.value.ipv6_gateway])
+  ) > 0 ? each.value.ipv6_gateway : ""
 }

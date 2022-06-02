@@ -15,6 +15,8 @@ variable "l3outs" {
         {
           alias                  = ""
           contract_exception_tag = 0
+          contracts              = []
+          /* Example Contract
           contracts = [
             {
               contract_name   = "default"
@@ -23,6 +25,7 @@ variable "l3outs" {
               qos_class       = "unspecified"
             }
           ]
+          */
           description            = ""
           epg_type               = "default" # default or oob
           flood_on_encapsulation = "disabled"
@@ -45,59 +48,45 @@ variable "l3outs" {
                 export_route_control_subnet = false
                 shared_route_control_subnet = false
               }]
-              route_summarization_policy = ""
-              route_control_profiles     = []
+              route_control_profiles = []
               # Example
               # route_control_profiles = [{
               #   direction = "export" # export/import
               #   route_map = "default"
               #   tenant = "**l3out_tenant**"
               # }]
-              subnet = "0.0.0.0/1"
-            },
-            {
-              aggregate = [{
-                aggregate_export        = false
-                aggregate_shared_routes = false
-              }]
-              description = ""
-              external_epg_classification = [{
-                external_subnets_for_external_epg = true
-                shared_security_import_subnet     = false
-              }]
-              route_control = [{
-                export_route_control_subnet = false
-                shared_route_control_subnet = false
-              }]
-              subnet = "128.0.0.0/1"
+              route_summarization_policy = ""
+              subnets                    = ["0.0.0.0/1", "128.0.0.0/1"]
             }
           ]
           route_control_profiles = []
-          # Example
-          # route_control_profiles = [{
-          #   direction = "export" # export/import
-          #   route_map = "default"
-          #   tenant = "**l3out_tenant**"
-          # }]
+          /* Example
+          route_control_profiles = [{
+            direction = "export" # export/import
+            route_map = "default"
+            tenant = "**l3out_tenant**"
+          }]
+          */
           target_dscp = "unspecified"
         }
       ]
       l3_domain             = ""
       level                 = "template"
       ospf_external_profile = []
-      # Example
-      # ospf_external_profile = [
-      #   {
-      #     ospf_area_cost = 1
-      #     ospf_area_control = [{
-      #       send_redistribution_lsas_into_nssa_area = true
-      #       originate_summary_lsa                   = true
-      #       suppress_forwarding_address             = false
-      #     }]
-      #     ospf_area_id   = "0.0.0.0"
-      #     ospf_area_type = "regular" # nssa, regular, stub
-      #   }
-      # ]
+      /* Example
+      ospf_external_profile = [
+        {
+          ospf_area_cost = 1
+          ospf_area_control = [{
+            send_redistribution_lsas_into_nssa_area = true
+            originate_summary_lsa                   = true
+            suppress_forwarding_address             = false
+          }]
+          ospf_area_id   = "0.0.0.0"
+          ospf_area_type = "regular" # nssa, regular, stub
+        }
+      ]
+      */
       route_control_enforcement = [
         {
           export = true
@@ -105,14 +94,15 @@ variable "l3outs" {
         }
       ]
       route_control_for_dampening = []
-      # Example
-      # route_control_for_dampening = [
-      #   {
-      #     address_family = "ipv4"
-      #     route_map      = "**REQUIRED**"
-      #     tenant         = "**l3out_tenant**"
-      #   }
-      # ]
+      /* Example
+      route_control_for_dampening = [
+        {
+          address_family = "ipv4"
+          route_map      = "**REQUIRED**"
+          tenant         = "**l3out_tenant**"
+        }
+      ]
+      */
       target_dscp = "unspecified"
       sites       = []
       template    = "common"
@@ -122,35 +112,35 @@ variable "l3outs" {
     }
   }
   description = <<-EOT
-  Key: Name of the VRF.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bgp_context_per_address_family: 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
-    - aws
-    - azure
-    - cisco (Default)
-# Argument Reference
-# addr - (Optional) Peer address for L3out floating SVI object. Default value: "0.0.0.0".
-# annotation - (Optional) Annotation for L3out floating SVI object.
-# autostate - (Optional) Autostate for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "disabled".
-# description - (Optional) Description for L3out floating SVI object.
-# encap - (Required) Port encapsulation for L3out floating SVI object.
-# encap_scope - (Optional) Encap scope for L3out floating SVI object. Allowed values are "ctx" and "local". Default value is "local".
-# if_inst_t - (Optional) Interface type for L3out floating SVI object. Allowed values are "ext-svi", "l3-port", "sub-interface" and "unspecified". Default value is "unspecified".
-# ipv6_dad - (Optional) IPv6 dad for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "enabled".
-# ll_addr - (Optional) Link local address for L3out floating SVI object. Default value: "::".
-# logical_interface_profile_dn - (Required) Distinguished name of parent logical interface profile object.
-# mac - (Optional) MAC address for L3out floating SVI object.
-# mode - (Optional) BGP domain mode for L3out floating SVI object. Allowed values are "native", "regular" and "untagged". Default value is "regular".
-# mtu - (Optional) Administrative MTU port on the aggregated interface for L3out floating SVI object. Range of allowed values is "576" to "9216". Default value is "inherit".
-# node_dn - (Required) Distinguished name of the node for L3out floating SVI object.
-# relation_l3ext_rs_dyn_path_att - (Optional) Relation to class infraDomP. Cardinality - N_TO_M. Type - Set of String.
-# target_dscp - (Optional) Target DSCP for L3out floating SVI object. Allowed values are "AF11", "AF12", "AF13", "AF21", "AF22", "AF23", "AF31", "AF32", "AF33", "AF41", "AF42", "AF43", "CS0", "CS1", "CS2", "CS3", "CS4", "CS5", "CS6", "CS7", "EF", "VA" and "unspecified". Default value is "unspecified".
+    Key: Name of the VRF.
+    * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+    * bgp_context_per_address_family: 
+    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+    * type: What is the type of controller.  Options are:
+      - apic: For APIC Controllers
+      - ndo: For Nexus Dashboard Orchestrator
+    * vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
+      - aws
+      - azure
+      - cisco (Default)
+    # Argument Reference
+    # addr - (Optional) Peer address for L3out floating SVI object. Default value: "0.0.0.0".
+    # annotation - (Optional) Annotation for L3out floating SVI object.
+    # autostate - (Optional) Autostate for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "disabled".
+    # description - (Optional) Description for L3out floating SVI object.
+    # encap - (Required) Port encapsulation for L3out floating SVI object.
+    # encap_scope - (Optional) Encap scope for L3out floating SVI object. Allowed values are "ctx" and "local". Default value is "local".
+    # if_inst_t - (Optional) Interface type for L3out floating SVI object. Allowed values are "ext-svi", "l3-port", "sub-interface" and "unspecified". Default value is "unspecified".
+    # ipv6_dad - (Optional) IPv6 dad for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "enabled".
+    # ll_addr - (Optional) Link local address for L3out floating SVI object. Default value: "::".
+    # logical_interface_profile_dn - (Required) Distinguished name of parent logical interface profile object.
+    # mac - (Optional) MAC address for L3out floating SVI object.
+    # mode - (Optional) BGP domain mode for L3out floating SVI object. Allowed values are "native", "regular" and "untagged". Default value is "regular".
+    # mtu - (Optional) Administrative MTU port on the aggregated interface for L3out floating SVI object. Range of allowed values is "576" to "9216". Default value is "inherit".
+    # node_dn - (Required) Distinguished name of the node for L3out floating SVI object.
+    # relation_l3ext_rs_dyn_path_att - (Optional) Relation to class infraDomP. Cardinality - N_TO_M. Type - Set of String.
+    # target_dscp - (Optional) Target DSCP for L3out floating SVI object. Allowed values are "AF11", "AF12", "AF13", "AF21", "AF22", "AF23", "AF31", "AF32", "AF33", "AF41", "AF42", "AF43", "CS0", "CS1", "CS2", "CS3", "CS4", "CS5", "CS6", "CS7", "EF", "VA" and "unspecified". Default value is "unspecified".
   EOT
   type = map(object(
     {
@@ -211,7 +201,7 @@ variable "l3outs" {
                 }
               )))
               route_summarization_policy = optional(string)
-              subnet                     = string
+              subnets                    = list(string)
             }
           ))
           route_control_profiles = optional(list(object(
@@ -223,9 +213,8 @@ variable "l3outs" {
           target_dscp = optional(string)
         }
       )))
-      l3_domain  = optional(string)
-      level      = optional(string)
-      name_alias = optional(string)
+      l3_domain = optional(string)
+      level     = optional(string)
       ospf_external_profile = optional(list(object(
         {
           ospf_area_cost = optional(number)
@@ -263,76 +252,6 @@ variable "l3outs" {
   ))
 }
 
-variable "bgp_password_1" {
-  default     = ""
-  description = "BGP Password 1."
-  sensitive   = true
-  type        = string
-}
-
-variable "bgp_password_2" {
-  default     = ""
-  description = "BGP Password 2."
-  sensitive   = true
-  type        = string
-}
-
-variable "bgp_password_3" {
-  default     = ""
-  description = "BGP Password 3."
-  sensitive   = true
-  type        = string
-}
-
-variable "bgp_password_4" {
-  default     = ""
-  description = "BGP Password 4."
-  sensitive   = true
-  type        = string
-}
-
-variable "bgp_password_5" {
-  default     = ""
-  description = "BGP Password 5."
-  sensitive   = true
-  type        = string
-}
-
-
-variable "ospf_key_1" {
-  default     = ""
-  description = "OSPF Key 1."
-  sensitive   = true
-  type        = string
-}
-
-variable "ospf_key_2" {
-  default     = ""
-  description = "OSPF Key 2."
-  sensitive   = true
-  type        = string
-}
-
-variable "ospf_key_3" {
-  default     = ""
-  description = "OSPF Key 3."
-  sensitive   = true
-  type        = string
-}
-
-variable "ospf_key_4" {
-  default     = ""
-  description = "OSPF Key 4."
-  sensitive   = true
-  type        = string
-}
-
-variable "ospf_key_5" {
-  default     = ""
-  description = "OSPF Key 5."
-  sensitive   = true
-  type        = string
-}
 
 
 /*_____________________________________________________________________________________________________________________
@@ -346,23 +265,22 @@ ________________________________________________________________________________
 */
 resource "aci_l3_outside" "l3outs" {
   depends_on = [
-    local.rs_l3_domains,
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each = { for k, v in local.l3outs : k => v if v.controller_type == "apic" }
-  # annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each       = { for k, v in local.l3outs : k => v if v.controller_type == "apic" }
+  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = each.value.description
   enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
   name           = each.key
-  name_alias     = each.value.name_alias
+  name_alias     = each.value.alias
   target_dscp    = each.value.target_dscp
   tenant_dn      = aci_tenant.tenants[each.value.tenant].id
   relation_l3ext_rs_ectx = length(regexall(
     each.value.tenant, each.value.vrf_tenant)
     ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
     "[[:alnum:]]+", each.value.vrf_tenant)
-  ) > 0 ? local.rs_vrfs[each.value.vrf].id : ""
+  ) > 0 ? "uni/tn-${each.value.vrf_tenant}/ctx-${each.value.vrf}" : ""
   relation_l3ext_rs_l3_dom_att = length(regexall(
     "[[:alnum:]]+", each.value.l3_domain)
   ) > 0 ? "uni/l3dom-${each.value.l3_domain}" : ""
@@ -397,7 +315,7 @@ resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   exception_tag  = each.value.contract_exception_tag
   flood_on_encap = each.value.flood_on_encapsulation
   match_t        = each.value.match_type
-  name_alias     = each.value.name_alias
+  name_alias     = each.value.alias
   name           = each.value.name
   pref_gr_memb   = each.value.preferred_group_member == true ? "include" : "exclude"
   prio           = each.value.qos_class
@@ -532,22 +450,27 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
   ]
   for_each = { for k, v in local.l3out_external_epg_subnets : k => v if v.epg_type != "oob" }
   aggregate = anytrue(
-    [each.value.agg_export, each.value.agg_shared]
+    [each.value.aggregate_export, each.value.aggregate_shared_routes]
     ) ? replace(trim(join(",", concat([
-      length(regexall(true, each.value.agg_export)) > 0 ? "export-rtctrl" : ""], [
-      length(regexall(true, each.value.agg_shared)) > 0 ? "shared-rtctrl" : ""]
+      length(regexall(true, each.value.aggregate_export)) > 0 ? "export-rtctrl" : ""], [
+      length(regexall(true, each.value.aggregate_shared_routes)) > 0 ? "shared-rtctrl" : ""]
   )), ","), ",,", ",") : "none"
   annotation                           = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                          = each.value.description
   external_network_instance_profile_dn = aci_external_network_instance_profile.l3out_external_epgs[each.value.ext_epg].id
   ip                                   = each.value.subnet
   scope = anytrue(
-    [each.value.scope_export, each.value.scope_isec, each.value.scope_ishared, each.value.scope_shared]
+    [
+      each.value.export_route_control_subnet,
+      each.value.external_subnets_for_external_epg,
+      each.value.shared_security_import_subnet,
+      each.value.shared_route_control_subnet
+    ]
     ) ? compact(concat([
-      length(regexall(true, each.value.scope_export)) > 0 ? "export-rtctrl" : ""], [
-      length(regexall(true, each.value.scope_isec)) > 0 ? "import-security" : ""], [
-      length(regexall(true, each.value.scope_ishared)) > 0 ? "shared-security" : ""], [
-      length(regexall(true, each.value.scope_shared)) > 0 ? "shared-rtctrl" : ""]
+      length(regexall(true, each.value.export_route_control_subnet)) > 0 ? "export-rtctrl" : ""], [
+      length(regexall(true, each.value.external_subnets_for_external_epg)) > 0 ? "import-security" : ""], [
+      length(regexall(true, each.value.shared_security_import_subnet)) > 0 ? "shared-security" : ""], [
+      length(regexall(true, each.value.shared_route_control_subnet)) > 0 ? "shared-rtctrl" : ""]
   )) : ["import-security"]
   dynamic "relation_l3ext_rs_subnet_to_profile" {
     for_each = each.value.route_control_profiles
@@ -585,4 +508,39 @@ resource "aci_rest_managed" "oob_external_epg_subnets" {
   content = {
     ip = each.value.subnet
   }
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "ospfExtP"
+ - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/ospfExtP"
+GUI Location:
+ - tenants > {tenant} > Networking > L3Outs > {l3out}: OSPF
+_______________________________________________________________________________________________________________________
+*/
+#------------------------------------------------
+# Assign a OSPF Routing Policy to the L3Out
+#------------------------------------------------
+resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
+  depends_on = [
+    aci_l3_outside.l3outs
+  ]
+  for_each   = local.l3out_ospf_external_policies
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  area_cost  = each.value.ospf_area_cost
+  area_ctrl = anytrue([
+    each.value.send_redistribution_lsas_into_nssa_area,
+    each.value.originate_summary_lsa,
+    each.value.suppress_forwarding_address
+    ]) ? compact(concat([
+      length(regexall(true, each.value.send_redistribution_lsas_into_nssa_area)) > 0 ? "redistribute" : ""], [
+      length(regexall(true, each.value.originate_summary_lsa)) > 0 ? "summary" : ""], [
+    length(regexall(true, each.value.suppress_forwarding_address)) > 0 ? "suppress-fa" : ""]
+  )) : ["redistribute", "summary"]
+  area_id       = each.value.ospf_area_id
+  area_type     = each.value.ospf_area_type
+  l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
+  # multipod_internal = "no"
 }

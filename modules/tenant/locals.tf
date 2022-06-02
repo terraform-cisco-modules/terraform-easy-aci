@@ -1,6 +1,15 @@
 locals {
   #__________________________________________________________
   #
+  # Annotations
+  #__________________________________________________________
+
+  annotations = {
+  }
+
+
+  #__________________________________________________________
+  #
   # Application Profile Variables
   #__________________________________________________________
 
@@ -259,13 +268,13 @@ locals {
       ]
       l3_configurations = value.l3_configurations != null ? [
         for k, v in value.l3_configurations : {
-          associated_l3outs = [
+          associated_l3outs = v.associated_l3outs != null ? [
             for a in v.associated_l3outs : {
-              l3out         = a.l3out != null ? a.l3out : ""
-              l3out_tenant  = a.l3out_tenant != null ? a.l3out_tenant : ""
+              l3out         = a.l3out
+              tenant        = a.tenant
               route_profile = a.route_profile != null ? a.route_profile : ""
             }
-          ]
+          ] : []
           ep_move_detection_mode  = v.ep_move_detection_mode != null ? v.ep_move_detection_mode : false
           unicast_routing         = v.unicast_routing != null ? v.unicast_routing : true
           custom_mac_address      = v.custom_mac_address != null ? v.custom_mac_address : ""
@@ -291,7 +300,7 @@ locals {
     }
   }
 
-  subnets_loop = flatten([
+  bridge_domain_subnets_loop = flatten([
     for key, value in local.bridge_domains : [
       for k, v in value.l3_configurations[0].subnets : {
         bridge_domain                = key
@@ -299,10 +308,7 @@ locals {
         description                  = v.description != null ? v.description : ""
         gateway_ip                   = v.gateway_ip != null ? v.gateway_ip : "198.18.5.1/24"
         ip_data_plane_learning       = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
-        l3out                        = value.l3_configurations[0].associated_l3outs[0].l3out
-        l3out_tenant                 = value.l3_configurations[0].associated_l3outs[0].l3out_tenant
         make_this_ip_address_primary = v.make_this_ip_address_primary != null ? v.make_this_ip_address_primary : false
-        route_profile                = v.route_profile != null ? v.route_profile : ""
         schema                       = value.schema
         sites                        = value.sites
         scope = v.scope != null ? [
@@ -333,7 +339,7 @@ locals {
       }
     ]
   ])
-  subnets = { for k, v in local.subnets_loop : "${v.bridge_domain}_${v.gateway_ip}" => v }
+  bridge_domain_subnets = { for k, v in local.bridge_domain_subnets_loop : "${v.bridge_domain}_${v.gateway_ip}" => v }
 
   rogue_coop_exception_list_loop = flatten([
     for k, v in local.bridge_domains : [
@@ -407,7 +413,6 @@ locals {
       controller_type       = v.controller_type
       description           = v.description
       filters               = [for key, value in local.apic_contract_filters : value.filter if value.contract == k]
-      log_packets           = v.log_packets != null ? v.log_packets : false
       alias                 = v.alias
       qos_class             = v.qos_class
       provider_match_type   = v.provider_match_type
@@ -497,19 +502,16 @@ locals {
 
   l3outs = {
     for k, v in var.l3outs : k => {
-      annotation      = v.annotation != null ? v.annotation : ""
-      controller_type = v.controller_type != null ? v.controller_type : "apic"
-      description     = v.description != null ? v.description : ""
-      external_epgs   = v.external_epgs != null ? v.external_epgs : []
-      import = v.route_control_enforcement != null ? lookup(
-        v.route_control_enforcement[0], "import", false
-      ) : false
-      l3_domain               = v.l3_domain != null ? v.l3_domain : ""
-      level                   = v.level != null ? v.level : "template"
-      alias                   = v.alias != null ? v.alias : ""
-      node_profiles           = v.node_profiles != null ? v.node_profiles : []
-      ospf_external_policies  = v.ospf_external_policies != null ? v.ospf_external_policies : []
-      ospf_interface_profiles = v.ospf_interface_profiles != null ? v.ospf_interface_profiles : []
+      annotation            = v.annotation != null ? v.annotation : ""
+      annotations           = v.annotations != null ? v.annotations : []
+      controller_type       = v.controller_type != null ? v.controller_type : "apic"
+      description           = v.description != null ? v.description : ""
+      external_epgs         = v.external_epgs != null ? v.external_epgs : []
+      import                = coalesce(v.route_control_enforcement[0].import, false)
+      l3_domain             = v.l3_domain != null ? v.l3_domain : ""
+      level                 = v.level != null ? v.level : "template"
+      alias                 = v.alias != null ? v.alias : ""
+      ospf_external_profile = v.ospf_external_profile != null ? v.ospf_external_profile : []
       route_control_for_dampening = v.route_control_for_dampening != null ? [
         for key, value in v.route_control_for_dampening : {
           address_family = value.address_family != null ? value.address_family : "ipv4"
@@ -519,7 +521,6 @@ locals {
       ] : []
       target_dscp = v.target_dscp != null ? v.target_dscp : "unspecified"
       sites       = v.sites != null ? v.sites : []
-      tags        = v.tags != null ? v.tags : []
       template    = v.template != null ? v.template : "common"
       tenant      = v.tenant != null ? v.tenant : "common"
       vrf         = v.vrf != null ? v.vrf : "default"
@@ -579,16 +580,17 @@ locals {
   ])
   l3out_ext_epg_contracts = { for k, v in local.ext_epg_contracts_loop : "${v.l3out}_${v.epg}_${v.contract_type}_${v.contract}" => v }
 
-  external_epg_subnets_loop = flatten([
+  external_epg_subnets_loop_1 = flatten([
     for key, value in local.l3out_external_epgs : [
       for k, v in value.subnets : {
-        agg_export      = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_export", false) : false
-        agg_shared      = v.aggregate != null ? lookup(v.aggregate[0], "aggregate_shared_routes", false) : false
-        annotation      = value.annotation
-        controller_type = value.controller_type
-        description     = v.description != null ? v.description : ""
-        epg_type        = value.epg_type
-        ext_epg         = key
+        aggregate_export        = coalesce(v.aggregate[0].aggregate_export, false)
+        aggregate_shared_routes = coalesce(v.aggregate[0].aggregate_shared_routes, false)
+        annotation              = value.annotation
+        controller_type         = value.controller_type
+        description             = v.description != null ? v.description : ""
+        epg_type                = value.epg_type
+        ext_epg                 = key
+        key2                    = k
         route_control_profiles = v.route_control_profiles != null ? {
           for a, b in v.route_control_profiles : a => {
             direction = b.direction
@@ -596,44 +598,78 @@ locals {
             tenant    = b.tenant != null ? b.tenant : value.tenant
           }
         } : {}
-        route_summarization_policy = v.route_summarization_policy != null ? v.route_summarization_policy : ""
-        scope_isec = v.external_epg_classification != null ? lookup(
-          v.external_epg_classification[0], "external_subnets_for_external_epg", true
-        ) : true
-        scope_ishared = v.external_epg_classification != null ? lookup(
-          v.external_epg_classification[0], "shared_security_import_subnet", false
-        ) : false
-        scope_export = v.route_control != null ? lookup(v.route_control[0], "export_route_control_subnet", false) : false
-        scope_shared = v.route_control != null ? lookup(v.route_control[0], "shared_route_control_subnet", false) : false
-        subnet       = v.subnet != null ? v.subnet : "0.0.0.0/1"
+        route_summarization_policy        = v.route_summarization_policy != null ? v.route_summarization_policy : ""
+        external_subnets_for_external_epg = coalesce(v.external_epg_classification[0].external_subnets_for_external_epg, true)
+        shared_security_import_subnet     = coalesce(v.external_epg_classification[0].shared_security_import_subnet, false)
+        export_route_control_subnet       = coalesce(v.route_control[0].export_route_control_subnet, false)
+        shared_route_control_subnet       = coalesce(v.route_control[0].shared_route_control_subnet, false)
+        subnets                           = v.subnets != null ? v.subnets : ["0.0.0.0/1", "128.0.0.0/1"]
       }
     ]
   ])
-  l3out_external_epg_subnets = { for k, v in local.external_epg_subnets_loop : "${v.ext_epg}_${v.subnet}" => v }
+  external_epg_subnets_loop_2 = { for k, v in local.external_epg_subnets_loop_1 : "${v.ext_epg}_${v.key2}" => v }
+  external_epg_subnets_loop_3 = flatten([
+    for k, v in local.external_epg_subnets_loop_2 : [
+      for s in v.subnets : {
+        aggregate_export                  = v.aggregate_export
+        aggregate_shared_routes           = v.aggregate_shared_routes
+        annotation                        = v.annotation
+        controller_type                   = v.controller_type
+        description                       = v.description
+        epg_type                          = v.epg_type
+        ext_epg                           = v.ext_epg
+        route_control_profiles            = v.route_control_profiles
+        route_summarization_policy        = v.route_summarization_policy
+        external_subnets_for_external_epg = v.external_subnets_for_external_epg
+        shared_security_import_subnet     = v.shared_security_import_subnet
+        export_route_control_subnet       = v.export_route_control_subnet
+        shared_route_control_subnet       = v.shared_route_control_subnet
+        subnet                            = s
+      }
+    ]
+  ])
+  l3out_external_epg_subnets = { for k, v in local.external_epg_subnets_loop_3 : "${v.ext_epg}_${v.subnet}" => v }
+
+  #=======================================================================================
+  # L3Outs - OSPF External Policies
+  #=======================================================================================
+
+  ospf_process_loop = flatten([
+    for key, value in local.l3outs : [
+      for k, v in value.ospf_external_profile : {
+        annotation                              = value.annotation
+        l3out                                   = key
+        ospf_area_cost                          = v.ospf_area_cost != null ? v.ospf_area_cost : 1
+        ospf_area_id                            = v.ospf_area_id != null ? v.ospf_area_id : "0.0.0.0"
+        ospf_area_type                          = v.ospf_area_type != null ? v.ospf_area_type : "regular"
+        originate_summary_lsa                   = coalesce(v.ospf_area_control[0].originate_summary_lsa, true)
+        send_redistribution_lsas_into_nssa_area = coalesce(v.ospf_area_control[0].send_redistribution_lsas_into_nssa_area, true)
+        suppress_forwarding_address             = coalesce(v.ospf_area_control[0].suppress_forwarding_address, true)
+        type                                    = value.type
+      }
+    ]
+  ])
+  l3out_ospf_external_policies = { for k, v in local.ospf_process_loop : "${v.l3out}_ospf_external" => v }
 
   #=======================================================================================
   # L3Outs - Logical Node Profiles
   #=======================================================================================
 
-  node_profiles_loop = flatten([
-    for key, value in local.l3outs : [
-      for k, v in value.node_profiles : {
-        annotation              = value.annotation
-        color_tag               = v.color_tag != null ? v.color_tag : "yellow-green"
-        controller_type         = value.controller_type
-        description             = v.description != null ? v.description : ""
-        interface_profiles      = v.interface_profiles != null ? v.interface_profiles : []
-        l3out                   = key
-        name                    = v.name
-        nodes                   = v.nodes != null ? v.nodes : []
-        ospf_interface_profiles = value.ospf_interface_profiles
-        pod_id                  = v.pod_id != null ? v.pod_id : 1
-        target_dscp             = value.target_dscp
-        tenant                  = value.tenant
-      }
-    ]
-  ])
-  l3out_node_profiles = { for k, v in local.node_profiles_loop : "${v.l3out}_${v.name}" => v }
+  l3out_node_profiles = {
+    for k, v in var.l3out_logical_node_profiles : k => {
+      alias              = v.alias != null ? v.alias : ""
+      annotation         = v.annotation != null ? v.annotation : ""
+      color_tag          = v.color_tag != null ? v.color_tag : "yellow-green"
+      controller_type    = v.controller_type != null ? v.controller_type : "apic"
+      description        = v.description != null ? v.description : ""
+      interface_profiles = v.interface_profiles != null ? v.interface_profiles : []
+      l3out              = v.l3out
+      nodes              = v.nodes != null ? v.nodes : []
+      pod_id             = v.pod_id != null ? v.pod_id : 1
+      target_dscp        = v.target_dscp != null ? v.target_dscp : "unspecified"
+      tenant             = v.tenant != null ? v.tenant : "common"
+    }
+  }
 
   nodes_loop = flatten([
     for key, value in local.l3out_node_profiles : [
@@ -650,6 +686,8 @@ locals {
   ])
   l3out_node_profiles_nodes = { for k, v in local.nodes_loop : "${v.node_profile}_${v.node_id}" => v }
 
+  l3out_node_profile_static_routes = {}
+
   #=======================================================================================
   # L3Outs - Logical Node Profiles - Logical Interface Profiles
   #=======================================================================================
@@ -657,20 +695,47 @@ locals {
   interface_profiles_loop = flatten([
     for key, value in local.l3out_node_profiles : [
       for k, v in value.interface_profiles : {
-        annotation                  = value.annotation
-        arp_policy                  = v.arp_policy != null ? v.arp_policy : ""
-        auto_state                  = v.auto_state != null ? v.auto_state : "disabled"
-        color_tag                   = value.color_tag
-        controller_type             = value.controller_type
-        custom_qos_policy           = v.custom_qos_policy != null ? v.custom_qos_policy : ""
-        description                 = v.description != null ? v.description : ""
-        egress_data_plane_policing  = v.egress_data_plane_policing != null ? v.egress_data_plane_policing : ""
-        encapsulation_scope         = v.encapsulation_scope != null ? v.encapsulation_scope : "local"
-        encapsulation_vlan          = v.encapsulation_vlan != null ? v.encapsulation_vlan : 1
+        annotation                 = value.annotation
+        arp_policy                 = v.arp_policy != null ? v.arp_policy : ""
+        auto_state                 = v.auto_state != null ? v.auto_state : "disabled"
+        color_tag                  = value.color_tag
+        controller_type            = value.controller_type
+        custom_qos_policy          = v.custom_qos_policy != null ? v.custom_qos_policy : ""
+        description                = v.description != null ? v.description : ""
+        egress_data_plane_policing = v.egress_data_plane_policing != null ? v.egress_data_plane_policing : ""
+        encapsulation_scope        = v.encapsulation_scope != null ? v.encapsulation_scope : "local"
+        encapsulation_vlan         = v.encapsulation_vlan != null ? v.encapsulation_vlan : 1
+        hsrp_interface_profile = v.hsrp_interface_profile != null ? [
+          for s in v.hsrp_interface_profile : {
+            alias       = s.alias != null ? s.alias : ""
+            annotation  = s.annotation != null ? s.annotation : ""
+            description = s.description != null ? s.description : ""
+            groups = s.groups != null ? [
+              for a in s.groups : {
+                alias                 = a.alias != null ? a.alias : ""
+                annotation            = a.annotation != null ? a.annotation : ""
+                description           = a.description != null ? a.description : ""
+                group_id              = a.group_id != null ? a.group_id : 0
+                group_name            = a.group_name != null ? a.group_name : ""
+                group_type            = a.group_type != null ? a.group_type : "ipv4"
+                hsrp_group_policy     = a.hsrp_group_policy != null ? a.hsrp_group_policy : ""
+                ip_address            = a.ip_address != null ? a.ip_address : ""
+                ip_obtain_mode        = a.ip_obtain_mode != null ? a.ip_obtain_mode : "admin"
+                mac_address           = a.mac_address != null ? a.mac_address : ""
+                name                  = a.name != null ? a.name : "default"
+                secondary_virtual_ips = a.secondary_virtual_ips != null ? a.secondary_virtual_ips : []
+              }
+            ] : []
+            hsrp_interface_policy = s.hsrp_interface_policy != null ? s.hsrp_interface_policy : "default"
+            policy_tenant         = s.policy_tenant != null ? s.policy_tenant : "common"
+            version               = s.version != null ? s.version : "v1"
+          }
+        ] : []
         ingress_data_plane_policing = v.ingress_data_plane_policing != null ? v.ingress_data_plane_policing : ""
-        interface                   = v.interface != null ? v.interface : "eth1/1"
+        interface_or_policy_group   = v.interface_or_policy_group != null ? v.interface_or_policy_group : "eth1/1"
         interface_type              = v.interface_type != null ? v.interface_type : "l3-port"
         ipv6_dad                    = v.ipv6_dad != null ? v.ipv6_dad : "enabled"
+        l3out                       = value.l3out
         link_local_address          = v.link_local_address != null ? v.link_local_address : "::"
         mac_address                 = v.mac_address != null ? v.mac_address : "00:22:BD:F8:19:FF"
         mode                        = v.mode != null ? v.mode : "regular"
@@ -680,15 +745,31 @@ locals {
         netflow_policies            = v.netflow_policies != null ? v.netflow_policies : []
         node_profile                = key
         nodes                       = v.nodes != null ? v.nodes : [201]
-        ospf_interface_profile      = v.ospf_interface_profile != null ? v.ospf_interface_profile : ""
-        pod_id                      = value.pod_id
-        preferred_address           = v.preferred_address != null ? v.preferred_address : "198.18.1.1/24"
-        qos_class                   = v.qos_class != null ? v.qos_class : "unspecified"
-        secondary_addresses         = v.secondary_addresses != null ? v.secondary_addresses : []
-        secondaries_keys            = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
-        svi_addresses               = v.svi_addresses != null ? v.svi_addresses : []
-        target_dscp                 = value.target_dscp
-        tenant                      = value.tenant
+        ospf_interface_profile = v.ospf_interface_profile != null ? [
+          for s in v.ospf_interface_profile : {
+            description           = s.description != null ? s.description : ""
+            authentication_type   = s.authentication_type != null ? s.authentication_type : "none"
+            name                  = s.name != null ? s.name : "default"
+            ospf_key              = s.ospf_key != null ? s.ospf_key : 0
+            ospf_interface_policy = s.ospf_interface_policy != null ? s.ospf_interface_policy : "default"
+            policy_tenant         = s.policy_tenant != null ? s.policy_tenant : value.tenant
+          }
+        ] : []
+        pod_id              = value.pod_id
+        preferred_address   = v.preferred_address != null ? v.preferred_address : "198.18.1.1/24"
+        qos_class           = v.qos_class != null ? v.qos_class : "unspecified"
+        secondary_addresses = v.secondary_addresses != null ? v.secondary_addresses : []
+        secondaries_keys    = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
+        svi_addresses = v.svi_addresses != null ? [
+          for s in v.svi_addresses : {
+            link_local_address  = s.link_local_address != null ? s.link_local_address : "::"
+            preferred_address   = s.preferred_address
+            secondary_addresses = s.secondaries != null ? s.secondaries : []
+            side                = s.side
+          }
+        ] : []
+        target_dscp = value.target_dscp
+        tenant      = value.tenant
       }
     ]
   ])
@@ -696,16 +777,16 @@ locals {
 
   svi_addressing_loop = flatten([
     for key, value in local.l3out_interface_profiles : [
-      for k, v in value.interface_profiles : {
+      for s in value.svi_addresses : {
         annotation          = value.annotation
         ipv6_dad            = value.ipv6_dad
-        link_local_address  = v.link_local_address != null ? v.link_local_address : "::"
+        link_local_address  = s.link_local_address
         path                = key
-        preferred_address   = v.preferred_address != null ? v.preferred_address : "198.18.1.1/24"
-        secondary_addresses = v.secondary_addresses != null ? v.secondary_addresses : []
-        secondaries_keys    = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
-        side                = v.side != null ? v.side : "A"
-        type                = value.type
+        preferred_address   = s.preferred_address
+        secondary_addresses = s.secondary_addresses
+        secondaries_keys    = s.secondary_addresses != null ? range(length(s.secondary_addresses)) : []
+        side                = s.side
+        interface_type      = value.interface_type
       }
     ] if value.interface_type == "ext-svi"
   ])
@@ -746,24 +827,23 @@ locals {
   hsrp_interface_profile_loop = flatten([
     for key, value in local.l3out_interface_profiles : [
       for k, v in value.hsrp_interface_profile : {
-        alias                 = v.alias != null ? v.alias : ""
-        annotation            = v.annotation != null ? v.annotation : ""
-        description           = v.description != null ? v.description : ""
-        groups                = v.groups != null ? v.groups : []
-        hsrp_interface_policy = v.hsrp_interface_policy != null ? v.hsrp_interface_policy : "default"
+        alias                 = v.alias
+        annotation            = v.annotation
+        description           = v.description
+        groups                = v.groups
+        hsrp_interface_policy = v.hsrp_interface_policy
         interface_profile     = key
-        key1                  = key
-        policy_tenant         = v.policy_tenant != null ? v.policy_tenant : "common"
-        version               = v.version != null ? v.version : "v1"
+        policy_tenant         = v.policy_tenant
+        version               = v.version
       }
     ]
   ])
   hsrp_interface_profile = {
-    for k, v in local.hsrp_interface_profile_loop : "${v.key1}" => v
+    for k, v in local.hsrp_interface_profile_loop : "${v.interface_profile}" => v
   }
 
   hsrp_interface_profile_groups_loop = flatten([
-    for key, value in local.l3out_interface_profiles_hsrp : [
+    for key, value in local.hsrp_interface_profile : [
       for k, v in value.groups : {
         alias                 = v.alias != null ? v.alias : ""
         annotation            = v.annotation != null ? v.annotation : ""
@@ -799,43 +879,16 @@ locals {
   }
 
   #=======================================================================================
-  # L3Outs - Logical Node Profiles - Logical Interface Profiles - OSPF External Policies
-  #=======================================================================================
-
-  ospf_process_loop = flatten([
-    for key, value in local.l3outs : [
-      for k, v in value.ospf_external_policies : {
-        annotation     = value.annotation
-        l3out          = key
-        ospf_area_cost = v.ospf_area_cost != null ? v.ospf_area_cost : 1
-        ospf_area_id   = v.ospf_area_id != null ? v.ospf_area_id : "0.0.0.0"
-        ospf_area_type = v.ospf_area_type != null ? v.ospf_area_type : "regular"
-        redistribute = v.ospf_area_control != null ? lookup(
-          v.ospf_area_control[0], "send_redistribution_lsas_into_nssa_area", true
-        ) : true
-        summary = v.ospf_area_control != null ? lookup(
-          v.ospf_area_control[0], "originate_summary_lsa", true
-        ) : true
-        suppress_fa = v.ospf_area_control != null ? lookup(
-          v.ospf_area_control[0], "suppress_forwarding_address", false
-        ) : false
-        type = value.type
-      }
-    ]
-  ])
-  l3out_ospf_external_policies = { for k, v in local.ospf_process_loop : "${v.l3out}_ospf_external" => v }
-
-  #=======================================================================================
   # L3Outs - Logical Node Profiles - Logical Interface Profiles - OSPF Interface Policies
   #=======================================================================================
 
   ospf_profiles_loop = flatten([
-    for key, value in local.l3outs : [
-      for k, v in value.ospf_interface_profiles : {
+    for key, value in local.l3out_interface_profiles : [
+      for k, v in value.ospf_interface_profile : {
         annotation            = value.annotation
         authentication_type   = v.authentication_type != null ? v.authentication_type : "none"
         description           = v.description != null ? v.description : ""
-        l3out                 = key
+        l3out                 = value.l3out
         name                  = v.name != null ? v.name : "default"
         ospf_key              = v.ospf_key != null ? v.ospf_key : 0
         ospf_interface_policy = v.ospf_interface_policy != null ? v.ospf_interface_policy : "default"
@@ -1008,8 +1061,8 @@ locals {
   # Policies - Endpoint Retention Variables
   #__________________________________________________________
 
-  endpoint_retention_policies = {
-    for k, v in var.endpoint_retention_policies : k => {
+  policies_endpoint_retention = {
+    for k, v in var.policies_endpoint_retention : k => {
       annotation                     = v.annotation != null ? v.annotation : ""
       bounce_entry_aging_interval    = v.bounce_entry_aging_interval != null ? v.bounce_entry_aging_interval : 630
       bounce_trigger                 = v.bounce_trigger != null ? v.bounce_trigger : "protocol"
@@ -1369,6 +1422,7 @@ locals {
         }
         ] : [
         {
+          contracts  = []
           match_type = "AtleastOne"
         }
       ]

@@ -1,12 +1,12 @@
 
 variable "sites" {
-  default     = ["site1", "site2"]
+  default     = []
   description = "List of Sites to import from Nexus Dashboard Orchestrator."
   type        = list(string)
 }
 
 variable "users" {
-  default     = ["user1", "user2"]
+  default     = []
   description = "List of Users to import from Nexus Dashboard Orchestrator."
   type        = list(string)
 }

@@ -244,7 +244,7 @@ resource "aci_application_epg" "application_epgs" {
   relation_fv_rs_dpp_pol       = each.value.data_plane_policer
   relation_fv_rs_aepg_mon_pol  = each.value.monitoring_policy
   relation_fv_rs_trust_ctrl    = each.value.fhs_trust_control_policy
-  relation_fv_rs_graph_def     = each.value.vzGraphCont
+  # relation_fv_rs_graph_def     = each.value.vzGraphCont
 }
 
 

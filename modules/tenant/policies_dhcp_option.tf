@@ -44,7 +44,7 @@ resource "aci_dhcp_option_policy" "policies_dhcp_option" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.policies_dhcp_option
+  for_each    = local.policies_dhcp_option
   annotation  = each.value.annotation
   description = each.value.description
   name        = each.key

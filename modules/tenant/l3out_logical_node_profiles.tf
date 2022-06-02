@@ -6,11 +6,12 @@ ________________________________________________________________________________
 variable "l3out_logical_node_profiles" {
   default = {
     "default" = {
-      alias       = ""
-      annotation  = ""
-      annotations = []
-      color_tag   = "yellow-green"
-      description = ""
+      alias           = ""
+      annotation      = ""
+      annotations     = []
+      color_tag       = "yellow-green"
+      controller_type = "apic"
+      description     = ""
       interface_profiles = [
         {
           arp_policy                  = ""
@@ -51,48 +52,50 @@ variable "l3out_logical_node_profiles" {
             }
           ]
           */
-          interface               = "eth1/1"
-          interface_type          = "l3-port" # ext-svi|l3-port|sub-interface
-          ipv6_dad                = "enabled"
-          link_local_address      = "::"
-          mac_address             = "00:22:BD:F8:19:FF"
-          mode                    = "regular"
-          mtu                     = "inherit" # 576 to 9216
-          name                    = "default"
-          nd_policy               = ""
-          netflow_policies        = []
-          nodes                   = [201]
-          ospf_interface_profiles = []
-          # Example
-          # ospf_interface_profiles = [
-          #   {
-          #     description           = ""
-          #     authentication_type   = "none" # md5,none,simple
-          #     name                  = "default"
-          #     ospf_key              = 0
-          #     ospf_interface_policy = "default"
-          #     policy_tenant    = "**l3out_tenant**"
-          #   }
-          # ]
-          preferred_address   = "198.18.1.1/24"
-          qos_class           = "unspecified"
-          secondary_addresses = [] # "198.18.3.1/24"
-          svi_addresses       = []
-          # Example
-          # svi_addresses               = [
-          #   {
-          #     link_local_address  = "::"
-          #     preferred_address   = "198.18.1.1/24"
-          #     secondary_addresses = []
-          #     side                = "A"
-          #   },
-          #   {
-          #     link_local_address  = "::"
-          #     preferred_address   = "198.18.1.2/24"
-          #     secondary_addresses = []
-          #     side                = "B"
-          #   }
-          # ]
+          interface_or_policy_group = "eth1/1"
+          interface_type            = "l3-port" # ext-svi|l3-port|sub-interface
+          ipv6_dad                  = "enabled"
+          link_local_addresses      = "::"
+          mac_address               = "00:22:BD:F8:19:FF"
+          mode                      = "regular"
+          mtu                       = "inherit" # 576 to 9216
+          name                      = "default"
+          nd_policy                 = ""
+          netflow_policies          = []
+          nodes                     = [201]
+          ospf_interface_profiles   = []
+          /* Example
+          ospf_interface_profile = [
+            {
+              description           = ""
+              authentication_type   = "none" # md5,none,simple
+              name                  = "default"
+              ospf_key              = 0
+              ospf_interface_policy = "default"
+              policy_tenant    = "**l3out_tenant**"
+            }
+          ]
+          */
+          primary_preferred_addresses = "198.18.1.1/24"
+          qos_class                   = "unspecified"
+          secondary_addresses         = [] # "198.18.3.1/24"
+          svi_addresses               = []
+          /* Example
+          svi_addresses               = [
+            {
+              link_local_address  = "::"
+              preferred_address   = "198.18.1.1/24"
+              secondary_addresses = []
+              side                = "A"
+            },
+            {
+              link_local_address  = "::"
+              preferred_address   = "198.18.1.2/24"
+              secondary_addresses = []
+              side                = "B"
+            }
+          ]
+          */
         }
       ]
       l3out = "**REQUIRED**"
@@ -103,55 +106,86 @@ variable "l3out_logical_node_profiles" {
           use_router_id_as_loopback = true
         }
       ]
-      pod_id      = 1
-      target_dscp = "unspecified"
+      pod_id               = 1
+      policy_source_tenant = "common"
+      static_routes = [
+        {
+          description         = ""
+          fallback_preference = 1
+          next_hop_addresses = [
+            {
+              description   = ""
+              preference    = 0
+              next_hop_ip   = "**REQUIRED**"
+              next_hop_type = "prefix"
+              ip_sla_policy = ""
+              track_policy  = ""
+            }
+          ]
+          prefix            = "**REQUIRED**"
+          route_control_bfd = false
+          track_policy      = ""
+        }
+      ]
       sites       = []
-      tags        = []
+      target_dscp = "unspecified"
       template    = "common"
     }
   }
   description = <<-EOT
-  Key: Name of the L3Out Logical Node Profile.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bgp_context_per_address_family: 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
-    - aws
-    - azure
-    - cisco (Default)
-  hsrp_interface_profiles - Group of Objects to add as an HSRP interface profile
-  * alias - (Optional) Name name_alias for object L3-out HSRP interface profile.
-  * annotation - (Optional) Annotation for object L3-out HSRP interface profile.
-  * description - (Optional) Description for object L3-out HSRP interface profile.
-  * groups - Map of group objects
-    - alias - (Optional) alias for L3out HSRP interface group object.
-    - annotation - (Optional) Annotation for L3out HSRP interface group object.
-    - description - (Optional) Description for L3out HSRP interface group object.
-    - group_id - (Optional) Group id for L3out HSRP interface group object.
-    - group_name - (Optional) Group name for L3out HSRP interface group object.
-    - group_type - (Optional) Group address-family type for L3out HSRP interface group object.  Options are:
-      * ipv4
-      * ipv6
-      Default value is ipv4.
-    - hsrp_group_policy - (Optional) Name of the HSRP Group Policy
-    - ip - (Optional) IP address for L3out HSRP interface group object.
-    - ip_obtain_mode - (Optional) IP obtain mode for L3out HSRP interface group object. Allowed values are:
-      * admin - Address is configured.
-      * auto - Auto configure IPv6 address.
-      * learn - Learn IP from HSRP Peer.
-      Default value is admin
-    - mac_address - (Optional) MAC address for L3out HSRP interface group object.
-    - name - (Required) Name of L3out HSRP interface group object.
-    - secondary_virtual_ips - (Optional) - List of secondary virtual IP's to assign to the group.
-  * hsrp_interface_policy - (Optional) Name of the HSRP Interface Policy.
-  * policy_tenant - (Optional) - Name of the tenant that contains the HSRP Interface and Group Policies.
-  * version - (Optional) Compatibility catalog version.
-    - v1
-    - v2
+    Key: Name of the L3Out Logical Node Profile.
+    * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+    * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+    * controller_type: What is the type of controller.  Options are:
+      - apic: For APIC Controllers
+      - ndo: For Nexus Dashboard Orchestrator
+    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    hsrp_interface_profiles - Group of Objects to add as an HSRP interface profile
+    * alias - (Optional) Name name_alias for object L3-out HSRP interface profile.
+    * annotation - (Optional) Annotation for object L3-out HSRP interface profile.
+    * description - (Optional) Description for object L3-out HSRP interface profile.
+    * groups - Map of group objects
+      - alias - (Optional) alias for L3out HSRP interface group object.
+      - annotation - (Optional) Annotation for L3out HSRP interface group object.
+      - description - (Optional) Description for L3out HSRP interface group object.
+      - group_id - (Optional) Group id for L3out HSRP interface group object.
+      - group_name - (Optional) Group name for L3out HSRP interface group object.
+      - group_type - (Optional) Group address-family type for L3out HSRP interface group object.  Options are:
+        * ipv4
+        * ipv6
+        Default value is ipv4.
+      - hsrp_group_policy - (Optional) Name of the HSRP Group Policy
+      - ip - (Optional) IP address for L3out HSRP interface group object.
+      - ip_obtain_mode - (Optional) IP obtain mode for L3out HSRP interface group object. Allowed values are:
+        * admin - Address is configured.
+        * auto - Auto configure IPv6 address.
+        * learn - Learn IP from HSRP Peer.
+        Default value is admin
+      - mac_address - (Optional) MAC address for L3out HSRP interface group object.
+      - name - (Required) Name of L3out HSRP interface group object.
+      - secondary_virtual_ips - (Optional) - List of secondary virtual IP's to assign to the group.
+    * hsrp_interface_policy - (Optional) Name of the HSRP Interface Policy.
+    * policy_tenant - (Optional) - Name of the tenant that contains the HSRP Interface and Group Policies.
+    * version - (Optional) Compatibility catalog version.
+      - v1
+      - v2
+    * nodes: map of Nodes to attach to the interface profile
+      - static_routes: Map of Static route attributes
+        * aggregate - (Optional) Aggregated Route for object l3out static route. Allowed values: true, false, default false
+        * alias - (Optional) Name name_alias for object l3out static route.
+        * annotation - (Optional) Annotation for object l3out static route.
+        * description - (Optional) Description for object l3out static route.
+        * preference - (Optional) The administrative preference value for this route. This value is useful for resolving routes advertised from different protocols. Range of allowed values is "1" to "255". Default value is "1".
+        * prefix - (Required) The static route IP address assigned to the outside network.
+        * route_control_bfd - (Optional) Route control for object l3out static route. Allowed values: "bfd", "unspecified". Default value is "unspecified".
+        * next_hop_addresses
+          - alias - (Optional) Name name_alias for object l3out static route next hop.
+          - annotation - (Optional) Annotation for object l3out static route next hop.
+          - description - (Optional) Description for object l3out static route next hop.
+          - next_hop_ip - (Required) The nexthop IP address for the static route to the outside network.
+          - next_hop_type - (Optional) Component type.
+          - Allowed values: "none", "prefix". Default value: "prefix".
+          - preference - (Optional) Administrative preference value for this route. Range: "1" to "255" Allowed values: "unspecified". Default value: "unspecified".
   EOT
   type = map(object(
     {
@@ -163,8 +197,9 @@ variable "l3out_logical_node_profiles" {
           value = string
         }
       )))
-      color_tag   = optional(string)
-      description = optional(string)
+      color_tag       = optional(string)
+      controller_type = optional(string)
+      description     = optional(string)
       interface_profiles = optional(list(object(
         {
           arp_policy                  = optional(string)
@@ -198,21 +233,21 @@ variable "l3out_logical_node_profiles" {
                 }
               )))
               hsrp_interface_policy = optional(string)
-              interface_profile     = string
-              tenant                = optional(string)
+              policy_tenant         = optional(string)
+              version               = optional(string)
             }
           )))
-          interface          = string
-          interface_type     = optional(string)
-          ipv6_dad           = optional(string)
-          link_local_address = optional(string)
-          mac_address        = optional(string)
-          mode               = optional(string)
-          mtu                = optional(string)
-          name               = string
-          nd_policy          = optional(string)
-          netflow_policies   = optional(list(string))
-          nodes              = optional(list(string))
+          interface_or_policy_group = string
+          interface_type            = optional(string)
+          ipv6_dad                  = optional(string)
+          link_local_address        = optional(string)
+          mac_address               = optional(string)
+          mode                      = optional(string)
+          mtu                       = optional(string)
+          name                      = string
+          nd_policy                 = optional(string)
+          netflow_policies          = optional(list(string))
+          nodes                     = optional(list(string))
           ospf_interface_profile = optional(list(object(
             {
               description           = optional(string)
@@ -229,13 +264,14 @@ variable "l3out_logical_node_profiles" {
           svi_addresses = optional(list(object(
             {
               link_local_address  = optional(string)
-              preferred_address   = optional(string)
+              preferred_address   = string
               secondary_addresses = optional(list(string))
               side                = string
             },
           )))
         }
       )))
+      l3out = string
       nodes = list(object(
         {
           node_id                   = optional(number)
@@ -243,12 +279,101 @@ variable "l3out_logical_node_profiles" {
           use_router_id_as_loopback = optional(bool)
         }
       ))
-      pod_id   = optional(string)
-      sites    = optional(list(string))
-      template = optional(string)
-      tenant   = optional(string)
+      pod_id = optional(string)
+      static_routes = optional(list(object(
+        {
+          description         = optional(string)
+          fallback_preference = optional(number)
+          next_hop_addresses = optional(list(object(
+            {
+              description   = optional(string)
+              preference    = optional(number)
+              next_hop_type = optional(string)
+              ip_sla_policy = optional(string)
+              track_policy  = optional(string)
+            }
+          )))
+          prefix            = string
+          route_control_bfd = optional(bool)
+          track_policy      = optional(string)
+        }
+      )))
+      sites       = optional(list(string))
+      target_dscp = optional(string)
+      template    = optional(string)
+      tenant      = optional(string)
     }
   ))
+}
+
+variable "bgp_password_1" {
+  default     = ""
+  description = "BGP Password 1."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_2" {
+  default     = ""
+  description = "BGP Password 2."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_3" {
+  default     = ""
+  description = "BGP Password 3."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_4" {
+  default     = ""
+  description = "BGP Password 4."
+  sensitive   = true
+  type        = string
+}
+
+variable "bgp_password_5" {
+  default     = ""
+  description = "BGP Password 5."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_1" {
+  default     = ""
+  description = "OSPF Key 1."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_2" {
+  default     = ""
+  description = "OSPF Key 2."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_3" {
+  default     = ""
+  description = "OSPF Key 3."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_4" {
+  default     = ""
+  description = "OSPF Key 4."
+  sensitive   = true
+  type        = string
+}
+
+variable "ospf_key_5" {
+  default     = ""
+  description = "OSPF Key 5."
+  sensitive   = true
+  type        = string
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -271,7 +396,7 @@ resource "aci_logical_node_profile" "l3out_node_profiles" {
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
-  name          = each.value.name
+  name          = each.key
   name_alias    = each.value.alias
   tag           = each.value.color_tag
   target_dscp   = each.value.target_dscp
@@ -376,15 +501,15 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.key].id
   target_dn = length(regexall(
     "ext-svi", each.value.interface_type)
-    ) > 0 ? "topology/pod-${each.value.pod_id}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.interface}]" : length(regexall(
+    ) > 0 ? "topology/pod-${each.value.pod_id}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.interface_or_policy_group}]" : length(regexall(
     "[[:alnum:]]+", each.value.interface_type)
-  ) > 0 ? "topology/pod-${each.value.pod_id}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.interface}]" : ""
+  ) > 0 ? "topology/pod-${each.value.pod_id}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.interface_or_policy_group}]" : ""
   if_inst_t   = each.value.interface_type
   addr        = each.value.interface_type != "ext-svi" ? each.value.preferred_address : ""
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : ""
+  autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : "disabled"
   encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encapsulation_vlan}" : "unknown"
-  mode        = each.value.interface_type != "l3-port" ? each.value.mode : "regular"
+  mode        = each.value.mode == "trunk" ? "regular" : "native"
   encap_scope = each.value.interface_type != "l3-port" ? each.value.encapsulation_scope : "local"
   ipv6_dad    = each.value.ipv6_dad
   ll_addr     = each.value.interface_type != "ext-svi" ? each.value.link_local_address : "::"
@@ -392,7 +517,9 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   mtu         = each.value.mtu
   target_dscp = each.value.target_dscp
 }
-
+output "l3out" {
+  value = local.l3outs
+}
 
 /*_____________________________________________________________________________________________________________________
 
@@ -464,49 +591,49 @@ ________________________________________________________________________________
 #------------------------------------------------
 # Create a BGP Peer Connectivity Profile
 #------------------------------------------------
-resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
-  depends_on = [
-    aci_logical_node_profile.l3out_node_profiles,
-    aci_logical_interface_profile.l3out_interface_profiles,
-    aci_bgp_peer_prefix.bgp_peer_prefix_policies
-  ]
-  for_each            = local.bgp_peer_connectivity_profiles
-  addr                = each.value.bgp_peer
-  addr_t_ctrl         = each.value.address_type_controls
-  allowed_self_as_cnt = each.value.allowed_self_as_count
-  as_number           = each.value.remote_as
-  ctrl                = each.value.bgp_controlls
-  description         = each.value.description
-  logical_node_profile_dn = length(
-    regexall("interface", each.value.peer_level)
-    ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
-    regexall("loopback", each.value.peer_level)
-  ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
-  password = length(
-    regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
-    regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
-    regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
-    regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
-  regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
-  peer_ctrl           = each.value.peer_controls
-  private_a_sctrl     = each.value.private_as_control
-  ttl                 = each.value.ebgp_multihop_ttl
-  weight              = each.value.weight_for_routes_from_neighbor
-  local_asn           = each.value.local_as_number
-  local_asn_propagate = each.value.local_as_number_config
-  relation_bgp_rs_peer_pfx_pol = length(
-    regexall(each.value.prefix_tenant == each.value.tenant)
-    ) > 0 ? aci_bgp_peer_prefix.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : length(
-    regexall("[:alnum:]", each.value.prefix_tenant)
-  ) > 0 ? rs_bgp_peer_prefix_policy.bgp_peer_prefix_policies[each.value.bgp_peer_prefix_policy].id : ""
-  dynamic "relation_bgp_rs_peer_pfx_pol" {
-    for_each = each.value.route_control_profiles
-    content {
-      direction = relation_bgp_rs_peer_to_profile.value.direction
-      target_dn = "uni/tn-${relation_bgp_rs_peer_pfx_pol.value.tenant}/prof-${relation_bgp_rs_peer_pfx_pol.value.route_map}"
-    }
-  }
-}
+# resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
+#   depends_on = [
+#     aci_logical_node_profile.l3out_node_profiles,
+#     aci_logical_interface_profile.l3out_interface_profiles,
+#     aci_bgp_peer_prefix.policies_bgp_peer_prefix
+#   ]
+#   for_each            = local.bgp_peer_connectivity_profiles
+#   addr                = each.value.bgp_peer
+#   addr_t_ctrl         = each.value.address_type_controls
+#   allowed_self_as_cnt = each.value.allowed_self_as_count
+#   as_number           = each.value.remote_as
+#   ctrl                = each.value.bgp_controlls
+#   description         = each.value.description
+#   logical_node_profile_dn = length(
+#     regexall("interface", each.value.peer_level)
+#     ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
+#     regexall("loopback", each.value.peer_level)
+#   ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
+#   password = length(
+#     regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
+#     regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
+#     regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
+#     regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
+#   regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
+#   peer_ctrl           = each.value.peer_controls
+#   private_a_sctrl     = each.value.private_as_control
+#   ttl                 = each.value.ebgp_multihop_ttl
+#   weight              = each.value.weight_for_routes_from_neighbor
+#   local_asn           = each.value.local_as_number
+#   local_asn_propagate = each.value.local_as_number_config
+#   relation_bgp_rs_peer_pfx_pol = length(
+#     regexall(each.value.prefix_tenant == each.value.tenant)
+#     ) > 0 ? aci_bgp_peer_prefix.policies_bgp_peer_prefix[each.value.bgp_peer_prefix_policy].id : length(
+#     regexall("[:alnum:]", each.value.prefix_tenant)
+#   ) > 0 ? "rs_bgp_peer_prefix_policy.policies_bgp_peer_prefix[each.value.bgp_peer_prefix_policy].id" : ""
+#   dynamic "relation_bgp_rs_peer_to_profile" {
+#     for_each = each.value.route_control_profiles
+#     content {
+#       direction = relation_bgp_rs_peer_to_profile.value.direction
+#       target_dn = "uni/tn-${relation_bgp_rs_peer_to_profile.value.tenant}/prof-${relation_bgp_rs_peer_to_profile.value.route_map}"
+#     }
+#   }
+# }
 
 /*_____________________________________________________________________________________________________________________
 
@@ -528,7 +655,7 @@ ________________________________________________________________________________
 #   autostate                    = each.value.auto_state
 #   description                  = each.value.description
 #   encap_scope                  = each.value.encap_scope
-#   if_inst_t                    = "ext-svi"
+#   if_inst_t                    = each.value.interface_type
 #   ipv6_dad                     = each.value.ipv6_dad
 #   ll_addr                      = each.value.link_local_address
 #   logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.key].id
@@ -557,7 +684,7 @@ resource "aci_l3out_hsrp_interface_profile" "hsrp_interface_profile" {
   ]
   for_each = local.hsrp_interface_profile
   logical_interface_profile_dn = length(compact([each.value.interface_profile])
-  ) > 0 ? aaci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : ""
+  ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : ""
   annotation              = each.value.annotation
   description             = each.value.description
   name_alias              = each.value.alias
@@ -616,39 +743,6 @@ resource "aci_l3out_hsrp_secondary_vip" "hsrp_interface_profile_group_secondarie
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "ospfExtP"
- - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/ospfExtP"
-GUI Location:
- - tenants > {tenant} > Networking > L3Outs > {l3out}: OSPF
-_______________________________________________________________________________________________________________________
-*/
-#------------------------------------------------
-# Assign a OSPF Routing Policy to the L3Out
-#------------------------------------------------
-resource "aci_l3out_ospf_external_policy" "l3out_ospf_external_policies" {
-  depends_on = [
-    aci_l3_outside.l3outs
-  ]
-  for_each   = local.l3out_ospf_external_policies
-  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  area_cost  = each.value.ospf_area_cost
-  area_ctrl = anytrue(
-    [each.value.redistribute, each.value.summary, each.value.suppress_fa]
-    ) ? replace(trim(join(",", concat([
-      length(regexall(true, each.value.redistribute)) > 0 ? "redistribute" : ""], [
-      length(regexall(true, each.value.summary)) > 0 ? "summary" : ""], [
-      length(regexall(true, each.value.suppress_fa)) > 0 ? "suppress-fa" : ""]
-  )), ","), ",,", ",") : ["redistribute", "summary"]
-  area_id       = each.value.ospf_area_id
-  area_type     = each.value.ospf_area_type
-  l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
-  # multipod_internal = "no"
-}
-
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
  - Class: "ospfIfP"
  - Distinguished Name: "/uni/tn-{tenant}/out-{l3out}/nodep-{node_profile}/lifp-{interface_profile}/ospfIfP"
 GUI Location:
@@ -661,8 +755,7 @@ ________________________________________________________________________________
 resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
   depends_on = [
     aci_logical_interface_profile.l3out_interface_profiles,
-    aci_ospf_interface_policy.ospf_interface_policies,
-    local.rs_ospf_interface_policies
+    aci_ospf_interface_policy.policies_ospf_interface,
   ]
   for_each   = local.l3out_ospf_interface_profiles
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -681,9 +774,60 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
   auth_type                    = each.value.authentication_type
   description                  = each.value.description
   logical_interface_profile_dn = aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id
-  relation_ospf_rs_if_pol = length(regexall(
-    each.value.tenant, each.value.policy_tenant)
-    ) > 0 ? aci_ospf_interface_policy.ospf_interface_policies[each.value.ospf_interface_policy].id : length(regexall(
-    "[[:alnum:]]+", each.value.policy_tenant)
-  ) > 0 ? local.rs_ospf_interface_policies[each.value.ospf_interface_policy].id : ""
+  relation_ospf_rs_if_pol      = "uni/tn-${each.value.policy_tenant}/ospfIfPol-${each.value.ospf_interface_policy}"
 }
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "ipRouteP"
+ - Distinguished Name: "uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/rsnodeL3OutAtt-[topology/pod-{pod_id}/node-{node_id}]/rt-[{route}]/"
+GUI Location:
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile {node_profile} > Logical Interface Profile > {interface_profile} > Nodes > {node_id} > Static Routes
+_______________________________________________________________________________________________________________________
+*/
+# resource "aci_l3out_static_route" "l3out_node_profile_static_routes" {
+#   depends_on = [
+#     aci_logical_node_to_fabric_node.l3out_node_profiles_nodes
+#   ]
+#   for_each = local.l3out_node_profile_static_routes
+#   # aggregate      = each.value.aggregate == true ? "yes" : "no"
+#   annotation     = each.value.annotation
+#   description    = each.value.description
+#   fabric_node_dn = aci_logical_node_to_fabric_node.l3out_node_profiles_nodes[each.value.node].id
+#   name_alias     = each.value.alias
+#   ip             = each.value.prefix
+#   pref           = each.value.preference
+#   rt_ctrl        = each.value.route_control_bfd == true ? "bfd" : "unspecified"
+#   # class fvTrackList
+#   relation_ip_rs_route_track = ""
+# }
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "ipNexthopP"
+ - Distinguished Name: "uni/tn-{tenant}/out-{l3out}/lnodep-{node_profile}/rsnodeL3OutAtt-[topology/pod-{pod_id}/node-{node_id}]/rt-[{route}]/nh-[{next_hop_ip}]"
+GUI Location:
+ - tenants > {tenant} > Networking > L3Outs > {l3out} > Logical Node Profile {node_profile} > Logical Interface Profile > {interface_profile} > Nodes > {node_id} > Static Routes
+_______________________________________________________________________________________________________________________
+*/
+# resource "aci_l3out_static_route_next_hop" "l3out_static_routes_next_hop" {
+#   depends_on = [
+#     aci_l3out_static_route.l3out_node_profile_static_routes
+#   ]
+#   for_each             = local.l3out_static_routes_next_hop
+#   annotation           = each.value.annotation
+#   description          = each.value.description
+#   name_alias           = each.value.alias
+#   nexthop_profile_type = each.value.next_hop_type
+#   nh_addr              = each.value.next_hop_ip
+#   pref                 = each.value.preference
+#   static_route_dn      = aci_l3out_static_route.l3out_node_profile_static_routes[each.value.static_route].id
+#   # class fvTrackList
+#   # relation_ip_rs_nexthop_route_track = ""
+#   # # Class "ipRsNHTrackMember"
+#   # relation_ip_rs_nh_track_member = length(compact([each.value.ip_sla_policy])
+#   # ) > 0 ? "" : ""
+# }
