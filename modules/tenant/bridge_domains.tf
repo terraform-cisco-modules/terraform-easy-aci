@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Bridge Domain — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "bridge_domains" {
   default = {
     "default" = {
@@ -56,7 +61,6 @@ variable "bridge_domains" {
           link_local_ipv6_address = "::"
           subnets = {
             "198.18.5.1/24" = {
-
               description                  = ""
               ip_data_plane_learning       = "enabled"
               make_this_ip_address_primary = false
@@ -86,6 +90,72 @@ variable "bridge_domains" {
       template             = ""
     }
   }
+  description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+      advanced_troubleshooting = [
+          disable_ip_data_plane_learning_for_pbr = false
+          endpoint_clear                         = false
+          first_hop_security_policy              = ""
+          intersite_bum_traffic_allow            = false
+          intersite_l2_stretch                   = false
+          monitoring_policy                      = ""
+          netflow_monitor_policies               = []
+          optimize_wan_bandwidth                 = false
+          rogue_coop_exception_list              = []
+      controller_type = "apic"
+      general = [
+          advertise_host_routes         = false
+          alias                         = ""
+          annotation                    = ""
+          annotations                   = []
+          arp_flooding                  = false
+          description                   = ""
+          endpoint_retention_policy     = ""
+          global_alias                  = ""
+          igmp_interface_policy         = ""
+          igmp_snooping_policy          = ""
+          ipv6_l3_unknown_multicast     = "flood"
+          l2_unknown_unicast            = "flood"
+          l3_unknown_multicast_flooding = "flood"
+          limit_ip_learn_to_subnets     = true
+          mld_snoop_policy              = ""
+          multi_destination_flooding    = "bd-flood"
+          name_alias                    = ""
+          pim                           = false
+          pimv6                         = false
+          tenant                        = "common"
+          type                          = "regular"
+          vrf                           = "default"
+          vrf_tenant                    = "common"
+      l3_configurations = [
+          associated_l3outs = [
+              l3out         = "default"
+              route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
+              tenant        = "common"
+          custom_mac_address      = ""
+          ep_move_detection_mode  = false
+          link_local_ipv6_address = "::"
+          subnets = {
+            "198.18.5.1/24" = {
+              description                  = ""
+              ip_data_plane_learning       = "enabled"
+              make_this_ip_address_primary = false
+              scope = [
+                  advertise_externally = false
+                  shared_between_vrfs  = false
+              subnet_control = [
+                  neighbor_discovery     = true
+                  no_default_svi_gateway = false
+                  querier_ip             = false
+              treat_as_virtual_ip_address = false
+          unicast_routing     = true
+          virtual_mac_address = ""
+      policy_source_tenant = "common"
+      schema               = ""
+      sites                = []
+      template             = ""
+  EOT
   type = map(object(
     {
       advanced_troubleshooting = optional(list(object(

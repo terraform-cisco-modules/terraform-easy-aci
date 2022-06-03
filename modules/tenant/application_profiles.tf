@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Application Profile — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "application_profiles" {
   default = {
     "default" = {
@@ -20,15 +25,15 @@ variable "application_profiles" {
     - apic: For APIC Controllers.
     - ndo: For Nexus Dashboard Orchestrator.
   APIC Specific Attributes:
-  * alias: (Optional) - A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * annotation: (Optional) - A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: (Optional) - Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * monitoring_poicy: (Optional) - Default is default.  To keep it simple the monitoring policy must be in the common Tenant.
-  * qos_class: (Optional) - Default is unspecified.  The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+  * alias: (optional) — A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+  * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+  * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+  * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+  * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
   NDO Specific Attributes:
-  * schema: (Required) - Schema Name the Template is assigned to.
-  * sites: (Optional) - Name of the Site to assign the Application Profile to if doing a Site specific assignment.
-  * template: (Required) - Name of the Template to assign the Application Profile to.
+  * schema: (required) - Schema Name the Template is assigned to.
+  * sites: (optional) — Name of the Site to assign the Application Profile to if doing a Site specific assignment.
+  * template: (required) - Name of the Template to assign the Application Profile to.
   EOT
   type = map(object(
     {

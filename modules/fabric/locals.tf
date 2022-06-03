@@ -597,22 +597,7 @@ locals {
       customer_id            = v.customer_id != null ? v.customer_id : ""
       description            = v.description != null ? v.description : ""
       from_email             = v.from_email != null ? v.from_email : ""
-      include_types = v.include_types != null ? [
-        for s in v.include_types : {
-          audit_logs   = s.audit_logs != null ? s.audit_logs : false
-          events       = s.events != null ? s.events : false
-          faults       = s.faults != null ? s.faults : true
-          session_logs = s.session_logs != null ? s.session_logs : false
-        }
-        ] : [
-        {
-          audit_logs   = false
-          events       = false
-          faults       = true
-          session_logs = false
-        }
-      ]
-      phone_contact = v.phone_contact != null ? v.phone_contact : ""
+      phone_contact          = v.phone_contact != null ? v.phone_contact : ""
       smtp_server = v.smtp_server != null ? [
         for s in v.smtp_server : {
           management_epg      = s.management_epg != null ? s.management_epg : "default"

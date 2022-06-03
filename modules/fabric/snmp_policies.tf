@@ -37,33 +37,42 @@ variable "snmp_policies" {
     Key - Name for the DNS Profile
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-      admin_state = "enabled"
-      annotation  = ""
-      contact     = ""
-      description = ""
-      include_types = [
-        {
-          audit_logs   = false
-          events       = false
-          faults       = true
-          session_logs = false
-        }
-      ]
-      location = ""
-      snmp_client_groups = [
-        {
-          clients             = []
-              address = string
-              name    = optional(string)
-          description         = ""
-          management_epg      = "default"
-          management_epg_type = "oob"
-          name                = "default"
-        }
-      ]
-      snmp_communities  = []
-      snmp_destinations = []
-      users             = []
+    * admin_state = "enabled"
+    * annotation  = ""
+    * contact     = ""
+    * description = ""
+    * include_types = [
+      - audit_logs   = false
+      - events       = false
+      - faults       = true
+      - session_logs = false
+    * location = ""
+    * snmp_client_groups = [
+      - clients             = []
+        * address = string
+        * name    = optional(string)
+      - description         = ""
+      - management_epg      = "default"
+      - management_epg_type = "oob"
+      - name                = "default"
+    * snmp_communities  = []
+      - community_variable = number
+      - description        = optional(string)
+    * snmp_destinations = []
+      - community_variable  = optional(number)
+      - host                = string
+      - management_epg      = optional(string)
+      - management_epg_type = optional(string)
+      - port                = optional(number)
+      - username            = optional(string)
+      - v3_security_level   = optional(string)
+      - version             = optional(string)
+    * users             = []
+      - authorization_key  = number
+      - authorization_type = optional(string)
+      - privacy_key        = optional(number)
+      - privacy_type       = optional(string)
+      - username           = string
   EOT
   type = map(object(
     {

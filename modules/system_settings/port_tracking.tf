@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Port Tracking — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "port_tracking" {
   default = {
     "default" = {
@@ -8,6 +13,10 @@ variable "port_tracking" {
       port_tracking_state    = "on"
     }
   }
+  description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+  EOT
   type = map(object(
     {
       annotation             = optional(string)

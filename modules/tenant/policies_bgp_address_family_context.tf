@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — BGP Address Family Context — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_bgp_address_family_context" {
   default = {
     "default" = {
@@ -15,18 +20,18 @@ variable "policies_bgp_address_family_context" {
   }
   description = <<-EOT
   Key - Name of the BGP Address Family Context Policies
-  * alias - (Optional) Name alias for BGP address family context object.
-  * annotation - (Optional) Annotation for BGP address family context object.
-  * description - (Optional) Description for BGP address family context object.
-  * ebgp_distance - (Optional) Administrative distance of EBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 20.
-  * ebgp_max_ecmp - (Optional) Maximum number of equal-cost paths for BGP address family context object.Range of allowed values is 1 to 64. Default value is 16.
-  * enable_host_route_leak - (Optional) Control state for BGP address family context object.
+  * alias: (optional) — Name alias for BGP address family context object.
+  * annotation: (optional) — Annotation for BGP address family context object.
+  * description: (optional) — Description for BGP address family context object.
+  * ebgp_distance: (optional) — Administrative distance of EBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 20.
+  * ebgp_max_ecmp: (optional) — Maximum number of equal-cost paths for BGP address family context object.Range of allowed values is 1 to 64. Default value is 16.
+  * enable_host_route_leak: (optional) — Control state for BGP address family context object.
     - false - Don't enable Host route leak
     - true - Enable Host route leak
-  * ibgp_distance - (Optional) Administrative distance of IBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 200.
-  * ibgp_max_ecmp - (Optional) Maximum ECMP IBGP for BGP address family context object. Range of allowed values is 1 to 64. Default value is 16.
-  * local_distance - (Optional) Administrative distance of local routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 220.
-  * tenant - (Required) Name of parent Tenant object.
+  * ibgp_distance: (optional) — Administrative distance of IBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 200.
+  * ibgp_max_ecmp: (optional) — Maximum ECMP IBGP for BGP address family context object. Range of allowed values is 1 to 64. Default value is 16.
+  * local_distance: (optional) — Administrative distance of local routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 220.
+  * tenant: (required) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

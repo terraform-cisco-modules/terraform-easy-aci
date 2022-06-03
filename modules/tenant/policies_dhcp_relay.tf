@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — DHCP Relay — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_dhcp_relay" {
   default = {
     "default" = {
@@ -21,15 +26,15 @@ variable "policies_dhcp_relay" {
   }
   description = <<-EOT
   Key - Name of the DHCP Relay Policy
-  annotation - (Optional) Annotation for object DHCP Relay Policy.
-  description - (Optional) Description for object DHCP Relay Policy.
-  mode - (Optional) DHCP relay policy mode. Allowed Values are "visible" and "not-visible". Default Value is "visible".
-  alias - (Optional) Name name_alias for object DHCP Relay Policy.
-  owner - (Optional) Owner of the target relay servers. Allowed values are "infra" and "tenant". Default value is "infra".
-  relation_dhcp_rs_prov - (Optional) List of relation to class fvEPg. Cardinality - N_TO_M. Type - Set of String.
-  relation_dhcp_rs_prov.tdn - (Required) target Dn of the class fvEPg.
-  relation_dhcp_rs_prov.addr - (Required) IP address for relation dhcpRsProv.
-  tenant - (Required) Name of parent Tenant object.
+  annotation: (optional) — Annotation for object DHCP Relay Policy.
+  description: (optional) — Description for object DHCP Relay Policy.
+  mode: (optional) — DHCP relay policy mode. Allowed Values are "visible" and "not-visible". Default Value is "visible".
+  alias: (optional) — Name name_alias for object DHCP Relay Policy.
+  owner: (optional) — Owner of the target relay servers. Allowed values are "infra" and "tenant". Default value is "infra".
+  relation_dhcp_rs_prov: (optional) — List of relation to class fvEPg. Cardinality - N_TO_M. Type - Set of String.
+  relation_dhcp_rs_prov.tdn: (required) — target Dn of the class fvEPg.
+  relation_dhcp_rs_prov.addr: (required) — IP address for relation dhcpRsProv.
+  tenant: (required) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

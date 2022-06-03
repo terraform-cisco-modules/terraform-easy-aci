@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "syslog" {
   default = {
     "default" = {
-      description = ""
       admin_state = "enabled"
       annotation  = ""
       console_destination = [
@@ -15,7 +14,8 @@ variable "syslog" {
           severity    = "critical"
         }
       ]
-      format = "aci"
+      description = ""
+      format      = "aci"
       include_types = [
         {
           audit_logs   = false
@@ -49,16 +49,14 @@ variable "syslog" {
   }
   description = <<-EOT
     Key - Name for the DNS Profile
+    * admin_state = "enabled"
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * console_destination = [
+      - admin_state = "enabled"
+      - severity    = "critical"
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-      description = ""
-      admin_state = "enabled"
-      annotation  = ""
-      console_destination = [
-          admin_state = "enabled"
-          severity    = "critical"
-      format = "aci"
-      include_types = [
+    * format = "aci"
+    * include_types = [
           audit_logs   = false
           events       = false
           faults       = true
@@ -83,14 +81,14 @@ variable "syslog" {
     {
       admin_state = optional(string)
       annotation  = optional(string)
-      description = optional(string)
       console_destination = optional(list(object(
         {
           admin_state = optional(string)
           severity    = optional(string)
         }
       )))
-      format = optional(string)
+      description = optional(string)
+      format      = optional(string)
       include_types = list(object(
         {
           audit_logs   = bool

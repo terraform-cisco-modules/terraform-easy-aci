@@ -1,12 +1,17 @@
 /*_____________________________________________________________________________________________________________________
 
-Switch Profile Variables
+APIC Inband Management Addresses — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "apics_inband_mgmt_addresses" {
   default     = {}
   description = <<-EOT
   key - Node ID of the APIC
+  * ipv4_address   = optional(string)
+  * ipv4_gateway   = optional(string)
+  * ipv6_address   = optional(string)
+  * ipv6_gateway   = optional(string)
+  * management_epg = string
   * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
   EOT
   type = map(object(

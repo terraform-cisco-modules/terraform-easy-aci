@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — BGP Route Summarization — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_bgp_route_summarization" {
   default = {
     "default" = {
@@ -10,12 +15,12 @@ variable "policies_bgp_route_summarization" {
   }
   description = <<-EOT
   Key - Name of the BGP Route Summarization Policies
-  * alias - (Optional) Name alias for object BGP route summarization.
-  * annotation - (Optional) Annotation for object BGP route summarization.
-  * attrmap - (Optional) Summary attribute map.
+  * alias: (optional) — Name alias for object BGP route summarization.
+  * annotation: (optional) — Annotation for object BGP route summarization.
+  * attrmap: (optional) — Summary attribute map.
   * generate_as_set_information - (Boolean) Generate AS-SET information
-  * description - (Optional) Description for object BGP route summarization.
-  * tenant - (Required) Name of parent Tenant object.
+  * description: (optional) — Description for object BGP route summarization.
+  * tenant: (required) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

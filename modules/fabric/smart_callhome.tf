@@ -21,15 +21,7 @@ variable "smart_callhome" {
           rfc_compliant = true
         }
       ]
-      from_email = ""
-      include_types = [
-        {
-          audit_logs   = false
-          events       = false
-          faults       = true
-          session_logs = false
-        }
-      ]
+      from_email     = ""
       phone_contact  = ""
       reply_to_email = ""
       site_id        = ""
@@ -48,37 +40,32 @@ variable "smart_callhome" {
   }
   description = <<-EOT
     Key - Name for the DNS Profile
+    * admin_state: (optional) — Options are:
+      - disabled
+      - enabled: (default)
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * contact_information: (optional) —     = ""
+    * contract_id: (optional) —             = ""
+    * customer_contact_email: (optional) —  = ""
+    * customer_id: (optional) —             = ""
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-      admin_state            = "enabled"
-      annotation             = ""
-      contact_information    = ""
-      contract_id            = ""
-      customer_contact_email = ""
-      customer_id            = ""
-      description            = ""
-      smart_destinations = [
-          admin_state   = "enabled"
-          email         = "admin@example.com"
-          format        = "short-txt" # aml|short-txt|xml
-          rfc_compliant = true
-      from_email = ""
-      include_types = [
-          audit_logs   = false
-          events       = false
-          faults       = true
-          session_logs = false
-      phone_contact  = ""
-      reply_to_email = ""
-      site_id        = ""
-      street_address = ""
-      smtp_server = [
-          management_epg      = "default"
-          management_epg_type = "oob" # inb|oob
-          port_number         = 25
-          secure_smtp         = false
-          smtp_server         = "relay.example.com"
-          username            = ""
+    * smart_destinations = [
+      - admin_state: (optional) —    = "enabled"
+      - email         = "admin@example.com"
+      - format: (optional) —         = "short-txt" # aml|short-txt|xml
+      - rfc_compliant: (optional) —  = true
+    * from_email: (optional) —  = ""
+    * phone_contact: (optional) —   = ""
+    * reply_to_email: (optional) —  = ""
+    * site_id: (optional) —         = ""
+    * street_address: (optional) —  = ""
+    * smtp_server: (required) —  = [
+      - management_epg: (optional) —       = "default"
+      - management_epg_type = "oob" # inb|oob
+      - port_number: (default: 25) —          = 25
+      - secure_smtp: (optional) —          = false
+      - smtp_server: (required) —          = "relay.example.com"
+      - username: (required if secure_smtp set to true) —             = ""
   EOT
   type = map(object(
     {
@@ -97,15 +84,7 @@ variable "smart_callhome" {
           rfc_compliant = optional(bool)
         }
       ))
-      from_email = optional(string)
-      include_types = optional(list(object(
-        {
-          audit_logs   = optional(bool)
-          events       = optional(bool)
-          faults       = optional(bool)
-          session_logs = optional(bool)
-        }
-      )))
+      from_email     = optional(string)
       phone_contact  = optional(string)
       reply_to_email = optional(string)
       site_id        = optional(string)

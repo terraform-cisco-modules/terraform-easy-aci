@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Filter — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "filters" {
   default = {
     "default" = {
@@ -43,6 +48,44 @@ variable "filters" {
       tenant       = "common"
     }
   }
+  description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+      alias           = ""
+      annotation      = ""
+      annotations     = []
+      controller_type = "apic"
+      description     = ""
+      filter_entries = [
+          alias                 = ""
+          annotation            = ""
+          annotations           = []
+          arp_flag              = "unspecified"
+          description           = ""
+          destination_port_from = "unspecified"
+          destination_port_to   = "unspecified"
+          ethertype             = "unspecified"
+          icmpv4_type           = "unspecified"
+          icmpv6_type           = "unspecified"
+          ip_protocol           = "unspecified"
+          global_alias          = ""
+          match_dscp            = "unspecified"
+          match_only_fragments  = false
+          name                  = "default"
+          source_port_from      = "unspecified"
+          source_port_to        = "unspecified"
+          stateful              = false
+          tcp_session_rules = [
+              acknowledgement = false
+              established     = false
+              finish          = false
+              reset           = false
+              synchronize     = false
+      global_alias = ""
+      schema       = "common"
+      template     = "common"
+      tenant       = "common"
+  EOT
   type = map(object(
     {
       alias      = optional(string)

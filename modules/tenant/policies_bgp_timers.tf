@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — BGP Timers — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_bgp_timers" {
   default = {
     "default" = {
@@ -15,16 +20,16 @@ variable "policies_bgp_timers" {
   }
   description = <<-EOT
   Key - Name of the BGP Timers Policies
-  * alias - (Optional) Name alias for bgp timers object. Default value is "default".
-  * annotation - (Optional) Annotation for bgp timers object.
-  * description - (Optional) Description for bgp timers object.
+  * alias: (optional) — Name alias for bgp timers object. Default value is "default".
+  * annotation: (optional) — Annotation for bgp timers object.
+  * description: (optional) — Description for bgp timers object.
   * graceful_restart_helper - (Boolean) Graceful restart enabled or helper only for bgp timers object.  Default is true
-  * hold_interval - (Optional) Time period before declaring neighbor down for bgp timers object. Default value is 180.
-  * keepalive_interval - (Optional) Interval time between keepalive messages for bgp timers object. Default value is 60.
-  * maximum_as_limit - (Optional) Maximum AS limit for bgp timers object. Range of allowed values is 0 to 2000. Default value is 0.
-  * name - (Required) Name of bgp timers object.
-  * stale_interval - (Optional) Stale interval for routes advertised by peer for bgp timers object. Range of allowed values is 1 to 3600. Default value is 300.
-  * tenant - (Required) Name of parent Tenant object.
+  * hold_interval: (optional) — Time period before declaring neighbor down for bgp timers object. Default value is 180.
+  * keepalive_interval: (optional) — Interval time between keepalive messages for bgp timers object. Default value is 60.
+  * maximum_as_limit: (optional) — Maximum AS limit for bgp timers object. Range of allowed values is 0 to 2000. Default value is 0.
+  * name: (required) — Name of bgp timers object.
+  * stale_interval: (optional) — Stale interval for routes advertised by peer for bgp timers object. Range of allowed values is 1 to 3600. Default value is 300.
+  * tenant: (required) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

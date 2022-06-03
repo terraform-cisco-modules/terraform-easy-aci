@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — OSPF Route Summarization — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_ospf_route_summarization" {
   default = {
     "default" = {
@@ -11,13 +16,13 @@ variable "policies_ospf_route_summarization" {
   }
   description = <<-EOT
   Key - Name of the OSPF Route Summarization Policy.
-  * alias - (Optional) Name alias for object OSPF route summarization.
-  * annotation - (Optional) Annotation for object OSPF route summarization.
-  * cost - (Optional) The OSPF Area cost for the default summary LSAs. The Area cost is used with NSSA and stub area types only. Range of allowed values is "0" to "16777215". Default value: "unspecified".
+  * alias: (optional) — Name alias for object OSPF route summarization.
+  * annotation: (optional) — Annotation for object OSPF route summarization.
+  * cost: (optional) — The OSPF Area cost for the default summary LSAs. The Area cost is used with NSSA and stub area types only. Range of allowed values is "0" to "16777215". Default value: "unspecified".
   * description - Description for for object OSPF route summarization.
-  * inter_area_enabled - (Optional) Inter area enabled flag for object OSPF route summarization. Allowed values: "no", "yes". Default value: "no".
-  * tag - (Optional) The color of a policy label. Default value: "0".
-  * tenant - (Required) Distinguished name of parent tenant object.
+  * inter_area_enabled: (optional) — Inter area enabled flag for object OSPF route summarization. Allowed values: "no", "yes". Default value: "no".
+  * tag: (optional) — The color of a policy label. Default value: "0".
+  * tenant: (required) — Distinguished name of parent tenant object.
   EOT
   type = map(object(
     {

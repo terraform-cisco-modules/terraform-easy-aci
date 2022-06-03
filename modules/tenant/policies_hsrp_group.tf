@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-Tenant - HSRP Interface Policy - Variables
+Tenant — Policies — HSRP Group — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "policies_hsrp_group" {
@@ -24,21 +24,21 @@ variable "policies_hsrp_group" {
   }
   description = <<-EOT
     Key - Name of the HSRP Interface Policy
-    * alias - (Optional) Name name_alias for HSRP group policy object.
-    * annotation - (Optional) Annotation for HSRP group policy object.
-    * description - (Optional) Description for HSRP group policy object.
-    * tenant - (Required) Name of the Tenant.
-    * enable_preemption_for_the_group - (Optional) True or False
-    * hello_interval - (Optional) The hello interval. Default value: "3000".
-    * hold_interval - (Optional) The period of time before declaring that the neighbor is down. Default value: "10000".
-    * key - (Optional) The key or password used to uniquely identify this configuration object. If key is set, the object key will reset when terraform configuration is applied. Default value: "cisco".
-    * max_seconds_to_prevent_preemption - (Optional) Maximum number of seconds to allow IPredundancy clients to prevent preemption. Default value: "0".
-    * min_preemption_delay - (Optional) HSRP Group's Minimum Preemption delay. Default value: "0".
-    * preemption_delay_after_reboot - (Optional) Preemption delay after switch reboot. Default value: "0".
-    * priority - (Optional) The QoS priority class ID. Default value: "100".
+    * alias: (optional) — Name name_alias for HSRP group policy object.
+    * annotation: (optional) — Annotation for HSRP group policy object.
+    * description: (optional) — Description for HSRP group policy object.
+    * tenant: (required) — Name of the Tenant.
+    * enable_preemption_for_the_group: (optional) — True or False
+    * hello_interval: (optional) — The hello interval. Default value: "3000".
+    * hold_interval: (optional) — The period of time before declaring that the neighbor is down. Default value: "10000".
+    * key: (optional) — The key or password used to uniquely identify this configuration object. If key is set, the object key will reset when terraform configuration is applied. Default value: "cisco".
+    * max_seconds_to_prevent_preemption: (optional) — Maximum number of seconds to allow IPredundancy clients to prevent preemption. Default value: "0".
+    * min_preemption_delay: (optional) — HSRP Group's Minimum Preemption delay. Default value: "0".
+    * preemption_delay_after_reboot: (optional) — Preemption delay after switch reboot. Default value: "0".
+    * priority: (optional) — The QoS priority class ID. Default value: "100".
     * tenant - (optional) Name of the tenant.  "common" by default.
-    * timeout - (Optional) Amount of time between authentication attempts. Default value: "0".
-    * type - (Optional) Type of authentication.
+    * timeout: (optional) — Amount of time between authentication attempts. Default value: "0".
+    * type: (optional) — Type of authentication.
       * md5_authentication
       * simple_authentication
   EOT

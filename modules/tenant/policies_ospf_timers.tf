@@ -1,4 +1,9 @@
 
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — OSPF Timers — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_ospf_timers" {
   default = {
     "default" = {
@@ -34,28 +39,28 @@ variable "policies_ospf_timers" {
   }
   description = <<-EOT
   Key - Name of the OSPF Timers Policy.
-  * alias - (Optional) Name alias for OSPF timers object.
-  * annotation - (Optional) Annotation for OSPF timers object.
-  * bw_ref - (Optional) OSPF policy bandwidth for OSPF timers object. Range of allowed values is "1" to "4000000". Default value is "40000".
-  * ctrl - (Optional) List of Control state for OSPF timers object. Allowed values are "name-lookup" and "pfx-suppress".
-  * description - (Optional) Description for OSPF timers object.
-  * dist - (Optional) Preferred administrative distance for OSPF timers object. Range of allowed values is "1" to "255". Default value is "110".
-  * gr_ctrl - (Optional) Graceful restart enabled or helper only for OSPF timers object. The allowed value is "helper". The default value is "helper". To deselect the option, just pass gr_ctrl=""
-  * lsa_arrival_intvl - (Optional) Minimum interval between the arrivals of lsas for OSPF timers object. The range of allowed values is "10" to "600000". The default value is "1000".
-  * lsa_gp_pacing_intvl - (Optional) LSA group pacing interval for OSPF timers object. The range of allowed values is "1" to "1800". The default value is "10".
-  * lsa_hold_intvl - (Optional) Throttle hold interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
-  * lsa_max_intvl - (Optional) throttle max interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
-  * lsa_start_intvl - (Optional) Throttle start-wait interval between LSAs for OSPF timers object. The range of allowed values is "0" to "5000". The default value is "0".
-  * max_ecmp - (Optional) Maximum ECMP for OSPF timers object. The range of allowed values is "1" to "64". The default value is "8".
-  * max_lsa_action - (Optional) Action to take when maximum LSA limit is reached for OSPF timers object. Allowed values are "reject", "log" and "restart". The default value is "reject".
-  * max_lsa_num - (Optional) Maximum number of LSAs that are not self-generated for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "20000".
-  * max_lsa_reset_intvl - (Optional) Time until the sleep count is reset to zero for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "10".
-  * max_lsa_sleep_cnt - (Optional) Number of times OSPF can be placed in a sleep state for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "5".
-  * max_lsa_sleep_intvl - (Optional) Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "5".
-  * max_lsa_thresh - (Optional) Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "100". The default value is "75".
-  * spf_hold_intvl - (Optional) Minimum hold time between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "1000".
-  * spf_init_intvl - (Optional) Initial delay interval for the SPF schedule for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "200".
-  * spf_max_intvl - (Optional) Maximum interval between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "5000".
+  * alias: (optional) — Name alias for OSPF timers object.
+  * annotation: (optional) — Annotation for OSPF timers object.
+  * bw_ref: (optional) — OSPF policy bandwidth for OSPF timers object. Range of allowed values is "1" to "4000000". Default value is "40000".
+  * ctrl: (optional) — List of Control state for OSPF timers object. Allowed values are "name-lookup" and "pfx-suppress".
+  * description: (optional) — Description for OSPF timers object.
+  * dist: (optional) — Preferred administrative distance for OSPF timers object. Range of allowed values is "1" to "255". Default value is "110".
+  * gr_ctrl: (optional) — Graceful restart enabled or helper only for OSPF timers object. The allowed value is "helper". The default value is "helper". To deselect the option, just pass gr_ctrl=""
+  * lsa_arrival_intvl: (optional) — Minimum interval between the arrivals of lsas for OSPF timers object. The range of allowed values is "10" to "600000". The default value is "1000".
+  * lsa_gp_pacing_intvl: (optional) — LSA group pacing interval for OSPF timers object. The range of allowed values is "1" to "1800". The default value is "10".
+  * lsa_hold_intvl: (optional) — Throttle hold interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
+  * lsa_max_intvl: (optional) — throttle max interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
+  * lsa_start_intvl: (optional) — Throttle start-wait interval between LSAs for OSPF timers object. The range of allowed values is "0" to "5000". The default value is "0".
+  * max_ecmp: (optional) — Maximum ECMP for OSPF timers object. The range of allowed values is "1" to "64". The default value is "8".
+  * max_lsa_action: (optional) — Action to take when maximum LSA limit is reached for OSPF timers object. Allowed values are "reject", "log" and "restart". The default value is "reject".
+  * max_lsa_num: (optional) — Maximum number of LSAs that are not self-generated for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "20000".
+  * max_lsa_reset_intvl: (optional) — Time until the sleep count is reset to zero for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "10".
+  * max_lsa_sleep_cnt: (optional) — Number of times OSPF can be placed in a sleep state for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "5".
+  * max_lsa_sleep_intvl: (optional) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "5".
+  * max_lsa_thresh: (optional) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "100". The default value is "75".
+  * spf_hold_intvl: (optional) — Minimum hold time between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "1000".
+  * spf_init_intvl: (optional) — Initial delay interval for the SPF schedule for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "200".
+  * spf_max_intvl: (optional) — Maximum interval between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "5000".
   * tenant: Name of parent Tenant object.
   EOT
   type = map(object(

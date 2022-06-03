@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — DHCP Option — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_dhcp_option" {
   default = {
     "default" = {
@@ -10,17 +15,17 @@ variable "policies_dhcp_option" {
   }
   description = <<-EOT
   Argument Reference
-  tenant - (Required) Name of parent Tenant object.
-  name - (Required) Name of Object DHCP Option Policy.
-  annotation - (Optional) Annotation for object DHCP Option Policy.
-  description - (Optional) Description for object DHCP Option Policy.
-  name_alias - (Optional) Name name_alias for object DHCP Option Policy.
-  dhcp_option - (Optional) To manage DHCP Option from the DHCP Option Policy resource. It has the attributes like name, annotation,data,dhcp_option_id and name_alias.
-  dhcp_option.name - (Required) Name of Object DHCP Option.
-  dhcp_option.annotation - (Optional) Annotation for object DHCP Option.
-  dhcp_option.data - (Optional) DHCP Option data.
-  dhcp_option.dhcp_option_id - (Optional) DHCP Option id (Unsigned Integer).
-  dhcp_option.name_alias - (Optional) Name name_alias for object DHCP Option.
+  tenant: (required) — Name of parent Tenant object.
+  name: (required) — Name of Object DHCP Option Policy.
+  annotation: (optional) — Annotation for object DHCP Option Policy.
+  description: (optional) — Description for object DHCP Option Policy.
+  name_alias: (optional) — Name name_alias for object DHCP Option Policy.
+  dhcp_option: (optional) — To manage DHCP Option from the DHCP Option Policy resource. It has the attributes like name, annotation,data,dhcp_option_id and name_alias.
+  dhcp_option.name: (required) — Name of Object DHCP Option.
+  dhcp_option.annotation: (optional) — Annotation for object DHCP Option.
+  dhcp_option.data: (optional) — DHCP Option data.
+  dhcp_option.dhcp_option_id: (optional) — DHCP Option id (Unsigned Integer).
+  dhcp_option.name_alias: (optional) — Name name_alias for object DHCP Option.
   EOT
   type = map(object(
     {

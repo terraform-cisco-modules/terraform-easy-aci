@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-Tenant - HSRP Interface Policy - Variables
+Tenant — Policies — HSRP Interface — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "policies_hsrp_interface" {
@@ -22,15 +22,15 @@ variable "policies_hsrp_interface" {
   }
   description = <<-EOT
     Key - Name of the HSRP Interface Policy
-    * alias - (Optional) Name name_alias for HSRP interface policy object.
-    * annotation - (Optional) Annotation for HSRP interface policy object.
-    * description - (Optional) Description for HSRP interface policy object.
-    * control - (Optional) Control state for HSRP interface policy object. 
+    * alias: (optional) — Name name_alias for HSRP interface policy object.
+    * annotation: (optional) — Annotation for HSRP interface policy object.
+    * description: (optional) — Description for HSRP interface policy object.
+    * control: (optional) — Control state for HSRP interface policy object. 
       - enable_bidirectional_forwarding_detection
       - use_burnt_in_mac_address_of_the_interface
-    * delay - (Optional) Administrative port delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
-    * reload_delay - (Optional) Reload delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
-    * tenant - (Required) Name of the Tenant.
+    * delay: (optional) — Administrative port delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
+    * reload_delay: (optional) — Reload delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
+    * tenant: (required) — Name of the Tenant.
   EOT
   type = map(object(
     {

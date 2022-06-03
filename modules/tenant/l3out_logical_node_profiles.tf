@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-L3Out - Logical Node Profiles
+L3Out - Logical Node Profile — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "l3out_logical_node_profiles" {
@@ -141,51 +141,51 @@ variable "l3out_logical_node_profiles" {
       - ndo: For Nexus Dashboard Orchestrator
     * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
     hsrp_interface_profiles - Group of Objects to add as an HSRP interface profile
-    * alias - (Optional) Name name_alias for object L3-out HSRP interface profile.
-    * annotation - (Optional) Annotation for object L3-out HSRP interface profile.
-    * description - (Optional) Description for object L3-out HSRP interface profile.
+    * alias: (optional) — Name name_alias for object L3-out HSRP interface profile.
+    * annotation: (optional) — Annotation for object L3-out HSRP interface profile.
+    * description: (optional) — Description for object L3-out HSRP interface profile.
     * groups - Map of group objects
-      - alias - (Optional) alias for L3out HSRP interface group object.
-      - annotation - (Optional) Annotation for L3out HSRP interface group object.
-      - description - (Optional) Description for L3out HSRP interface group object.
-      - group_id - (Optional) Group id for L3out HSRP interface group object.
-      - group_name - (Optional) Group name for L3out HSRP interface group object.
-      - group_type - (Optional) Group address-family type for L3out HSRP interface group object.  Options are:
+      - alias: (optional) — alias for L3out HSRP interface group object.
+      - annotation: (optional) — Annotation for L3out HSRP interface group object.
+      - description: (optional) — Description for L3out HSRP interface group object.
+      - group_id: (optional) — Group id for L3out HSRP interface group object.
+      - group_name: (optional) — Group name for L3out HSRP interface group object.
+      - group_type: (optional) — Group address-family type for L3out HSRP interface group object.  Options are:
         * ipv4
         * ipv6
         Default value is ipv4.
-      - hsrp_group_policy - (Optional) Name of the HSRP Group Policy
-      - ip - (Optional) IP address for L3out HSRP interface group object.
-      - ip_obtain_mode - (Optional) IP obtain mode for L3out HSRP interface group object. Allowed values are:
+      - hsrp_group_policy: (optional) — Name of the HSRP Group Policy
+      - ip: (optional) — IP address for L3out HSRP interface group object.
+      - ip_obtain_mode: (optional) — IP obtain mode for L3out HSRP interface group object. Allowed values are:
         * admin - Address is configured.
         * auto - Auto configure IPv6 address.
         * learn - Learn IP from HSRP Peer.
         Default value is admin
-      - mac_address - (Optional) MAC address for L3out HSRP interface group object.
-      - name - (Required) Name of L3out HSRP interface group object.
-      - secondary_virtual_ips - (Optional) - List of secondary virtual IP's to assign to the group.
-    * hsrp_interface_policy - (Optional) Name of the HSRP Interface Policy.
-    * policy_source_tenant - (Optional) - Name of the tenant that contains the HSRP Interface and Group Policies.
-    * version - (Optional) Compatibility catalog version.
+      - mac_address: (optional) — MAC address for L3out HSRP interface group object.
+      - name: (required) — Name of L3out HSRP interface group object.
+      - secondary_virtual_ips: (optional) — - List of secondary virtual IP's to assign to the group.
+    * hsrp_interface_policy: (optional) — Name of the HSRP Interface Policy.
+    * policy_source_tenant: (optional) — - Name of the tenant that contains the HSRP Interface and Group Policies.
+    * version: (optional) — Compatibility catalog version.
       - v1
       - v2
     * nodes: map of Nodes to attach to the interface profile
       - static_routes: Map of Static route attributes
-        * aggregate - (Optional) Aggregated Route for object l3out static route. Allowed values: true, false, default false
-        * alias - (Optional) Name name_alias for object l3out static route.
-        * annotation - (Optional) Annotation for object l3out static route.
-        * description - (Optional) Description for object l3out static route.
-        * preference - (Optional) The administrative preference value for this route. This value is useful for resolving routes advertised from different protocols. Range of allowed values is "1" to "255". Default value is "1".
-        * prefix - (Required) The static route IP address assigned to the outside network.
-        * route_control_bfd - (Optional) Route control for object l3out static route. Allowed values: "bfd", "unspecified". Default value is "unspecified".
+        * aggregate: (optional) — Aggregated Route for object l3out static route. Allowed values: true, false, default false
+        * alias: (optional) — Name name_alias for object l3out static route.
+        * annotation: (optional) — Annotation for object l3out static route.
+        * description: (optional) — Description for object l3out static route.
+        * preference: (optional) — The administrative preference value for this route. This value is useful for resolving routes advertised from different protocols. Range of allowed values is "1" to "255". Default value is "1".
+        * prefix: (required) — The static route IP address assigned to the outside network.
+        * route_control_bfd: (optional) — Route control for object l3out static route. Allowed values: "bfd", "unspecified". Default value is "unspecified".
         * next_hop_addresses
-          - alias - (Optional) Name name_alias for object l3out static route next hop.
-          - annotation - (Optional) Annotation for object l3out static route next hop.
-          - description - (Optional) Description for object l3out static route next hop.
-          - next_hop_ip - (Required) The nexthop IP address for the static route to the outside network.
-          - next_hop_type - (Optional) Component type.
+          - alias: (optional) — Name name_alias for object l3out static route next hop.
+          - annotation: (optional) — Annotation for object l3out static route next hop.
+          - description: (optional) — Description for object l3out static route next hop.
+          - next_hop_ip: (required) — The nexthop IP address for the static route to the outside network.
+          - next_hop_type: (optional) — Component type.
           - Allowed values: "none", "prefix". Default value: "prefix".
-          - preference - (Optional) Administrative preference value for this route. Range: "1" to "255" Allowed values: "unspecified". Default value: "unspecified".
+          - preference: (optional) — Administrative preference value for this route. Range: "1" to "255" Allowed values: "unspecified". Default value: "unspecified".
   EOT
   type = map(object(
     {

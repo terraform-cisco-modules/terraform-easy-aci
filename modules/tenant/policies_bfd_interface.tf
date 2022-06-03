@@ -1,5 +1,8 @@
-# Manages ACI BFD Interface Policy
-#
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — BFD Interface — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_bfd_interface" {
   default = {
     "default" = {
@@ -17,19 +20,19 @@ variable "policies_bfd_interface" {
     }
   }
   description = <<-EOT
-  * Argument Reference
-  * admin_state - (Optional) Administrative state of the object BFD Interface Policy. Allowed values are "disabled" and "enabled". Default is "enabled".
-  * annotation - (Optional) Annotation for object BFD Interface Policy.
-  * description - (Optional) Description for object BFD Interface Policy.
-  * detect_mult - (Optional) Detection multiplier for object BFD Interface Policy. Range: "1" - "50". Default value is "3".
-  * echo_admin_state - (Optional) Echo mode indicator for object BFD Interface Policy. Allowed values are "disabled" and "enabled". Default is "enabled".
-  * echo_recieve_interval - (Optional) Echo rx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
-  * enable_sub_interface_optimization - (Boolean) Control state for object BFD Interface Policy.  Default is false.
-  * minimum_recieve_interval - (Optional) Required minimum rx interval for boject BFD Interface Policy. Range: "50" - "999". Default value is "50".
-  * minimum_transmit_interval - (Optional) Desired minimum tx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
-  * name - (Required) Name of object BFD Interface Policy.
-  * name_alias - (Optional) Name name_alias for object BFD Interface Policy.
-  * tenant - (Required) Name of parent tenant object.
+    Key - 
+    * admin_state: (optional) — Administrative state of the object BFD Interface Policy. Allowed values are "disabled" and "enabled". Default is "enabled".
+    * annotation: (optional) — Annotation for object BFD Interface Policy.
+    * description: (optional) — Description for object BFD Interface Policy.
+    * detect_mult: (optional) — Detection multiplier for object BFD Interface Policy. Range: "1" - "50". Default value is "3".
+    * echo_admin_state: (optional) — Echo mode indicator for object BFD Interface Policy. Allowed values are "disabled" and "enabled". Default is "enabled".
+    * echo_recieve_interval: (optional) — Echo rx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
+    * enable_sub_interface_optimization - (Boolean) Control state for object BFD Interface Policy.  Default is false.
+    * minimum_recieve_interval: (optional) — Required minimum rx interval for boject BFD Interface Policy. Range: "50" - "999". Default value is "50".
+    * minimum_transmit_interval: (optional) — Desired minimum tx interval for object BFD Interface Policy. Range: "50" - "999". Default value is "50".
+    * name: (required) — Name of object BFD Interface Policy.
+    * name_alias: (optional) — Name name_alias for object BFD Interface Policy.
+    * tenant: (required) — Name of parent tenant object.
   EOT
   type = map(object(
     {

@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Endpoint Controls — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "endpoint_controls" {
   default = {
     "default" = {
@@ -23,13 +28,8 @@ variable "endpoint_controls" {
     }
   }
   description = <<-EOT
-  Key: Name of the APIC Connectivity Preference Map.  This should be default.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * type: COOP protocol is enhanced to support two ZMQ authentication modes:
-    - compatible Type: COOP accepts both MD5 authenticated and non-authenticated ZMQ connections for message transportation.
-    - strict: COOP allows MD5 authenticated ZMQ connections only.
-    Note: The APIC provides a managed object (fabric:SecurityToken), that includes an attribute to be used for the MD5 password. An attribute in this managed object, called "token", is a string that changes every hour. COOP obtains the notification from the DME to update the password for ZMQ authentication. The attribute token value is not displayed.
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
   EOT
   type = map(object(
     {

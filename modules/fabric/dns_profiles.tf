@@ -19,17 +19,17 @@ variable "dns_profiles" {
     Key - Name for the DNS Profile
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-      dns_domains           = []
+      dns_domains: (optional) —            = []
           domain         = string
-          default_domain = optional(bool)
-          description    = optional(string)
-      dns_providers         = []
-          description  = optional(string)
+          default_domain: (optional) —  = optional(bool)
+          description: (optional) —     = optional(string)
+      dns_providers: (optional) —          = []
+          description: (optional) —   = optional(string)
           dns_provider = string
-          preferred    = optional(string)
+          preferred: (optional) —     = optional(string)
       ip_version_preference = "IPv4"
-      management_epg        = "default"
-      management_epg_type   = "oob"
+      management_epg: (optional) —         = "default"
+      management_epg_type: (optional) —    = "oob"
   EOT
   type = map(object(
     {

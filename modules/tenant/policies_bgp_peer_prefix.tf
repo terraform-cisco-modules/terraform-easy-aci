@@ -1,13 +1,7 @@
-#------------------------------------------------
-# Create a BGP Peer Connectivity Profile
-#------------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
-/*
-API Information:
- - Class: "bgpPeerPfxPol"
- - Distinguished Name: "uni/tn-{tenant}/bgpPfxP-{name}"
-GUI Location:
- - Tenants > {tenant} > Networking > Policies > Protocol > BGP >  BGP Peer Prefix > {name}
+Tenant — Policies — BGP Peer Prefix — Variables
+_______________________________________________________________________________________________________________________
 */
 variable "policies_bgp_peer_prefix" {
   default = {
@@ -23,14 +17,14 @@ variable "policies_bgp_peer_prefix" {
   }
   description = <<-EOT
   Key - Name of the BGP Peer Prefix Policies
-  * alias - (Optional) Name alias for BGP peer prefix object.
-  * action - (Optional) Action when the maximum prefix limit is reached for BGP peer prefix object. Allowed values are "log", "reject", "restart" and "shut". Default value is "reject".
-  * annotation - (Optional) Annotation for BGP peer prefix object.
-  * description - (Optional) Description for BGP peer prefix object.
-  * maximum_number_of_prefixes - (Optional) Maximum number of prefixes allowed from the peer for BGP peer prefix object. Default value is "20000".
-  * restart_time - (Optional) The period of time in minutes before restarting the peer when the prefix limit is reached for BGP peer prefix object. Default value is "infinite".
-  * tenant - (Required) Name of parent Tenant object.
-  * threshold - (Optional) Threshold percentage of the maximum number of prefixes before a warning is issued for BGP peer prefix object. Default value is "75".
+  * alias: (optional) — Name alias for BGP peer prefix object.
+  * action: (optional) — Action when the maximum prefix limit is reached for BGP peer prefix object. Allowed values are "log", "reject", "restart" and "shut". Default value is "reject".
+  * annotation: (optional) — Annotation for BGP peer prefix object.
+  * description: (optional) — Description for BGP peer prefix object.
+  * maximum_number_of_prefixes: (optional) — Maximum number of prefixes allowed from the peer for BGP peer prefix object. Default value is "20000".
+  * restart_time: (optional) — The period of time in minutes before restarting the peer when the prefix limit is reached for BGP peer prefix object. Default value is "infinite".
+  * tenant: (required) — Name of parent Tenant object.
+  * threshold: (optional) — Threshold percentage of the maximum number of prefixes before a warning is issued for BGP peer prefix object. Default value is "75".
   EOT
   type = map(object(
     {
@@ -46,6 +40,15 @@ variable "policies_bgp_peer_prefix" {
   ))
 }
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "bgpPeerPfxPol"
+ - Distinguished Name: "uni/tn-{tenant}/bgpPfxP-{name}"
+GUI Location:
+ - Tenants > {tenant} > Networking > Policies > Protocol > BGP >  BGP Peer Prefix > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_bgp_peer_prefix" "policies_bgp_peer_prefix" {
   depends_on = [
     aci_tenant.tenants

@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — Policies — BGP Best Path — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "policies_bgp_best_path" {
   default = {
     "default" = {
@@ -10,12 +15,12 @@ variable "policies_bgp_best_path" {
   }
   description = <<-EOT
   Key - Name of the BGP Best Path Policies
-  * alias - (Optional) Name alias for object BGP Best Path Policy.
-  * tenant_dn - (Required) Distinguished name of parent tenant object.
-  * annotation - (Optional) Annotation for object BGP Best Path Policy.
-  * description - (Optional) Description for object BGP Best Path Policy.
-  * relax_as_path_restriction - (Optional) The control state.  Allowed values: "asPathMultipathRelax", "0". Default Value: "0".
-  * tenant - (Required) Name of parent Tenant object.
+  * alias: (optional) — Name alias for object BGP Best Path Policy.
+  * tenant_dn: (required) — Distinguished name of parent tenant object.
+  * annotation: (optional) — Annotation for object BGP Best Path Policy.
+  * description: (optional) — Description for object BGP Best Path Policy.
+  * relax_as_path_restriction: (optional) — The control state.  Allowed values: "asPathMultipathRelax", "0". Default Value: "0".
+  * tenant: (required) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
