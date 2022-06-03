@@ -22,24 +22,24 @@ variable "global_mcp_instance_policy" {
     }
   }
   description = <<-EOT
-    Key — Unique Identifier for the Map of Objects.  Not used in assignment.  There can only be the default MCP Instance Policy.
-    * admin_state — The administrative state of the MCP instance policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * enable_mcp_pdu_per_vlan — When set to true it enables Enable MCP PDU per VLAN.  When set to false it disables Enable MCP PDU per VLAN.
-    * initial_delay — The delay time before the MCP starts taking action based on the value of the Loop Protection Action, which is a value configured by the user. From the system bootup until the Initial Delay Timer timeout, MCP will only create a syslog entry if a loop is detected. The range is from 0 to 1800 seconds. The default is 180 seconds.
-    * loop_detect_multiplication_factor — he multiplication factor that MCP uses to determine when a loop is formed. It denotes the number of continuous packets a port has to receive before claiming a loop is formed. The range is from 1 to 255. The default is 3.  For strict mode MCP, during the grace timer period, the default value of 3 is overruled. Even if 1 packet is received, the port is disabled.
-    * loop_protect_action — Determines how MCP acts when a loop is detected. MCP error-disables the port or syslog only based on this value. The default is Port Disabled.  For strict mode MCP, even if you uncheck the Port Disable check box, the port is disabled if a loop is detected.
-    * transmission_frequency — Sets the transmission frequency of the instance advertisements. The range is from 100 milliseconds to 300 seconds. The default is 2 seconds.
-      - seconds
-      - msec
+    Key — This should always be default
+    * admin_state: (default: enabled) — The administrative state of the MCP instance policy.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * enable_mcp_pdu_per_vlan: (default: true) — When set to true it enables Enable MCP PDU per VLAN.  When set to false it disables Enable MCP PDU per VLAN.
+    * initial_delay: (default: 180) — The delay time before the MCP starts taking action based on the value of the Loop Protection Action, which is a value configured by the user. From the system bootup until the Initial Delay Timer timeout, MCP will only create a syslog entry if a loop is detected. The range is from 0 to 1800 seconds.
+    * loop_detect_multiplication_factor: (default: 3) — he multiplication factor that MCP uses to determine when a loop is formed. It denotes the number of continuous packets a port has to receive before claiming a loop is formed. The range is from 1 to 255. For strict mode MCP, during the grace timer period, the default value of 3 is overruled. Even if 1 packet is received, the port is disabled.
+    * loop_protect_action: (default: true) — Determines how MCP acts when a loop is detected. MCP error-disables the port or syslog only based on this value. For strict mode MCP, even if you uncheck the Port Disable check box, the port is disabled if a loop is detected.
+    * transmission_frequency — Sets the transmission frequency of the instance advertisements. The range is from 100 milliseconds to 300 seconds.
+      - seconds: (default: 2)
+      - msec: (default: 0)
   EOT
   type = map(object(
     {
       description                       = optional(string)
       admin_state                       = optional(string)
       annotation                        = optional(string)
-      enable_mcp_pdu_per_vlan           = bool
+      enable_mcp_pdu_per_vlan           = optional(bool)
       initial_delay                     = optional(number)
       loop_detect_multiplication_factor = optional(number)
       loop_protection_disable_port      = optional(bool)

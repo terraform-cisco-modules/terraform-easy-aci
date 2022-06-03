@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Syslog — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "syslog" {
   default = {
     "default" = {
@@ -43,6 +48,36 @@ variable "syslog" {
     }
   }
   description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      description = ""
+      admin_state = "enabled"
+      annotation  = ""
+      console_destination = [
+          admin_state = "enabled"
+          severity    = "critical"
+      format = "aci"
+      include_types = [
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+      local_file_destination = [
+          admin_state = "enabled"
+          severity    = "warnings"
+      min_severity = "warnings"
+      remote_destinations = [
+          admin_state         = "enabled"
+          forwarding_facility = "local7"
+          host                = "host.example.com"
+          management_epg      = "default"
+          management_epg_type = "oob"
+          port                = 514
+          severity            = "warnings"
+          transport           = "udp"
+      show_milliseconds_in_timestamp = false
+      show_time_zone_in_timestamp    = false
   EOT
   type = map(object(
     {
@@ -100,8 +135,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "syslog_destination_groups" {
   for_each   = local.syslog
-  dn         = "uni/fabric/slgroup-${each.key}"
   class_name = "syslogGroup"
+  dn         = "uni/fabric/slgroup-${each.key}"
   content = {
     # annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr               = each.value.description
@@ -153,8 +188,8 @@ resource "aci_rest_managed" "syslog_remote_destinations" {
     aci_rest_managed.syslog_destination_groups
   ]
   for_each   = local.syslog_remote_destinations
-  dn         = "uni/fabric/slgroup-${each.value.key1}/rdst-${each.value.host}"
   class_name = "syslogRemoteDest"
+  dn         = "uni/fabric/slgroup-${each.value.key1}/rdst-${each.value.host}"
   content = {
     # annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminState         = each.value.admin_state
@@ -190,8 +225,8 @@ resource "aci_rest_managed" "syslog_sources" {
     aci_rest_managed.syslog_destination_groups
   ]
   for_each   = local.syslog
-  dn         = "uni/fabric/moncommon/slsrc-${each.key}"
   class_name = "syslogSrc"
+  dn         = "uni/fabric/moncommon/slsrc-${each.key}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(

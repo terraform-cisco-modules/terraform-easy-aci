@@ -241,7 +241,7 @@ locals {
   policies_link_level = {
     for k, v in var.policies_link_level : k => {
       annotation                  = v.annotation != null ? v.annotation : ""
-      auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : true
+      auto_negotiation            = v.auto_negotiation != null ? v.auto_negotiation : "on"
       description                 = v.description != null ? v.description : ""
       global_alias                = v.global_alias != null ? v.global_alias : ""
       forwarding_error_correction = v.forwarding_error_correction != null ? v.forwarding_error_correction : "inherit"
@@ -437,7 +437,7 @@ locals {
       fibre_channel_interface_policy = v.fibre_channel_interface_policy != null ? v.fibre_channel_interface_policy : ""
       l2_interface_policy            = v.l2_interface_policy != null ? v.l2_interface_policy : ""
       link_aggregation_policy        = v.link_aggregation_policy != null ? v.link_aggregation_policy : ""
-      link_aggregation_type          = v.link_aggregation_type != null ? v.link_aggregation_type : "node"
+      link_aggregation_type          = v.link_aggregation_type != null ? v.link_aggregation_type : "vpc"
       link_flap_policy               = v.link_flap_policy != null ? v.link_flap_policy : ""
       link_level_flow_control_policy = v.link_level_flow_control_policy != null ? v.link_level_flow_control_policy : ""
       link_level_policy              = v.link_level_policy != null ? v.link_level_policy : ""

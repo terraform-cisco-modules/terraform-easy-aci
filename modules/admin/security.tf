@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Global Security — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "security" {
   default = {
     "default" = {
@@ -23,6 +28,29 @@ variable "security" {
     }
   }
   description = <<-EOT
+    Key — Name of your Firmware Policy
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * lockout_user: (optional) — List of Lockout User Attributes.
+      - enable_lockout: (optional) — Enable blocking of user logins after failed attempts. Allowed values are:
+        * disable: (default)
+        * enable
+      - lockout_duration: (default: 60) — Duration in minutes for which login should be blocked.Duration in minutes for which future logins should be blocked Allowed range is 1-1440.
+      - max_failed_attempts: (default: 5) — Maximum continuous failed logins before blocking user.max failed login attempts before blocking user login Allowed range is 1-15.
+      - max_failed_attempts_window: (default: 5) — Time period for maximum continuous failed logins.times in minutes for max login failures to occur before blocking the user Allowed range is 1-720.
+    * maximum_validity_period: (default: 24) — Maximum Validity Period in hours.The maximum validity period for a webt oken. Allowed range is 4-24.
+    * no_change_interval: (default: 24) — No Password Change Interval in Hours.A minimum period after a password change before the user can change the password again. Allowed range is 0-745.
+    * password_change_interval_enforce: (optional) — he change count/change interval policy selector. This property enables you to select an option for enforcing password change. Allowed values are:
+      - disable
+      - enable: (default)
+    * password_change_interval: (default: 48) — A time interval for limiting the number of password changes. Allowed range is 0-745.
+    * password_changes_within_interval: (default: 2) — Number of Password Changes in Interval.The number of password changes allowed within the change interval. Allowed range is 0-10.
+    * password_expiration_warn_time: (default: 15) — Password Expiration Warn Time in Days.A warning period before password expiration. A warning will be displayed when a user logs in within this number of days of an impending password expiration. Allowed range is 0-30.
+    * password_strength_check: (optional) — assword Strength Check.The password strength check specifies if the system enforces the strength of the user password. Allowed values are:
+      - false
+      - true: (default)
+    * user_passwords_to_store_count: (default: 5) — Password History Count.How many retired passwords are stored in a user's password history. Allowed range is 0-15.
+    * web_session_idle_timeout: (default: 1200) — GUI Idle Timeout in Seconds.The maximum interval time the GUI remains idle before login needs to be refreshed. Allowed range is 60-65525.
+    * web_token_timeout: (default: 600) — Timeout in Seconds.The web token timeout interval. Allowed range is 300-9600.
   EOT
   type = map(object(
     {

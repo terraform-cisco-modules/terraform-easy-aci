@@ -33,34 +33,34 @@ variable "switches_leaf_policy_groups" {
   }
   description = <<-EOT
     key - Name of the Leaf Policy Group.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * bfd_ipv4_policy — The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-    * bfd_ipv6_policy — The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
-    * bfd_multihop_ipv4_policy — The BFD multihop IPv4 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv4 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
-    * bfd_multihop_ipv6_policy — The BFD multihop IPv6 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv6 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
-    * cdp_interface_policy — The CDP policy name.  CDP is used to obtain protocol addresses of neighboring devices and discover those devices. CDP is also be used to display information about the interfaces connecting to the neighboring devices. CDP is media- and protocol-independent, and runs on all Cisco-manufactured equipments including routers, bridges, access servers, and switches.
-    * copp_leaf_policy — The leaf CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
-    * copp_pre_filter — The CoPP Pre-Filter name.  A CoPP prefilter profile is used on spine and leaf switches to filter access to authentication services based on specified sources and TCP ports to protect against DDoS attacks. When deployed on a switch, control plane traffic is denied by default. Only the traffic specified in the CoPP prefilter profile is permitted.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * dot1x_node_authentication_policy — The 802.1x node authentication policy name.  An 802.1x node authorization policy is a client and server-based access control and authentication protocol that restricts unauthorized clients from connecting to a LAN through publicly accessible ports.
-    * equipment_flash_config — Flash Configuration Policy.
-    * fast_link_failover_policy — The fast link failover policy name.  A fast link failover policy provides better convergence of the network.  Fast link failover policies are not supported on the same port as port profiles or remote leaf switch connections.
-    * fibre_channel_node_policy — The default Fibre Channel node policy name.  Fibre channel node policies specify FCoE-related settings, such as the load balance options and FIP keep alive intervals. 
-    * fibre_channel_san_policy — The Fibre Channel SAN policy name.  Fibre Channel SAN policies specify FCoE-related settings: Error detect timeout values (EDTOV), resource allocation timeout values (RATOV), and the MAC address prefix (also called FC map) used by the leaf switch. Typically the default value 0E:FC:00 is used. 
-    * forward_scale_profile_policy — The forwarding scale profile policy name.  The forwarding scale profile policy provides different scalability options. The scaling types are:
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * bfd_ipv4_policy: (default: default) — The BFD IPv4 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
+    * bfd_ipv6_policy: (default: default) — The BFD IPv6 policy name.  Bidirectional Forwarding Detection (BFD) is used to provide sub-second failure detection times in the forwarding path between Cisco ACI fabric border leaf switches configured to support peering router connections.
+    * bfd_multihop_ipv4_policy: (default: default) — The BFD multihop IPv4 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv4 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
+    * bfd_multihop_ipv6_policy: (default: default) — The BFD multihop IPv6 policy name.  Bidirectional Forwarding Detection (BFD) multihop for IPv6 provides subsecond forwarding failure detection for a destination with more than one hop and up to 255 hops.
+    * cdp_interface_policy: (default: default) — The CDP policy name.  CDP is used to obtain protocol addresses of neighboring devices and discover those devices. CDP is also be used to display information about the interfaces connecting to the neighboring devices. CDP is media- and protocol-independent, and runs on all Cisco-manufactured equipments including routers, bridges, access servers, and switches.
+    * copp_leaf_policy: (default: default) — The leaf CoPP policy name.  Control Plane Policing (CoPP) protects the control plane, which ensures network stability, reachability, and packet delivery.
+    * copp_pre_filter: (default: default) — The CoPP Pre-Filter name.  A CoPP prefilter profile is used on spine and leaf switches to filter access to authentication services based on specified sources and TCP ports to protect against DDoS attacks. When deployed on a switch, control plane traffic is denied by default. Only the traffic specified in the CoPP prefilter profile is permitted.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * dot1x_node_authentication_policy: (default: default) — The 802.1x node authentication policy name.  An 802.1x node authorization policy is a client and server-based access control and authentication protocol that restricts unauthorized clients from connecting to a LAN through publicly accessible ports.
+    * equipment_flash_config: (default: default) — Flash Configuration Policy.
+    * fast_link_failover_policy: (default: default) — The fast link failover policy name.  A fast link failover policy provides better convergence of the network.  Fast link failover policies are not supported on the same port as port profiles or remote leaf switch connections.
+    * fibre_channel_node_policy: (default: default) — The default Fibre Channel node policy name.  Fibre channel node policies specify FCoE-related settings, such as the load balance options and FIP keep alive intervals. 
+    * fibre_channel_san_policy: (default: default) — The Fibre Channel SAN policy name.  Fibre Channel SAN policies specify FCoE-related settings: Error detect timeout values (EDTOV), resource allocation timeout values (RATOV), and the MAC address prefix (also called FC map) used by the leaf switch. Typically the default value 0E:FC:00 is used. 
+    * forward_scale_profile_policy: (default: default) — The forwarding scale profile policy name.  The forwarding scale profile policy provides different scalability options. The scaling types are:
       - Dual Stack — Provides scalability of up to 12,000 endpoints for IPv6 configurations and up to 24,000 endpoints for IPv4 configurations.
       - High LPM — Provides scalability similar to the dual-stack policy, except that the longest prefix match (LPM) scale is 128,000 and the policy scale is 8,000.
       - IPv4 Scale — Enables systems with no IPv6 configurations to increase scalability to 48,000 IPv4 endpoints.
       - High Dual Stack — Provides scalability of up to 64,000 MAC endpoints, 64,000 IPv4 endpoints, and 24,000 IPv6 endpoints.
       For more information about this feature, see the Cisco APIC Forwarding Scale Profiles document.
-    * lldp_interface_policy — The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
-    * monitoring_policy — The monitoring policy name.  Monitoring policies can include policies such as event/fault severity or the fault lifecycle. 
-    * netflow_node_policy — The NetFlow node policy name.  The node-level policy deploys two different NetFlow timers that specify the rate at which flow records are sent to the external collector.
-    * poe_node_policy — The PoE node policy name.  PoE node policies control the overall power setting for the switch.
-    * ptp_node_policy — The PTP node policy name.  The Precision Time Protocol (PTP) synchronizes distributed clocks in a system using Ethernet networks.
-    * spanning_tree_interface_policy — The spanning tree policy name.  A spanning tree protocol (STP) policy prevents loops caused by redundant paths in your network.
-    * synce_node_policy — The SyncE Node policy name.  Synchronous Ethernet (SyncE) provides high-quality clock synchronization over Ethernet ports by using known common precision frequency references.
-    * usb_configuration_policy — The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
+    * lldp_interface_policy: (default: default) — The LLDP policy name.  LLDP uses the logical link control (LLC) services to transmit and receive information to and from other LLDP agents.
+    * monitoring_policy: (default: default) — The monitoring policy name.  Monitoring policies can include policies such as event/fault severity or the fault lifecycle. 
+    * netflow_node_policy: (default: default) — The NetFlow node policy name.  The node-level policy deploys two different NetFlow timers that specify the rate at which flow records are sent to the external collector.
+    * poe_node_policy: (default: default) — The PoE node policy name.  PoE node policies control the overall power setting for the switch.
+    * ptp_node_policy: (default: default) — The PTP node policy name.  The Precision Time Protocol (PTP) synchronizes distributed clocks in a system using Ethernet networks.
+    * spanning_tree_interface_policy: (default: default) — The spanning tree policy name.  A spanning tree protocol (STP) policy prevents loops caused by redundant paths in your network.
+    * synce_node_policy: (default: default) — The SyncE Node policy name.  Synchronous Ethernet (SyncE) provides high-quality clock synchronization over Ethernet ports by using known common precision frequency references.
+    * usb_configuration_policy: (default: default) — The USB configuration policy name.  The USB configuration policy can disable the USB port on a Cisco ACI-mode switch to prevent someone booting the switch from a USB image that contains malicious code.
   EOT
   type = map(object(
     {

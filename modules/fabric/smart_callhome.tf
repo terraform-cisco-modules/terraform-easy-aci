@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Smart CallHome — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "smart_callhome" {
   default = {
     "default" = {
@@ -41,6 +46,40 @@ variable "smart_callhome" {
       ]
     }
   }
+  description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      admin_state            = "enabled"
+      annotation             = ""
+      contact_information    = ""
+      contract_id            = ""
+      customer_contact_email = ""
+      customer_id            = ""
+      description            = ""
+      smart_destinations = [
+          admin_state   = "enabled"
+          email         = "admin@example.com"
+          format        = "short-txt" # aml|short-txt|xml
+          rfc_compliant = true
+      from_email = ""
+      include_types = [
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+      phone_contact  = ""
+      reply_to_email = ""
+      site_id        = ""
+      street_address = ""
+      smtp_server = [
+          management_epg      = "default"
+          management_epg_type = "oob" # inb|oob
+          port_number         = 25
+          secure_smtp         = false
+          smtp_server         = "relay.example.com"
+          username            = ""
+  EOT
   type = map(object(
     {
       admin_state            = optional(string)
@@ -103,8 +142,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "smart_callhome_destination_groups" {
   for_each   = local.smart_callhome
-  dn         = "uni/fabric/smartgroup-${each.key}"
   class_name = "callhomeSmartGroup"
+  dn         = "uni/fabric/smartgroup-${each.key}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr = each.value.description
@@ -114,8 +153,8 @@ resource "aci_rest_managed" "smart_callhome_destination_groups" {
 
 resource "aci_rest_managed" "smart_callhome_destination_groups_callhome_profile" {
   for_each   = local.smart_callhome
-  dn         = "uni/fabric/smartgroup-${each.key}/prof"
   class_name = "callhomeProf"
+  dn         = "uni/fabric/smartgroup-${each.key}/prof"
   content = {
     addr       = each.value.street_address
     adminState = each.value.admin_state
@@ -140,8 +179,8 @@ resource "aci_rest_managed" "smart_callhome_smtp_servers" {
     aci_rest_managed.smart_callhome_destination_groups
   ]
   for_each   = local.smart_callhome_smtp_servers
-  dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
   class_name = "callhomeSmtpServer"
+  dn         = "uni/fabric/smartgroup-${each.value.key1}/prof/smtp"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     host = each.value.smtp_server
@@ -170,8 +209,8 @@ resource "aci_rest_managed" "smart_callhome_destinations" {
     aci_rest_managed.smart_callhome_destination_groups
   ]
   for_each   = local.smart_callhome_destinations
-  dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
   class_name = "callhomeSmartDest"
+  dn         = "uni/fabric/smartgroup-${each.value.key1}/smartdest-${each.value.name}"
   content = {
     # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminState   = each.value.admin_state

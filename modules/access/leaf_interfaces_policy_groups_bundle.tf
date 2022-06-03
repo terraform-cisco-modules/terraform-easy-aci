@@ -35,45 +35,45 @@ variable "leaf_interfaces_policy_groups_bundle" {
   }
   description = <<-EOT
     Key — Name of the Leaf Interface - Access Policy Group.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * attachable_entity_profile — The Name of the Global Attachable Entity Profile.
-    * cdp_interface_policy — The Name of the CDP Interface Policy.
-    * copp_interface_policy — The Name of the CoPP Interafce Policy.
-    * data_plane_policing_egress — The Name of the Egress Data Plane Policing Policy.
-    * data_plane_policing_ingress — The Name of the Ingress Data Plane Policing Policy.
-    * description — escription to add to the Object.  The description can be up to 128 characters.
-    * fibre_channel_interface_policy — The Name of the 802.1X Port Authentication Policy.
-    * l2_interface_policy — The Name of the Layer2 Interface Policy.
-    * link_aggregation_policy — The Name of the Link Aggreation Policy.
-    * link_aggregation_type — The Type of Link Aggregation.  Options are:
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * attachable_entity_profile: (required) — The Name of the Global Attachable Entity Profile.
+    * cdp_interface_policy: (optional) — The Name of the CDP Interface Policy.
+    * copp_interface_policy: (optional) — The Name of the CoPP Interafce Policy.
+    * data_plane_policing_egress: (optional) — The Name of the Egress Data Plane Policing Policy.
+    * data_plane_policing_ingress: (optional) — The Name of the Ingress Data Plane Policing Policy.
+    * description: (optional) — escription to add to the Object.  The description can be up to 128 characters.
+    * fibre_channel_interface_policy: (optional) — The Name of the 802.1X Port Authentication Policy.
+    * l2_interface_policy: (optional) — The Name of the Layer2 Interface Policy.
+    * link_aggregation_policy: (optional) — The Name of the Link Aggreation Policy.
+    * link_aggregation_type: (optional) — The Type of Link Aggregation.  Options are:
       - pc
-      - vpc
-    * link_flap_policy — The Name of the Link Flap Policy.
-    * link_level_flow_control_policy — The Name of the Link Level Flow Control Policy.
-    * link_level_policy — The Name of the Link Level Policy.
-    * lldp_interface_policy — The Name of the LLDP Interface Policy.
-    * macsec_policy — The Name of the MACSec Policy.
-    * mcp_interface_policy — The Name of the MCP Interface Policy.
-    * monitoring_policy — The Name of the Monitoring Policy.
-    * netflow_monitor_policies — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
+      - vpc: (default)
+    * link_flap_policy: (optional) — The Name of the Link Flap Policy.
+    * link_level_flow_control_policy: (optional) — The Name of the Link Level Flow Control Policy.
+    * link_level_policy: (optional) — The Name of the Link Level Policy.
+    * lldp_interface_policy: (optional) — The Name of the LLDP Interface Policy.
+    * macsec_policy: (optional) — The Name of the MACSec Policy.
+    * mcp_interface_policy: (optional) — The Name of the MCP Interface Policy.
+    * monitoring_policy: (optional) — The Name of the Monitoring Policy.
+    * netflow_monitor_policies: (optional) — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
       - ip_filter_type — IP Filter Type.  Options are:
         * ce
-        * ipv4
+        * ipv4: (default)
         * ipv6
       - netflow_monitor_policy — The Name of the Netflow Monitor Policy.
-    * port_security_policy — The Name of the Port Security Policy.
-    * priority_flow_control_policy — The Name of the Priority Flow Control Policy.
-    * slow_drain_policy — The Name of the Slow Drain Policy.
-    * span_destination_groups — The Name of the Span Destination Group.
-    * span_source_groups — The Name of the Span Source Groups.
-    * spanning_tree_interface_policy — The Name of the Spanning Tree Interface Policy.
-    * storm_control_policy — The Name of the Storm Control Policy.
+    * port_security_policy: (optional) — The Name of the Port Security Policy.
+    * priority_flow_control_policy: (optional) — The Name of the Priority Flow Control Policy.
+    * slow_drain_policy: (optional) — The Name of the Slow Drain Policy.
+    * span_destination_groups: (optional) — The Name of the Span Destination Group.
+    * span_source_groups: (optional) — The Name of the Span Source Groups.
+    * spanning_tree_interface_policy: (optional) — The Name of the Spanning Tree Interface Policy.
+    * storm_control_policy: (optional) — The Name of the Storm Control Policy.
   EOT
   type = map(object(
     {
       annotation                     = optional(string)
-      attachable_entity_profile      = optional(string)
+      attachable_entity_profile      = string
       cdp_interface_policy           = optional(string)
       copp_interface_policy          = optional(string)
       data_plane_policing_egress     = optional(string)
@@ -128,7 +128,7 @@ resource "aci_leaf_access_bundle_policy_group" "leaf_interfaces_policy_groups_bu
   for_each    = local.leaf_interfaces_policy_groups_bundle
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
-  lag_t       = each.value.link_aggregation_type == "pc" ? "node" : "link"
+  lag_t       = each.value.link_aggregation_type == "vpc" ? "node" : "link"
   name        = each.key
   # class: infraAttEntityP
   relation_infra_rs_att_ent_p = length(compact([each.value.attachable_entity_profile])

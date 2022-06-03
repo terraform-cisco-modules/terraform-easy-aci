@@ -14,10 +14,10 @@ variable "policies_port_security" {
   }
   description = <<-EOT
     Key — Name of the Port Security Policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * maximum_endpoints — (Default value is 0).  The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
-    * port_security_timeout — (Default value is 60).  The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * maximum_endpoints: (default: 0) — The maximum number of endpoints that can be learned on the interface. The current supported range for the maximum endpoints configured value is from 0 to 12000. If the maximum endpoints value is 0, the port security policy is disabled on that port.
+    * port_security_timeout: (default: 60) — The delay time before MAC learning is re-enabled. The current supported range for the timeout value is from 60 to 3600.
   EOT
   type = map(object(
     {

@@ -7,7 +7,7 @@ variable "policies_link_level" {
   default = {
     "default" = {
       annotation                  = ""
-      auto_negotiation            = true
+      auto_negotiation            = "on"
       description                 = ""
       forwarding_error_correction = "inherit"
       global_alias                = ""
@@ -17,23 +17,23 @@ variable "policies_link_level" {
   }
   description = <<-EOT
     Key — Name of the Link Level Policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * auto_negotiation — (Default value is true).  Policy auto negotiation for object fabric if pol. Allowed values:
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * auto_negotiation: (optional) — Policy auto negotiation for object fabric if pol. Allowed values:
       - off
-      - on
+      - on: (default)
       - on-enforce
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-    * forwarding_error_correction — (Default value is "inherit").  Forwarding error correction for object fabric if pol. Allowed values: 
-      - inherit
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias: (optional) — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * forwarding_error_correction: (optional) — Forwarding error correction for object fabric if pol. Allowed values: 
+      - inherit: (default)
       - cl91-rs-fec
       - cl74-fc-fec
       - ieee-rs-fec
       - cons16-rs-fec
       - kp-fec
       - disable-fec
-    * link_debounce_interval — (Default value is 100).  Link debounce interval for object fabric if pol. Range of allowed values: 0-5000.
-    * speed — (Default value is "inherit").  Port speed for object fabric if pol. Allowed values: 
+    * link_debounce_interval: (default: 100) — Link debounce interval for object fabric if pol. Range of allowed values: 0-5000.
+    * speed: (optional) — Port speed for object fabric if pol. Allowed values: 
       - unknown
       - 100M
       - 1G
@@ -44,7 +44,7 @@ variable "policies_link_level" {
       - 100G
       - 200G
       - 400G
-      * inherit
+      - inherit: (optional)
   EOT
   type = map(object(
     {
@@ -94,8 +94,8 @@ resource "aci_rest_managed" "policies_link_level_global_alias" {
     aci_fabric_if_pol.policies_link_level,
   ]
   for_each   = local.policies_link_level_global_alias
-  dn         = "uni/infra/hintfpol-${each.key}"
   class_name = "tagAliasInst"
+  dn         = "uni/infra/hintfpol-${each.key}"
   content = {
     name = each.value.global_alias
   }

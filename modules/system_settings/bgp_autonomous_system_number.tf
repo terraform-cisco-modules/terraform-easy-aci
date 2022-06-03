@@ -15,8 +15,8 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "bgp_autonomous_system_number" {
-  dn         = "uni/fabric/bgpInstP-default/as"
   class_name = "bgpAsP"
+  dn         = "uni/fabric/bgpInstP-default/as"
   content = {
     # annotation = var.annotation
     asn = var.bgp_autonomous_system_number

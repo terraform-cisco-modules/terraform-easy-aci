@@ -12,8 +12,8 @@ variable "domains_layer3" {
   }
   description = <<-EOT
     Key — Name of the Layer 3 Domain.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * vlan_pool — The Name of the VLAN Pool to Associate to the Domain.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * vlan_pool: (required) — The Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {

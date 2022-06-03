@@ -20,18 +20,18 @@ variable "global_qos_class" {
     }
   }
   description = <<-EOT
-    Key — Unique Identifier for the Map of Objects.  Not used in assignment.  There can only be the default MCP Instance Policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * elephant_trap_age_period — Elephant Trap Age Timer.  Minimum allowed value is 0.
-    * elephant_trap_bandwidth_threshold — Elephant flow track activeness.  Minimum allowed value is 0.
-    * elephant_trap_byte_coun — Elephant Trap flow identifier.  Minimum allowed value is 0.
-    * elephant_trap_state — Elephant Trap state.  Set to true to enable
-    * fabric_flush_interval — Fabric Flush Interval in milliseconds.  Range is 100-1000.  Default is 500.
-    * fabric_flush_state — Fabric Priority Flow Control flush State.
-    * micro_burst_spine_queues —  Micro Burst Spine Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
-    * micro_burst_leaf_queues — Micro Burst Leaf Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
-    * preserve_cos — CoS Preservation, to guarantee the QoS priority settings of the various traffic streams, in a single-pod topology. In multipod topologies, use a DSCP policy to enable preserving QoS priority mapping for the traffic streams as they transit the inter-pod network.  QoS Class—Priority flow control requires that CoS levels be globally enabled for the fabric and assigned to the profiles of applications that generate FCoE traffic.
+    Key — This should always be default.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * elephant_trap_age_period: (default: 0) — Elephant Trap Age Timer.  Minimum allowed value is 0.
+    * elephant_trap_bandwidth_threshold: (default: 0) — Elephant flow track activeness.  Minimum allowed value is 0.
+    * elephant_trap_byte_coun: (default: 0) — Elephant Trap flow identifier.  Minimum allowed value is 0.
+    * elephant_trap_state: (default: false) — Elephant Trap state.  Set to true to enable
+    * fabric_flush_interval: (default: 500) — Fabric Flush Interval in milliseconds.  Range is 100-1000.
+    * fabric_flush_state: (default: false) — Fabric Priority Flow Control flush State.
+    * micro_burst_spine_queues: (default: 0) —  Micro Burst Spine Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
+    * micro_burst_leaf_queues: (default: 0) — Micro Burst Leaf Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
+    * preserve_cos: (default: true) — CoS Preservation, to guarantee the QoS priority settings of the various traffic streams, in a single-pod topology. In multipod topologies, use a DSCP policy to enable preserving QoS priority mapping for the traffic streams as they transit the inter-pod network.  QoS Class—Priority flow control requires that CoS levels be globally enabled for the fabric and assigned to the profiles of applications that generate FCoE traffic.
   EOT
   type = map(object(
     {

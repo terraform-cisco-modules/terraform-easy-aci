@@ -69,7 +69,7 @@ locals {
         authentication_type   = v.authentication_type != null ? v.authentication_type : "usePassword"
         description           = v.description != null ? v.description : ""
         format                = v.format != null ? v.format : "json"
-        include_secure_fields = v.include_secure_fields != null ? v.include_secure_fields : true
+        include_secure_fields = v.include_secure_fields != null ? v.include_secure_fields : false
         key1                  = key
         management_epg        = v.management_epg != null ? v.management_epg : "default"
         management_epg_type   = v.management_epg_type != null ? v.management_epg_type : "oob"
@@ -80,9 +80,7 @@ locals {
         remote_path           = v.remote_path != null ? v.remote_path : "/tmp"
         remote_port           = v.remote_port != null ? v.remote_port : 22
         snapshot              = v.snapshot != null ? v.snapshot : false
-        ssh_key_contents      = v.ssh_key_contents != null ? v.ssh_key_contents : 0
-        ssh_key_passphrase    = v.ssh_key_passphrase != null ? v.ssh_key_passphrase : 0
-        start_now             = v.start_now != null ? v.start_now : "untriggered"
+        start_now             = v.start_now != null ? v.start_now : false
         username              = v.username != null ? v.username : "admin"
       }
     ]
@@ -106,8 +104,6 @@ locals {
         remote_path           = v.remote_path
         remote_port           = v.remote_port
         snapshot              = v.snapshot
-        ssh_key_contents      = v.ssh_key_contents
-        ssh_key_passphrase    = v.ssh_key_passphrase
         start_now             = v.start_now
         username              = v.username
       }
@@ -123,14 +119,24 @@ locals {
         delay_between_node_upgrades = v.delay_between_node_upgrades != null ? v.delay_between_node_upgrades : 0
         description                 = v.description != null ? v.description : ""
         key1                        = key
-        maximum_concurrent_nodes    = v.maximum_concurrent_nodes != null ? v.maximum_concurrent_nodes : "unlimited"
-        maximum_running_time        = v.maximum_running_time != null ? v.maximum_running_time : "unlimited"
+        maximum_concurrent_nodes    = v.maximum_concurrent_nodes != null ? v.maximum_concurrent_nodes : 0
+        maximum_running_time        = v.maximum_running_time != null ? v.maximum_running_time : 0
         processing_break            = v.processing_break != null ? v.processing_break : "none"
-        processing_size_capacity    = v.processing_size_capacity != null ? v.processing_size_capacity : "unlimited"
-        scheduled_days              = v.scheduled_days != null ? v.scheduled_days : "every-day"
-        scheduled_hour              = v.scheduled_hour != null ? v.scheduled_hour : 23
-        scheduled_minute            = v.scheduled_minute != null ? v.scheduled_minute : 45
-        window_type                 = v.window_type != null ? v.window_type : "recurring"
+        processing_size_capacity    = v.processing_size_capacity != null ? v.processing_size_capacity : 0
+        schedule = v.schedule != null ? [
+          for s in v.schedule : {
+            days   = s.days != null ? s.days : "every-day"
+            hour   = s.hour != null ? s.hour : 23
+            minute = s.minute != null ? s.minute : 45
+          }
+          ] : [
+          {
+            days   = "every-day"
+            hour   = 23
+            minute = 45
+          }
+        ]
+        window_type = v.window_type != null ? v.window_type : "recurring"
       }
     ]
   ])
@@ -154,7 +160,7 @@ locals {
       notify_conditions      = v.notify_conditions != null ? v.notify_conditions : "notifyOnlyOnFailures"
       run_mode               = v.run_mode != null ? v.run_mode : "pauseOnlyOnFailures"
       simulator              = v.simulator != null ? v.simulator : false
-      version                = v.version != null ? v.version : "5.2(3g)"
+      version                = v.version != null ? v.version : "5.2(4e)"
       version_check_override = v.version_check_override != null ? v.version_check_override : "untriggered"
     }
   }

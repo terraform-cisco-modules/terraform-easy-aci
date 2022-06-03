@@ -13,9 +13,11 @@ variable "policies_mcp_interface" {
   }
   description = <<-EOT
     Key — Name of the MCP Interface Policy.
-    * admin_state — (Default value is "enabled").  The administrative state of the MCP interface policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * admin_state: (optional) — The administrative state of the MCP interface policy.  Options are:
+      - disabled
+      - enabled: (default)
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
   EOT
   type = map(object(
     {

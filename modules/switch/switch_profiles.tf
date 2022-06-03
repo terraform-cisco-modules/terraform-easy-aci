@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-Switch Profile Variables
+Switch Profile — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "switch_profiles" {
@@ -51,30 +51,29 @@ variable "switch_profiles" {
     }
   }
   description = <<-EOT
-  key - Node ID of the Leaf or Spine
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * external_pool_id:
-  * interfaces:
-    - Key: The Name of the Interface Selector.  This Must be in the format of X/X for a regular leaf port or X/X/X for a breakout sub port.
-      * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-      * interface_description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-      * policy_group: Name of the Interface Policy Group
-      * policy_group_type: The type of Policy to Apply to the Port.
-        - access: Access Port Policy Group
-        - breakout: Breakout Port Policy Group
-        - bundle: Port-Channel or Virtual Port-Channel Port Policy Group
-      * sub_port: Flag to tell the Script to create a Sub-Port Block or regular Port Block
-  * monitoring_policy: Name of the Monitoring Policy to assign to the Fabric Node Member.
-  * name: Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
-  * node_type:
-    - leaf
-    - remote-leaf-wan
-    - spine
-    - tier-2-leaf
-  * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
-  * serial_number: Manufacturing Serial Number of the Switch.
-  * two_slot_leaf: Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
+    key — Node ID of the Leaf or Spine
+    * annotation: (optional) — A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * external_pool_id: (optional) — External Pool ID for a remote leaf.
+    * interfaces: (required)
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      - interface_description: (optional) — Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      - policy_group: (optional) — Name of the Interface Policy Group
+      - policy_group_type: (optional) — The type of Policy to Apply to the Port.
+        * access: (default) — Access Port Policy Group
+        * breakout — Breakout Port Policy Group
+        * bundle — Port-Channel or Virtual Port-Channel Port Policy Group
+      - sub_port: (default: false) — Flag to tell the Script to create a Sub-Port Block or regular Port Block
+    * monitoring_policy: (optional) — Name of the Monitoring Policy to assign to the Fabric Node Member.
+    * name: (required) — Hostname of the Leaf plus Name of the Leaf Profile, Leaf Interface Profile, and Leaf Profile Selector.
+    * node_type: (optional):
+      - leaf: (default)
+      - remote-leaf-wan
+      - spine
+      - tier-2-leaf
+    * pod_id: (default: 1) — Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+    * serial_number: (required) — Manufacturing Serial Number of the Switch.
+    * two_slot_leaf: (default: false) — Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
   type = map(object(
     {

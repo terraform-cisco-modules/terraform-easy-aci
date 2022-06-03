@@ -15,11 +15,11 @@ variable "global_attachable_access_entity_profiles" {
   }
   description = <<-EOT
     Key — Name of the Attachable Access Entity Profile Policy.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * layer3_domains — A List of Layer3 Domains to Attach to this AAEP Policy.
-    * physical_domains — A List of Physical Domains to Attach to this AAEP Policy.
-    * vmm_domains — A List of Virtual Domains to Attach to this AAEP Policy.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * layer3_domains: (optional) — A List of Layer3 Domains to Attach to this AAEP Policy.
+    * physical_domains: (optional) — A List of Physical Domains to Attach to this AAEP Policy.
+    * vmm_domains: (optional) — A List of Virtual Domains to Attach to this AAEP Policy.
   EOT
   type = map(object(
     {

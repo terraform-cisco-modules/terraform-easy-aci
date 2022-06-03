@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+SNMP Policy — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "snmp_policies" {
   default = {
     "default" = {
@@ -28,6 +33,38 @@ variable "snmp_policies" {
       users             = []
     }
   }
+  description = <<-EOT
+    Key - Name for the DNS Profile
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      admin_state = "enabled"
+      annotation  = ""
+      contact     = ""
+      description = ""
+      include_types = [
+        {
+          audit_logs   = false
+          events       = false
+          faults       = true
+          session_logs = false
+        }
+      ]
+      location = ""
+      snmp_client_groups = [
+        {
+          clients             = []
+              address = string
+              name    = optional(string)
+          description         = ""
+          management_epg      = "default"
+          management_epg_type = "oob"
+          name                = "default"
+        }
+      ]
+      snmp_communities  = []
+      snmp_destinations = []
+      users             = []
+  EOT
   type = map(object(
     {
       admin_state = optional(string)
@@ -203,8 +240,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "snmp_policies" {
   for_each   = local.snmp_policies
-  dn         = "uni/fabric/snmppol-${each.key}"
   class_name = "snmpPol"
+  dn         = "uni/fabric/snmppol-${each.key}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     adminSt = each.value.admin_state
@@ -230,8 +267,8 @@ resource "aci_rest_managed" "snmp_client_groups" {
     aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_client_groups
-  dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.name}"
   class_name = "snmpClientGrpP"
+  dn         = "uni/fabric/snmppol-${each.value.key1}/clgrp-${each.value.name}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr = each.value.description
@@ -262,12 +299,12 @@ resource "aci_rest_managed" "snmp_client_group_clients" {
     aci_rest_managed.snmp_client_groups
   ]
   for_each   = local.snmp_client_group_clients
-  dn         = "uni/fabric/snmppol-${each.value.snmp_policy}/clgrp-${each.value.client_group}/client-[${each.value.address}]"
   class_name = "snmpClientP"
+  dn         = "uni/fabric/snmppol-${each.value.snmp_policy}/clgrp-${each.value.client_group}/client-[${each.value.address}]"
   content = {
-    addr = each.value.address
-    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name = each.value.name
+    addr       = each.value.address
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    name       = each.value.name
   }
 }
 
@@ -327,8 +364,8 @@ resource "aci_rest_managed" "snmp_policies_users" {
     aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_policies_users
-  dn         = "uni/fabric/snmppol-${each.value.key1}/user-[${each.value.username}]"
   class_name = "snmpUserP"
+  dn         = "uni/fabric/snmppol-${each.value.key1}/user-[${each.value.username}]"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     authKey = length(regexall(
@@ -366,8 +403,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "snmp_monitoring_destination_groups" {
   for_each   = local.snmp_policies
-  dn         = "uni/fabric/snmpgroup-${each.key}"
   class_name = "snmpGroup"
+  dn         = "uni/fabric/snmpgroup-${each.key}"
   content = {
     descr = each.value.description
     name  = each.key
@@ -389,8 +426,8 @@ resource "aci_rest_managed" "snmp_trap_destinations" {
     aci_rest_managed.snmp_monitoring_destination_groups
   ]
   for_each   = local.snmp_trap_destinations
-  dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
   class_name = "snmpTrapDest"
+  dn         = "uni/fabric/snmpgroup-${each.value.key1}/trapdest-${each.value.host}-port-${each.value.port}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     host = each.value.host
@@ -428,8 +465,8 @@ resource "aci_rest_managed" "snmp_policies_trap_servers" {
     aci_rest_managed.snmp_policies
   ]
   for_each   = local.snmp_trap_destinations
-  dn         = "uni/fabric/snmppol-${each.value.key1}/trapfwdserver-[${each.value.host}]"
   class_name = "snmpTrapFwdServerP"
+  dn         = "uni/fabric/snmppol-${each.value.key1}/trapfwdserver-[${each.value.host}]"
   content = {
     addr = each.value.host
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -449,8 +486,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "snmp_trap_source" {
   for_each   = local.snmp_policies
-  dn         = "uni/fabric/moncommon/snmpsrc-${each.key}"
   class_name = "snmpSrc"
+  dn         = "uni/fabric/moncommon/snmpsrc-${each.key}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     incl = alltrue(

@@ -17,13 +17,13 @@ variable "spine_interface_policy_groups" {
   }
   description = <<-EOT
     key — Name of the Spine Interface Policy Group.
-    * attachable_entity_profile — Name of the Access Entity Profile Policy.  An Attached Entity Profile (AEP) provides a template to deploy hypervisor policies or application EPGs on a large set of ports.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * cdp_interface_policy — Name of the CDP Interface Policy.  Cisco Discovery Protocol (CDP) policy to obtain protocol addresses of neighboring devices and discover the platform of these devices.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-    * link_level_policy — Name of the Link Level Policy.  Link Level policy specifies Layer 1 parameters for host facing ports.
-    * macsec_policy — Name of the MACsec Policy.  
+    * attachable_entity_profile: (required) — Name of the Access Entity Profile Policy.  An Attached Entity Profile (AEP) provides a template to deploy hypervisor policies or application EPGs on a large set of ports.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * cdp_interface_policy: (optional) — Name of the CDP Interface Policy.  Cisco Discovery Protocol (CDP) policy to obtain protocol addresses of neighboring devices and discover the platform of these devices.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias: (optional) — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * link_level_policy: (optional) — Name of the Link Level Policy.  Link Level policy specifies Layer 1 parameters for host facing ports.
+    * macsec_policy: (optional) — Name of the MACsec Policy.  
   EOT
   type = map(object(
     {
@@ -87,8 +87,8 @@ resource "aci_rest_managed" "spine_interface_policy_groups_global_alias" {
     aci_spine_port_policy_group.spine_interface_policy_groups,
   ]
   for_each   = local.spine_interface_policy_groups_global_alias
-  dn         = "uni/infra/funcprof/spaccportgrp-${each.key}"
   class_name = "tagAliasInst"
+  dn         = "uni/infra/funcprof/spaccportgrp-${each.key}"
   content = {
     name = each.value.global_alias
   }

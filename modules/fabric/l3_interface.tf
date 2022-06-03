@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+L3 Interface — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "l3_interface" {
   default = {
     "default" = {
@@ -7,12 +12,12 @@ variable "l3_interface" {
     }
   }
   description = <<-EOT
-  Key: Name of the Fabric Node Control Policy - **This should always be default.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bfd_isis_policy_configuration: State ( enabled or disabled) of the BFD-IS-IS policy configuration.
-    - enabled: Enables BFD-IS-IS policy.
-    - disabled: Disables BFD-IS-IS policy.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    Key — Name of the Fabric Node Control Policy - **This should always be default.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * bfd_isis_policy_configuration: (optional) — State ( enabled or disabled) of the BFD-IS-IS policy configuration.
+      - enabled: (default)
+      - disabled
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
   EOT
   type = map(object(
     {

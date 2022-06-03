@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Pod Policy Group — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "pod_policy_groups" {
   default = {
     "default" = {
@@ -13,16 +18,16 @@ variable "pod_policy_groups" {
     }
   }
   description = <<-EOT
-  key - Name of the Pod Policy Group
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bgp_route_reflector_policy: Name of the BGP Route Reflector Policy.
-  * coop_group_policy: Name of the COOP Group Policy.
-  * date_time_policy: Name of the Data and Time Policy.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * isis_policy: Name of the ISIS Policy.
-  * macsec_policy: Name of the MACSec Policy.
-  * management_access_policy: Name of the Management Access Policy.
-  * snmp_policy: Name of the SNMP Policy.
+    key — Name of the Pod Policy Group
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * bgp_route_reflector_policy: (default: default) — Name of the BGP Route Reflector Policy.
+    * coop_group_policy: (default: default) — Name of the COOP Group Policy.
+    * date_time_policy: (default: default) — Name of the Data and Time Policy.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * isis_policy: (default: default) — Name of the ISIS Policy.
+    * macsec_policy: (default: default) — Name of the MACSec Policy.
+    * management_access_policy: (default: default) — Name of the Management Access Policy.
+    * snmp_policy: (default: default) — Name of the SNMP Policy.
   EOT
   type = map(object(
     {
@@ -180,8 +185,8 @@ resource "aci_rest_managed" "pod_profiles" {
     aci_rest_managed.pod_policy_groups
   ]
   for_each   = local.pod_profiles
-  dn         = "uni/fabric/podprof-${each.key}"
   class_name = "fabricPodP"
+  dn         = "uni/fabric/podprof-${each.key}"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr = each.value.description
@@ -204,8 +209,8 @@ resource "aci_rest_managed" "pod_profile_selectors_all" {
     aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "ALL" }
-  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-ALL"
   class_name = "fabricPodS"
+  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-ALL"
   content = {
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name = each.value.name
@@ -235,8 +240,8 @@ resource "aci_rest_managed" "pod_profile_selectors_range" {
     aci_rest_managed.pod_profiles
   ]
   for_each   = { for k, v in local.pod_profile_selectors : k => v if v.pod_selector_type == "range" }
-  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-range"
   class_name = "fabricPodS"
+  dn         = "uni/fabric/podprof-${each.value.key1}/pods-${each.value.name}-typ-range"
   content = {
     annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = each.value.name

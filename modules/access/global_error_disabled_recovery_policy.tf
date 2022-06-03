@@ -39,34 +39,34 @@ variable "global_error_disabled_recovery_policy" {
     }
   }
   description = <<-EOT
-    Key — Unique Identifier for the Map of Objects.  Not used in assignment.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * error_disable_recovery_interval — Sets the error disable recovery interval, which specifies the time to recover from an error-disabled state. The interval range is from 30 seconds to 65535 seconds. The default is 300 seconds.
-    * events — Indicates whether an Error Disable Recovery type is enabled (true or false).
-      - arp_inspection — Flag to enable or disable recovery for an ARP Inspection event.
-      - bpdu_guard — Flag to enable or disable recovery for a BPDU Guard event.
-      - debug_1 — Flag to enable or disable recovery for a Debug 1 event.
-      - debug_2 — Flag to enable or disable recovery for a Debug 2 event.
-      - debug_3 — Flag to enable or disable recovery for a Debug 3 event.
-      - debug_4 — Flag to enable or disable recovery for a Debug 4 event.
-      - debug_5 — Flag to enable or disable recovery for a Debug 5 event.
-      - dhcp_rate_limit — Flag to enable or disable recovery for a DHCP Rate Limit event.
-      - ethernet_port_module — Flag to enable or disable recovery for an Ethernet Port Module event.
-      - frequent_endpoint_move — Flag to enable or disable recovery for a Frequent Endpoint Move event.
-      - ip_address_conflict — Flag to enable or disable recovery for an IP Address Conflict event.
-      - ipqos_dcbxp_compatability_failure — Flag to enable or disable recovery for an IP QoS DCBXP Compatibility Failure event.
-      - ipqos_manager_error — Flag to enable or disable recovery for an IP QoS Manager Error event.
-      - link_flap — Flag to enable or disable recovery for a Link Flap event.
-      - loopback — Flag to enable or disable recovery for a Loopback event.
-      - loop_indication_by_mcp — Flag to enable or disable recovery for a Loop Indication by MCP event.
-      - port_security_violation — Flag to enable or disable recovery for a Port Security Violation event.
-      - security_violation — Flag to enable or disable recovery for a Security Violation event.
-      - set_port_state_failed — Flag to enable or disable recovery for a Set Port State Failed event.
-      - storm_control — Flag to enable or disable recovery for a Storm Control event.
-      - stp_inconsist_vpc_peerlink — Flag to enable or disable recovery for an STP Inconsistent VPC Peerlink event.
-      - system_error_based — Flag to enable or disable recovery for a System Error Based event.
-      - unidirection_link_detection — Flag to enable or disable recovery for a Unidirectional Link Detection event.
-      - unknown — Flag to enable or disable recovery for an Unknown event.
+    Key — This should always be default.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * error_disable_recovery_interval: (default: 300) — Sets the error disable recovery interval, which specifies the time to recover from an error-disabled state. The interval range is from 30 seconds to 65535 seconds.
+    * events: (optional) — Indicates whether an Error Disable Recovery type is enabled (true or false).
+      - arp_inspection: (default: false) — Flag to enable or disable recovery for an ARP Inspection event.
+      - bpdu_guard: (default: true) — Flag to enable or disable recovery for a BPDU Guard event.
+      - debug_1: (default: false) — Flag to enable or disable recovery for a Debug 1 event.
+      - debug_2: (default: false) — Flag to enable or disable recovery for a Debug 2 event.
+      - debug_3: (default: false) — Flag to enable or disable recovery for a Debug 3 event.
+      - debug_4: (default: false) — Flag to enable or disable recovery for a Debug 4 event.
+      - debug_5: (default: false) — Flag to enable or disable recovery for a Debug 5 event.
+      - dhcp_rate_limit: (default: false) — Flag to enable or disable recovery for a DHCP Rate Limit event.
+      - ethernet_port_module: (default: false) — Flag to enable or disable recovery for an Ethernet Port Module event.
+      - frequent_endpoint_move: (default: true) — Flag to enable or disable recovery for a Frequent Endpoint Move event.
+      - ip_address_conflict: (default: false) — Flag to enable or disable recovery for an IP Address Conflict event.
+      - ipqos_dcbxp_compatability_failure: (default: false) — Flag to enable or disable recovery for an IP QoS DCBXP Compatibility Failure event.
+      - ipqos_manager_error: (default: false) — Flag to enable or disable recovery for an IP QoS Manager Error event.
+      - link_flap: (default: false) — Flag to enable or disable recovery for a Link Flap event.
+      - loopback: (default: false) — Flag to enable or disable recovery for a Loopback event.
+      - loop_indication_by_mcp: (default: true) — Flag to enable or disable recovery for a Loop Indication by MCP event.
+      - port_security_violation: (default: false) — Flag to enable or disable recovery for a Port Security Violation event.
+      - security_violation: (default: false) — Flag to enable or disable recovery for a Security Violation event.
+      - set_port_state_failed: (default: false) — Flag to enable or disable recovery for a Set Port State Failed event.
+      - storm_control: (default: false)— Flag to enable or disable recovery for a Storm Control event.
+      - stp_inconsist_vpc_peerlink: (default: false) — Flag to enable or disable recovery for an STP Inconsistent VPC Peerlink event.
+      - system_error_based: (default: false) — Flag to enable or disable recovery for a System Error Based event.
+      - unidirection_link_detection: (default: false) — Flag to enable or disable recovery for a Unidirectional Link Detection event.
+      - unknown: (default: false) — Flag to enable or disable recovery for an Unknown event.
   EOT
   type = map(object(
     {

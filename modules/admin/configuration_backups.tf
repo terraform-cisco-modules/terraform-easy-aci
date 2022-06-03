@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Configuration Backups - Admin > Import/Export Policies
+_______________________________________________________________________________________________________________________
+*/
 variable "configuration_backups" {
   default = {
     "default" = {
@@ -7,7 +12,7 @@ variable "configuration_backups" {
           authentication_type   = "usePassword"
           description           = ""
           format                = "json"
-          include_secure_fields = true
+          include_secure_fields = false
           management_epg        = "default"
           management_epg_type   = "oob"
           max_snapshot_count    = 0
@@ -17,9 +22,7 @@ variable "configuration_backups" {
           remote_path           = "/tmp"
           remote_port           = 22
           snapshot              = false
-          ssh_key_contents      = 0
-          ssh_key_passphrase    = 0
-          start_now             = "untriggered"
+          start_now             = false
           username              = "admin"
         }
       ]
@@ -27,18 +30,76 @@ variable "configuration_backups" {
         {
           delay_between_node_upgrades = 0 # Only applicable if the maximum concurrent node count is 1.
           description                 = ""
-          maximum_concurrent_nodes    = "unlimited"
-          maximum_running_time        = "unlimited"
+          maximum_concurrent_nodes    = 0
+          maximum_running_time        = 0
           processing_break            = "none"
-          processing_size_capacity    = "unlimited"
-          scheduled_days              = "every-day"
-          scheduled_hour              = 23
-          scheduled_minute            = 45
-          window_type                 = "recurring"
+          processing_size_capacity    = 0
+          schedule = [
+            {
+              days   = "every-day"
+              hour   = 23
+              minute = 45
+            }
+          ]
+          window_type = "recurring"
         }
       ]
     }
   }
+  description = <<-EOT
+    Key — Name of your Configuration Backup Policy
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * configuration_export: (required) — Configuration Export Map.
+      - authentication_type: (optional) — Authentication Type Choice. Allowed values are:
+        * usePassword: (default)
+        * useSshKeyContents
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - format: (optional) — The data format to be used when exporting the configuration export policy. The format can be:
+        * json: (default)
+        * xml
+      - include_secure_fields: (default: false) — This required the Global AES Settings to be enabled for this to be set to true.
+      - management_epg: (required) — Name of the Management EPG
+      - management_epg_type: (optional) — Type of Management EPG.  Options are:
+        * inb
+        * oob: (default)
+      - max_snapshot_count: (default: 0) — A value between 0-10.
+      - password: (required if UsePassword) — Password Key "remote_password_{key}" when authentication_type is set to "usePassword".
+      - protocol: (optional) — Transfer protocol to be used for data export of object File Remote Path .  Allowed values are:
+        * ftp
+        * scp
+        * sftp: (default)
+        Note: Value "ftp" cannot be set if authentication_type is equal to "useSshKeyContents"
+      - remote_hosts — List of Remote Hosts to Export the Policy to.
+      - remote_path — Remote Path on the Hosts.
+      - remote_port — Remote Protocol Port 0-65535.  Default is port 22.
+      - snapshot — Flag to set Snapshot for object configuration export policy. 
+      - start_now — Flag to start the export now.  Options are true or false
+      - username: (required if UsePassword) — Username for the Remote Host when authentication_type is set to "usePassword".
+    * recurring_window: (required) — Recuring Window Map.
+      - delay_between_node_upgrades: (default: 0) — Delay between node upgrades. Delay between node upgrades in seconds. Range: "0" - "18000".
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - maximum_concurrent_nodes: (default: 0) — The concurrency capacity limit. This is the maximum number of tasks that can be processed concurrently.
+      - maximum_running_time: (default: 0) — The processing time capacity limit. This is the maximum duration of the window. The range is 0 to (2^64 - 1) milliseconds. The default value of 0 indicates unlimited, meaning there is no time limit enforced on the scheduler window.
+      - processing_break: (default: none) — A period of time taken between processing of items within the concurrency cap. Allowed Min Value: "00:00:00:00.001"(Format is DD:HH:MM:SS.Milliseconds). 
+        * NOTE: (If user sets "00:00:00:00.000" as a value, provider will accept it but it'll set it as "none").
+      - processing_size_capacity: (default: 0) — Processing size capacity limitation specification. Indicates the limit of items to be processed within this window. Range: "1" - "65535".
+      - schedule: (optional)
+        * days — Recurring Window Schedule Day(s). Options are:
+          - every-day: (default)
+          - even-day
+          - odd-day
+          - Sunday
+          - Monday
+          - Tuesday
+          - Wednesday
+          - Thursday
+          - Friday
+          - Saturday
+          - Sunday
+        * hour: (default: 23) — The hour that the recurring window begins. Specify the hour as 0 to 24.
+        * minute: (default: 45) — The minute that the recurring window begins. Specify the minute as 0 to 59.
+      - window_type: (default: recurring) — Currently this will always be "recurring"
+  EOT
   type = map(object(
     {
       annotation = optional(string)
@@ -57,9 +118,7 @@ variable "configuration_backups" {
           remote_path           = optional(string)
           remote_port           = optional(number)
           snapshot              = optional(bool)
-          ssh_key_contents      = optional(number)
-          ssh_key_passphrase    = optional(number)
-          start_now             = optional(string)
+          start_now             = optional(bool)
           username              = optional(string)
         }
       ))
@@ -67,14 +126,18 @@ variable "configuration_backups" {
         {
           delay_between_node_upgrades = optional(number)
           description                 = optional(string)
-          maximum_concurrent_nodes    = optional(string)
+          maximum_concurrent_nodes    = optional(number)
           maximum_running_time        = optional(string)
           processing_break            = optional(string)
-          processing_size_capacity    = optional(string)
-          scheduled_days              = optional(string)
-          scheduled_hour              = optional(number)
-          scheduled_minute            = optional(number)
-          window_type                 = optional(string)
+          processing_size_capacity    = optional(number)
+          schedule = optional(list(object(
+            {
+              days   = optional(string)
+              hour   = optional(number)
+              minute = optional(number)
+            }
+          )))
+          window_type = optional(string)
         }
       ))
     }
@@ -135,12 +198,14 @@ variable "ssh_key_passphrase" {
 # Create a Triggered Scheduler
 #----------------------------------------------
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "trigSchedP"
  - Distinguished Name: "uni/fabric/schedp-{scheduler_name}"
 GUI Location:
  - Admin > Schedulers > Fabric > {scheduler_name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_trigger_scheduler" "trigger_schedulers" {
   for_each    = local.trigger_schedulers
@@ -152,12 +217,14 @@ resource "aci_trigger_scheduler" "trigger_schedulers" {
 #----------------------------------------------------
 # Assign a Recurring Window to the Trigger Scheduler
 #----------------------------------------------------
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "trigRecurrWindowP"
  - Distinguished Name: "uni/fabric/schedp-{scheduler_name}/recurrwinp-{scheduler_name}"
 GUI Location:
  - Admin > Schedulers > Fabric > {scheduler_name} > Recurring Window {scheduler_name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_recurring_window" "recurring_window" {
   depends_on = [
@@ -165,27 +232,29 @@ resource "aci_recurring_window" "recurring_window" {
   ]
   for_each   = local.recurring_window
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  concur_cap = each.value.maximum_concurrent_nodes # "unlimited"
-  day        = each.value.scheduled_days           # "every-day"
-  hour       = each.value.scheduled_hour           # 0
-  minute     = each.value.scheduled_minute         # 0
+  concur_cap = each.value.maximum_concurrent_nodes == 0 ? "unlimited" : each.value.maximum_concurrent_nodes
+  day        = each.value.schedule[0].days   # "every-day"
+  hour       = each.value.schedule[0].hour   # 0
+  minute     = each.value.schedule[0].minute # 0
   name       = each.key
   node_upg_interval = length(regexall(
     1, each.value.maximum_concurrent_nodes)
   ) > 0 && each.value.window_type == "one-time" ? each.value.delay_between_node_upgrades : 0
-  proc_break   = each.value.processing_break         # "none"
-  proc_cap     = each.value.processing_size_capacity # "unlimited"
+  proc_break   = each.value.processing_break # "none"
+  proc_cap     = each.value.processing_size_capacity == 0 ? "unlimited" : each.value.processing_size_capacity
   scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.key].id
-  time_cap     = each.value.maximum_running_time # "unlimited"
+  time_cap     = each.value.maximum_running_time == 0 ? "unlimited" : each.value.processing_size_capacity
 }
 
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "fileRemotePath"
  - Distinguished Name: "uni/fabric/path-{remote_host}"
 GUI Location:
- - Admin > Import/Export > Remote Locations:{Remote_Host}
+ - Admin > Import/Export > Remote Locations:{remote_host}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_file_remote_path" "export_remote_hosts" {
   for_each                        = local.configuration_export
@@ -213,12 +282,14 @@ resource "aci_file_remote_path" "export_remote_hosts" {
 # Create Configuration Export Policy
 #----------------------------------------------------
 
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "configExportP"
- - Distinguished Name: "uni/fabric/configexp-{Export_Name}"
+ - Distinguished Name: "uni/fabric/configexp-{export_name}"
 GUI Location:
- - Admin > Import/Export > Export Policies > Configuration > {Export_Name}
+ - Admin > Import/Export > Export Policies > Configuration > {export_name}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_configuration_export_policy" "configuration_export" {
   depends_on = [
@@ -226,7 +297,7 @@ resource "aci_configuration_export_policy" "configuration_export" {
     aci_trigger_scheduler.trigger_schedulers
   ]
   for_each                              = local.configuration_export
-  admin_st                              = each.value.start_now # triggered|untriggered
+  admin_st                              = each.value.start_now == true ? "triggered" : "untriggered"
   annotation                            = each.value.annotation != "" ? each.value.annotation : var.annotation
   description                           = each.value.description
   format                                = each.value.format # "json|xml"
@@ -236,7 +307,5 @@ resource "aci_configuration_export_policy" "configuration_export" {
   snapshot                              = each.value.snapshot == true ? "yes" : "no"
   target_dn                             = aci_file_remote_path.export_remote_hosts[each.key].id
   relation_config_rs_export_destination = aci_file_remote_path.export_remote_hosts[each.key].id
-  # relation_trig_rs_triggerable            = Unsure
-  # relation_config_rs_remote_path      = aci_file_remote_path.export_remote_hosts[each.key].id
-  relation_config_rs_export_scheduler = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
+  relation_config_rs_export_scheduler   = aci_trigger_scheduler.trigger_schedulers[each.value.key1].id
 }

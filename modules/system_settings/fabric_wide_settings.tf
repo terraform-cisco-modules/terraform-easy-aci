@@ -53,8 +53,8 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "fabric_wide_settings" {
   for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("(^[3-4]\\..*|^5.[0-1].*|^5.2\\([0-2].*\\))", var.apic_version)) > 0 }
-  dn         = "uni/infra/settings"
   class_name = "infraSetPol"
+  dn         = "uni/infra/settings"
   content = {
     # annotation                 = each.value.annotation != "" ? each.value.annotation : var.annotation
     domainValidation           = each.value.enforce_domain_validation == true ? "yes" : "no"
@@ -70,8 +70,8 @@ resource "aci_rest_managed" "fabric_wide_settings" {
 
 resource "aci_rest_managed" "fabric_wide_settings_5_2_3" {
   for_each   = { for k, v in local.fabric_wide_settings : k => v if length(regexall("5.2(3[a-z])", var.apic_version)) > 0 }
-  dn         = "uni/infra/settings"
   class_name = "infraSetPol"
+  dn         = "uni/infra/settings"
   content = {
     # disableEpDampening     = 	each.value. # disable_ep_dampening
     # enableMoStreaming      = 	each.value.

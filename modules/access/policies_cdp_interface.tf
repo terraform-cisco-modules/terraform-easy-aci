@@ -14,10 +14,10 @@ variable "policies_cdp_interface" {
   }
   description = <<-EOT
     Key — Name of the CDP Interface Policy.
-    * admin_state — (Default value is "enabled").  The State of the CDP Protocol on the Interface.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * admin_state: (default: enabled) — The State of the CDP Protocol on the Interface.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias: (optional) — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   EOT
   type = map(object(
     {
@@ -62,8 +62,8 @@ resource "aci_rest_managed" "policies_cdp_interface_global_alias" {
     aci_cdp_interface_policy.policies_cdp_interface,
   ]
   for_each   = local.policies_cdp_interface_global_alias
-  dn         = "uni/infra/cdpIfP-${each.key}"
   class_name = "tagAliasInst"
+  dn         = "uni/infra/cdpIfP-${each.key}"
   content = {
     name = each.value.global_alias
   }

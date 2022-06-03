@@ -7,7 +7,7 @@ variable "leaf_interfaces_policy_groups_access" {
   default = {
     "default" = {
       annotation                       = ""
-      attachable_entity_profile        = ""
+      attachable_entity_profile        = "**REQUIRED**"
       cdp_interface_policy             = ""
       copp_interface_policy            = ""
       data_plane_policing_egress       = ""
@@ -39,46 +39,46 @@ variable "leaf_interfaces_policy_groups_access" {
   }
   description = <<-EOT
     Key — Name of the Leaf Interface - Access Policy Group.
-    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * description — Description to add to the Object.  The description can be up to 128 characters.
-    * attachable_entity_profile — The Name of the Global Attachable Entity Profile.
-    * cdp_interface_policy — The Name of the CDP Interface Policy.
-    * copp_interface_policy — The Name of the CoPP Interafce Policy.
-    * data_plane_policing_egress — The Name of the Egress Data Plane Policing Policy.
-    * data_plane_policing_ingress — The Name of the Ingress Data Plane Policing Policy.
-    * description — escription to add to the Object.  The description can be up to 128 characters.
-    * dot1x_port_authentication_policy — The Name of the 802.1X Port Authentication Policy.
-    * dwdm_policy — The Name of the DWDM Interface Policy.
-    * fibre_channel_interface_policy — The Name of the 802.1X Port Authentication Policy.
-    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-    * l2_interface_policy — The Name of the Layer2 Interface Policy.
-    * link_flap_policy — The Name of the Link Flap Policy.
-    * link_level_flow_control_policy — The Name of the Link Level Flow Control Policy.
-    * link_level_policy — The Name of the Link Level Policy.
-    * lldp_interface_policy — The Name of the LLDP Interface Policy.
-    * macsec_policy — The Name of the MACSec Policy.
-    * mcp_interface_policy — The Name of the MCP Interface Policy.
-    * monitoring_policy — The Name of the Monitoring Policy.
-    * netflow_monitor_policies — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * attachable_entity_profile: (required) — The Name of the Global Attachable Entity Profile.
+    * cdp_interface_policy: (optional) — The Name of the CDP Interface Policy.
+    * copp_interface_policy: (optional) — The Name of the CoPP Interafce Policy.
+    * data_plane_policing_egress: (optional) — The Name of the Egress Data Plane Policing Policy.
+    * data_plane_policing_ingress: (optional) — The Name of the Ingress Data Plane Policing Policy.
+    * description: (optional) — escription to add to the Object.  The description can be up to 128 characters.
+    * dot1x_port_authentication_policy: (optional) — The Name of the 802.1X Port Authentication Policy.
+    * dwdm_policy: (optional) — The Name of the DWDM Interface Policy.
+    * fibre_channel_interface_policy: (optional) — The Name of the 802.1X Port Authentication Policy.
+    * global_alias: (optional) — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * l2_interface_policy: (optional) — The Name of the Layer2 Interface Policy.
+    * link_flap_policy: (optional) — The Name of the Link Flap Policy.
+    * link_level_flow_control_policy: (optional) — The Name of the Link Level Flow Control Policy.
+    * link_level_policy: (optional) — The Name of the Link Level Policy.
+    * lldp_interface_policy: (optional) — The Name of the LLDP Interface Policy.
+    * macsec_policy: (optional) — The Name of the MACSec Policy.
+    * mcp_interface_policy: (optional) — The Name of the MCP Interface Policy.
+    * monitoring_policy: (optional) — The Name of the Monitoring Policy.
+    * netflow_monitor_policies: (optional) — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
       - ip_filter_type — IP Filter Type.  Options are:
         * ce
         * ipv4
         * ipv6
       - netflow_monitor_policy — The Name of the Netflow Monitor Policy.
-    * poe_interface_policy — The Name of the PoE Interface Policy.
-    * port_security_policy — The Name of the Port Security Policy.
-    * priority_flow_control_policy — The Name of the Priority Flow Control Policy.
-    * slow_drain_policy — The Name of the Slow Drain Policy.
-    * span_destination_groups — The Name of the Span Destination Group.
-    * span_source_groups — The Name of the Span Source Groups.
-    * spanning_tree_interface_policy — The Name of the Spanning Tree Interface Policy.
-    * storm_control_policy — The Name of the Storm Control Policy.
-    * synce_interface_policy — The Name of the SyncE Interface Policy.
+    * poe_interface_policy: (optional) — The Name of the PoE Interface Policy.
+    * port_security_policy: (optional) — The Name of the Port Security Policy.
+    * priority_flow_control_policy: (optional) — The Name of the Priority Flow Control Policy.
+    * slow_drain_policy: (optional) — The Name of the Slow Drain Policy.
+    * span_destination_groups: (optional) — The Name of the Span Destination Group.
+    * span_source_groups: (optional) — The Name of the Span Source Groups.
+    * spanning_tree_interface_policy: (optional) — The Name of the Spanning Tree Interface Policy.
+    * storm_control_policy: (optional) — The Name of the Storm Control Policy.
+    * synce_interface_policy: (optional) — The Name of the SyncE Interface Policy.
   EOT
   type = map(object(
     {
       annotation                       = optional(string)
-      attachable_entity_profile        = optional(string)
+      attachable_entity_profile        = string
       cdp_interface_policy             = optional(string)
       copp_interface_policy            = optional(string)
       data_plane_policing_egress       = optional(string)
@@ -232,8 +232,8 @@ resource "aci_rest_managed" "leaf_interfaces_policy_groups_access_global_alias" 
     aci_leaf_access_port_policy_group.leaf_interfaces_policy_groups_access,
   ]
   for_each   = local.leaf_interfaces_policy_groups_access_global_alias
-  dn         = "uni/infra/funcprof/accportgrp-${each.key}"
   class_name = "tagAliasInst"
+  dn         = "uni/infra/funcprof/accportgrp-${each.key}"
   content = {
     name = each.value.global_alias
   }

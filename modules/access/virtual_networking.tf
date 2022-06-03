@@ -84,10 +84,10 @@ variable "virtual_networking" {
   }
   description = <<-EOT
   Key — Name of the Virtual Networking Policy
-  * controllers — List of Controllers to add to the Virtual Networking Policy
-    - annotation — (Optional) - Annotation of object VMM Controller.
-    - datacenter — (Required) - Top level container name.
-    - dvs_version — (Optional) -  Dvs Version. Allowed values are:
+  * controllers: (required) — List of Controllers to add to the Virtual Networking Policy
+    - annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    - datacenter: (required) — Top level container name.
+    - dvs_version: (ptional) — Dvs Version. Allowed values are:
       * 7.0
       * 6.6
       * 6.5
@@ -95,17 +95,17 @@ variable "virtual_networking" {
       * 5.5
       * 5.1
       * unmanaged
-    - hostname — (Required) - Hostname or IP Address. [Create Only]
-    - management_epg — (Required) - Name of the Management EPG.
-    - management_epg_type — (Required) - Type of Management EPG.  Options are:
-      * inb — This is an Inband EPG.
+    - hostname: (required) — Hostname or IP Address. [Create Only]
+    - management_epg: (required) — Name of the Management EPG.
+    - management_epg_type: (optional) — Type of Management EPG.  Options are:
+      * inb: (default) — This is an Inband EPG.
       * oob — This is an Out-of-Band EPG.
-    - monitoring_policy — (class monInfraPol) (Optional) - Name of the Monitoring Policy.
-    - sequence_number — (Optional) - An ISIS link-state packet sequence number. Default value is "0".
-    - stats_collection — (Optional) - The statistics mode. Allowed values are:
-      * disabled
+    - monitoring_policy: (optional) — Name of the Monitoring Policy.
+    - sequence_number: (default: 0) — (Optional) - An ISIS link-state packet sequence number. Default value is "0".
+    - stats_collection: (optional) — The statistics mode. Allowed values are:
+      * disabled: (default)
       * enabled
-    - switch_scope — (Optional) - The VMM control policy scope. Allowed values are:
+    - switch_scope: (optional) — The VMM control policy scope. Allowed values are:
       * MicrosoftSCVMM — SCVMM
       * cloudfoundry — Cloud Foundry
       * iaas — vShield
@@ -116,32 +116,40 @@ variable "virtual_networking" {
       * openstack — Openstack
       * rhev — Redhat Enterprise Virtualization
       * unmanaged — Unmanaged
-      * vm — vCenter DVS
-    - trigger_inventory_sync — (Optional) - Triggered Inventory Sync Status. It will sync the status of inventory if value is set to triggered. Once sync is done, value is reset back to untriggered. Allowed values are "autoTriggered", "triggered", "untriggered", and default value is "untriggered". Type: String.
-    - vxlan_pool — (class fvnsVxlanInstP) (Optional) - Name of the VxLAN Pool.
-  * credentials — List of credential policies to add to the Virtual Networking Policy
-    * annotation — (Optional) - Annotation of object VMM Credential.
-    * description — (Optional) - Description of object VMM Credential.
-    * password — (Required) - Password Identifier in the range of 1 to 5 to identify the vmm_password_{number} variable.
-    * username — (Required) - Username to use for login to the controller.
-  * domain — List of Arguments for the virtual networking domain.
-    - name - (Required) Name of Object vmm domain.
-    - access_mode — (Optional) - Access mode for object vmm domain. Allowed values are:
+      * vm: (default) — vCenter DVS
+    - trigger_inventory_sync: (optional) — Triggered Inventory Sync Status. It will sync the status of inventory if value is set to triggered. Once sync is done, value is reset back to untriggered. Allowed values are:
+      * autoTriggered
+      * triggered
+      * untriggered: (default)
+    - vxlan_pool: (optional) — (class fvnsVxlanInstP) Name of the VxLAN Pool.
+  * credentials: (required) — List of credential policies to add to the Virtual Networking Policy
+    * annotation: (optional) — Annotation of object VMM Credential.
+    * description: (optional) — Description of object VMM Credential.
+    * password: (required) — Password Identifier in the range of 1 to 5 to identify the vmm_password_{number} variable.
+    * username: (required) — Username to use for login to the controller.
+  * domain: (required) — List of Arguments for the virtual networking domain.
+    - name: (required) - (Required) Name of Object vmm domain.
+    - access_mode: (optional) — Access mode for object vmm domain. Allowed values are:
       * read-only
-      * read-write
-    - annotation — (Optional) - Annotation for object vmm domain.
-    - control_knob — (Optional) - Type pf control knob to use. Allowed values are:
+      * read-write: (default)
+    - annotation: (optional) — Annotation for object vmm domain.
+    - control_knob (optional) — Type pf control knob to use. Allowed values are:
       * none
-      * epDpVerify
-    - delimiter — (Optional) - Delimiter for object vmm domain.
-    - enable_tag_collection — (Optional) - Flag enable tagging for object vmm domain.
-    - encapsulation — (Optional) - The layer 2 encapsulation protocol to use with the virtual switch. Allowed values are "unknown", "vlan" and "vxlan". Default is "unknown".
-    - enforcement — (Optional) - The switching enforcement preference. This determines whether switches can be done within the virtual switch (Local Switching) or whether all switched traffic must go through the fabric (No Local Switching). Allowed values are "hw", "sw" and "unknown". Default is "hw".
-    - endpoint_inventory_type — (Optional) - Determines which end point inventory type to use for object VMM domain. Allowed values are "none" and "on-link". Default is "on-link".
-    - endpoint_retention_time — (Optional) - End point retention time for object vmm domain. Allowed value range is "0" - "600". Default value is "0".
-    - switch_mode — (Optional) - The switch mode for the vmm domain profile. Allowed values are:
+      * epDpVerify: (default)
+    - delimiter: (default: '|') — Delimiter for object vmm domain.
+    - enable_tag_collection: (optional) — Flag enable tagging for object vmm domain.
+    - encapsulation: (optional) — The layer 2 encapsulation protocol to use with the virtual switch. Allowed values:
+      * unknown
+      vlan: (default)
+      vxlan
+    - enforcement: (optional) — The switching enforcement preference. This determines whether switches can be done within the virtual switch (Local Switching) or whether all switched traffic must go through the fabric (No Local Switching). Allowed values are "hw", "sw" and "unknown". Default is "hw".
+    - endpoint_inventory_type: (optional) — Determines which end point inventory type to use for object VMM domain. Allowed values are:
+      * none
+      * on-link: (default)
+    - endpoint_retention_time: (default: 0) — End point retention time for object vmm domain. Allowed value range is "0" - "600". Default value is "0".
+    - switch_mode: (optional) — The switch mode for the vmm domain profile. Allowed values are:
       * cf
-      * default
+      * default: (default)
       * k8s
       * nsx
       * ovs
@@ -149,55 +157,58 @@ variable "virtual_networking" {
       * rhev
       * openshift
       * unknown
-    - switch_provider — (Optional) - The switch to be used for the vmm domain profile. Allowed values are:
+    - switch_provider: (optional) — The switch to be used for the vmm domain profile. Allowed values are:
       * CloudFoundry
       * Kubernetes
       * Microsoft
       * OpenShift
       * OpenStack
       * Redhat
-      * VMware
-    - preferred_encapsulation — (Optional) - The preferred encapsulation mode for object VMM domain. Allowed values are "unspecified", "vlan" and "vxlan". Default is "unspecified".
-    - vlan_pool — (Optional) - Relation to class fvnsVlanInstP. Cardinality - N_TO_ONE. Type - String.
-  * vswitch_policy — Virtual Switch Policy to assign to the Virtual Networking Policy.
-    - annotation — (Optional) - Annotation of object VSwitch Policy Group.
-    - cdp_interface_policy — (Optional) - (class cdpIfPol) - Name of the CDP Interface Policy.
-    - description — (Optional) - Description of object VSwitch Policy Group.
-    - enhanced_lag_policy — (Optional) - (class lacpEnhancedLagPol) A List of ehnanced lag policy attributes:
-      * load_balancing_mode:
-        - dst-ip — Destination IP Address
-        - dst-ip-l4port — Destination IP Address and TCP/UDP Port
-        - dst-ip-l4port-vlan — Destination IP Address, TCP/UDP Port and VLAN
-        - dst-ip-vlan — Destination IP Address and VLAN
-        - dst-l4port — Destination TCP/UDP Port
-        - dst-mac — Destination MAC Address
-        - src-dst-ip — Source and Destination IP Address
-        - src-dst-ip-l4port — Source and Destination IP Address and TCP/UDP Port
-        - src-dst-ip-l4port-vlan — Source and Destination IP Address, TCP/UDP Port and VLAN
-        - src-dst-ip-vlan — Source and Destination IP Address and VLAN
-        - src-dst-l4port — Source and Destination TCP/UDP Port
-        - src-dst-mac — Source and Destination MAC Address
-        - src-ip — Source IP Address
-        - src-ip-l4port — Source IP Address and TCP/UDP Port
-        - src-ip-l4port-vlan — Source IP Address, TCP/UDP Port and VLAN
-        - src-ip-vlan — Source IP Address and VLAN
-        - src-l4port — Source TCP/UDP Port
-        - src-mac — Source MAC Address
-        - src-port-id — Source Port ID
-        - vlan — VLAN
+      * VMware: (default)
+    - preferred_encapsulation: (optional) — The preferred encapsulation mode for object VMM domain. Allowed values are:
+      * unspecified: (default)
+      * vlan
+      * vxlan
+    - vlan_pool: (required) — Name of the VLAN Pool to Assign to the policy.
+  * vswitch_policy: (required) — Virtual Switch Policy to assign to the Virtual Networking Policy.
+    - annotation: (optional) — Annotation of object VSwitch Policy Group.
+    - cdp_interface_policy: (optional) — (class cdpIfPol) - Name of the CDP Interface Policy.
+    - description: (optional) — Description of object VSwitch Policy Group.
+    - enhanced_lag_policy: (optional) — (class lacpEnhancedLagPol) A List of ehnanced lag policy attributes:
+      * load_balancing_mode: (optional):
+        - dst-ip — Destination IP Address.
+        - dst-ip-l4port — Destination IP Address and TCP/UDP Port.
+        - dst-ip-l4port-vlan — Destination IP Address, TCP/UDP Port and VLAN.
+        - dst-ip-vlan — Destination IP Address and VLAN.
+        - dst-l4port — Destination TCP/UDP Port.
+        - dst-mac — Destination MAC Address.
+        - src-dst-ip: (default) — Source and Destination IP Address.
+        - src-dst-ip-l4port — Source and Destination IP Address and TCP/UDP Port.
+        - src-dst-ip-l4port-vlan — Source and Destination IP Address, TCP/UDP Port and VLAN.
+        - src-dst-ip-vlan — Source and Destination IP Address and VLAN.
+        - src-dst-l4port — Source and Destination TCP/UDP Port.
+        - src-dst-mac — Source and Destination MAC Address.
+        - src-ip — Source IP Address.
+        - src-ip-l4port — Source IP Address and TCP/UDP Port.
+        - src-ip-l4port-vlan — Source IP Address, TCP/UDP Port and VLAN.
+        - src-ip-vlan — Source IP Address and VLAN.
+        - src-l4port — Source TCP/UDP Port.
+        - src-mac — Source MAC Address.
+        - src-port-id — Source Port ID.
+        - vlan — VLAN.
       * mode — Options are:
         - active — LACP Active.
         - passive — LACP Passive.
-      * number_of_links — (Optional) - The number of uplinks to create in the enhanced Lag Policy.
-    - firewall_policy — (Optional) - (class nwsFwPol) - Name of the Firewall Policy.
-    - lldp_interface_policy — (Optional) - (class lldpIfPol) - Name of the LLDP Interface Policy
-    - mtu_policy — (Optional) - (class l2InstPol) - Name of the L2 Interface Policy.
-    - port_channel_policy — (Optional) - (class lacpLagPol) - Name of the Port-Channel (LACP) Interface Policy.
-    - vmm_netflow_export_policy - (Optional) - 
-      * active_flow_time_out — (Optional) - The range of allowed values is "0" to "3600". Default value is "60".
-      * idle_flow_time_out — (Optional) - The range of allowed values is "0" to "600". Default value is "15".
-      * netflow_policy — (class netflowVmmExporterPol) (Required) - The Name of the Netflow Exporters for VM Networking Policy.
-      * sampling_rate — (Optional) - The range of allowed values is "0" to "1000". Default value is "0".
+      * number_of_links: (optional) — The number of uplinks to create in the enhanced Lag Policy.
+    - firewall_policy: (optional) — (class nwsFwPol) - Name of the Firewall Policy.
+    - lldp_interface_policy: (optional) — (class lldpIfPol) - Name of the LLDP Interface Policy
+    - mtu_policy: (optional) — (class l2InstPol) - Name of the L2 Interface Policy.
+    - port_channel_policy: (optional) — (class lacpLagPol) - Name of the Port-Channel (LACP) Interface Policy.
+    - vmm_netflow_export_policy: (optional)
+      * active_flow_time_out: (default: 60) — The range of allowed values is "0" to "3600".
+      * idle_flow_time_out: (default: 15) — The range of allowed values is "0" to "600".
+      * netflow_policy: (required) — (class netflowVmmExporterPol) The Name of the Netflow Exporters for VM Networking Policy.
+      * sampling_rate: (default: 0) — The range of allowed values is "0" to "1000".
   EOT
   type = map(object(
     {
@@ -348,8 +359,8 @@ resource "aci_rest_managed" "vmm_domains_uplinks" {
     aci_vmm_domain.domains_vmm
   ]
   for_each   = local.vmm_uplinks
-  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont"
   class_name = "vmmUplinkPCont"
+  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont"
   content = {
     numOfUplinks = each.value.numOfUplinks
   }
@@ -360,8 +371,8 @@ resource "aci_rest_managed" "vmm_uplink_names" {
     aci_rest_managed.vmm_domains_uplinks
   ]
   for_each   = local.vmm_uplink_names
-  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont/uplinkp-${each.value.uplinkId}"
   class_name = "vmmUplinkP"
+  dn         = "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}/uplinkpcont/uplinkp-${each.value.uplinkId}"
   content = {
     uplinkId   = each.value.uplinkId
     uplinkName = each.value.uplinkName

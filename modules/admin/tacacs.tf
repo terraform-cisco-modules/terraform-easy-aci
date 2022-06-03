@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+TACACS+ — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "tacacs" {
   default = {
     "default" = {
@@ -33,33 +38,33 @@ variable "tacacs" {
     }
   }
   description = <<-EOT
-  Key: Name of the TACACS Login Domain, Accounting Destination Group, Source etc.
-  * accounting_include: 
-    - audit_logs (included by default)
-    - events
-    - faults
-    - session_logs (included by default)
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * authorization_protocol: The TACACS+ authentication protocol. The protocol can be:
-    - chap
-    - mschap
-    - pap (default)
-  * hosts: 
-    - host: The TACACS+ host name or IP address.
-    - key: a number between 1 and 5 to identify the variable tacacs_key_{id} to use.
-    - management_epg: The name of the Management EPG to assign the host to.
-    - management_epg_type: Type of Management EPG.
-      * oob (defualt)
-      * inb
-  * port: The TCP port number to be used when making connections to the TACACS+ daemon. The range is from 1 to 65535. The default is 49.
-  * retries: The number of retries when contacting the TACACS+ endpoint. The range is from 0 to 5 retries. The default is 1.
-  * server_monitoring: Enabling Server Monitoring allows the connectivity of the remote AAA servers to be tested.
-    - admin_state: Options are:
-      * enabled
-      * disabled (default)
-    - password: a number between 1 and 5 to identify the variable tacacs_monitoring_password to use.
-    - username: The username to assign to the server monitoring configuration.
-  * timeout: The period of time (in seconds) the device will wait for a response from the daemon before it times out and declares an error. The range is from 1 to 60 seconds. The default is 5 seconds. If set to 0, the AAA provider timeout is used.
+    Key — Name of the TACACS Login Domain, Accounting Destination Group, Source etc.
+    * accounting_include: (optional) — Management Messages to include in the accounting log
+      - audit_logs: (default: true)
+      - events: (default: false)
+      - faults: (default: false)
+      - session_logs: (default: true)
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * authorization_protocol: (optional) — The TACACS+ authentication protocol. The protocol can be:
+      - chap
+      - mschap
+      - pap: (default)
+    * hosts: (required) — Map of Providers to add to the Login Domain.
+      - host: (required) — The TACACS+ host name or IP address.
+      - key: (default: 1) — a number between 1 and 5 to identify the variable tacacs_key_{id} to use.
+      - management_epg: (required) — The name of the Management EPG to assign the host to.
+      - management_epg_type: (optional) — Type of Management EPG.
+        * inb
+        * oob: (default)
+    * port: (default: 49) — The TCP port number to be used when making connections to the TACACS+ daemon. The range is from 1 to 65535. The default is 49.
+    * retries: (default: 1) — The number of retries when contacting the TACACS+ endpoint. The range is from 0 to 5 retries. The default is 1.
+    * server_monitoring: (optional) — Enabling Server Monitoring allows the connectivity of the remote AAA servers to be tested.
+      - admin_state: (optional) — Options are:
+        * enabled
+        * disabled (default)
+      - password: (required if enabled) — a number between 1 and 5 to identify the variable tacacs_monitoring_password to use.
+      - username: (required if enabled) — The username to assign to the server monitoring configuration.
+    * timeout: (default: 5) — The period of time (in seconds) the device will wait for a response from the daemon before it times out and declares an error. The range is from 1 to 60 seconds. The default is 5 seconds. If set to 0, the AAA provider timeout is used.
   EOT
   type = map(object(
     {
