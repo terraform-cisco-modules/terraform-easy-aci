@@ -1,20 +1,25 @@
+/*_____________________________________________________________________________________________________________________
+
+Leaf Interfaces — Bundle (PC|VPC) Policy Group — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "leaf_interfaces_policy_groups_bundle" {
   default = {
     "default" = {
-      attachable_entity_profile      = ""
       annotation                     = ""
+      attachable_entity_profile      = ""
       cdp_interface_policy           = ""
       copp_interface_policy          = ""
       data_plane_policing_egress     = ""
       data_plane_policing_ingress    = ""
       description                    = ""
       fibre_channel_interface_policy = ""
+      l2_interface_policy            = ""
       link_aggregation_policy        = ""
       link_aggregation_type          = ""
       link_flap_policy               = ""
       link_level_flow_control_policy = ""
       link_level_policy              = ""
-      l2_interface_policy            = ""
       lldp_interface_policy          = ""
       macsec_policy                  = ""
       mcp_interface_policy           = ""
@@ -29,14 +34,46 @@ variable "leaf_interfaces_policy_groups_bundle" {
     }
   }
   description = <<-EOT
-  Key: Name of the Attachable Access Entity Profile Policy.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    Key — Name of the Leaf Interface - Access Policy Group.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * attachable_entity_profile — The Name of the Global Attachable Entity Profile.
+    * cdp_interface_policy — The Name of the CDP Interface Policy.
+    * copp_interface_policy — The Name of the CoPP Interafce Policy.
+    * data_plane_policing_egress — The Name of the Egress Data Plane Policing Policy.
+    * data_plane_policing_ingress — The Name of the Ingress Data Plane Policing Policy.
+    * description — escription to add to the Object.  The description can be up to 128 characters.
+    * fibre_channel_interface_policy — The Name of the 802.1X Port Authentication Policy.
+    * l2_interface_policy — The Name of the Layer2 Interface Policy.
+    * link_aggregation_policy — The Name of the Link Aggreation Policy.
+    * link_aggregation_type — The Type of Link Aggregation.  Options are:
+      - pc
+      - vpc
+    * link_flap_policy — The Name of the Link Flap Policy.
+    * link_level_flow_control_policy — The Name of the Link Level Flow Control Policy.
+    * link_level_policy — The Name of the Link Level Policy.
+    * lldp_interface_policy — The Name of the LLDP Interface Policy.
+    * macsec_policy — The Name of the MACSec Policy.
+    * mcp_interface_policy — The Name of the MCP Interface Policy.
+    * monitoring_policy — The Name of the Monitoring Policy.
+    * netflow_monitor_policies — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
+      - ip_filter_type — IP Filter Type.  Options are:
+        * ce
+        * ipv4
+        * ipv6
+      - netflow_monitor_policy — The Name of the Netflow Monitor Policy.
+    * port_security_policy — The Name of the Port Security Policy.
+    * priority_flow_control_policy — The Name of the Priority Flow Control Policy.
+    * slow_drain_policy — The Name of the Slow Drain Policy.
+    * span_destination_groups — The Name of the Span Destination Group.
+    * span_source_groups — The Name of the Span Source Groups.
+    * spanning_tree_interface_policy — The Name of the Spanning Tree Interface Policy.
+    * storm_control_policy — The Name of the Storm Control Policy.
   EOT
   type = map(object(
     {
-      attachable_entity_profile      = optional(string)
       annotation                     = optional(string)
+      attachable_entity_profile      = optional(string)
       cdp_interface_policy           = optional(string)
       copp_interface_policy          = optional(string)
       data_plane_policing_egress     = optional(string)
@@ -64,16 +101,16 @@ variable "leaf_interfaces_policy_groups_bundle" {
     }
   ))
 }
-#------------------------------------------------
-# Create Bundle (port-channel|vpc) Policy Groups
-#------------------------------------------------
 
-/*
+
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraAccBndlGrp"
  - Distinguished Name: "uni/infra/funcprof/accbundle-{{Name}}"
 GUI Location:
  - Fabric > Interfaces > Leaf Interfaces > Policy Groups > [PC or VPC] Interface > {{Name}}
+_______________________________________________________________________________________________________________________
 */
 resource "aci_leaf_access_bundle_policy_group" "leaf_interfaces_policy_groups_bundle" {
   depends_on = [
@@ -131,10 +168,10 @@ resource "aci_leaf_access_bundle_policy_group" "leaf_interfaces_policy_groups_bu
   ) > 0 ? "uni/fabric/monfab-${each.value.monitoring_policy}" : ""
   # class: netflowMonitorPol
   dynamic "relation_infra_rs_netflow_monitor_pol" {
-    for_each = toset(each.value.netflow_monitor_policies)
+    for_each = each.value.netflow_monitor_policies
     content {
-      flt_type  = element(split(":", relation_infra_rs_netflow_monitor_pol.value), 1)
-      target_dn = "uni/infra/monitorpol-${element(split(":", relation_infra_rs_netflow_monitor_pol.value), 0)}"
+      flt_type  = relation_infra_rs_netflow_monitor_pol.value.ip_filter_type
+      target_dn = "uni/infra/monitorpol-${relation_infra_rs_netflow_monitor_pol.value.netflow_monitor_policy}"
     }
   }
   # class: qosDppPol

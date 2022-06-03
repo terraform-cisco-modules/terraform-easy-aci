@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-LLDP Interface Policy Variables
+Policies — LLDP Interface — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "policies_lldp_interface" {
@@ -14,12 +14,12 @@ variable "policies_lldp_interface" {
     }
   }
   description = <<-EOT
-  Key: Name of the LLDP Interface Policy.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-  * receive_state: (Default value is "enabled").  The reception of LLDP packets on an interface. 
-  * transmit_state: (Default value is "enabled").  The transmission of LLDP packets on an interface. 
+    Key — Name of the LLDP Interface Policy.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * receive_state — (Default value is "enabled").  The reception of LLDP packets on an interface. 
+    * transmit_state — (Default value is "enabled").  The transmission of LLDP packets on an interface. 
   EOT
   type = map(object(
     {
@@ -49,4 +49,26 @@ resource "aci_lldp_interface_policy" "policies_lldp_interface" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/infra/lldpIfP-{name}/alias"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > Link Level : {name}: alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "policies_lldp_interface_global_alias" {
+  depends_on = [
+    aci_lldp_interface_policy.policies_lldp_interface,
+  ]
+  for_each   = local.policies_link_level_global_alias
+  dn         = "uni/infra/lldpIfP-${each.key}"
+  class_name = "tagAliasInst"
+  content = {
+    name = each.value.global_alias
+  }
 }

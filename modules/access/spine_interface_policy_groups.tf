@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-Spine Interface Policy Group Variables
+Spine Interfaces — Policy Groups — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "spine_interface_policy_groups" {
@@ -16,14 +16,14 @@ variable "spine_interface_policy_groups" {
     }
   }
   description = <<-EOT
-  key - Name of the Spine Interface Policy Group.
-  * attachable_entity_profile: Name of the Access Entity Profile Policy.  An Attached Entity Profile (AEP) provides a template to deploy hypervisor policies or application EPGs on a large set of ports.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-  * cdp_interface_policy: Name of the CDP Interface Policy.  Cisco Discovery Protocol (CDP) policy to obtain protocol addresses of neighboring devices and discover the platform of these devices.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
-  * link_level_policy: Name of the Link Level Policy.  Link Level policy specifies Layer 1 parameters for host facing ports.
-  * macsec_policy: Name of the MACsec Policy.  
+    key — Name of the Spine Interface Policy Group.
+    * attachable_entity_profile — Name of the Access Entity Profile Policy.  An Attached Entity Profile (AEP) provides a template to deploy hypervisor policies or application EPGs on a large set of ports.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * cdp_interface_policy — Name of the CDP Interface Policy.  Cisco Discovery Protocol (CDP) policy to obtain protocol addresses of neighboring devices and discover the platform of these devices.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * link_level_policy — Name of the Link Level Policy.  Link Level policy specifies Layer 1 parameters for host facing ports.
+    * macsec_policy — Name of the MACsec Policy.  
   EOT
   type = map(object(
     {
@@ -37,6 +37,7 @@ variable "spine_interface_policy_groups" {
     }
   ))
 }
+
 
 /*_____________________________________________________________________________________________________________________
 
@@ -69,4 +70,26 @@ resource "aci_spine_port_policy_group" "spine_interface_policy_groups" {
   # class: macsecIfPol
   relation_infra_rs_macsec_if_pol = length(compact([each.value.macsec_policy])
   ) > 0 ? "uni/infra/macsecifp-${each.value.macsec_policy}" : ""
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/infra/funcprof/spaccportgrp-{name}/alias"
+GUI Location:
+ - Fabric > Interfaces > Leaf Interfaces > Policy Groups > Leaf Access Port > {name}: alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "spine_interface_policy_groups_global_alias" {
+  depends_on = [
+    aci_spine_port_policy_group.spine_interface_policy_groups,
+  ]
+  for_each   = local.spine_interface_policy_groups_global_alias
+  dn         = "uni/infra/funcprof/spaccportgrp-${each.key}"
+  class_name = "tagAliasInst"
+  content = {
+    name = each.value.global_alias
+  }
 }

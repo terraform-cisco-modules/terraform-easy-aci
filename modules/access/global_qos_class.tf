@@ -1,11 +1,12 @@
 /*_____________________________________________________________________________________________________________________
 
-Global QoS Class Variables
+Fabric > Access Policies > Policies > Global > QoS Class
 _______________________________________________________________________________________________________________________
 */
 variable "global_qos_class" {
   default = {
     "default" = {
+      annotation                        = ""
       description                       = ""
       elephant_trap_age_period          = 0
       elephant_trap_bandwidth_threshold = 0
@@ -16,26 +17,25 @@ variable "global_qos_class" {
       micro_burst_spine_queues          = 0
       micro_burst_leaf_queues           = 0
       preserve_cos                      = true
-      annotation                        = ""
     }
   }
   description = <<-EOT
-  Key: Name of the Layer2 Interface Policy.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * qinq: (Default value is "disabled").  To enable or disable an interface for Dot1q Tunnel or Q-in-Q encapsulation modes, select one of the following:
-    - corePort: Configure this core-switch interface to be included in a Dot1q Tunnel.  You can configure multiple corePorts, for multiple customers, to be used in a Dot1q Tunnel.
-    - disabled: Disable this interface to be used in a Dot1q Tunnel.
-    - doubleQtagPort: Configure this interface to be used for Q-in-Q encapsulated traffic.
-    - edgePort: Configure this edge-switch interface (for a single customer) to be included in a Dot1q Tunnel.
-  * reflective_relay: (Default value is "disabled").  Enable or disable reflective relay for ports that consume the policy.
-  * vlan_scope: (Default value is "global").  The layer 2 interface VLAN scope. The scope can be:
-    - global: Sets the VLAN encapsulation value to map only to a single EPG per leaf.
-    - portlocal: Allows allocation of separate (Port, Vlan) translation entries in both ingress and egress directions. This configuration is not valid when the EPGs belong to a single bridge domain.
-    VLAN Scope is not supported if edgePort is selected in the QinQ field.
-    Note:  Changing the VLAN scope from Global to Port Local or Port Local to Global will cause the ports where this policy is applied to flap and traffic will be disrupted.
+    Key — Unique Identifier for the Map of Objects.  Not used in assignment.  There can only be the default MCP Instance Policy.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * elephant_trap_age_period — Elephant Trap Age Timer.  Minimum allowed value is 0.
+    * elephant_trap_bandwidth_threshold — Elephant flow track activeness.  Minimum allowed value is 0.
+    * elephant_trap_byte_coun — Elephant Trap flow identifier.  Minimum allowed value is 0.
+    * elephant_trap_state — Elephant Trap state.  Set to true to enable
+    * fabric_flush_interval — Fabric Flush Interval in milliseconds.  Range is 100-1000.  Default is 500.
+    * fabric_flush_state — Fabric Priority Flow Control flush State.
+    * micro_burst_spine_queues —  Micro Burst Spine Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
+    * micro_burst_leaf_queues — Micro Burst Leaf Queues percent.  Range is 0-100.  **Note: Requires version 5.X of the APIC.
+    * preserve_cos — CoS Preservation, to guarantee the QoS priority settings of the various traffic streams, in a single-pod topology. In multipod topologies, use a DSCP policy to enable preserving QoS priority mapping for the traffic streams as they transit the inter-pod network.  QoS Class—Priority flow control requires that CoS levels be globally enabled for the fabric and assigned to the profiles of applications that generate FCoE traffic.
   EOT
   type = map(object(
     {
+      annotation                        = optional(string)
       description                       = optional(string)
       elephant_trap_age_period          = optional(number)
       elephant_trap_bandwidth_threshold = optional(number)
@@ -46,7 +46,6 @@ variable "global_qos_class" {
       micro_burst_spine_queues          = optional(string)
       micro_burst_leaf_queues           = optional(string)
       preserve_cos                      = optional(bool)
-      annotation                        = optional(string)
     }
   ))
 }
@@ -60,6 +59,7 @@ API Information:
 GUI Location:
  - Fabric > Access Policies > Policies > Global > QOS Class
 
+_______________________________________________________________________________________________________________________
 */
 resource "aci_qos_instance_policy" "global_qos_class" {
   for_each              = local.global_qos_class

@@ -11,9 +11,9 @@ variable "domains_layer3" {
     }
   }
   description = <<-EOT
-  Key: Name of the Layer 3 Domain.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * vlan_pool: Name of the VLAN Pool to Associate to the Domain.
+    Key — Name of the Layer 3 Domain.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * vlan_pool — The Name of the VLAN Pool to Associate to the Domain.
   EOT
   type = map(object(
     {

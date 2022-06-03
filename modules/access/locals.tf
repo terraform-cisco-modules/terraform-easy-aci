@@ -23,6 +23,10 @@ locals {
   # Global Policies Variables
   #__________________________________________________________
 
+  #===================================
+  # Attachable Access Entity Profiles
+  #===================================
+
   attachable_access_entity_profiles_1 = {
     for k, v in var.global_attachable_access_entity_profiles : k => {
       annotation       = v.annotation != null ? v.annotation : ""
@@ -55,38 +59,77 @@ locals {
   }
 
 
+  #===================================
+  # Error Disable Recovery Policy
+  #===================================
+
   global_error_disabled_recovery_policy = {
-    for k, v in var.global_error_disabled_recovery_policy : k => {
-      annotation                        = v.annotation != null ? v.annotation : ""
-      description                       = v.description != null ? v.description : ""
-      arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : true
-      bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
-      debug_1                           = v.debug_1 != null ? v.debug_1 : true
-      debug_2                           = v.debug_2 != null ? v.debug_2 : true
-      debug_3                           = v.debug_3 != null ? v.debug_3 : true
-      debug_4                           = v.debug_4 != null ? v.debug_4 : true
-      debug_5                           = v.debug_5 != null ? v.debug_5 : true
-      dhcp_rate_limit                   = v.dhcp_rate_limit != null ? v.dhcp_rate_limit : true
-      error_disable_recovery_interval   = v.error_disable_recovery_interval != null ? v.error_disable_recovery_interval : 300
-      ethernet_port_module              = v.ethernet_port_module != null ? v.ethernet_port_module : true
-      frequent_endpoint_move            = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
-      ip_address_conflict               = v.ip_address_conflict != null ? v.ip_address_conflict : true
-      ipqos_dcbxp_compatability_failure = v.ipqos_dcbxp_compatability_failure != null ? v.ipqos_dcbxp_compatability_failure : true
-      ipqos_manager_error               = v.ipqos_manager_error != null ? v.ipqos_manager_error : true
-      link_flap                         = v.link_flap != null ? v.link_flap : true
-      loopback                          = v.loopback != null ? v.loopback : true
-      loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
-      port_security_violation           = v.port_security_violation != null ? v.port_security_violation : true
-      security_violation                = v.security_violation != null ? v.security_violation : true
-      set_port_state_failed             = v.set_port_state_failed != null ? v.set_port_state_failed : true
-      storm_control                     = v.storm_control != null ? v.storm_control : true
-      stp_inconsist_vpc_peerlink        = v.stp_inconsist_vpc_peerlink != null ? v.stp_inconsist_vpc_peerlink : true
-      system_error_based                = v.system_error_based != null ? v.system_error_based : true
-      unidirection_link_detection       = v.unidirection_link_detection != null ? v.unidirection_link_detection : true
-      unknown                           = v.unknown != null ? v.unknown : true
+    for key, value in var.global_error_disabled_recovery_policy : k => {
+      annotation                      = value.annotation != null ? value.annotation : ""
+      description                     = value.description != null ? value.description : ""
+      error_disable_recovery_interval = value.error_disable_recovery_interval != null ? value.error_disable_recovery_interval : 300
+      events = v.events != null ? [
+        for v in value.events : {
+          arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : false
+          bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
+          debug_1                           = v.debug_1 != null ? v.debug_1 : false
+          debug_2                           = v.debug_2 != null ? v.debug_2 : false
+          debug_3                           = v.debug_3 != null ? v.debug_3 : false
+          debug_4                           = v.debug_4 != null ? v.debug_4 : false
+          debug_5                           = v.debug_5 != null ? v.debug_5 : false
+          dhcp_rate_limit                   = v.dhcp_rate_limit != null ? v.dhcp_rate_limit : false
+          ethernet_port_module              = v.ethernet_port_module != null ? v.ethernet_port_module : false
+          frequent_endpoint_move            = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
+          ip_address_conflict               = v.ip_address_conflict != null ? v.ip_address_conflict : false
+          ipqos_dcbxp_compatability_failure = v.ipqos_dcbxp_compatability_failure != null ? v.ipqos_dcbxp_compatability_failure : false
+          ipqos_manager_error               = v.ipqos_manager_error != null ? v.ipqos_manager_error : false
+          link_flap                         = v.link_flap != null ? v.link_flap : false
+          loopback                          = v.loopback != null ? v.loopback : false
+          loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
+          port_security_violation           = v.port_security_violation != null ? v.port_security_violation : false
+          security_violation                = v.security_violation != null ? v.security_violation : false
+          set_port_state_failed             = v.set_port_state_failed != null ? v.set_port_state_failed : false
+          storm_control                     = v.storm_control != null ? v.storm_control : false
+          stp_inconsist_vpc_peerlink        = v.stp_inconsist_vpc_peerlink != null ? v.stp_inconsist_vpc_peerlink : false
+          system_error_based                = v.system_error_based != null ? v.system_error_based : false
+          unidirection_link_detection       = v.unidirection_link_detection != null ? v.unidirection_link_detection : false
+          unknown                           = v.unknown != null ? v.unknown : false
+        }
+        ] : [
+        {
+          arp_inspection                    = false
+          bpdu_guard                        = true
+          debug_1                           = false
+          debug_2                           = false
+          debug_3                           = false
+          debug_4                           = false
+          debug_5                           = false
+          dhcp_rate_limit                   = false
+          ethernet_port_module              = false
+          frequent_endpoint_move            = true
+          ip_address_conflict               = false
+          ipqos_dcbxp_compatability_failure = false
+          ipqos_manager_error               = false
+          link_flap                         = false
+          loopback                          = false
+          loop_indication_by_mcp            = true
+          port_security_violation           = false
+          security_violation                = false
+          set_port_state_failed             = false
+          storm_control                     = false
+          stp_inconsist_vpc_peerlink        = false
+          system_error_based                = false
+          unidirection_link_detection       = false
+          unknown                           = false
+        }
+      ]
     }
   }
 
+
+  #===================================
+  # MCP Instance Policy
+  #===================================
 
   global_mcp_instance_policy = {
     for k, v in var.global_mcp_instance_policy : k => {
@@ -98,11 +141,24 @@ locals {
       initial_delay                     = v.initial_delay != null ? v.initial_delay : 180
       loop_detect_multiplication_factor = v.loop_detect_multiplication_factor != null ? v.loop_detect_multiplication_factor : 3
       loop_protection_disable_port      = v.loop_protection_disable_port != null ? v.loop_protection_disable_port : true
-      transmission_frequency_seconds    = v.transmission_frequency_seconds != null ? v.transmission_frequency_seconds : 2
-      transmission_frequency_msec       = v.transmission_frequency_msec != null ? v.transmission_frequency_msec : 0
+      transmission_frequency = v.transmission_frequency != null ? [
+        for s in v.transmission_frequency : {
+          seconds = s.seconds != null ? s.seconds : 2
+          msec    = s.msec != null ? s.msec : 0
+        }
+        ] : [
+        {
+          seconds = 2
+          msec    = 0
+        }
+      ]
     }
   }
 
+
+  #===================================
+  # Global QoS Class
+  #===================================
 
   global_qos_class = {
     for k, v in var.global_qos_class : k => {
@@ -127,6 +183,10 @@ locals {
   # Interface Policies Variables
   #__________________________________________________________
 
+  #=========================
+  # CDP Interface
+  #=========================
+
   policies_cdp_interface = {
     for k, v in var.policies_cdp_interface : k => {
       admin_state  = v.admin_state != null ? v.admin_state : "enabled"
@@ -136,6 +196,16 @@ locals {
     }
   }
 
+  policies_cdp_interface_global_alias = {
+    for k, v in local.policies_cdp_interface : k => {
+      global_alias = v.global_alias
+      policy_type  = "cdp"
+    } if v.global_alias != ""
+  }
+
+  #=========================
+  # Fibre-Channel Interface
+  #=========================
 
   policies_fibre_channel_interface = {
     for k, v in var.policies_fibre_channel_interface : k => {
@@ -150,6 +220,9 @@ locals {
     }
   }
 
+  #=========================
+  # L2 Interface
+  #=========================
 
   policies_l2_interface = {
     for k, v in var.policies_l2_interface : k => {
@@ -161,6 +234,9 @@ locals {
     }
   }
 
+  #=========================
+  # Link-Level
+  #=========================
 
   policies_link_level = {
     for k, v in var.policies_link_level : k => {
@@ -174,6 +250,16 @@ locals {
     }
   }
 
+  policies_link_level_global_alias = {
+    for k, v in local.policies_link_level : k => {
+      global_alias = v.global_alias
+      policy_type  = "link_level"
+    } if v.global_alias != ""
+  }
+
+  #=========================
+  # LLDP Interface
+  #=========================
 
   policies_lldp_interface = {
     for k, v in var.policies_lldp_interface : k => {
@@ -185,6 +271,16 @@ locals {
     }
   }
 
+  policies_lldp_interface_global_alias = {
+    for k, v in local.policies_lldp_interface : k => {
+      global_alias = v.global_alias
+      policy_type  = "lldp"
+    } if v.global_alias != ""
+  }
+
+  #=========================
+  # MCP Interface
+  #=========================
 
   policies_mcp_interface = {
     for k, v in var.policies_mcp_interface : k => {
@@ -194,6 +290,9 @@ locals {
     }
   }
 
+  #=========================
+  # Port-Channel
+  #=========================
 
   policies_port_channel = {
     for k, v in var.policies_port_channel : k => {
@@ -223,6 +322,16 @@ locals {
     }
   }
 
+  policies_port_channel_global_alias = {
+    for k, v in local.policies_port_channel : k => {
+      global_alias = v.global_alias
+      policy_type  = "port_channel"
+    } if v.global_alias != ""
+  }
+
+  #=========================
+  # Port Security
+  #=========================
 
   policies_port_security = {
     for k, v in var.policies_port_security : k => {
@@ -234,6 +343,10 @@ locals {
   }
 
 
+  #=========================
+  # Spanning-Tree Interface
+  #=========================
+
   policies_spanning_tree_interface = {
     for k, v in var.policies_spanning_tree_interface : k => {
       annotation   = v.annotation != null ? v.annotation : ""
@@ -243,6 +356,14 @@ locals {
       global_alias = v.global_alias != null ? v.global_alias : ""
     }
   }
+
+  policies_spanning_tree_interface_global_alias = {
+    for k, v in local.policies_spanning_tree_interface : k => {
+      global_alias = v.global_alias
+      policy_type  = "stp"
+    } if v.global_alias != ""
+  }
+
 
   #__________________________________________________________
   #
@@ -270,19 +391,30 @@ locals {
       macsec_policy                    = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy             = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy                = v.monitoring_policy != null ? v.monitoring_policy : ""
-      netflow_monitor_policies         = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
-      poe_interface_policy             = v.poe_interface_policy != null ? v.poe_interface_policy : ""
-      port_security_policy             = v.port_security_policy != null ? v.port_security_policy : ""
-      priority_flow_control_policy     = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
-      slow_drain_policy                = v.slow_drain_policy != null ? v.slow_drain_policy : ""
-      span_destination_groups          = v.span_destination_groups != null ? v.span_destination_groups : []
-      span_source_groups               = v.span_source_groups != null ? v.span_source_groups : []
-      spanning_tree_interface_policy   = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
-      storm_control_policy             = v.storm_control_policy != null ? v.storm_control_policy : ""
-      synce_interface_policy           = v.synce_interface_policy != null ? v.synce_interface_policy : ""
+      netflow_monitor_policies = v.netflow_monitor_policies != null ? [
+        for s in v.netflow_monitor_policies : {
+          ip_filter_type         = s.ip_filter_type != null ? s.ip_filter_type : "ipv4"
+          netflow_monitor_policy = s.netflow_monitor_policy
+        }
+      ] : []
+      poe_interface_policy           = v.poe_interface_policy != null ? v.poe_interface_policy : ""
+      port_security_policy           = v.port_security_policy != null ? v.port_security_policy : ""
+      priority_flow_control_policy   = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
+      slow_drain_policy              = v.slow_drain_policy != null ? v.slow_drain_policy : ""
+      span_destination_groups        = v.span_destination_groups != null ? v.span_destination_groups : []
+      span_source_groups             = v.span_source_groups != null ? v.span_source_groups : []
+      spanning_tree_interface_policy = v.spanning_tree_interface_policy != null ? v.spanning_tree_interface_policy : ""
+      storm_control_policy           = v.storm_control_policy != null ? v.storm_control_policy : ""
+      synce_interface_policy         = v.synce_interface_policy != null ? v.synce_interface_policy : ""
     }
   }
 
+  leaf_interfaces_policy_groups_access_global_alias = {
+    for k, v in local.leaf_interfaces_policy_groups_access : k => {
+      global_alias = v.global_alias
+      policy_type  = "leaf_access"
+    } if v.global_alias != ""
+  }
 
   leaf_interfaces_policy_groups_breakout = {
     for k, v in var.leaf_interfaces_policy_groups_breakout : k => {
@@ -313,7 +445,12 @@ locals {
       macsec_policy                  = v.macsec_policy != null ? v.macsec_policy : ""
       mcp_interface_policy           = v.mcp_interface_policy != null ? v.mcp_interface_policy : ""
       monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
-      netflow_monitor_policies       = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
+      netflow_monitor_policies = v.netflow_monitor_policies != null ? [
+        for s in v.netflow_monitor_policies : {
+          ip_filter_type         = s.ip_filter_type != null ? s.ip_filter_type : "ipv4"
+          netflow_monitor_policy = s.netflow_monitor_policy
+        }
+      ] : []
       port_security_policy           = v.port_security_policy != null ? v.port_security_policy : ""
       priority_flow_control_policy   = v.priority_flow_control_policy != null ? v.priority_flow_control_policy : ""
       slow_drain_policy              = v.slow_drain_policy != null ? v.slow_drain_policy : ""
@@ -327,7 +464,7 @@ locals {
 
   #__________________________________________________________
   #
-  # Leaf Policy Group Variables
+  # Switches - Leaf Policy Group Variables
   #__________________________________________________________
 
   switches_leaf_policy_groups = {
@@ -376,10 +513,17 @@ locals {
     }
   }
 
+  spine_interface_policy_groups_global_alias = {
+    for k, v in local.spine_interface_policy_groups : k => {
+      global_alias = v.global_alias
+      policy_type  = "spine_access"
+    } if v.global_alias != ""
+  }
+
 
   #__________________________________________________________
   #
-  # Spine Policy Group Variables
+  # Switches - Spine Policy Group Variables
   #__________________________________________________________
 
   switches_spine_policy_groups = {

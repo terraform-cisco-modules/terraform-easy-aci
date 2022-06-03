@@ -1,12 +1,13 @@
-#------------------------------------------
-# Create Access Port Policy Groups
-#------------------------------------------
+/*_____________________________________________________________________________________________________________________
 
+Leaf Interfaces — Access Policy Group — Variables
+_______________________________________________________________________________________________________________________
+*/
 variable "leaf_interfaces_policy_groups_access" {
   default = {
     "default" = {
-      attachable_entity_profile        = ""
       annotation                       = ""
+      attachable_entity_profile        = ""
       cdp_interface_policy             = ""
       copp_interface_policy            = ""
       data_plane_policing_egress       = ""
@@ -37,15 +38,47 @@ variable "leaf_interfaces_policy_groups_access" {
     }
   }
   description = <<-EOT
-  Key: Name of the Attachable Access Entity Profile Policy.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object. 
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    Key — Name of the Leaf Interface - Access Policy Group.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * attachable_entity_profile — The Name of the Global Attachable Entity Profile.
+    * cdp_interface_policy — The Name of the CDP Interface Policy.
+    * copp_interface_policy — The Name of the CoPP Interafce Policy.
+    * data_plane_policing_egress — The Name of the Egress Data Plane Policing Policy.
+    * data_plane_policing_ingress — The Name of the Ingress Data Plane Policing Policy.
+    * description — escription to add to the Object.  The description can be up to 128 characters.
+    * dot1x_port_authentication_policy — The Name of the 802.1X Port Authentication Policy.
+    * dwdm_policy — The Name of the DWDM Interface Policy.
+    * fibre_channel_interface_policy — The Name of the 802.1X Port Authentication Policy.
+    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    * l2_interface_policy — The Name of the Layer2 Interface Policy.
+    * link_flap_policy — The Name of the Link Flap Policy.
+    * link_level_flow_control_policy — The Name of the Link Level Flow Control Policy.
+    * link_level_policy — The Name of the Link Level Policy.
+    * lldp_interface_policy — The Name of the LLDP Interface Policy.
+    * macsec_policy — The Name of the MACSec Policy.
+    * mcp_interface_policy — The Name of the MCP Interface Policy.
+    * monitoring_policy — The Name of the Monitoring Policy.
+    * netflow_monitor_policies — Map of Objects to assign Netflow Monitor Policies to the Policy Group.
+      - ip_filter_type — IP Filter Type.  Options are:
+        * ce
+        * ipv4
+        * ipv6
+      - netflow_monitor_policy — The Name of the Netflow Monitor Policy.
+    * poe_interface_policy — The Name of the PoE Interface Policy.
+    * port_security_policy — The Name of the Port Security Policy.
+    * priority_flow_control_policy — The Name of the Priority Flow Control Policy.
+    * slow_drain_policy — The Name of the Slow Drain Policy.
+    * span_destination_groups — The Name of the Span Destination Group.
+    * span_source_groups — The Name of the Span Source Groups.
+    * spanning_tree_interface_policy — The Name of the Spanning Tree Interface Policy.
+    * storm_control_policy — The Name of the Storm Control Policy.
+    * synce_interface_policy — The Name of the SyncE Interface Policy.
   EOT
   type = map(object(
     {
-      attachable_entity_profile        = optional(string)
       annotation                       = optional(string)
+      attachable_entity_profile        = optional(string)
       cdp_interface_policy             = optional(string)
       copp_interface_policy            = optional(string)
       data_plane_policing_egress       = optional(string)
@@ -63,25 +96,34 @@ variable "leaf_interfaces_policy_groups_access" {
       macsec_policy                    = optional(string)
       mcp_interface_policy             = optional(string)
       monitoring_policy                = optional(string)
-      netflow_monitor_policies         = optional(list(string))
-      port_security_policy             = optional(string)
-      poe_interface_policy             = optional(string)
-      priority_flow_control_policy     = optional(string)
-      slow_drain_policy                = optional(string)
-      span_destination_groups          = optional(list(string))
-      span_source_groups               = optional(list(string))
-      spanning_tree_interface_policy   = optional(string)
-      storm_control_policy             = optional(string)
-      synce_interface_policy           = optional(string)
+      netflow_monitor_policies = optional(list(object(
+        {
+          ip_filter_type         = optional(string)
+          netflow_monitor_policy = string
+        }
+
+      )))
+      port_security_policy           = optional(string)
+      poe_interface_policy           = optional(string)
+      priority_flow_control_policy   = optional(string)
+      slow_drain_policy              = optional(string)
+      span_destination_groups        = optional(list(string))
+      span_source_groups             = optional(list(string))
+      spanning_tree_interface_policy = optional(string)
+      storm_control_policy           = optional(string)
+      synce_interface_policy         = optional(string)
     }
   ))
 }
-/*
+/*_____________________________________________________________________________________________________________________
+
 API Information:
  - Class: "infraAccPortGrp"
- - Distinguished Name: "uni/infra/funcprof/accportgrp-{{Name}}"
+ - Distinguished Name: "uni/infra/funcprof/accportgrp-{name}"
 GUI Location:
- - Fabric > Interfaces > Leaf Interfaces > Policy Groups > Leaf Access Port > {{Name}}
+ - Fabric > Interfaces > Leaf Interfaces > Policy Groups > Leaf Access Port > {name}
+
+_______________________________________________________________________________________________________________________
 */
 resource "aci_leaf_access_port_policy_group" "leaf_interfaces_policy_groups_access" {
   depends_on = [
@@ -139,10 +181,10 @@ resource "aci_leaf_access_port_policy_group" "leaf_interfaces_policy_groups_acce
   ) > 0 ? "uni/fabric/monfab-${each.value.monitoring_policy}" : ""
   # class: netflowMonitorPol
   dynamic "relation_infra_rs_netflow_monitor_pol" {
-    for_each = toset(each.value.netflow_monitor_policies)
+    for_each = each.value.netflow_monitor_policies
     content {
-      flt_type  = element(split(":", relation_infra_rs_netflow_monitor_pol.value), 1)
-      target_dn = "uni/infra/monitorpol-${element(split(":", relation_infra_rs_netflow_monitor_pol.value), 0)}"
+      flt_type  = relation_infra_rs_netflow_monitor_pol.value.ip_filter_type
+      target_dn = "uni/infra/monitorpol-${relation_infra_rs_netflow_monitor_pol.value.netflow_monitor_policy}"
     }
   }
   # class: poeIfPol
@@ -174,3 +216,25 @@ resource "aci_leaf_access_port_policy_group" "leaf_interfaces_policy_groups_acce
   ) > 0 ? "uni/infra/ifPol-${each.value.spanning_tree_interface_policy}" : ""
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/infra/funcprof/accportgrp-{name}/alias"
+GUI Location:
+ - Fabric > Interfaces > Leaf Interfaces > Policy Groups > Leaf Access Port > {name}: alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "leaf_interfaces_policy_groups_access_global_alias" {
+  depends_on = [
+    aci_leaf_access_port_policy_group.leaf_interfaces_policy_groups_access,
+  ]
+  for_each   = local.leaf_interfaces_policy_groups_access_global_alias
+  dn         = "uni/infra/funcprof/accportgrp-${each.key}"
+  class_name = "tagAliasInst"
+  content = {
+    name = each.value.global_alias
+  }
+}

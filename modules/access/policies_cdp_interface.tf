@@ -1,10 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-API Information:
- - Class: "cdpIfPol"
- - Distinguished Name: "uni/infra/cdpIfP-{name}"
-GUI Location:
- - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
+Policies — CDP Interface — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "policies_cdp_interface" {
@@ -17,11 +13,11 @@ variable "policies_cdp_interface" {
     }
   }
   description = <<-EOT
-  Key: Name of the CDP Interface Policy.
-  * admin_state: (Default value is "enabled").  The State of the CDP Protocol on the Interface.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
+    Key — Name of the CDP Interface Policy.
+    * admin_state — (Default value is "enabled").  The State of the CDP Protocol on the Interface.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * global_alias — A label, unique within the fabric, that can serve as a substitute for an object's Distinguished Name (DN).  A global alias must be unique accross the fabric.
   EOT
   type = map(object(
     {
@@ -34,10 +30,41 @@ variable "policies_cdp_interface" {
 }
 
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "cdpIfPol"
+ - Distinguished Name: "uni/infra/cdpIfP-{name}"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_cdp_interface_policy" "policies_cdp_interface" {
   for_each    = local.policies_cdp_interface
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   admin_st    = each.value.admin_state
   description = each.value.description
   name        = each.key
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/infra/cdpIfP-{name}/alias"
+GUI Location:
+ - Fabric > Access Policies > Policies > Interface > CDP Interface : {name}: alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "policies_cdp_interface_global_alias" {
+  depends_on = [
+    aci_cdp_interface_policy.policies_cdp_interface,
+  ]
+  for_each   = local.policies_cdp_interface_global_alias
+  dn         = "uni/infra/cdpIfP-${each.key}"
+  class_name = "tagAliasInst"
+  content = {
+    name = each.value.global_alias
+  }
 }

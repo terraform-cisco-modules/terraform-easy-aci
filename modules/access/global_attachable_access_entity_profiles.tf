@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________________________________________________
 
-AAEP Policy Variables
+Global — Attachable Access Entity Profile — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "global_attachable_access_entity_profiles" {
@@ -14,11 +14,12 @@ variable "global_attachable_access_entity_profiles" {
     }
   }
   description = <<-EOT
-  Key: Name of the Attachable Access Entity Profile Policy.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * layer3_domains: A List of Layer3 Domains to Attach to this AAEP Policy.
-  * physical_domains: A List of Physical Domains to Attach to this AAEP Policy.
-  * vmm_domains: A List of Virtual Domains to Attach to this AAEP Policy.
+    Key — Name of the Attachable Access Entity Profile Policy.
+    * annotation — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description — Description to add to the Object.  The description can be up to 128 characters.
+    * layer3_domains — A List of Layer3 Domains to Attach to this AAEP Policy.
+    * physical_domains — A List of Physical Domains to Attach to this AAEP Policy.
+    * vmm_domains — A List of Virtual Domains to Attach to this AAEP Policy.
   EOT
   type = map(object(
     {
@@ -57,10 +58,10 @@ resource "aci_attachable_access_entity_profile" "global_attachable_access_entity
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "infraAttEntityP"
- - Distinguished Name: "uni/infra/attentp-{AAEP}"
+ - Class: "infraGeneric"
+ - Distinguished Name: "uni/infra/attentp-{name}/gen-default"
 GUI Location:
- - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {AAEP}
+ - Fabric > Access Policies > Policies > Global > Attachable Access Entity Profiles : {name}: Application EPGs
 _______________________________________________________________________________________________________________________
 */
 resource "aci_access_generic" "access_generic" {
@@ -68,6 +69,7 @@ resource "aci_access_generic" "access_generic" {
     aci_attachable_access_entity_profile.global_attachable_access_entity_profiles
   ]
   for_each                            = local.global_attachable_access_entity_profiles
+  annotation                          = each.value.annotation != "" ? each.value.annotation : var.annotation
   attachable_access_entity_profile_dn = aci_attachable_access_entity_profile.global_attachable_access_entity_profiles[each.key].id
   name                                = "default"
 }

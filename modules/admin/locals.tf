@@ -226,9 +226,9 @@ locals {
         management_epg         = value.management_epg != null ? value.management_epg : "default"
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
-        server_monitoring      = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["admin_state"], "disabled") : "disabled"
-        password               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["password"], 0) : 0
-        username               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["username"], "admin") : "admin"
+        server_monitoring      = coalesce(v.server_monitoring[0]["admin_state"], "disabled")
+        password               = coalesce(v.server_monitoring[0]["password"], 0)
+        username               = coalesce(v.server_monitoring[0]["username"], "default")
         type                   = v.type
       }
     ]
@@ -319,13 +319,12 @@ locals {
         management_epg         = value.management_epg != null ? value.management_epg : "default"
         management_epg_type    = value.management_epg_type != null ? value.management_epg_type : "oob"
         order                  = value.order
-        server_monitoring      = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["admin_state"], "disabled") : "disabled"
-        password               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["password"], 0) : 0
-        username               = v.server_monitoring != null ? coalesce(v.server_monitoring[0]["username"], "admin") : "admin"
+        server_monitoring      = coalesce(v.server_monitoring[0]["admin_state"], "disabled")
+        password               = coalesce(v.server_monitoring[0]["password"], 0)
+        username               = coalesce(v.server_monitoring[0]["username"], "default")
       }
     ]
   ])
-
   tacacs_hosts = { for k, v in local.tacacs_hosts_loop : "${v.key1}_${v.host}" => v }
 
 }
