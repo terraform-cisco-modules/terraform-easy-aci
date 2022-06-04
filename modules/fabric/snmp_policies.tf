@@ -330,9 +330,9 @@ resource "aci_rest_managed" "snmp_client_group_clients" {
   class_name = "snmpClientP"
   dn         = "uni/fabric/snmppol-${each.value.snmp_policy}/clgrp-${each.value.client_group}/client-[${each.value.address}]"
   content = {
-    addr       = each.value.address
+    addr = each.value.address
     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name       = each.value.name
+    name = each.value.name
   }
 }
 

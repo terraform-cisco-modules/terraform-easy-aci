@@ -83,8 +83,8 @@ output "policies_cdp_interface" {
 
 output "policies_fibre_channel_interface" {
   value = local.policies_fibre_channel_interface != {} ? { for v in sort(
-    keys(aci_cdp_interface_policy.policies_fibre_channel_interface)
-  ) : v => aci_cdp_interface_policy.policies_fibre_channel_interface[v].id } : {}
+    keys(aci_interface_fc_policy.policies_fibre_channel_interface)
+  ) : v => aci_interface_fc_policy.policies_fibre_channel_interface[v].id } : {}
 }
 
 output "policies_l2_interface" {
@@ -175,7 +175,7 @@ Virtual Networking — VMM Domain — Outputs
 _______________________________________________________________________________________________________________________
 */
 output "vmm_domains" {
-  value = local.virtual_networking != {} ? { for v in sort(
+  value = local.domains_vmm != {} ? { for v in sort(
     keys(aci_vmm_domain.domains_vmm)
   ) : v => aci_vmm_domain.domains_vmm[v].id } : {}
 }

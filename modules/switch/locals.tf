@@ -118,13 +118,6 @@ locals {
   # VPC Domains Variables
   #__________________________________________________________
 
-  vpc_domain_policies = {
-    for k, v in var.vpc_domain_policies : k => {
-      annotation    = v.annotation != null ? v.annotation : ""
-      dead_interval = v.dead_interval != null ? v.dead_interval : 200
-      description   = v.description != null ? v.description : ""
-    }
-  }
   vpc_domains = {
     for k, v in var.vpc_domains : k => {
       annotation        = v.annotation != null ? v.annotation : ""

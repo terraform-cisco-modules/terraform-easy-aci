@@ -127,7 +127,7 @@ variable "configuration_backups" {
           delay_between_node_upgrades = optional(number)
           description                 = optional(string)
           maximum_concurrent_nodes    = optional(number)
-          maximum_running_time        = optional(string)
+          maximum_running_time        = optional(number)
           processing_break            = optional(string)
           processing_size_capacity    = optional(number)
           schedule = optional(list(object(
@@ -233,17 +233,17 @@ resource "aci_recurring_window" "recurring_window" {
   for_each   = local.recurring_window
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
   concur_cap = each.value.maximum_concurrent_nodes == 0 ? "unlimited" : each.value.maximum_concurrent_nodes
-  day        = each.value.schedule[0].days   # "every-day"
-  hour       = each.value.schedule[0].hour   # 0
-  minute     = each.value.schedule[0].minute # 0
+  day        = each.value.schedule[0].days
+  hour       = each.value.schedule[0].hour
+  minute     = each.value.schedule[0].minute
   name       = each.key
   node_upg_interval = length(regexall(
     1, each.value.maximum_concurrent_nodes)
   ) > 0 && each.value.window_type == "one-time" ? each.value.delay_between_node_upgrades : 0
-  proc_break   = each.value.processing_break # "none"
+  proc_break   = each.value.processing_break
   proc_cap     = each.value.processing_size_capacity == 0 ? "unlimited" : each.value.processing_size_capacity
   scheduler_dn = aci_trigger_scheduler.trigger_schedulers[each.key].id
-  time_cap     = each.value.maximum_running_time == 0 ? "unlimited" : each.value.processing_size_capacity
+  time_cap     = each.value.maximum_running_time == 0 ? "unlimited" : each.value.maximum_running_time
 }
 
 

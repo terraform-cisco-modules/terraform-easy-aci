@@ -64,11 +64,11 @@ locals {
   #===================================
 
   global_error_disabled_recovery_policy = {
-    for key, value in var.global_error_disabled_recovery_policy : k => {
+    for key, value in var.global_error_disabled_recovery_policy : key => {
       annotation                      = value.annotation != null ? value.annotation : ""
       description                     = value.description != null ? value.description : ""
       error_disable_recovery_interval = value.error_disable_recovery_interval != null ? value.error_disable_recovery_interval : 300
-      events = v.events != null ? [
+      events = value.events != null ? [
         for v in value.events : {
           arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : false
           bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
@@ -732,5 +732,17 @@ locals {
   ])
   vmm_uplink_names = { for k, v in local.vmm_uplink_names_loop : "${v.domain}_${v.uplinkName}" => v }
 
+  #__________________________________________________________
+  #
+  # VPC Domains Variables
+  #__________________________________________________________
+
+  vpc_domain_policies = {
+    for k, v in var.vpc_domain_policies : k => {
+      annotation    = v.annotation != null ? v.annotation : ""
+      dead_interval = v.dead_interval != null ? v.dead_interval : 200
+      description   = v.description != null ? v.description : ""
+    }
+  }
   # End of Local Loops
 }
