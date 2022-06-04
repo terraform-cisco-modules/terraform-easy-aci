@@ -35,44 +35,63 @@ variable "snmp_policies" {
   }
   description = <<-EOT
     Key - Name for the DNS Profile
+    * admin_state: (optional) — The administrative state of the SNMP policy. The state can be:
+      - disabled
+      - enabled: (default)
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-    * admin_state = "enabled"
-    * annotation  = ""
-    * contact     = ""
-    * description = ""
-    * include_types = [
-      - audit_logs   = false
-      - events       = false
-      - faults       = true
-      - session_logs = false
-    * location = ""
-    * snmp_client_groups = [
+    * contact: (optional) — The contact information for the SNMP policy.
+    * include_types: (optional) — The Type of messages to include in the SNMP Policy.
+      - audit_logs: (default: false)
+      - events: (default: false)
+      - faults: (default: true)
+      - session_logs: (default: false)
+    * location: (optional) — The location for the SNMP policy.
+    * snmp_client_groups: (required) — List of Client Groups to assign to the SNMP Policy.
       - clients             = []
-        * address = string
-        * name    = optional(string)
-      - description         = ""
-      - management_epg      = "default"
-      - management_epg_type = "oob"
-      - name                = "default"
-    * snmp_communities  = []
-      - community_variable = number
-      - description        = optional(string)
+        * address: (required) — The SNMP client profile IP address.
+        * name: (default: address value) — The name of the client group profile. This name can be between 1 and 64 alphanumeric characters.
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - management_epg: (default: default) — The management EPG for the Smart Callhome destination group profile.
+      - management_epg_type: (optional) — Type of management EPG.  Options are:
+        * inb
+        * oob: (default)
+      - name: (default: default) — Name of the SNMP Client Group to create.
+    * snmp_communities: (optional) — List of Communities to add to the Policy.
+      - community_variable: (default: 1) — A value between 1 to 5 that will point to the snmp_community_{value} variable.
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
     * snmp_destinations = []
-      - community_variable  = optional(number)
-      - host                = string
-      - management_epg      = optional(string)
-      - management_epg_type = optional(string)
-      - port                = optional(number)
-      - username            = optional(string)
-      - v3_security_level   = optional(string)
-      - version             = optional(string)
-    * users             = []
-      - authorization_key  = number
-      - authorization_type = optional(string)
-      - privacy_key        = optional(number)
-      - privacy_type       = optional(string)
-      - username           = string
+      - community_variable: (required if version is v2c) — A value between 1 to 5 that will point to the snmp_community_{value} variable.
+      - host: (required) — The host for the SNMP trap destination. SNMP traps enable an agent to notify the management station of significant events by way of an unsolicited SNMP message.
+      - management_epg: (default: default) — The management EPG for the Smart Callhome destination group profile.
+      - management_epg_type: (optional) — Type of management EPG.  Options are:
+        * inb
+        * oob: (default)
+      - port: (default: 162) — The service port of the SNMP trap destination. SNMP traps enable an agent to notify the management station of significant events by way of an unsolicited SNMP message. The range is from 0(unspecified) to 65535.
+      - username: (required if version is v3) — The name of the SNMP User.
+      - v3_security_level: (optional) — The SNMP V3 security level for the destination path. The level can be:
+        * auth: (default)
+        * noauth
+        * priv
+      - version: (optional) — The SNMP version to utilize for the Trap destination.
+        * v1
+        * v2c: (default)
+        * v3
+    * users: (optional) — SNMP Users to add to the SNMP Policy.
+      - authorization_key: (default: 1) — A value between 1 to 5 that will point to the snmp_authorization_key_{value} variable.
+      - authorization_type: (optional) — he authentication type for the user profile. The authentication type is a message authentication code (MAC) that is used between two parties sharing a secret key to validate information transmitted between them. HMAC (Hash MAC) is based on cryptographic hash functions. It can be used in combination with any iterated cryptographic hash function. HMAC MD5 and HMAC SHA1 are two constructs of the HMAC using the MD5 hash function and the SHA1 hash function. HMAC also uses a secret key for calculation and verification of the message authentication values. Supported types are:
+       * hmac-md5-96
+       * hmac-sha1-96: (default)
+       * hmac-sha2-224
+       * hmac-sha2-256
+       * hmac-sha2-384
+       * hmac-sha2-512
+      - privacy_key: (optional) — A value between 1 to 5 that will point to the snmp_privacy_key_{value} variable.
+      - privacy_type: (optional) — The privacy (encryption) type for the user profile. The type can be Data Encryption Standard (DES) or Advanced Encryption Standard (AES). Data Encryption Standard is a method of data encryption that uses a private (secret) key. DES applies a 56-bit key to each 64-bit block of data. Advanced Encryption Standard that uses a key with a length of 128 bits to encrypt data blocks with a length of 128 bits. The privacy types are:
+        * aes-128
+        * des
+        * none: (default)
+      - username: (required) — The name of the SNMP User to create.
   EOT
   type = map(object(
     {

@@ -12,10 +12,14 @@ variable "global_aes_encryption_settings" {
     }
   }
   description = <<-EOT
-  Key - This should be default.
-  * clear_passphrase: 
-  * enable_encryption: 
-  * passphrase_key_derivation_version: 
+    Key - This should always be default.
+    * clear_passphrase: (optional) — Flag to clear the passphrase when disabling Global AES Encryption.
+      - false: (default)
+      - true
+    * enable_encryption: (optional) — Enables strong encryption on the import or export policy.
+      - false
+      - true: (default)
+    * passphrase_key_derivation_version: (default: v1) — v1 is the only option today.
   EOT
   type = map(object(
     {

@@ -48,7 +48,7 @@ variable "date_and_time" {
       - hostname: (required) — Hostname/IP Address of the NTP Server
       - key_id: (optional) — key_id of the Authentication key.
       - management_epg: (required) — Name of the Management EPG
-      - management_epg_type: (optional) — Type of EPG.  Options are:
+      - management_epg_type: (optional) — Type of management EPG.  Options are:
         * inb — for Inband EPGs.
         * oob: (default) — For Out-of-Band EPGs.
       - maximum_polling_interval: (default: 6) — The maximum NTP default polling value. This default is set in terms of seconds. The maximum interval range is from 4 to 16.

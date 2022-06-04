@@ -39,33 +39,46 @@ variable "smart_callhome" {
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
-    * admin_state: (optional) — Options are:
+    Key - Name for the Smart CallHome.  You can only have one Smart CallHome Profile.
+    * admin_state: (optional) — The admin state of the Smart Callhome destination group profile. The state can be Enabled or Disabled. If enabled, the system uses the profile policy when an event or fault matching the associated cause is encountered. If disabled, the system ignores the policy even if a matching error occurs.  Options are:
       - disabled
       - enabled: (default)
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * contact_information: (optional) —     = ""
-    * contract_id: (optional) —             = ""
-    * customer_contact_email: (optional) —  = ""
-    * customer_id: (optional) —             = ""
+    * contact_information: (optional) — The customer contact ID. Note that the customer ID associated with the Smart Callhome configuration in Cisco UCS must be the CCO (Cisco.com) account name associated with a support contract that includes Smart Callhome.
+    * contract_id: (optional) — The contract information provided by the customer.
+    * customer_contact_email: (optional) — The email address of the contact for the system or site. This address is not necessarily the same as the reply-to addresses used in the outgoing emails.
+    * customer_id: (optional) — The customer for the Smart Callhome destination group profile.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-    * smart_destinations = [
-      - admin_state: (optional) —    = "enabled"
-      - email         = "admin@example.com"
-      - format: (optional) —         = "short-txt" # aml|short-txt|xml
-      - rfc_compliant: (optional) —  = true
-    * from_email: (optional) —  = ""
-    * phone_contact: (optional) —   = ""
-    * reply_to_email: (optional) —  = ""
-    * site_id: (optional) —         = ""
-    * street_address: (optional) —  = ""
+    * smart_destinations: (required) — List of email addresses to send smart callHome information.
+      - admin_state: (optional) — The admin state of the Smart Callhome destination group.
+        * disabled
+        * enabled: (default)
+      - email: (default: admin@example.com) — The email address of the sender.
+      - format: (optional) —         = "short-txt"
+        * aml
+        * short-txt: (default)
+        * xml
+      - rfc_compliant: (optional) — Messages are only to be sent in RFC-compliant formats.
+        * NOTE:  If this flag is enabled, messages will not be backward compatible and might have issues with Microsoft Outlook on OSX.
+          - If rfc_compliant is not checked, there will be no message body though.
+        * false
+        * true: (default)
+    * from_email: (optional) — The email address of the sender.
+    * phone_contact: (optional) — The customer contact phone number.
+    * reply_to_email: (optional) — The reply-to email address for emails sent.
+    * site_id: (optional) — The site ID provided by the customer. This is the ID of the network where the site is deployed.
+    * street_address: (optional) — The contact address of the customer.
     * smtp_server: (required) —  = [
-      - management_epg: (optional) —       = "default"
-      - management_epg_type = "oob" # inb|oob
-      - port_number: (default: 25) —          = 25
-      - secure_smtp: (optional) —          = false
-      - smtp_server: (required) —          = "relay.example.com"
-      - username: (required if secure_smtp set to true) —             = ""
+      - management_epg: (default: default) — The management EPG for the Smart Callhome destination group profile.
+      - management_epg_type: (optional) — Type of management EPG.  Options are:
+        * inb
+        * oob: (default)
+      - port_number: (default: 25) — The SMTP server port number for the Smart Callhome destination group profile. Note that you must configure the SMTP server address for the Smart Callhome functionality to work. You can also configure the from and reply-to e-mail addresses. The port rage is from 0 to 65535.
+      - secure_smtp: (optional) — Flag to enable smtp authentication when required.
+        * false: (default)
+        * true
+      - smtp_server: (default: relay.example.com) — The hostname or IP for the Smart Callhome destination group profile. Smart Callhome sends email messages to either the IP address or hostname and the associated port number.
+      - username: (required if secure_smtp set to true) — Username for the smtp server when secure_smtp is enabled.
   EOT
   type = map(object(
     {

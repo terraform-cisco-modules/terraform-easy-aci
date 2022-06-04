@@ -10,7 +10,7 @@ variable "endpoint_controls" {
       ep_loop_protection = [{
         action = [{
           bd_learn_disable = false
-          port_disable     = false
+          port_disable     = true
         }]
         administrative_state      = "enabled"
         loop_detection_interval   = 60
@@ -28,8 +28,32 @@ variable "endpoint_controls" {
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
+    Key - This should always be default.
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * ep_loop_protection: (required) — The endpoint loop protection policy specifies how loops detected by frequent MAC address moves are handled.
+      - action: (optional) — Action to Perform when a Loop is dected.
+        * bd_learn_disable: (optional) — Disable bridge domain learning when a loop is detected, options are:
+          - false: (default)
+          - true
+        * port_disable: (optional) — Disable the Port when a loop is detected, options are:
+          - false
+          - true: (default)
+      - administrative_state: (optional) — The administrative state of the endpoint loop protection policy, options are: 
+        * disabled
+        * enabled: (default)
+      - loop_detection_interval: (default: 60) — Sets the loop detection interval, which specifies the time to detect a loop. The interval range is from 30 to 300 seconds.
+      - loop_detection_multiplier: (default: 4) — Sets the loop detection multiplication factor, which is the number of times a single EP moves between ports within the loop detection interval.
+    * ip_aging: (required) — When enabled, the IP aging policy ages unused IPs on an endpoint.  When the Administrative State is enabled, the IP aging policy sends ARP requests (for IPv4) and neighbor solicitations (for IPv6) to track IPs on endpoints. If no response is given, the policy ages the unused IPs.  Required: The endpoint retention policy specifies the timer used for tracking IPs on endpoints.
+      - administrative_state: (optional) — Enables and disables the IP aging policy, options are:
+        * disabled
+        * enabled: (default)
+    * rouge_ep_control: (required) — A rogue endpoint can attack leaf switches through frequently, repeatedly injecting packets on different leaf switch ports and changing 802.1Q tags (emulating endpoint moves), resulting in learned sclass and EPG port changes. Misconfigurations can also cause frequent IP and MAC addresss changes (moves).  The Rogue EP Control feature addresses this vulnerability.
+      - administrative_state: (optional) — The administrative state of the Rogue EP Control policy, options are:
+        * disabled
+        * enabled: (default)
+      - hold_interval: (default: 1800) — Interval in seconds after the endpoint is declared rogue, where it is kept static so learning is prevented and the traffic to and from the rogue endpoint is dropped. After this interval, the endpoint is deleted. Valid values are from 300 to 3600.
+      - rouge_interval: (default: 30) — Sets the Rogue EP detection interval, which specifies the time to detect rogue endpoints. Valid values are from 0 to 65535 seconds.
+      - rouge_multiplier: (default: 6) — Sets the Rogue EP Detection multiplication factor for determining if an endpoint is unauthorized. If the endpoint moves more times than this number, within the EP detection interval, the endpoint is declared rogue. Valid values are from 2 to 10.
   EOT
   type = map(object(
     {

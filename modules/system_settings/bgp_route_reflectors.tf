@@ -11,8 +11,9 @@ variable "bgp_route_reflectors" {
     }
   }
   description = <<-EOT
-  Key - Pod Identifier
-  * node_id: Node Identifier for the Spine.
+    * Key - Pod Identifier
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * node_list: (required) — List of Spine Node Identifiers to add as route reflectors.
   EOT
   type = map(object(
     {

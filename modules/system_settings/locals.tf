@@ -27,12 +27,12 @@ locals {
         action = v.action != null ? [
           for s in v.action : {
             bd_learn_disable = s.bd_learn_disable != null ? s.bd_learn_disable : false
-            port_disable     = s.port_disable != null ? s.port_disable : false
+            port_disable     = s.port_disable != null ? s.port_disable : true
           }
           ] : [
           {
             bd_learn_disable = false
-            port_disable     = false
+            port_disable     = true
           }
         ]
         administrative_state      = v.administrative_state != null ? v.administrative_state : "enabled"
@@ -136,7 +136,7 @@ locals {
       lsp_generation_maximum_wait_interval            = v.lsp_generation_maximum_wait_interval != null ? v.lsp_generation_maximum_wait_interval : 8000
       lsp_generation_second_wait_interval             = v.lsp_generation_second_wait_interval != null ? v.lsp_generation_second_wait_interval : 50
       sfp_computation_frequency_initial_wait_interval = v.sfp_computation_frequency_initial_wait_interval != null ? v.sfp_computation_frequency_initial_wait_interval : 50
-      sfp_computation_frequency_maximum_wait_interval = v.sfp_computation_frequency_maximum_wait_interval != null ? v.sfp_computation_frequency_maximum_wait_interval : 50
+      sfp_computation_frequency_maximum_wait_interval = v.sfp_computation_frequency_maximum_wait_interval != null ? v.sfp_computation_frequency_maximum_wait_interval : 8000
       sfp_computation_frequency_second_wait_interval  = v.sfp_computation_frequency_second_wait_interval != null ? v.sfp_computation_frequency_second_wait_interval : 50
     }
   }

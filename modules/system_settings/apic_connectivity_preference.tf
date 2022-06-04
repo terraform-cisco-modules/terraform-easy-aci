@@ -4,11 +4,11 @@ APIC Connectivity Preference — Variables
 _______________________________________________________________________________________________________________________
 */
 variable "apic_connectivity_preference" {
-  default     = "inband"
+  default     = "ooband"
   description = <<-EOT
   * The preferred management connectivity preference. Options are:
-    - inband: Executes in-band management connectivity between the APIC server to external devices through leaf switches on the ACI fabric.
-    - ooband: Executes out-of-band management connectivity between the APIC server to external devices through connections external to the ACI fabric.
+    - inband — Executes in-band management connectivity between the APIC server to external devices through leaf switches on the ACI fabric.
+    - ooband: (default) — Executes out-of-band management connectivity between the APIC server to external devices through connections external to the ACI fabric.
   EOT
   type        = string
 }

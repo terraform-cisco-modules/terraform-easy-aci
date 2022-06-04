@@ -25,8 +25,49 @@ variable "fabric_wide_settings" {
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
+    Key - This should always be default.
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * disable_remote_ep_learning: (optional) — You should enable this policy in fabrics which include the Cisco Nexus 9000 series switches, 93128 TX, 9396 PX, or 9396 TX switches with the N9K-M12PQ uplink module, after all the nodes have been successfully upgraded to APIC Release 2.2(2x).
+      - Note: After any of the following configuration changes, you may need to manually flush previously learned IP endpoints:
+        * Remote IP endpoint learning is disabled.
+        * The VRF is configured for ingress policy enforcement.
+        * At least one Layer 3 interface exists in the VRF.
+      - To manually flush previously learned IP endpoints, enter the following command on both VPC peers: vsh -c "clear system internal epm endpoint vrf <vrf-name> remote"
+      - false
+      - true: (default)
+    * enforce_domain_validation: (optional) — Enable a validation check when static paths are added, to ensure that a domain is attached to the EPG on the path.
+      - false
+      - true: (default)
+    * enforce_epg_vlan_validation: (optional) — When checked, the system globally prevents overlapping VLAN pools from being assigned to EPGs.
+      - Note:  If overlapping VLAN pools already exist and this parameter is checked, the system returns an error. You must assign VLAN pools that are not overlapping to the EPGs before choosing this feature.
+      - If this parameter is checked and an attempt is made to add an overlapping VLAN pool to an EPG, the system returns an error.
+      - false: (default)
+      - true
+    * enforce_subnet_check: (optional) — When checked, IP address learning on outside of subnets configured in a VRF, for all VRFs are disabled.
+      - false
+      - true: (default)
+    * leaf_opflex_client_authentication: (optional) — To enforce Opflex client certificate authentication on leaf switches for GOLF and Linux.
+      - false
+      - true: (default)
+    * leaf_ssl_opflex: (optional) — To enable SSL Opflex transport for leaf switches.
+      - false
+      - true: (default)
+    * reallocate_gipo: (optional) — Enable reallocating group IP outer addresses (Gipos) on non-stretched BDs to make room for stretched BDs.
+      - false: (default)
+      - true
+    * restrict_infra_vlan_traffic: (optional) — This feature restricts Infra VLAN traffic to only network paths specified by Infra security entry policies. When this feature is enabled, each leaf switch limits Infra VLAN traffic between compute nodes to allow only iVXLAN traffic. The switch also limits traffic to fabric nodes to allow only OpFlex and iVXLAN/VXLAN traffic. APIC management traffic is allowed on front panel ports on the Infra VLAN.
+      - false: (default)
+      - true
+    * ssl_opflex_versions: (optional) — This is only applicable to APIC version 5.2 and greater.
+      - TLSv1: (default: false)
+      - TLSv1_1: (default: false)
+      - TLSv1_2: (default: true)
+    * spine_opflex_client_authentication: (optional) — To enforce Opflex client certificate authentication on spine switches for GOLF and Linux.
+      - false
+      - true: (default)
+    * spine_ssl_opflex: (optional) — To enable SSL Opflex transport for spine switches.
+      - false
+      - true: (default)
   EOT
   type = map(object(
     {

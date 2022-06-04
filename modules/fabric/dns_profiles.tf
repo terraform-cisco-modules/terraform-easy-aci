@@ -16,20 +16,28 @@ variable "dns_profiles" {
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
+    Key - Name for the DNS Profile.
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-      dns_domains: (optional) —            = []
-          domain         = string
-          default_domain: (optional) —  = optional(bool)
-          description: (optional) —     = optional(string)
-      dns_providers: (optional) —          = []
-          description: (optional) —   = optional(string)
-          dns_provider = string
-          preferred: (optional) —     = optional(string)
-      ip_version_preference = "IPv4"
-      management_epg: (optional) —         = "default"
-      management_epg_type: (optional) —    = "oob"
+    * dns_domains: (optional) — The DNS domain uses a hierarchical scheme for establishing host names for network nodes and allows local control of the segments of the network through a client-server scheme. The DNS system can locate a network device by translating the hostname of the device into its associated IP address.
+      - domain: (required) — The domain name.
+      - default_domain: (optional) — Indicates whether this domain is the default domain. Only one domain in the group can be the default. The value can be:
+        * false: (default)
+        * true
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * dns_providers: (optional) — The DNS provider is a DNS server that uses a hierarchical scheme for establishing host names for network nodes, which local control of the segments of the network through a client-server scheme. The DNS system can locate a network device by translating the hostname of the device into its associated IP address.
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - dns_provider: (required) — The address of the DNS provider.
+      - preferred: (optional) — Specifies if this the preferred provider. Only one provider in the group should be preferred.  Options are:
+        * false: (default)
+        * true
+    * ip_version_preference: (optional) — The preferred IP protocol to perform DNS Lookups with.
+      * IPv4: (default)
+      * IPv6
+    * management_epg: (default: default) — The management EPG for the Smart Callhome destination group profile.
+    * management_epg_type: (optional) — Type of management EPG.  Options are:
+      - inb
+      - oob: (default)
   EOT
   type = map(object(
     {
@@ -46,7 +54,7 @@ variable "dns_profiles" {
         {
           description  = optional(string)
           dns_provider = string
-          preferred    = optional(string)
+          preferred    = optional(bool)
         }
       )))
       ip_version_preference = optional(string)

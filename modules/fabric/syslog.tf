@@ -48,34 +48,86 @@ variable "syslog" {
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
-    * admin_state = "enabled"
+    Key - Name for the Syslog Profile
+    * admin_state: (optional) — The administrative state of the syslog profile. The values can be:
+      - disabled
+      - enabled: (default)
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * console_destination = [
-      - admin_state = "enabled"
-      - severity    = "critical"
+    * console_destination: (optional) — Syslog settings for Console.
+      - admin_state: (optional) — The administrative state of the console terminal. The values can be:
+        * disabled
+        * enabled: (default)
+      - severity: (optional) — The minimum severity level of the messages to be displayed. The level can be:
+        * emergencies
+        * alerts
+        * critical: (default)
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
     * format = "aci"
-    * include_types = [
-          audit_logs   = false
-          events       = false
-          faults       = true
-          session_logs = false
-      local_file_destination = [
-          admin_state = "enabled"
-          severity    = "warnings"
-      min_severity = "warnings"
-      remote_destinations = [
-          admin_state         = "enabled"
-          forwarding_facility = "local7"
-          host                = "host.example.com"
-          management_epg      = "default"
-          management_epg_type = "oob"
-          port                = 514
-          severity            = "warnings"
-          transport           = "udp"
-      show_milliseconds_in_timestamp = false
-      show_time_zone_in_timestamp    = false
+    * include_types: (optional) — The Type of messages to include in the Syslog Policy.
+      - audit_logs: (default: false)
+      - events: (default: false)
+      - faults: (default: true)
+      - session_logs: (default: false)
+    * local_file_destination: (optional) — Syslog settings for Local File.
+      - admin_state: (optional) — The administrative state of the local file. The values can be:
+        * disabled
+        * enabled: (default)
+      - severity: (optional) — The severity of the event, alert, or issue that caused the syslog entry to be generated. The level can be:
+        * emergencies
+        * alerts
+        * critical
+        * errors
+        * warnings: (default)
+        * notifications
+        * information
+        * debugging
+    * min_severity: (optional) — 
+      - emergencies
+      - alerts
+      - critical
+      - errors
+      - warnings: (default)
+      - notifications
+      - information
+      - debugging
+    * remote_destinations: (optional) — 
+      - admin_state: (optional) — The administrative state of the remote destination host. The values can be:
+        * disabled
+        * enabled: (default)
+      - forwarding_facility: (optional) — The facility to be used to send messages to this destination.
+        * local0
+        * local1
+        * local2
+        * local3
+        * local4
+        * local5
+        * local6
+        * local7: (default)
+      - host: (default: host.example.com) — The host name or IP address for export destination.
+      - management_epg: (default: default) — The management EPG for the Smart Callhome destination group profile.
+      - management_epg_type: (optional) — Type of management EPG.  Options are:
+        * inb
+        * oob: (default)
+      - port: (default: 514) — The syslog service port of the remote destination. The range is from 0 to 65535.
+      - severity: (optional) — The severity of the event, alert, or issue that caused the syslog entry to be generated. The level can be:
+        * emergencies
+        * alerts
+        * critical
+        * errors
+        * warnings: (default)
+        * notifications
+        * information
+        * debugging
+      - transport: (optional) — The transport protocol to use for the messages. The values can be:
+        * ssl — If you select ssl as the transport protocol, the Cisco ACI switch (acting as a client) makes a secure, encrypted outbound connection to remote syslog servers (acting as a server) supporting secure connectivity for logging. With authentication and encryption, this feature allows for a secure communication over an insecure network.
+        * tcp
+        * udp: (default)
+    * show_milliseconds_in_timestamp: (optional) — Include msec in the log timestamp.
+      - false: (default)
+      - true
+    * show_time_zone_in_timestamp: (optional) — Include the local time zone in the log timestamp.
+      - false: (default)
+      - true
   EOT
   type = map(object(
     {

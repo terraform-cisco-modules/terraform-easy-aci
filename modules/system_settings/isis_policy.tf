@@ -14,13 +14,24 @@ variable "isis_policy" {
       lsp_generation_maximum_wait_interval            = 8000
       lsp_generation_second_wait_interval             = 50
       sfp_computation_frequency_initial_wait_interval = 50
-      sfp_computation_frequency_maximum_wait_interval = 50
+      sfp_computation_frequency_maximum_wait_interval = 8000
       sfp_computation_frequency_second_wait_interval  = 50
     }
   }
   description = <<-EOT
-    Key - Name for the DNS Profile
+    Key - This should always be default.
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * isis_mtu: (default: 1492) — The IS-IS Domain policy LSP MTU. The MTU is from 128 to 4352.
+    * isis_metric_for_redistributed_routes: (default: 60) — The IS-IS metric that is used for all imported routes into IS-IS. The values available are from 1 to 63.
+    * lsp_fast_flood_mode: (optional) — The IS-IS Fast-Flooding of LSPs improves Intermediate System-to-Intermediate System (IS-IS) convergence time when new link-state packets (LSPs) are generated in the network and shortest path first (SPF) is triggered by the new LSPs. The mode can be:
+      - disabled
+      - enabled: (default)
+    * lsp_generation_initial_wait_interval: (default: 50) — The LSP generation initial wait interval. This is used in the LSP generation interval for the LSP MTU.
+    * lsp_generation_maximum_wait_interval: (default: 8000) — The LSP generation maximum wait interval. This is used in the LSP generation interval for the LSP MTU. 
+    * lsp_generation_second_wait_interval: (default: 50) — The LSP generation second wait interval. This is used in the LSP generation interval for the LSP MTU. 
+    * sfp_computation_frequency_initial_wait_interval: (default: 50) — The SPF computation frequency initial wait interval. This is used in the SPF computations for the LSP MTU.
+    * sfp_computation_frequency_maximum_wait_interval: (default: 8000) — The SPF computation frequency maximum wait interval. This is used in the SPF computations for the LSP MTU.
+    * sfp_computation_frequency_second_wait_interval: (default: 50) — The SPF computation frequency second wait interval. This is used in the SPF computations for the LSP MTU.
   EOT
   type = map(object(
     {
