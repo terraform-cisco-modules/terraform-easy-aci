@@ -34,49 +34,51 @@ variable "route_map_set_rules" {
           weight            = 0
         },
       ]
-      tenant = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the Set Rule.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * rules: These are the Set Rules and their Attributes.  Details about attributes for each type are below:
-    - type: Type of Set Rule.  Options are:
-      * additional_communities or set_communities: These Rule(s) Attributes as follows:
-        - **Note: Only one community can be added to the set_community type.
-        - communities = [
-            {
-              community    = "<community_value>" # **Required
-              description  = ""                  # Optional with type additional_communities
-              set_criteria = "append"            # options are append, none, replace
-            }
-          ]
-      * multipath: The multipath type doesn't have any attributes but you must also add set_next_hop_unchanged.
-      * set_as_path: Attributes as follows:
-        - asns          = [1, 2, 3]     # List of ASN's to add when criteria is set to "prepend"
-        - criteria      = "prepend"     # Options are prepend or prepend-last-as
-        - last_as_count = 0             # The number of times to prepend the last-asn when criteria is set to prepend-last-as
-      * set_dampening: Attributes as follows:
-        - half-life         = 15   # Range is 1-60
-        - max_suppress_time = 60   # Range is 1-255
-        - reuse_limit       = 750  # Range is 1-20000
-        - suppress_limit    = 2000 # Range is 1-20000
-      * set_metric: Attributes as follows:
-        - metric = 1 # The Minimum Metric is 1
-      * set_metric_type: Attributes as follows:
-        - metric_type = "ospf-type1" # Options are ospf-type1 and ospf-type2
-      * set_next_hop: Attributes as follows:
-        - address = "198.18.0.1" # The Next Hop IP Address
-      * set_next_hop_unchanged: This rule doesn't have any attributes.
-      * set_preference: Attributes as follows:
-        - preference = 100 # Assign Route Preference to the Rule
-      * set_route_tag: Attributes as follows:
-        - route_tag = 1 # Tag to Assign to Routes
-      * weight: Attributes as follows:
-        - address = 0 # Weight to assign to routes
-  * tenant: Name of the Tenant to configure the rules in.
+    Key - Name of the Set Rule.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+    * rules: These are the Set Rules and their Attributes.  Details about attributes for each type are below:
+      - type: Type of Set Rule.  Options are:
+        * additional_communities or set_communities: These Rule(s) Attributes as follows:
+          - **Note: Only one community can be added to the set_community type.
+          - communities = [
+              {
+                community    = "<community_value>" # **Required
+                description  = ""                  # Optional with type additional_communities
+                set_criteria = "append"            # options are append, none, replace
+              }
+            ]
+        * multipath: The multipath type doesn't have any attributes but you must also add set_next_hop_unchanged.
+        * set_as_path: Attributes as follows:
+          - asns          = [1, 2, 3]     # List of ASN's to add when criteria is set to "prepend"
+          - criteria      = "prepend"     # Options are prepend or prepend-last-as
+          - last_as_count = 0             # The number of times to prepend the last-asn when criteria is set to prepend-last-as
+        * set_dampening: Attributes as follows:
+          - half-life         = 15   # Range is 1-60
+          - max_suppress_time = 60   # Range is 1-255
+          - reuse_limit       = 750  # Range is 1-20000
+          - suppress_limit    = 2000 # Range is 1-20000
+        * set_metric: Attributes as follows:
+          - metric = 1 # The Minimum Metric is 1
+        * set_metric_type: Attributes as follows:
+          - metric_type = "ospf-type1" # Options are ospf-type1 and ospf-type2
+        * set_next_hop: Attributes as follows:
+          - address = "198.18.0.1" # The Next Hop IP Address
+        * set_next_hop_unchanged: This rule doesn't have any attributes.
+        * set_preference: Attributes as follows:
+          - preference = 100 # Assign Route Preference to the Rule
+        * set_route_tag: Attributes as follows:
+          - route_tag = 1 # Tag to Assign to Routes
+        * weight: Attributes as follows:
+          - address = 0 # Weight to assign to routes
+    * tenant: Name of the Tenant to configure the rules in.
   EOT
   type = map(object(
     {

@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "policies_bgp_address_family_context" {
   default = {
     "default" = {
-      alias                  = ""
       annotation             = ""
       description            = ""
       ebgp_distance          = 20
@@ -15,27 +14,27 @@ variable "policies_bgp_address_family_context" {
       ibgp_distance          = 200
       ibgp_max_ecmp          = 16
       local_distance         = 220
-      tenant                 = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                 = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the BGP Address Family Context Policies
-  * alias: (optional) — Name alias for BGP address family context object.
-  * annotation: (optional) — Annotation for BGP address family context object.
-  * description: (optional) — Description for BGP address family context object.
-  * ebgp_distance: (optional) — Administrative distance of EBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 20.
-  * ebgp_max_ecmp: (optional) — Maximum number of equal-cost paths for BGP address family context object.Range of allowed values is 1 to 64. Default value is 16.
-  * enable_host_route_leak: (optional) — Control state for BGP address family context object.
-    - false - Don't enable Host route leak
-    - true - Enable Host route leak
-  * ibgp_distance: (optional) — Administrative distance of IBGP routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 200.
-  * ibgp_max_ecmp: (optional) — Maximum ECMP IBGP for BGP address family context object. Range of allowed values is 1 to 64. Default value is 16.
-  * local_distance: (optional) — Administrative distance of local routes for BGP address family context object. Range of allowed values is 1 to 255. Default value is 220.
-  * tenant: (required) — Name of parent Tenant object.
+    Key - Name of the BGP Address Family Context Policies
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * ebgp_distance: (default: 20) — Administrative distance of EBGP routes for BGP address family context object. Range of allowed values is 1-255.
+    * ebgp_max_ecmp: (default: 16) — Maximum number of equal-cost paths for BGP address family context object.Range of allowed values is 1-64.
+    * enable_host_route_leak: (optional) — Control state for BGP address family context object.
+      - false: (default)
+      - true
+    * ibgp_distance: (default: 200) — Administrative distance of IBGP routes for BGP address family context object. Range of allowed values is 1-255.
+    * ibgp_max_ecmp: (default: 16) — Maximum ECMP IBGP for BGP address family context object. Range of allowed values is 1 to 64. Default value is 16.
+    * local_distance: (default: 220) — Administrative distance of local routes for BGP address family context object. Range of allowed values is 1-255.
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias                  = optional(string)
       annotation             = optional(string)
       description            = optional(string)
       ebgp_distance          = optional(number)
@@ -45,11 +44,23 @@ variable "policies_bgp_address_family_context" {
       ibgp_max_ecmp          = optional(number)
       local_distance         = optional(number)
       name                   = optional(string)
-      tenant                 = optional(string)
+      /*  If undefined the variable of local.first_tenant will be used
+      tenant                 = local.folder_tenant
+      */
     }
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "bgpCtxAfPol"
+ - Distinguised Name: "uni/tn-{name}/bgpCtxAfP-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > BGP > BGP Address Family Context > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_bgp_address_family_context" "policies_bgp_address_family_context" {
   depends_on = [
     aci_tenant.tenants
@@ -66,6 +77,5 @@ resource "aci_bgp_address_family_context" "policies_bgp_address_family_context" 
   max_ecmp      = each.value.ebgp_max_ecmp
   max_ecmp_ibgp = each.value.ibgp_max_ecmp
   name          = each.key
-  name_alias    = each.value.alias
   tenant_dn     = aci_tenant.tenants[each.value.tenant].id
 }

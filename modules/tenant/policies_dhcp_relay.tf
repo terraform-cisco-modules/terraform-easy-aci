@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "policies_dhcp_relay" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       dhcp_relay_providers = [
@@ -19,26 +18,36 @@ variable "policies_dhcp_relay" {
           tenant              = ""
         }
       ]
-      mode   = "visible"
-      owner  = "infra"
-      tenant = "common"
+      mode  = "visible"
+      owner = "infra"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the DHCP Relay Policy
-  annotation: (optional) — Annotation for object DHCP Relay Policy.
-  description: (optional) — Description for object DHCP Relay Policy.
-  mode: (optional) — DHCP relay policy mode. Allowed Values are "visible" and "not-visible". Default Value is "visible".
-  alias: (optional) — Name name_alias for object DHCP Relay Policy.
-  owner: (optional) — Owner of the target relay servers. Allowed values are "infra" and "tenant". Default value is "infra".
-  relation_dhcp_rs_prov: (optional) — List of relation to class fvEPg. Cardinality - N_TO_M. Type - Set of String.
-  relation_dhcp_rs_prov.tdn: (required) — target Dn of the class fvEPg.
-  relation_dhcp_rs_prov.addr: (required) — IP address for relation dhcpRsProv.
-  tenant: (required) — Name of parent Tenant object.
+    Key - Name of the DHCP Relay Policy
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * dhcp_relay_providers: (optional) — List of DHCP Relay Provider attributes.
+      - address: (required) — The server IP address.
+      - application_profile: (required if epg_type is epg) — Name of parent Application Profile object.
+      - epg: (default: default) — Name of the EPG/External-EPG Object.
+      - epg_type: (optional) — The Type of EPG to assign to the DHCP relay Provider.
+        * epg: (default)
+        * ext_epg
+      - l3out: (required if epg_type is ext_epg) — Name of parent L3Out object.
+      - tenant: (required) — Name of parent Tenant object.
+    * mode: (optional) — DHCP relay policy mode. Allowed Values are:
+      - visible: (default)
+      - not-visible
+    * owner: (optional) — Owner of the target relay servers. Allowed values are:
+      - infra: (default)
+      - tenant
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       dhcp_relay_providers = optional(list(object(
@@ -58,6 +67,16 @@ variable "policies_dhcp_relay" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "dhcpRelayPol"
+ - Distinguised Name: "uni/tn-{name}/relayp-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > DHCP > Relay Policies > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_dhcp_relay_policy" "policies_dhcp_relay" {
   depends_on = [
     aci_tenant.tenants
@@ -67,7 +86,6 @@ resource "aci_dhcp_relay_policy" "policies_dhcp_relay" {
   description = each.value.description
   mode        = each.value.mode
   name        = each.key
-  name_alias  = each.value.alias
   owner       = each.value.owner
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   dynamic "relation_dhcp_rs_prov" {

@@ -30,12 +30,14 @@ variable "contracts" {
       log                 = false
       qos_class           = "unspecified"
       provider_match_type = "AtleastOne"
-      schema              = "common"
       scope               = "context" # application-profile|context|global|tenant
       tags                = []
       target_dscp         = "unspecified"
-      template            = "common"
-      tenant              = "common"
+      /* If undefined the variable of local.first_tenant will be used for:
+      schema              = local.folder_tenant
+      template            = local.folder_tenant
+      tenant              = local.folder_tenant
+      */
     }
   }
   description = <<-EOT

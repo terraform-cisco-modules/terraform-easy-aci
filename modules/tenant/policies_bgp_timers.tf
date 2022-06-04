@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "policies_bgp_timers" {
   default = {
     "default" = {
-      alias                   = ""
       annotation              = ""
       description             = ""
       graceful_restart_helper = true
@@ -15,25 +14,27 @@ variable "policies_bgp_timers" {
       maximum_as_limit        = 0
       name                    = "default"
       stale_interval          = 300
-      tenant                  = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                  = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the BGP Timers Policies
-  * alias: (optional) — Name alias for bgp timers object. Default value is "default".
-  * annotation: (optional) — Annotation for bgp timers object.
-  * description: (optional) — Description for bgp timers object.
-  * graceful_restart_helper - (Boolean) Graceful restart enabled or helper only for bgp timers object.  Default is true
-  * hold_interval: (optional) — Time period before declaring neighbor down for bgp timers object. Default value is 180.
-  * keepalive_interval: (optional) — Interval time between keepalive messages for bgp timers object. Default value is 60.
-  * maximum_as_limit: (optional) — Maximum AS limit for bgp timers object. Range of allowed values is 0 to 2000. Default value is 0.
-  * name: (required) — Name of bgp timers object.
-  * stale_interval: (optional) — Stale interval for routes advertised by peer for bgp timers object. Range of allowed values is 1 to 3600. Default value is 300.
-  * tenant: (required) — Name of parent Tenant object.
+    Key - Name of the BGP Timers Policies
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * graceful_restart_helper — (optional) Graceful restart enabled or helper only for bgp timers object.  Options are:
+      - false
+      - true: (default)
+    * hold_interval: (default: 180) — Time period before declaring neighbor down for bgp timers object. Default value is 180.
+    * keepalive_interval: (default: 60) — Interval time between keepalive messages for bgp timers object. Default value is 60.
+    * maximum_as_limit: (default: 0) — Maximum AS limit for bgp timers object. Range of allowed values is 0 to 2000. Default value is 0.
+    * name: (required) — Name of bgp timers object.
+    * stale_interval: (default: 300) — Stale interval for routes advertised by peer for bgp timers object. Range of allowed values is 1 to 3600. Default value is 300.
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias                   = optional(string)
       annotation              = optional(string)
       description             = optional(string)
       graceful_restart_helper = optional(bool)
@@ -47,6 +48,16 @@ variable "policies_bgp_timers" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "bgpCtxPol"
+ - Distinguised Name: "uni/tn-{name}/bgpCtxP-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > BGP > BGP Timers > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_bgp_timers" "policies_bgp_timers" {
   depends_on = [
     aci_tenant.tenants
@@ -59,7 +70,6 @@ resource "aci_bgp_timers" "policies_bgp_timers" {
   ka_intvl     = each.value.keepalive_interval
   max_as_limit = each.value.maximum_as_limit
   name         = each.key
-  name_alias   = each.value.alias
   stale_intvl  = each.value.stale_interval == 300 ? "default" : each.value.stale_interval
   tenant_dn    = aci_tenant.tenants[each.value.tenant].id
 }

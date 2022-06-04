@@ -1,11 +1,15 @@
 variable "schemas" {
   default = {
-    "default" = {
-      primary_template = "common"
-      tenant           = "common"
+    "default" = { # By default the default name will be local.first_tenant
+      /* If undefined the variable of local.first_tenant will be used for:
+      primary_template = local.folder_tenant
+      tenant           = local.folder_tenant
+      */
       templates = [
         {
-          name  = "common"
+          /* If undefined the variable of local.first_tenant will be used for:
+          name  = local.folder_tenant
+          */
           sites = ["site1", "site2"]
         }
       ]
@@ -13,11 +17,11 @@ variable "schemas" {
   }
   type = map(object(
     {
-      primary_template = string
-      tenant           = string
+      primary_template = optional(string)
+      tenant           = optional(string)
       templates = list(object(
         {
-          name  = string
+          name  = optional(string)
           sites = list(string)
         }
       ))

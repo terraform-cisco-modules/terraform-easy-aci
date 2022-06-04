@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "policies_hsrp_interface" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       control = [
@@ -17,24 +16,24 @@ variable "policies_hsrp_interface" {
       ]
       delay        = 0
       reload_delay = 0
-      tenant       = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant            = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
     Key - Name of the HSRP Interface Policy
-    * alias: (optional) — Name name_alias for HSRP interface policy object.
-    * annotation: (optional) — Annotation for HSRP interface policy object.
-    * description: (optional) — Description for HSRP interface policy object.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
     * control: (optional) — Control state for HSRP interface policy object. 
-      - enable_bidirectional_forwarding_detection
-      - use_burnt_in_mac_address_of_the_interface
-    * delay: (optional) — Administrative port delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
-    * reload_delay: (optional) — Reload delay for HSRP interface policy object.Range: "0" to "10000". Default value is "0".
-    * tenant: (required) — Name of the Tenant.
+      - enable_bidirectional_forwarding_detection: (default: false)
+      - use_burnt_in_mac_address_of_the_interface: (default: false)
+    * delay: (default: 0) — Administrative port delay for HSRP interface policy object.Range: "0-10000".
+    * reload_delay: (default: 0) — Reload delay for HSRP interface policy object.Range: "0-10000".
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       control = optional(list(object(
@@ -55,9 +54,9 @@ variable "policies_hsrp_interface" {
 
 API Information:
  - Class: "hsrpIfPol"
- - Distinguished Name: "/uni/tn-{tenant}/hsrpIfPol-{hsrp_policy}"
+ - Distinguished Name: "/uni/tn-{tenant}/hsrpIfPol-{name}"
 GUI Location:
-tenants > {tenant} > Policies > Protocol > HSRP > Interface Policies > {hsrp_policy}
+tenants > {tenant} > Policies > Protocol > HSRP > Interface Policies > {name}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_hsrp_interface_policy" "policies_hsrp_interface" {
@@ -75,7 +74,6 @@ resource "aci_hsrp_interface_policy" "policies_hsrp_interface" {
   delay        = each.value.delay
   description  = each.value.description
   name         = each.key
-  name_alias   = each.value.alias
   reload_delay = each.value.reload_delay
   tenant_dn    = aci_tenant.tenants[each.value.tenant].id
 }

@@ -43,9 +43,11 @@ variable "filters" {
         }
       ]
       global_alias = ""
-      schema       = "common"
-      template     = "common"
-      tenant       = "common"
+      /* If undefined the variable of local.first_tenant will be used for:
+      schema              = local.folder_tenant
+      template            = local.folder_tenant
+      tenant              = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
@@ -82,9 +84,11 @@ variable "filters" {
               reset           = false
               synchronize     = false
       global_alias = ""
-      schema       = "common"
-      template     = "common"
-      tenant       = "common"
+      /* If undefined the variable of local.first_tenant will be used
+      schema              = local.folder_tenant
+      template            = local.folder_tenant
+      tenant              = local.folder_tenant
+      */
   EOT
   type = map(object(
     {

@@ -1,45 +1,54 @@
 
+/*_____________________________________________________________________________________________________________________
+
+Tenants
+_______________________________________________________________________________________________________________________
+*/
 variable "tenants" {
   default = {
     "default" = {
       alias             = ""
       annotation        = ""
       annotations       = []
-      controller_type   = "apic" # apic or ndo
+      controller_type   = "apic"
       description       = ""
-      monitoring_policy = ""
+      monitoring_policy = "default"
       global_alias      = ""
       sites             = []
       users             = []
     }
   }
   description = <<-EOT
-  Key: Name of the Tenant.
-  * alias: A changeable name for a given object. While the name of an object, once created, can't be changed, the Alias is a field that can be changed.
-  * annotation: A search keyword or term that is assigned to the Object. Annotations allow you to group multiple objects by descriptive names. You can assign the same annotation name to multiple objects and you can assign one or more annotation names to a single object.
-  * annotations: A key/value pair of annotations to assign to an object.
-  * controller_type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * global_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * sites: When using Nexus Dashboard Orchestrator the sites attribute is used to distinguish the site and cloud types.  Options are:
-    - aws_access_key_id: (Optional) - AWS Access Key Id. It must be provided if the AWS account is not trusted. This parameter will only have effect with vendor = aws.
-    - aws_account_id: (Optional) - Id of AWS account. It's required when vendor is set to aws. This parameter will only have effect with vendor = aws
-    - azure_access_type: (Optional) - Type of Azure Account Configuration. Allowed values are managed, shared and credentials. Default to managed. Other Credentials are not required if azure_access_type is set to managed. This parameter will only have effect with vendor = azure.
-      * credentials
-      * managed
-      * shared
-    - azure_active_directory_id: (Optional) - Azure Active Directory Id. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure.
-    - azure_application_id: (Optional) - Azure Application Id. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure.
-    - azure_shared_account_id: (Optional) - Azure shared account Id. It must be provided when azure_access_type to shared. This parameter will only have effect with vendor = azure.
-    - azure_subscription_id: (Optional) - Azure subscription id. It's required when vendor is set to azure. This parameter will only have effect with vendor = azure.
-    - is_aws_account_trusted: (Optional) - Azure Access Key ID.
-    - site: (Required) - Name of the Site to Associate
-    - vendor: The type of vendor to apply the tenant to.
-      * aws
-      * azure
-      * cisco
+    Key — Name of the Tenant.
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    Nexus Dashboard Orchestrator Specific Attributes:
+    * sites: (required when controller_type is ndo) — When using Nexus Dashboard Orchestrator the sites attribute is used to distinguish the site and cloud types.  Options are:
+      - aws_access_key_id: (optional) — AWS Access Key Id. It must be provided if the AWS account is not trusted. This parameter will only have effect with vendor = aws.
+      - aws_account_id: (optional) — Id of AWS account. It's required when vendor is set to aws. This parameter will only have effect with vendor = aws
+      - azure_access_type: (optional) — Type of Azure Account Configuration. Allowed values are managed, shared and credentials. Other Credentials are not required if azure_access_type is set to managed. This parameter will only have effect with vendor = azure.
+        * credentials
+        * managed: (default)
+        * shared
+      - azure_active_directory_id: (optional) — Azure Active Directory Id. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure.
+      - azure_application_id: (optional) — Azure Application Id. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure.
+      - azure_shared_account_id: (optional) — Azure shared account Id. It must be provided when azure_access_type to shared. This parameter will only have effect with vendor = azure.
+      - azure_subscription_id: (optional) — Azure subscription id. It's required when vendor is set to azure. This parameter will only have effect with vendor = azure.
+      - is_aws_account_trusted: (optional) — Azure Access Key ID.
+      - site: (required) - Name of the Site to Associate to the Parent Tenant Object.
+      - vendor: (optional) — The type of vendor to apply the tenant to.
+        * aws
+        * azure
+        * cisco: (default)
+    * users: (required when controller_type is ndo) — List of Users to associate to the Parent Tenant Object. 
   EOT
   type = map(object(
     {
@@ -106,11 +115,61 @@ resource "aci_tenant" "tenants" {
   relation_fv_rs_tenant_mon_pol = each.value.monitoring_policy != "" ? "uni/tn-common/monepg-${each.value.monitoring_policy}" : ""
 }
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAnnotation"
+ - Distinguished Name: "uni/tn-{tenant}/annotationKey-[{key}]"
+GUI Location:
+ - Tenants > {tenant}: {annotations}
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "tenants_annotations" {
+  depends_on = [
+    aci_tenant.tenants
+  ]
+  for_each   = local.tenants_annotations
+  dn         = "uni/tn-${each.value.tenant}/annotationKey-[${each.value.key}]"
+  class_name = "tagAnnotation"
+  content = {
+    key   = each.value.key
+    value = each.value.value
+  }
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/tn-{tenant}/alias"
+GUI Location:
+ - Tenants > {tenant} > Networking > VRFs > {vrf}: global_alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "tenants_global_alias" {
+  depends_on = [
+    aci_tenant.tenants
+  ]
+  for_each   = local.tenants_global_alias
+  class_name = "tagAliasInst"
+  dn         = "uni/tn-${each.value.tenant}/alias"
+  content = {
+    name = each.value.global_alias
+  }
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+Nexus Dashboard — Tenants
+_______________________________________________________________________________________________________________________
+*/
 resource "mso_tenant" "tenants" {
   provider = mso
   depends_on = [
-    data.mso_site.sites,
-    data.mso_user.users
+    data.mso_site.ndo_sites,
+    data.mso_user.ndo_users
   ]
   for_each     = { for k, v in local.tenants : k => v if v.controller_type == "ndo" }
   name         = each.key
@@ -159,13 +218,13 @@ resource "mso_tenant" "tenants" {
   dynamic "site_associations" {
     for_each = { for k, v in each.value.sites : k => v if v.vendor == "cisco" }
     content {
-      site_id = data.mso_site.sites[site_associations.value.site].id
+      site_id = data.mso_site.ndo_sites[site_associations.value.site].id
     }
   }
   dynamic "user_associations" {
     for_each = toset(each.value.users)
     content {
-      user_id = data.mso_user.users[user_associations.value].id
+      user_id = data.mso_user.ndo_users[user_associations.value].id
     }
   }
 }

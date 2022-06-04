@@ -20,7 +20,7 @@ variable "l3outs" {
           contracts = [
             {
               contract_name   = "default"
-              contract_tenant = "common"
+              contract_tenant = local.folder_tenant
               contract_type   = "consumer" # consumer|interface|intra_epg|provider|taboo
               qos_class       = "unspecified"
             }
@@ -64,7 +64,6 @@ variable "l3outs" {
           route_control_profiles = [{
             direction = "export" # export/import
             route_map = "default"
-            tenant = "**l3out_tenant**"
           }]
           */
           target_dscp = "unspecified"
@@ -99,16 +98,18 @@ variable "l3outs" {
         {
           address_family = "ipv4"
           route_map      = "**REQUIRED**"
-          tenant         = "**l3out_tenant**"
         }
       ]
       */
       target_dscp = "unspecified"
       sites       = []
-      template    = "common"
-      tenant      = "common"
       vrf         = "default"
-      vrf_tenant  = "common"
+      /* If undefined the variable of local.first_tenant will be used
+      policy_source_tenant = local.first_tenant
+      schema               = local.first_tenant
+      template             = local.first_tenant
+      tenant               = local.first_tenant
+      */
     }
   }
   description = <<-EOT
@@ -213,8 +214,9 @@ variable "l3outs" {
           target_dscp = optional(string)
         }
       )))
-      l3_domain = optional(string)
-      level     = optional(string)
+      l3_domain            = optional(string)
+      level                = optional(string)
+      policy_source_tenant = optional(string)
       ospf_external_profile = optional(list(object(
         {
           ospf_area_cost = optional(number)
@@ -247,7 +249,6 @@ variable "l3outs" {
       template    = optional(string)
       tenant      = optional(string)
       vrf         = optional(string)
-      vrf_tenant  = optional(string)
     }
   ))
 }
@@ -268,19 +269,15 @@ resource "aci_l3_outside" "l3outs" {
     aci_tenant.tenants,
     aci_vrf.vrfs
   ]
-  for_each       = { for k, v in local.l3outs : k => v if v.controller_type == "apic" }
-  annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description    = each.value.description
-  enforce_rtctrl = each.value.import == true ? ["export", "import"] : ["export"]
-  name           = each.key
-  name_alias     = each.value.alias
-  target_dscp    = each.value.target_dscp
-  tenant_dn      = aci_tenant.tenants[each.value.tenant].id
-  relation_l3ext_rs_ectx = length(regexall(
-    each.value.tenant, each.value.vrf_tenant)
-    ) > 0 ? aci_vrf.vrfs[each.value.vrf].id : length(regexall(
-    "[[:alnum:]]+", each.value.vrf_tenant)
-  ) > 0 ? "uni/tn-${each.value.vrf_tenant}/ctx-${each.value.vrf}" : ""
+  for_each               = { for k, v in local.l3outs : k => v if v.controller_type == "apic" }
+  annotation             = each.value.annotation != "" ? each.value.annotation : var.annotation
+  description            = each.value.description
+  enforce_rtctrl         = each.value.import == true ? ["export", "import"] : ["export"]
+  name                   = each.key
+  name_alias             = each.value.alias
+  target_dscp            = each.value.target_dscp
+  tenant_dn              = aci_tenant.tenants[each.value.tenant].id
+  relation_l3ext_rs_ectx = aci_vrf.vrfs[each.value.vrf].id
   relation_l3ext_rs_l3_dom_att = length(regexall(
     "[[:alnum:]]+", each.value.l3_domain)
   ) > 0 ? "uni/l3dom-${each.value.l3_domain}" : ""
@@ -288,7 +285,7 @@ resource "aci_l3_outside" "l3outs" {
     for_each = each.value.route_control_for_dampening
     content {
       af                     = "${relation_l3ext_rs_dampening_pol.value.address_family}-ucast"
-      tn_rtctrl_profile_name = "uni/tn-${relation_l3ext_rs_dampening_pol.value.tenant}/prof-${relation_l3ext_rs_dampening_pol.value.route_map}"
+      tn_rtctrl_profile_name = "uni/tn-${each.value.tenant}/prof-${relation_l3ext_rs_dampening_pol.value.route_map}"
     }
   }
   # relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
@@ -324,7 +321,7 @@ resource "aci_external_network_instance_profile" "l3out_external_epgs" {
     for_each = each.value.route_control_profiles
     content {
       direction              = each.value.direction
-      tn_rtctrl_profile_name = "uni/tn-${relation_l3ext_rs_inst_p_to_profile.value.tenant}/prof-${relation_l3ext_rs_inst_p_to_profile.value.route_map}"
+      tn_rtctrl_profile_name = "uni/tn-${each.value.tenant}/prof-${relation_l3ext_rs_inst_p_to_profile.value.route_map}"
     }
   }
   # relation_l3ext_rs_l3_inst_p_to_dom_p        = each.value.L3_Domain
@@ -481,7 +478,7 @@ resource "aci_l3_ext_subnet" "external_epg_subnets" {
   }
   relation_l3ext_rs_subnet_to_rt_summ = length(
     regexall("[:alnum:]", each.value.route_summarization_policy)
-  ) > 0 ? "uni/tn-common/bgprtsum-${each.value.route_summarization_policy}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/bgprtsum-${each.value.route_summarization_policy}" : ""
 }
 
 

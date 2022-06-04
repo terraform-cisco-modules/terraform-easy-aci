@@ -199,7 +199,6 @@ locals {
   policies_cdp_interface_global_alias = {
     for k, v in local.policies_cdp_interface : k => {
       global_alias = v.global_alias
-      policy_type  = "cdp"
     } if v.global_alias != ""
   }
 
@@ -253,7 +252,6 @@ locals {
   policies_link_level_global_alias = {
     for k, v in local.policies_link_level : k => {
       global_alias = v.global_alias
-      policy_type  = "link_level"
     } if v.global_alias != ""
   }
 
@@ -274,7 +272,6 @@ locals {
   policies_lldp_interface_global_alias = {
     for k, v in local.policies_lldp_interface : k => {
       global_alias = v.global_alias
-      policy_type  = "lldp"
     } if v.global_alias != ""
   }
 
@@ -325,7 +322,6 @@ locals {
   policies_port_channel_global_alias = {
     for k, v in local.policies_port_channel : k => {
       global_alias = v.global_alias
-      policy_type  = "port_channel"
     } if v.global_alias != ""
   }
 
@@ -360,7 +356,6 @@ locals {
   policies_spanning_tree_interface_global_alias = {
     for k, v in local.policies_spanning_tree_interface : k => {
       global_alias = v.global_alias
-      policy_type  = "stp"
     } if v.global_alias != ""
   }
 
@@ -412,7 +407,6 @@ locals {
   leaf_interfaces_policy_groups_access_global_alias = {
     for k, v in local.leaf_interfaces_policy_groups_access : k => {
       global_alias = v.global_alias
-      policy_type  = "leaf_access"
     } if v.global_alias != ""
   }
 
@@ -516,7 +510,6 @@ locals {
   spine_interface_policy_groups_global_alias = {
     for k, v in local.spine_interface_policy_groups : k => {
       global_alias = v.global_alias
-      policy_type  = "spine_access"
     } if v.global_alias != ""
   }
 

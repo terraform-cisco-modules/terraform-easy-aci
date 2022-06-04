@@ -47,7 +47,6 @@ variable "l3out_logical_node_profiles" {
                 }
               ]
               hsrp_interface_policy = "default"
-              policy_source_tenant  = "common"
               version               = "v1"
             }
           ]
@@ -106,8 +105,7 @@ variable "l3out_logical_node_profiles" {
           use_router_id_as_loopback = true
         }
       ]
-      pod_id               = 1
-      policy_source_tenant = "common"
+      pod_id = 1
       static_routes = [
         {
           description         = ""
@@ -129,7 +127,12 @@ variable "l3out_logical_node_profiles" {
       ]
       sites       = []
       target_dscp = "unspecified"
-      template    = "common"
+      /* If undefined the variable of local.first_tenant will be used for:
+      policy_source_tenant = local.first_tenant
+      schema               = local.first_tenant
+      template             = local.first_tenant
+      tenant               = local.first_tenant
+      */
     }
   }
   description = <<-EOT
@@ -453,16 +456,16 @@ resource "aci_logical_interface_profile" "l3out_interface_profiles" {
   tag                     = each.value.color_tag
   relation_l3ext_rs_arp_if_pol = length(regexall(
     "[[:alnum:]]+", each.value.arp_policy)
-  ) > 0 ? "uni/tn-common/arpifpol-${each.value.arp_policy}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/arpifpol-${each.value.arp_policy}" : ""
   relation_l3ext_rs_egress_qos_dpp_pol = length(regexall(
     "[[:alnum:]]+", each.value.egress_data_plane_policing)
-  ) > 0 ? "uni/tn-common/qosdpppol-${each.value.egress_data_plane_policing}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.egress_data_plane_policing}" : ""
   relation_l3ext_rs_ingress_qos_dpp_pol = length(regexall(
     "[[:alnum:]]+", each.value.ingress_data_plane_policing)
-  ) > 0 ? "uni/tn-common/qosdpppol-${each.value.ingress_data_plane_policing}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.ingress_data_plane_policing}" : ""
   relation_l3ext_rs_l_if_p_cust_qos_pol = length(regexall(
     "[[:alnum:]]+", each.value.custom_qos_policy)
-  ) > 0 ? "uni/tn-common/qoscustom-${each.value.custom_qos_policy}" : ""
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qoscustom-${each.value.custom_qos_policy}" : ""
   relation_l3ext_rs_nd_if_pol = each.value.nd_policy
   dynamic "relation_l3ext_rs_l_if_p_to_netflow_monitor_pol" {
     for_each = each.value.netflow_policies

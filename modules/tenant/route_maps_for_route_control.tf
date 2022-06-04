@@ -18,9 +18,10 @@ variable "route_maps_for_route_control" {
           set_rule    = ""
         }
       }
-      name_alias         = ""
       route_map_continue = false
-      tenant             = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant = local.folder_tenant
+      */
     }
   }
   type = map(object(
@@ -36,7 +37,6 @@ variable "route_maps_for_route_control" {
           set_rule    = optional(string)
         }
       )))
-      name_alias         = optional(string)
       route_map_continue = optional(bool)
       tenant             = optional(string)
     }
@@ -52,7 +52,6 @@ resource "aci_rest_managed" "route_maps_for_route_control" {
     autoContinue = each.value.route_map_continue == true ? "yes" : "no"
     descr        = each.value.description
     name         = each.key
-    nameAlias    = each.value.name_alias
   }
 }
 

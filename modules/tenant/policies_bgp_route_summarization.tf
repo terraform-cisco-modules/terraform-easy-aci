@@ -6,25 +6,26 @@ ________________________________________________________________________________
 variable "policies_bgp_route_summarization" {
   default = {
     "default" = {
-      alias                       = ""
       annotation                  = ""
       description                 = ""
       generate_as_set_information = false
-      tenant                      = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                      = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the BGP Route Summarization Policies
-  * alias: (optional) — Name alias for object BGP route summarization.
-  * annotation: (optional) — Annotation for object BGP route summarization.
-  * attrmap: (optional) — Summary attribute map.
-  * generate_as_set_information - (Boolean) Generate AS-SET information
-  * description: (optional) — Description for object BGP route summarization.
-  * tenant: (required) — Name of parent Tenant object.
+    Key - Name of the BGP Route Summarization Policies
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * attrmap: (optional) — Summary attribute map.
+    * generate_as_set_information — (optional) Generate AS-SET information.  Options are:
+      - false: (default)
+      - true
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias                       = optional(string)
       annotation                  = optional(string)
       description                 = optional(string)
       generate_as_set_information = optional(bool)
@@ -34,6 +35,16 @@ variable "policies_bgp_route_summarization" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "bgpRtSummPol"
+ - Distinguised Name: "uni/tn-{name}/bgprtsum-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > BGP > BGP Route Summarization > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_bgp_route_summarization" "policies_bgp_route_summarization" {
   depends_on = [
     aci_tenant.tenants
@@ -44,6 +55,5 @@ resource "aci_bgp_route_summarization" "policies_bgp_route_summarization" {
   ctrl        = each.value.generate_as_set_information == true ? "as-set" : "none"
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
 }

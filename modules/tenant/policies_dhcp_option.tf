@@ -6,35 +6,31 @@ ________________________________________________________________________________
 variable "policies_dhcp_option" {
   default = {
     "default" = {
-      alias       = ""
       annotation  = ""
       description = ""
       options     = []
-      tenant      = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant      = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Argument Reference
-  tenant: (required) — Name of parent Tenant object.
-  name: (required) — Name of Object DHCP Option Policy.
-  annotation: (optional) — Annotation for object DHCP Option Policy.
-  description: (optional) — Description for object DHCP Option Policy.
-  name_alias: (optional) — Name name_alias for object DHCP Option Policy.
-  dhcp_option: (optional) — To manage DHCP Option from the DHCP Option Policy resource. It has the attributes like name, annotation,data,dhcp_option_id and name_alias.
-  dhcp_option.name: (required) — Name of Object DHCP Option.
-  dhcp_option.annotation: (optional) — Annotation for object DHCP Option.
-  dhcp_option.data: (optional) — DHCP Option data.
-  dhcp_option.dhcp_option_id: (optional) — DHCP Option id (Unsigned Integer).
-  dhcp_option.name_alias: (optional) — Name name_alias for object DHCP Option.
+    Argument Reference
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * dhcp_option: (optional) — To manage DHCP Option from the DHCP Option Policy resource. It has the attributes like name, annotation,data,dhcp_option_id.
+          annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+          data: (required) — The DHCP option data. Refer to RFC 2132 for more information.
+          dhcp_option_id: (required) — The DHCP option ID.
+          name: (required) — Name of Object DHCP Option.
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias       = optional(string)
       annotation  = optional(string)
       description = optional(string)
       options = optional(list(object(
         {
-          alias          = optional(string)
           annotation     = optional(string)
           data           = string
           dhcp_option_id = string
@@ -45,6 +41,17 @@ variable "policies_dhcp_option" {
     }
   ))
 }
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "dhcpOptionPol"
+ - Distinguised Name: "uni/tn-{name}/dhcpoptpol-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > DHCP > Options Policies > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_dhcp_option_policy" "policies_dhcp_option" {
   depends_on = [
     aci_tenant.tenants
@@ -53,7 +60,6 @@ resource "aci_dhcp_option_policy" "policies_dhcp_option" {
   annotation  = each.value.annotation
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
   dynamic "dhcp_option" {
     for_each = each.value.options
@@ -62,7 +68,6 @@ resource "aci_dhcp_option_policy" "policies_dhcp_option" {
       data           = dhcp_option.value.data
       dhcp_option_id = dhcp_option.value.dhcp_option_id
       name           = dhcp_option.value.name
-      name_alias     = dhcp_option.value.alias
     }
   }
 }

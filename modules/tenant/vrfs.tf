@@ -1,3 +1,8 @@
+/*_____________________________________________________________________________________________________________________
+
+Tenant — VRFs
+_______________________________________________________________________________________________________________________
+*/
 variable "vrfs" {
   default = {
     "default" = {
@@ -21,31 +26,77 @@ variable "vrfs" {
       global_alias                   = ""
       ip_data_plane_learning         = "enabled"
       layer3_multicast               = true
-      level                          = "template"
       monitoring_policy              = ""
       ospf_timers                    = "default"
       ospf_timers_per_address_family = []
-      policy_source_tenant           = "common"
       policy_enforcement_direction   = "ingress"  # "egress"
       policy_enforcement_preference  = "enforced" # unenforced
       preferred_group                = false
-      schema                         = "common"
       sites                          = []
-      tags                           = []
       template                       = ""
-      tenant                         = "common"
       transit_route_tag_policy       = ""
+      /*  If undefined the variable of local.first_tenant will be used for:
+      policy_source_tenant           = local.folder_tenant
+      schema                         = local.folder_tenant
+      tenant                         = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key: Name of the VRF.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bgp_context_per_address_family: 
-  * controller_type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+    Key — Name of the VRF/Context.
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    SHARED (APIC & NDO) Attributes:
+    * description: Description to add to the Object.  The description can be up to 128 characters.
+    * epg_esg_collection_for_vrfs = [
+        {
+          contracts  = []
+              name      = string
+              qos_class = optional(string)
+              schema    = optional(string)
+              template  = optional(string)
+              tenant    = string
+              type      = string
+          match_type = "AtleastOne"
+        }
+      ]
+    * ip_data_plane_learning         = "enabled"
+    * layer3_multicast               = true
+    * policy_enforcement_preference  = "enforced" # unenforced
+    * preferred_group                = false
+    * tenant                         = "local.folder_tenant"
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * bd_enforcement_status: (optional) — 
+      - false: default
+      - true
+    * bgp_timers: (default: default) — 
+    * bgp_timers_per_address_family: (optional) — 
+          address_family = optional(string)
+          policy         = string
+    * communities                     = []
+          community_variable = number
+          description        = optional(string)
+    * eigrp_timers_per_address_family = []
+          address_family = optional(string)
+          policy         = string
+    * endpoint_retention_policy       = "default"
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * ospf_timers                    = "default"
+    * ospf_timers_per_address_family = []
+          address_family = optional(string)
+          policy         = string
+    * policy_source_tenant           = local.folder_tenant
+    * policy_enforcement_direction   = "ingress"  # "egress"
+    * transit_route_tag_policy       = ""
+    Nexus Dashboard Orchestrator Specific Attributes:
+    * schema: (required) — Schema Name.
+    * sites: (optional) — List of Site Names to assign site specific attributes.
+    * template: (required) — The Template name to create the object within.
   EOT
   type = map(object(
     {
@@ -98,7 +149,6 @@ variable "vrfs" {
       global_alias           = optional(string)
       ip_data_plane_learning = optional(string)
       layer3_multicast       = optional(bool)
-      level                  = optional(string)
       monitoring_policy      = optional(string)
       ospf_timers            = optional(string)
       ospf_timers_per_address_family = optional(list(object(
@@ -113,15 +163,9 @@ variable "vrfs" {
       preferred_group               = optional(bool)
       schema                        = optional(string)
       sites                         = optional(list(string))
-      tags = optional(list(object(
-        {
-          key   = string
-          value = string
-        }
-      )))
-      template                 = optional(string)
-      tenant                   = optional(string)
-      transit_route_tag_policy = optional(string)
+      template                      = optional(string)
+      tenant                        = optional(string)
+      transit_route_tag_policy      = optional(string)
     }
   ))
 }
@@ -316,7 +360,7 @@ resource "aci_snmp_community" "vrf_communities" {
 /*_____________________________________________________________________________________________________________________
 
 GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF} > EPG Collection for VRF: [Provided/Consumed Contracts]
+ - Tenants > {tenant} > Networking > VRFs > {vrf} > EPG Collection for VRF: [Provided/Consumed Contracts]
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "vzany_provider_contracts" {
@@ -352,7 +396,7 @@ resource "mso_schema_template_vrf_contract" "vzany_contracts" {
   depends_on = [
     mso_schema_template_vrf.vrfs
   ]
-  for_each          = { for k, v in local.vzany_contracts : k => v if v.controller_type == "ndo" && v.level == "template" }
+  for_each          = { for k, v in local.vzany_contracts : k => v if v.controller_type == "ndo" }
   schema_id         = mso_schema.schemas[each.value.schema].id
   template_name     = each.value.template
   vrf_name          = each.value.vrf
@@ -369,7 +413,7 @@ resource "mso_schema_template_vrf_contract" "vzany_contracts" {
 /*_____________________________________________________________________________________________________________________
 
 GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF}: Policy >  Preferred Group
+ - Tenants > {tenant} > Networking > VRFs > {vrf}: Policy >  Preferred Group
 _______________________________________________________________________________________________________________________
 */
 resource "aci_any" "vrf_preferred_group" {
@@ -388,11 +432,14 @@ API Information:
  - Class: "tagAnnotation"
  - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}/annotationKey-[{key}]"
 GUI Location:
- - Tenants > {Tenant} > Networking > VRFs > {VRF}: {annotations}
+ - Tenants > {tenant} > Networking > VRFs > {vrf}: {annotations}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "vrf_tags" {
-  for_each   = { for k, v in local.vrf_tags : k => v if v.controller_type == "apic" }
+resource "aci_rest_managed" "vrfs_annotations" {
+  depends_on = [
+    aci_vrf.vrfs
+  ]
+  for_each   = local.vrfs_annotations
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/annotationKey-[${each.value.key}]"
   class_name = "tagAnnotation"
   content = {
@@ -401,3 +448,24 @@ resource "aci_rest_managed" "vrf_tags" {
   }
 }
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "tagAliasInst"
+ - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}/alias"
+GUI Location:
+ - Tenants > {tenant} > Networking > VRFs > {vrf}: global_alias
+
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "vrfs_global_alias" {
+  depends_on = [
+    aci_vrf.vrfs
+  ]
+  for_each   = local.vrfs_global_alias
+  class_name = "tagAliasInst"
+  dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/alias"
+  content = {
+    name = each.value.global_alias
+  }
+}

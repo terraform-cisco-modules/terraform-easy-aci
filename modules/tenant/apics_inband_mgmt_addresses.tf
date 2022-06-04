@@ -6,13 +6,13 @@ ________________________________________________________________________________
 variable "apics_inband_mgmt_addresses" {
   default     = {}
   description = <<-EOT
-  key - Node ID of the APIC
-  * ipv4_address   = optional(string)
-  * ipv4_gateway   = optional(string)
-  * ipv6_address   = optional(string)
-  * ipv6_gateway   = optional(string)
-  * management_epg = string
-  * pod_id: Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+    key - Node ID of the APIC
+    * ipv4_address: (optional) — IPv4 Address/Prefix of the Inband Management EPG.
+    * ipv4_gateway: (optional) — IPv4 Gateway of the Inband Management EPG.
+    * ipv6_address: (optional) — IPv6 Address/Prefix of the Inband Management EPG.
+    * ipv6_gateway: (optional) — IPv6 Gateway of the Inband Management EPG.
+    * management_epg: (required) — Name of the Inband Management EPG.
+    * pod_id: (required) — Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
   EOT
   type = map(object(
     {

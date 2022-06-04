@@ -21,26 +21,28 @@ variable "route_map_match_rules" {
           type           = "match_prefix"
         },
       }
-      tenant = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the Set Rule.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
-  * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
-  * rules: These are the Match Rules and their Attributes.  Details about attributes for each type are below:
-    - type: Type of Match Rule.  Options are:
-      * match_community or match_regex_community: These Rule(s) Attributes as follows:
-        - community       = "<community_value>" # **Required
-        - community_type  = "regular"           # Options are regular and extended
-        - description     = ""                  # Optional
-        - regex           = "<regex_value>"     # Required for match_regex_community type.
-      * match_prefix: Attributes as follows:
-        - greater_than  = <value>              # Optional
-        - less_than     = <value>              # Optional
-        - network       = "<network>/<prefix>" # Required
-  * tenant: Name of the Tenant to configure the rules in.
+    Key - Name of the Set Rule.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * name_alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
+    * rules: These are the Match Rules and their Attributes.  Details about attributes for each type are below:
+      - type: Type of Match Rule.  Options are:
+        * match_community or match_regex_community: These Rule(s) Attributes as follows:
+          - community       = "<community_value>" # **Required
+          - community_type  = "regular"           # Options are regular and extended
+          - description     = ""                  # Optional
+          - regex           = "<regex_value>"     # Required for match_regex_community type.
+        * match_prefix: Attributes as follows:
+          - greater_than  = <value>              # Optional
+          - less_than     = <value>              # Optional
+          - network       = "<network>/<prefix>" # Required
+    * tenant: Name of the Tenant to configure the rules in.
   EOT
   type = map(object(
     {

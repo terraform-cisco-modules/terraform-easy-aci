@@ -14,26 +14,31 @@ variable "application_profiles" {
       monitoring_policy = ""
       qos_class         = "unspecified"
       sites             = []
-      schema            = ""
-      template          = "common"
-      tenant            = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      schema            = local.folder_tenant
+      template          = local.folder_tenant
+      tenant            = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key: Name of the Application Profile.
-  * controller_type: (Required) - The type of controller.  Options are:
-    - apic: For APIC Controllers.
-    - ndo: For Nexus Dashboard Orchestrator.
-  APIC Specific Attributes:
-  * alias: (optional) — A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-  * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-  * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-  * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
-  NDO Specific Attributes:
-  * schema: (required) - Schema Name the Template is assigned to.
-  * sites: (optional) — Name of the Site to assign the Application Profile to if doing a Site specific assignment.
-  * template: (required) - Name of the Template to assign the Application Profile to.
+    Key — Name of the Application Profile.
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * tenant: (default: local.folder_tenant) — The name of the tenant to for the Application Profile.
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    NDO Specific Attributes:
+    * schema: (required) - Schema Name.
+    * sites: (optional) — List of Site Names to assign site specific attributes.
+    * template: (required) - The Template name to create the object within.
   EOT
   type = map(object(
     {

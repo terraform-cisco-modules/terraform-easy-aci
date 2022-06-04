@@ -6,13 +6,15 @@ ________________________________________________________________________________
 variable "application_epgs" {
   default = {
     "default" = {
-      alias                  = ""
-      annotation             = ""
-      annotations            = []
-      application_profile    = "default"
-      bd_schema              = "common"
-      bd_template            = "common"
-      bd_tenant              = "common" # default is EPG Tenant
+      alias               = ""
+      annotation          = ""
+      annotations         = []
+      application_profile = "default"
+      /* If undefined the top level EPG Attributes will be used
+      bd_schema              = application_epg_schema
+      bd_template            = application_epg_template
+      bd_tenant              = application_epg_tenant
+      */
       bridge_domain          = "default"
       contract_exception_tag = null
       contracts              = []
@@ -68,7 +70,6 @@ variable "application_epgs" {
       intra_epg_isolation      = "unenforced"
       preferred_group_member   = false
       qos_class                = "unspecified"
-      schema                   = "common"
       sites                    = []
       static_paths             = []
       /* example
@@ -84,37 +85,58 @@ variable "application_epgs" {
         }
       ]
       */
-      template     = "common"
-      tenant       = "common"
-      useg_epg     = false
-      vlan         = null # This is just used for the Inband Management EPG
-      vrf          = "default"
-      vrf_schema   = "common"
-      vrf_template = "common"
-      vzGraphCont  = ""
+      useg_epg = false
+      vlan     = null # This is just used for the Inband Management EPG
+      vrf      = "default"
+      /* If undefined the variable of local.first_tenant will be used for:
+      schema       = local.first_tenant
+      template     = local.first_tenant
+      tenant       = local.first_tenant
+      vrf_schema   = local.first_tenant
+      vrf_template = local.first_tenant
+      */
+      vzGraphCont = ""
     }
   }
   description = <<-EOT
-  key: Name of the EPG
-  * static_paths: List of Paths to assign to the EPG.
-    - encapsulation_type: The Type of Encapsulation to use on the Interface
-      * micro_seg: 
-      * qinq: Port Encapsulation is QinQ based.
-      * vlan: Port Encapsulation is VLAN based.
-      * vxlan: Port Encapsulation is VXLAN based.
-    - epg: Name of the EPG to assign this path to.
-    - mode:  Mode of the static association with the path.
-      * access: Select this mode if the traffic from the host is untagged (without VLAN ID). When a leaf switch is configured for an EPG to be untagged, for every port this EPG uses, the packets will exit the switch untagged.
-      * dot1p: Select this mode if the traffic from the host is tagged with a 802.1P tag. When an access port is configured with a single EPG in native 802.1p mode, its packets exit that port untagged. When an access port is configured with multiple EPGs, one in native 802.1p mode, and some with VLAN tags, all packets exiting that access port are tagged VLAN 0 for EPG configured in native 802.1p mode and for all other EPGs packets exit with their respective VLAN tags.
-      * trunk: The default deployment mode. Select this mode if the traffic from the host is tagged with a VLAN ID.
-    - name: Name of the Path.  For a Physical Port this will be the slot/port.  For PC/VPC this is the name of the Policy Group.
-    - nodes: If the Path type is vpc this should be a list of 2 leaf's.  Otherwise a list of 1 leaf.
-    - path_type: 
-      * pc: Path Type is Port-Channel
-      * port: Path Type is Physical Port
-      * vpc: Path Type is Virtual-Port-Channel
-    - pod: Identifier for the Pod the Nodes are assigned to for the static path.  Default value is 1.
-    - vlans: For VLAN and VXLAN this is a list of 1.  For micro_seg and qinq this is a list of 2.
+    Key — Name of the Application EPG.
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * tenant: (default: local.first_tenant) — The name of the tenant to for the Application EPG.
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    Nexus Dashboard Orchestrator Specific Attributes:
+    * schema: (default: local.first_tenant) — Schema Name.
+    * sites: (default: local.first_tenant) — List of Site Names to assign site specific attributes.
+    * template: (default: local.first_tenant) — The Template name to create the object within.
+
+
+    * static_paths: List of Paths to assign to the EPG.
+      - encapsulation_type: The Type of Encapsulation to use on the Interface
+        * micro_seg: 
+        * qinq: Port Encapsulation is QinQ based.
+        * vlan: Port Encapsulation is VLAN based.
+        * vxlan: Port Encapsulation is VXLAN based.
+      - epg: Name of the EPG to assign this path to.
+      - mode:  Mode of the static association with the path.
+        * access: Select this mode if the traffic from the host is untagged (without VLAN ID). When a leaf switch is configured for an EPG to be untagged, for every port this EPG uses, the packets will exit the switch untagged.
+        * dot1p: Select this mode if the traffic from the host is tagged with a 802.1P tag. When an access port is configured with a single EPG in native 802.1p mode, its packets exit that port untagged. When an access port is configured with multiple EPGs, one in native 802.1p mode, and some with VLAN tags, all packets exiting that access port are tagged VLAN 0 for EPG configured in native 802.1p mode and for all other EPGs packets exit with their respective VLAN tags.
+        * trunk: The default deployment mode. Select this mode if the traffic from the host is tagged with a VLAN ID.
+      - name: Name of the Path.  For a Physical Port this will be the slot/port.  For PC/VPC this is the name of the Policy Group.
+      - nodes: If the Path type is vpc this should be a list of 2 leaf's.  Otherwise a list of 1 leaf.
+      - path_type: 
+        * pc: Path Type is Port-Channel
+        * port: Path Type is Physical Port
+        * vpc: Path Type is Virtual-Port-Channel
+      - pod: Identifier for the Pod the Nodes are assigned to for the static path.  Default value is 1.
+      - vlans: For VLAN and VXLAN this is a list of 1.  For micro_seg and qinq this is a list of 2.
   EOT
   type = map(object(
     {

@@ -1,4 +1,3 @@
-
 /*_____________________________________________________________________________________________________________________
 
 Tenant — Policies — OSPF Timers — Variables
@@ -7,9 +6,9 @@ ________________________________________________________________________________
 variable "policies_ospf_timers" {
   default = {
     "default" = {
-      alias               = ""
-      annotation          = ""
-      bandwidth_reference = 400000
+      annotation                = ""
+      admin_distance_preference = 110
+      bandwidth_reference       = 400000
       control_knobs = [
         {
           enable_name_lookup_for_router_ids = false
@@ -17,7 +16,6 @@ variable "policies_ospf_timers" {
         }
       ]
       description                                 = ""
-      admin_distance_preference                   = 110
       graceful_restart_helper                     = true
       initial_spf_scheduled_delay_interval        = 200
       lsa_group_pacing_interval                   = 10
@@ -34,40 +32,57 @@ variable "policies_ospf_timers" {
       minimum_hold_time_between_spf_calculations  = 1000
       minimum_interval_between_arrival_of_a_lsa   = 1000
       maximum_wait_time_between_spf_calculations  = 5000
-      tenant                                      = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                                      = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the OSPF Timers Policy.
-  * alias: (optional) — Name alias for OSPF timers object.
-  * annotation: (optional) — Annotation for OSPF timers object.
-  * bw_ref: (optional) — OSPF policy bandwidth for OSPF timers object. Range of allowed values is "1" to "4000000". Default value is "40000".
-  * ctrl: (optional) — List of Control state for OSPF timers object. Allowed values are "name-lookup" and "pfx-suppress".
-  * description: (optional) — Description for OSPF timers object.
-  * dist: (optional) — Preferred administrative distance for OSPF timers object. Range of allowed values is "1" to "255". Default value is "110".
-  * gr_ctrl: (optional) — Graceful restart enabled or helper only for OSPF timers object. The allowed value is "helper". The default value is "helper". To deselect the option, just pass gr_ctrl=""
-  * lsa_arrival_intvl: (optional) — Minimum interval between the arrivals of lsas for OSPF timers object. The range of allowed values is "10" to "600000". The default value is "1000".
-  * lsa_gp_pacing_intvl: (optional) — LSA group pacing interval for OSPF timers object. The range of allowed values is "1" to "1800". The default value is "10".
-  * lsa_hold_intvl: (optional) — Throttle hold interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
-  * lsa_max_intvl: (optional) — throttle max interval between LSAs for OSPF timers object. The range of allowed values is "50" to "30000". The default value is "5000".
-  * lsa_start_intvl: (optional) — Throttle start-wait interval between LSAs for OSPF timers object. The range of allowed values is "0" to "5000". The default value is "0".
-  * max_ecmp: (optional) — Maximum ECMP for OSPF timers object. The range of allowed values is "1" to "64". The default value is "8".
-  * max_lsa_action: (optional) — Action to take when maximum LSA limit is reached for OSPF timers object. Allowed values are "reject", "log" and "restart". The default value is "reject".
-  * max_lsa_num: (optional) — Maximum number of LSAs that are not self-generated for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "20000".
-  * max_lsa_reset_intvl: (optional) — Time until the sleep count is reset to zero for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "10".
-  * max_lsa_sleep_cnt: (optional) — Number of times OSPF can be placed in a sleep state for OSPF timers object. The range of allowed values is "1" to "4294967295". The default value is "5".
-  * max_lsa_sleep_intvl: (optional) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "1440". The default value is "5".
-  * max_lsa_thresh: (optional) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1" to "100". The default value is "75".
-  * spf_hold_intvl: (optional) — Minimum hold time between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "1000".
-  * spf_init_intvl: (optional) — Initial delay interval for the SPF schedule for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "200".
-  * spf_max_intvl: (optional) — Maximum interval between SPF calculations for OSPF timers object. The range of allowed values is "1" to "600000". The default value is "5000".
-  * tenant: Name of parent Tenant object.
+    Key - Name of the OSPF Timers Policy.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * admin_distance_preference: (optional) — Preferred administrative distance for OSPF timers object. Range of allowed values is "1-255". Default value is "110".
+    * bandwidth_reference: (default: 400000) — OSPF policy bandwidth for OSPF timers object. Range of allowed values is "1-4000000".
+    * control_knobs: (optional) — List of Control state for OSPF timers object.
+      - enable_name_lookup_for_router_ids: (default: false)
+      - prefix_suppress: (default: false)
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * graceful_restart_helper: (optional) — Graceful restart enabled or helper only for OSPF timers object. The allowed values are:
+      - false
+      - true: (default)
+    * lsa_arrival_intvl: (optional) — Minimum interval between the arrivals of lsas for OSPF timers object. The range of allowed values is "10-600000".
+    * lsa_group_pacing_interval: (default: 10) — LSA group pacing interval for OSPF timers object. The range of allowed values is "1-1800". The default value is "10".
+    * lsa_generation_throttle_hold_interval: (default: 5000) — Throttle hold interval between LSAs for OSPF timers object. The range of allowed values is "50-30000".
+    * lsa_generation_throttle_maximum_interval: (default: 5000) — throttle max interval between LSAs for OSPF timers object. The range of allowed values is "50-30000".
+    * lsa_generation_throttle_start_wait_interval: (default: 0) — Throttle start-wait interval between LSAs for OSPF timers object. The range of allowed values is "0-5000".
+      initial_spf_scheduled_delay_interval        = 200
+      lsa_threshold                               = 75
+      maximum_lsa_reset_interval                  = 10
+      maximum_lsa_sleep_count                     = 5
+      maximum_lsa_sleep_interval                  = 5
+      maximum_number_of_not_self_generated_lsas   = 20000
+      minimum_hold_time_between_spf_calculations  = 1000
+      minimum_interval_between_arrival_of_a_lsa   = 1000
+      maximum_wait_time_between_spf_calculations  = 5000
+    * lsa_maximum_action: (optional) — Action to take when maximum LSA limit is reached for OSPF timers object. Allowed values are:
+      - log
+      - reject: (default)
+      - restart
+    * lsa_threshold: (default: 75) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1-100". The default value is "75".
+    * maximum_ecmp: (default: 8) — Maximum ECMP for OSPF timers object. The range of allowed values is "1-64".
+    * maximum_lsa_reset_interval: (default: 10) — Time until the sleep count is reset to zero for OSPF timers object. The range of allowed values is "1-1440".
+    * maximum_lsa_sleep_count: (default: 5) — Number of times OSPF can be placed in a sleep state for OSPF timers object. The range of allowed values is "1-4294967295".
+    * maximum_lsa_sleep_interval: (default: 5) — Maximum LSA threshold for OSPF timers object. The range of allowed values is "1-1440".
+    * maximum_number_of_not_self_generated_lsas: (default: 20000) — Maximum number of LSAs that are not self-generated for OSPF timers object. The range of allowed values is "1-4294967295".
+    * minimum_hold_time_between_spf_calculations: (default: 1000) — Minimum hold time between SPF calculations for OSPF timers object. The range of allowed values is "1-600000".
+    * minimum_interval_between_arrival_of_a_lsa: (default: 1000) — Initial delay interval for the SPF schedule for OSPF timers object. The range of allowed values is "1-600000".
+    * maximum_wait_time_between_spf_calculations: (default: 5000) — Maximum interval between SPF calculations for OSPF timers object. The range of allowed values is "1-600000".
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias               = optional(string)
-      annotation          = optional(string)
-      bandwidth_reference = optional(number)
+      annotation                = optional(string)
+      admin_distance_preference = optional(number)
+      bandwidth_reference       = optional(number)
       control_knobs = optional(list(object(
         {
           enable_name_lookup_for_router_ids = optional(bool)
@@ -75,7 +90,6 @@ variable "policies_ospf_timers" {
         }
       )))
       description                                 = optional(string)
-      admin_distance_preference                   = optional(number)
       graceful_restart_helper                     = optional(bool)
       initial_spf_scheduled_delay_interval        = optional(number)
       lsa_group_pacing_interval                   = optional(number)
@@ -97,6 +111,16 @@ variable "policies_ospf_timers" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "ospfCtxPol"
+ - Distinguished Name: "/uni/tn-{tenant}/ospfCtxP-{name}"
+GUI Location:
+ - Tenants > {tenant} > Networking > Policies > Protocol > OSPF >  OSPF Timers > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_ospf_timers" "policies_ospf_timers" {
   depends_on = [
     aci_tenant.tenants
@@ -131,7 +155,6 @@ resource "aci_ospf_timers" "policies_ospf_timers" {
   max_lsa_sleep_intvl = each.value.maximum_lsa_sleep_interval
   max_lsa_thresh      = each.value.lsa_threshold
   name                = each.key
-  name_alias          = each.value.alias
   spf_hold_intvl      = each.value.minimum_hold_time_between_spf_calculations
   spf_init_intvl      = each.value.initial_spf_scheduled_delay_interval
   spf_max_intvl       = each.value.maximum_wait_time_between_spf_calculations

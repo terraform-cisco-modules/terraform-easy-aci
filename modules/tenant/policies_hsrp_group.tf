@@ -6,7 +6,6 @@ ________________________________________________________________________________
 variable "policies_hsrp_group" {
   default = {
     "default" = {
-      alias                             = ""
       annotation                        = ""
       description                       = ""
       enable_preemption_for_the_group   = false
@@ -17,34 +16,36 @@ variable "policies_hsrp_group" {
       min_preemption_delay              = 0
       preemption_delay_after_reboot     = 0
       priority                          = 100
-      tenant                            = "common"
       timeout                           = 0
       type                              = "simple_authentication"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                            = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
     Key - Name of the HSRP Interface Policy
-    * alias: (optional) — Name name_alias for HSRP group policy object.
-    * annotation: (optional) — Annotation for HSRP group policy object.
-    * description: (optional) — Description for HSRP group policy object.
-    * tenant: (required) — Name of the Tenant.
-    * enable_preemption_for_the_group: (optional) — True or False
-    * hello_interval: (optional) — The hello interval. Default value: "3000".
-    * hold_interval: (optional) — The period of time before declaring that the neighbor is down. Default value: "10000".
-    * key: (optional) — The key or password used to uniquely identify this configuration object. If key is set, the object key will reset when terraform configuration is applied. Default value: "cisco".
-    * max_seconds_to_prevent_preemption: (optional) — Maximum number of seconds to allow IPredundancy clients to prevent preemption. Default value: "0".
-    * min_preemption_delay: (optional) — HSRP Group's Minimum Preemption delay. Default value: "0".
-    * preemption_delay_after_reboot: (optional) — Preemption delay after switch reboot. Default value: "0".
-    * priority: (optional) — The QoS priority class ID. Default value: "100".
-    * tenant - (optional) Name of the tenant.  "common" by default.
-    * timeout: (optional) — Amount of time between authentication attempts. Default value: "0".
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * enable_preemption_for_the_group: (optional)
+      - false: (default)
+      - true
+    * hello_interval: (default: 3000) — he interval between hello packets that HSRP sends on the interface. Note that the smaller the hello interval, the faster topological changes will be detected, but more routing traffic will ensue. The range is from 250 to 254000 milliseconds.
+    * hold_interval: (default: 10000) — TSets the HSRP extended hold timer, in milliseconds, for both IPv4 and IPv6 groups. The timer range is from 750 to 255000.
+    * key: (default: cisco) — The key or password used to uniquely identify this configuration object. If key is set, the object key will reset when terraform configuration is applied.
+    * max_seconds_to_prevent_preemption: (default: 0) — The maximum amount of time allowed for the HSRP client to prevent preemption.  This is disabled by default by setting the value to 0.
+    * min_preemption_delay: (default: 0) — Configures the router to take over as the active router for an HSRP group if it has a higher priority than the current active router.Configures the router to take over as the active router for an HSRP group if it has a higher priority than the current active router. This is disabled by default by setting the value to 0.
+    * preemption_delay_after_reboot: (default: 0) — The delay time for the preemptive action after the active HSRP leaf is reloaded.  This is disabled by default by setting the value to 0.
+    * priority: (default: 100) — Sets the priority in HSRP to define the active router and the standby router. This is used to exchanged HSRP hello messages.  The level range is from 0 to 255.
+    * tenant: Name of parent Tenant object.
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * timeout: (optional) — Configures MD5 authentication for HSRP on this interface. You can use a key chain or key string. If you use a key string, you can optionally set the timeout for when HSRP will only accept a new key.  The range is from 0 to 32767 seconds.
     * type: (optional) — Type of authentication.
       * md5_authentication
       * simple_authentication
   EOT
   type = map(object(
     {
-      alias                             = optional(string)
       annotation                        = optional(string)
       description                       = optional(string)
       enable_preemption_for_the_group   = optional(bool)
@@ -68,10 +69,10 @@ variable "policies_hsrp_group" {
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "hsrpIfPol"
- - Distinguished Name: "/uni/tn-{tenant}/hsrpIfPol-{hsrp_policy}"
+ - Class: "hsrpGroupPol"
+ - Distinguished Name: "/uni/tn-{tenant}/hsrpGroupPol-{name}"
 GUI Location:
-tenants > {tenant} > Policies > Protocol > HSRP > Interface Policies > {hsrp_policy}
+tenants > {tenant} > Policies > Protocol > HSRP > Group Policies > {name}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_hsrp_group_policy" "policies_hsrp_group" {
@@ -86,7 +87,6 @@ resource "aci_hsrp_group_policy" "policies_hsrp_group" {
   hold_intvl             = each.value.hold_interval
   key                    = each.value.key
   name                   = each.key
-  name_alias             = each.value.alias
   preempt_delay_min      = each.value.min_preemption_delay
   preempt_delay_reload   = each.value.preemption_delay_after_reboot
   preempt_delay_sync     = each.value.max_seconds_to_prevent_preemption

@@ -6,25 +6,25 @@ ________________________________________________________________________________
 variable "policies_bgp_best_path" {
   default = {
     "default" = {
-      alias                     = ""
       annotation                = ""
       description               = ""
       relax_as_path_restriction = false
-      tenant                    = "common"
+      /*  If undefined the variable of local.first_tenant will be used for:
+      tenant                    = local.folder_tenant
+      */
     }
   }
   description = <<-EOT
-  Key - Name of the BGP Best Path Policies
-  * alias: (optional) — Name alias for object BGP Best Path Policy.
-  * tenant_dn: (required) — Distinguished name of parent tenant object.
-  * annotation: (optional) — Annotation for object BGP Best Path Policy.
-  * description: (optional) — Description for object BGP Best Path Policy.
-  * relax_as_path_restriction: (optional) — The control state.  Allowed values: "asPathMultipathRelax", "0". Default Value: "0".
-  * tenant: (required) — Name of parent Tenant object.
+    Key - Name of the BGP Best Path Policy.
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * relax_as_path_restriction: (optional) — The control state.  Allowed values:
+      - false: (default)
+      - true
+    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
-      alias                     = optional(string)
       annotation                = optional(string)
       description               = optional(string)
       relax_as_path_restriction = optional(bool)
@@ -33,6 +33,16 @@ variable "policies_bgp_best_path" {
   ))
 }
 
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "bgpBestPathCtrlPol"
+ - Distinguised Name: "uni/tn-{name}/bestpath-{name}"
+GUI Location:
+ - Tenants > {tenant} > Policies > Protocol > BGP > BGP Best Path > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_bgp_best_path_policy" "policies_bgp_best_path" {
   depends_on = [
     aci_tenant.tenants
@@ -42,6 +52,5 @@ resource "aci_bgp_best_path_policy" "policies_bgp_best_path" {
   ctrl        = each.value.relax_as_path_restriction == true ? "asPathMultipathRelax" : "0"
   description = each.value.description
   name        = each.key
-  name_alias  = each.value.alias
   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
 }
