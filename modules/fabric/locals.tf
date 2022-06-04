@@ -701,7 +701,7 @@ locals {
       for k, v in value.clients : {
         annotation   = value.annotation != null ? value.annotation : ""
         address      = v.address
-        name         = v.name != null ? v.name : ""
+        name         = v.name != null ? v.name : v.address
         snmp_policy  = value.key1
         client_group = value.name
       }
