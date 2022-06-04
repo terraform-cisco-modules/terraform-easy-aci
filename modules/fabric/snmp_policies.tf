@@ -331,7 +331,7 @@ resource "aci_rest_managed" "snmp_client_group_clients" {
   dn         = "uni/fabric/snmppol-${each.value.snmp_policy}/clgrp-${each.value.client_group}/client-[${each.value.address}]"
   content = {
     addr       = each.value.address
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = each.value.name
   }
 }
