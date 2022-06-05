@@ -70,15 +70,15 @@ locals {
       error_disable_recovery_interval = value.error_disable_recovery_interval != null ? value.error_disable_recovery_interval : 300
       events = value.events != null ? [
         for v in value.events : {
-          bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
-          frequent_endpoint_move            = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
-          loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
+          bpdu_guard             = v.bpdu_guard != null ? v.bpdu_guard : true
+          frequent_endpoint_move = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
+          loop_indication_by_mcp = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
         }
         ] : [
         {
-          bpdu_guard                        = true
-          frequent_endpoint_move            = true
-          loop_indication_by_mcp            = true
+          bpdu_guard             = true
+          frequent_endpoint_move = true
+          loop_indication_by_mcp = true
         }
       ]
     }

@@ -438,9 +438,9 @@ resource "aci_vmm_controller" "controllers" {
   stats_mode          = each.value.stats_collection
   vxlan_depl_pref     = each.value.switch_mode == "nsx" ? "nsx" : "vxlan"
   relation_vmm_rs_acc = aci_vmm_credential.credentials[each.value.domain].id
-  relation_vmm_rs_ctrlr_p_mon_pol = length(compact([each.value.monitoring_policy])
-  ) > 0 ? "uni/infra/moninfra-${each.value.monitoring_policy}" : ""
-  relation_vmm_rs_mgmt_e_pg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
+  # relation_vmm_rs_ctrlr_p_mon_pol = length(compact([each.value.monitoring_policy])
+  # ) > 0 ? "uni/infra/moninfra-${each.value.monitoring_policy}" : ""
+  # relation_vmm_rs_mgmt_e_pg = "uni/tn-mgmt/mgmtp-default/${each.value.management_epg_type}-${each.value.management_epg}"
   # relation_vmm_rs_to_ext_dev_mgr  = [each.value.external_device_manager]
   relation_vmm_rs_vxlan_ns = length(compact([each.value.vxlan_pool])
   ) > 0 ? "uni/infra/vxlanns-${each.value.vxlan_pool}" : ""

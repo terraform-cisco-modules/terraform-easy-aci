@@ -10,9 +10,9 @@ variable "global_error_disabled_recovery_policy" {
       error_disable_recovery_interval = 300
       events = [
         {
-          bpdu_guard                        = true
-          frequent_endpoint_move            = true
-          loop_indication_by_mcp            = true
+          bpdu_guard             = true
+          frequent_endpoint_move = true
+          loop_indication_by_mcp = true
         }
       ]
     }
@@ -33,9 +33,9 @@ variable "global_error_disabled_recovery_policy" {
       error_disable_recovery_interval = optional(number)
       events = optional(list(object(
         {
-          bpdu_guard                        = optional(bool)
-          frequent_endpoint_move            = optional(bool)
-          loop_indication_by_mcp            = optional(bool)
+          bpdu_guard             = optional(bool)
+          frequent_endpoint_move = optional(bool)
+          loop_indication_by_mcp = optional(bool)
         }
       )))
     }
