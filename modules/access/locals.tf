@@ -70,7 +70,6 @@ locals {
       error_disable_recovery_interval = value.error_disable_recovery_interval != null ? value.error_disable_recovery_interval : 300
       events = value.events != null ? [
         for v in value.events : {
-          arp_inspection                    = v.arp_inspection != null ? v.arp_inspection : false
           bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
           debug_1                           = v.debug_1 != null ? v.debug_1 : false
           debug_2                           = v.debug_2 != null ? v.debug_2 : false
@@ -97,7 +96,6 @@ locals {
         }
         ] : [
         {
-          arp_inspection                    = false
           bpdu_guard                        = true
           debug_1                           = false
           debug_2                           = false

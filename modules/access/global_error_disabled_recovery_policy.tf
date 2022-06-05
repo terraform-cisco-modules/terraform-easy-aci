@@ -10,7 +10,6 @@ variable "global_error_disabled_recovery_policy" {
       error_disable_recovery_interval = 300
       events = [
         {
-          arp_inspection                    = false
           bpdu_guard                        = true
           debug_1                           = false
           debug_2                           = false
@@ -43,7 +42,6 @@ variable "global_error_disabled_recovery_policy" {
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * error_disable_recovery_interval: (default: 300) — Sets the error disable recovery interval, which specifies the time to recover from an error-disabled state. The interval range is from 30 seconds to 65535 seconds.
     * events: (optional) — Indicates whether an Error Disable Recovery type is enabled (true or false).
-      - arp_inspection: (default: false) — Flag to enable or disable recovery for an ARP Inspection event.
       - bpdu_guard: (default: true) — Flag to enable or disable recovery for a BPDU Guard event.
       - debug_1: (default: false) — Flag to enable or disable recovery for a Debug 1 event.
       - debug_2: (default: false) — Flag to enable or disable recovery for a Debug 2 event.
@@ -75,7 +73,6 @@ variable "global_error_disabled_recovery_policy" {
       error_disable_recovery_interval = optional(number)
       events = optional(list(object(
         {
-          arp_inspection                    = optional(bool)
           bpdu_guard                        = optional(bool)
           debug_1                           = optional(bool)
           debug_2                           = optional(bool)
@@ -119,10 +116,6 @@ resource "aci_error_disable_recovery" "global_error_disabled_recovery_policy" {
   for_each            = local.global_error_disabled_recovery_policy
   annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   err_dis_recov_intvl = each.value.error_disable_recovery_interval
-  edr_event {
-    event   = "event-arp-inspection"
-    recover = each.value.events[0].arp_inspection == true ? "yes" : "no"
-  }
   edr_event {
     event   = "event-bpduguard"
     recover = each.value.events[0].bpdu_guard == true ? "yes" : "no"
