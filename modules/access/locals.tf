@@ -71,54 +71,14 @@ locals {
       events = value.events != null ? [
         for v in value.events : {
           bpdu_guard                        = v.bpdu_guard != null ? v.bpdu_guard : true
-          debug_1                           = v.debug_1 != null ? v.debug_1 : false
-          debug_2                           = v.debug_2 != null ? v.debug_2 : false
-          debug_3                           = v.debug_3 != null ? v.debug_3 : false
-          debug_4                           = v.debug_4 != null ? v.debug_4 : false
-          debug_5                           = v.debug_5 != null ? v.debug_5 : false
-          dhcp_rate_limit                   = v.dhcp_rate_limit != null ? v.dhcp_rate_limit : false
-          ethernet_port_module              = v.ethernet_port_module != null ? v.ethernet_port_module : false
           frequent_endpoint_move            = v.frequent_endpoint_move != null ? v.frequent_endpoint_move : true
-          ip_address_conflict               = v.ip_address_conflict != null ? v.ip_address_conflict : false
-          ipqos_dcbxp_compatability_failure = v.ipqos_dcbxp_compatability_failure != null ? v.ipqos_dcbxp_compatability_failure : false
-          ipqos_manager_error               = v.ipqos_manager_error != null ? v.ipqos_manager_error : false
-          link_flap                         = v.link_flap != null ? v.link_flap : false
-          loopback                          = v.loopback != null ? v.loopback : false
           loop_indication_by_mcp            = v.loop_indication_by_mcp != null ? v.loop_indication_by_mcp : true
-          port_security_violation           = v.port_security_violation != null ? v.port_security_violation : false
-          security_violation                = v.security_violation != null ? v.security_violation : false
-          set_port_state_failed             = v.set_port_state_failed != null ? v.set_port_state_failed : false
-          storm_control                     = v.storm_control != null ? v.storm_control : false
-          stp_inconsist_vpc_peerlink        = v.stp_inconsist_vpc_peerlink != null ? v.stp_inconsist_vpc_peerlink : false
-          system_error_based                = v.system_error_based != null ? v.system_error_based : false
-          unidirection_link_detection       = v.unidirection_link_detection != null ? v.unidirection_link_detection : false
-          unknown                           = v.unknown != null ? v.unknown : false
         }
         ] : [
         {
           bpdu_guard                        = true
-          debug_1                           = false
-          debug_2                           = false
-          debug_3                           = false
-          debug_4                           = false
-          debug_5                           = false
-          dhcp_rate_limit                   = false
-          ethernet_port_module              = false
           frequent_endpoint_move            = true
-          ip_address_conflict               = false
-          ipqos_dcbxp_compatability_failure = false
-          ipqos_manager_error               = false
-          link_flap                         = false
-          loopback                          = false
           loop_indication_by_mcp            = true
-          port_security_violation           = false
-          security_violation                = false
-          set_port_state_failed             = false
-          storm_control                     = false
-          stp_inconsist_vpc_peerlink        = false
-          system_error_based                = false
-          unidirection_link_detection       = false
-          unknown                           = false
         }
       ]
     }
