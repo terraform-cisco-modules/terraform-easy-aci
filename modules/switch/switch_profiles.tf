@@ -347,11 +347,11 @@ resource "aci_access_port_selector" "leaf_interface_selectors" {
   access_port_selector_type = "range"
   relation_infra_rs_acc_base_grp = length(regexall(
     "access", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
-    ) > 0 ? "uni/infra/funcprof/accportgrp-${each.value.interface_policy_group}" : length(regexall(
+    ) > 0 ? "uni/infra/funcprof/accportgrp-${each.value.policy_group}" : length(regexall(
     "breakout", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
-    ) > 0 ? "uni/infra/funcprof/brkoutportgrp-${each.value.interface_policy_group}" : length(regexall(
+    ) > 0 ? "uni/infra/funcprof/brkoutportgrp-${each.value.policy_group}" : length(regexall(
     "bundle", each.value.policy_group_type)) > 0 && length(compact([each.value.policy_group])
-  ) > 0 ? "uni/infra/funcprof/accbundle-${each.value.interface_policy_group}" : ""
+  ) > 0 ? "uni/infra/funcprof/accbundle-${each.value.policy_group}" : ""
 }
 
 
