@@ -471,8 +471,8 @@ resource "aci_logical_interface_profile" "l3out_interface_profiles" {
     "[[:alnum:]]+", each.value.custom_qos_policy)
   ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qoscustom-${each.value.custom_qos_policy}" : ""
   relation_l3ext_rs_nd_if_pol = length(regexall(
-    "[[:alnum:]]+", each.value.each.value.nd_policy)
-  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.each.value.nd_policy}" : ""
+    "[[:alnum:]]+", each.value.nd_policy)
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.nd_policy}" : ""
   dynamic "relation_l3ext_rs_l_if_p_to_netflow_monitor_pol" {
     for_each = each.value.netflow_monitor_policies
     content {

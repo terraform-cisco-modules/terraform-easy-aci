@@ -23,8 +23,8 @@ variable "switch_profiles" {
       interfaces = [
         {
           description           = ""
+          interface             = "1/1"
           interface_description = ""
-          port                  = "1/1"
           policy_group          = ""
           policy_group_type     = "access"
           sub_port              = false
@@ -57,6 +57,7 @@ variable "switch_profiles" {
     * external_pool_id: (optional) — External Pool ID for a remote leaf.
     * interfaces: (required)
       - description: (optional) — Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+      - interface: (optional) — Physical Port on the Switch.
       - interface_description: (optional) — Description to add to the Object.  The description can be up to 128 alphanumeric characters.
       - policy_group: (optional) — Name of the Interface Policy Group
       - policy_group_type: (optional) — The type of Policy to Apply to the Port.
@@ -92,8 +93,8 @@ variable "switch_profiles" {
       interfaces = list(object(
         {
           description           = optional(string)
+          interface             = string
           interface_description = optional(string)
-          port                  = string
           policy_group          = optional(string)
           policy_group_type     = optional(string)
           sub_port              = optional(bool)

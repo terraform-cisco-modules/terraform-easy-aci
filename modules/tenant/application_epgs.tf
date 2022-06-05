@@ -56,7 +56,7 @@ variable "application_epgs" {
         {
           aaep                      = "default"
           instrumentation_immediacy = "on-demand"
-          mode                      = "regular"
+          mode                      = "trunk"
           vlans                     = ["unknown"]
         }
       ]
@@ -544,6 +544,6 @@ resource "aci_epgs_using_function" "epg_to_aaeps" {
   encap             = length(each.value.vlans) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
   instr_imedcy      = each.value.instrumentation_immediacy
   mode              = each.value.mode == "trunk" ? "regular" : each.value.mode == "access" ? "untagged" : "native"
-  primary_encap     = length(each.value.vlans) > 1 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
+  primary_encap     = length(each.value.vlans) > 1 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
   tdn               = aci_application_epg.application_epgs[each.value.epg].id
 }

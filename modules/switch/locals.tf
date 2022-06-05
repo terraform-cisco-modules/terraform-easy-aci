@@ -29,45 +29,45 @@ locals {
         description           = s.description != null ? s.description : ""
         interface_description = s.interface_description != null ? s.interface_description : ""
         interface_name = coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-00${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          regexall("^\\d$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-00${element(split("/", s.interface), 1)}-${element(split("/", s.interface), 2
           )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-0${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          regexall("^\\d{2}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-0${element(split("/", s.interface), 1)}-${element(split("/", s.interface), 2
           )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          regexall("^\\d{3}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-${element(split("/", s.interface), 1)}-${element(split("/", s.interface), 2
           )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
-          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-00${element(split("/", s.port), 1
+          regexall("^\\d$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-00${element(split("/", s.interface), 1
           )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
-          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-0${element(split("/", s.port), 1
+          regexall("^\\d{2}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-0${element(split("/", s.interface), 1
           )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == true && length(
-          regexall("^\\d{3}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-${element(split("/", s.port), 1
+          regexall("^\\d{3}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-${element(split("/", s.interface), 1
           )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-0${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          regexall("^\\d$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-0${element(split("/", s.interface), 1)}-${element(split("/", s.interface), 2
           )}" : coalesce(s.sub_port, false) == true && v.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-${element(split("/", s.port), 1)}-${element(split("/", s.port), 2
+          regexall("^\\d{2}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-${element(split("/", s.interface), 1)}-${element(split("/", s.interface), 2
           )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == false && length(
-          regexall("^\\d$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-0${element(split("/", s.port), 1
+          regexall("^\\d$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-0${element(split("/", s.interface), 1
           )}" : coalesce(s.sub_port, false) == false && v.two_slot_leaf == false && length(
-          regexall("^\\d{2}$", element(split("/", s.port), 1))) > 0 ? "Eth${element(split("/", s.port), 0
-            )}-${element(split("/", s.port), 1
+          regexall("^\\d{2}$", element(split("/", s.interface), 1))) > 0 ? "Eth${element(split("/", s.interface), 0
+            )}-${element(split("/", s.interface), 1
         )}" : ""
         key1              = k
-        key2              = s.port
-        module            = element(split("/", s.port), 0)
+        key2              = s.interface
+        module            = element(split("/", s.interface), 0)
         name              = k
         node_type         = v.node_type
-        port              = element(split("/", s.port), 1)
+        port              = element(split("/", s.interface), 1)
         policy_group      = s.policy_group != null ? s.policy_group : ""
         policy_group_type = s.policy_group_type != null ? s.policy_group_type : "access"
-        sub_port          = s.sub_port != false ? element(split("/", s.port), 2) : ""
+        sub_port          = s.sub_port != false ? element(split("/", s.interface), 2) : ""
       }
     ]
   ])
