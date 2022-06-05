@@ -15,9 +15,9 @@ variable "application_profiles" {
       qos_class         = "unspecified"
       sites             = []
       /*  If undefined the variable of local.first_tenant will be used for:
-      schema            = local.folder_tenant
-      template          = local.folder_tenant
-      tenant            = local.folder_tenant
+      schema            = local.first_tenant
+      template          = local.first_tenant
+      tenant            = local.first_tenant
       */
     }
   }
@@ -27,7 +27,7 @@ variable "application_profiles" {
       - apic: (default)
       - ndo
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-    * tenant: (default: local.folder_tenant) — The name of the tenant to for the Application Profile.
+    * tenant: (default: local.first_tenant) — The name of the tenant to for the Application Profile.
     APIC Specific Attributes:
     * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.

@@ -10,7 +10,7 @@ variable "policies_bgp_route_summarization" {
       description                 = ""
       generate_as_set_information = false
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                      = local.folder_tenant
+      tenant                      = local.first_tenant
       */
     }
   }
@@ -22,7 +22,7 @@ variable "policies_bgp_route_summarization" {
     * generate_as_set_information — (optional) Generate AS-SET information.  Options are:
       - false: (default)
       - true
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

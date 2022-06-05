@@ -24,7 +24,7 @@ variable "policies_ospf_interface" {
       retransmit_interval = 5
       transmit_delay      = 1
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant              = local.folder_tenant
+      tenant              = local.first_tenant
       */
     }
   }
@@ -45,7 +45,7 @@ variable "policies_ospf_interface" {
       - p2p
     * priority: (default: 1) — The OSPF interface priority used to determine the designated router (DR) on a specific network. The router with the highest OSPF priority on a segment will become the DR for that segment. The same process is repeated for the backup designated router (BDR). In the case of a tie, the router with the highest RID will win. The default for the interface OSPF priority is one. Remember that the DR and BDR concepts are per multiaccess segment. Allowed range is 0-255. Default value is 1.
     * retransmit_interval: (default: 5) — The interval between LSA retransmissions. The retransmit interval occurs while the router is waiting for an acknowledgement from the neighbor router that it received the LSA. If no acknowlegment is received at the end of the interval, then the LSA is resent. Allowed value range is 1-65535.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
     * transmit_delay: (default: 1) — The delay time needed to send an LSA update packet. OSPF increments the LSA age time by the transmit delay amount before transmitting the LSA update. You should take into account the transmission and propagation delays for the interface when you set this value. Allowed value range is 1-450.
   EOT
   type = map(object(

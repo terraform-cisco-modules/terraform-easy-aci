@@ -21,7 +21,7 @@ variable "policies_dhcp_relay" {
       mode  = "visible"
       owner = "infra"
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant = local.folder_tenant
+      tenant = local.first_tenant
       */
     }
   }
@@ -44,7 +44,7 @@ variable "policies_dhcp_relay" {
     * owner: (optional) — Owner of the target relay servers. Allowed values are:
       - infra: (default)
       - tenant
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

@@ -33,7 +33,7 @@ variable "policies_ospf_timers" {
       minimum_interval_between_arrival_of_a_lsa   = 1000
       maximum_wait_time_between_spf_calculations  = 5000
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                                      = local.folder_tenant
+      tenant                                      = local.first_tenant
       */
     }
   }
@@ -76,7 +76,7 @@ variable "policies_ospf_timers" {
     * minimum_hold_time_between_spf_calculations: (default: 1000) — Minimum hold time between SPF calculations for OSPF timers object. The range of allowed values is "1-600000".
     * minimum_interval_between_arrival_of_a_lsa: (default: 1000) — Initial delay interval for the SPF schedule for OSPF timers object. The range of allowed values is "1-600000".
     * maximum_wait_time_between_spf_calculations: (default: 5000) — Maximum interval between SPF calculations for OSPF timers object. The range of allowed values is "1-600000".
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

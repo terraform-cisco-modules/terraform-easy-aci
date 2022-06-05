@@ -2,13 +2,13 @@ variable "schemas" {
   default = {
     "default" = { # By default the default name will be local.first_tenant
       /* If undefined the variable of local.first_tenant will be used for:
-      primary_template = local.folder_tenant
-      tenant           = local.folder_tenant
+      primary_template = local.first_tenant
+      tenant           = local.first_tenant
       */
       templates = [
         {
           /* If undefined the variable of local.first_tenant will be used for:
-          name  = local.folder_tenant
+          name  = local.first_tenant
           */
           sites = ["site1", "site2"]
         }

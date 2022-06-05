@@ -10,7 +10,7 @@ variable "policies_dhcp_option" {
       description = ""
       options     = []
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant      = local.folder_tenant
+      tenant      = local.first_tenant
       */
     }
   }
@@ -23,7 +23,7 @@ variable "policies_dhcp_option" {
           data: (required) — The DHCP option data. Refer to RFC 2132 for more information.
           dhcp_option_id: (required) — The DHCP option ID.
           name: (required) — Name of Object DHCP Option.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

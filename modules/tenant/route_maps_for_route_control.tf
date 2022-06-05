@@ -20,7 +20,7 @@ variable "route_maps_for_route_control" {
       }
       route_map_continue = false
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant = local.folder_tenant
+      tenant = local.first_tenant
       */
     }
   }

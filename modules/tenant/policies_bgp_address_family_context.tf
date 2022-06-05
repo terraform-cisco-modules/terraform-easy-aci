@@ -15,7 +15,7 @@ variable "policies_bgp_address_family_context" {
       ibgp_max_ecmp          = 16
       local_distance         = 220
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                 = local.folder_tenant
+      tenant                 = local.first_tenant
       */
     }
   }
@@ -31,7 +31,7 @@ variable "policies_bgp_address_family_context" {
     * ibgp_distance: (default: 200) — Administrative distance of IBGP routes for BGP address family context object. Range of allowed values is 1-255.
     * ibgp_max_ecmp: (default: 16) — Maximum ECMP IBGP for BGP address family context object. Range of allowed values is 1 to 64. Default value is 16.
     * local_distance: (default: 220) — Administrative distance of local routes for BGP address family context object. Range of allowed values is 1-255.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
@@ -45,7 +45,7 @@ variable "policies_bgp_address_family_context" {
       local_distance         = optional(number)
       name                   = optional(string)
       /*  If undefined the variable of local.first_tenant will be used
-      tenant                 = local.folder_tenant
+      tenant                 = local.first_tenant
       */
     }
   ))

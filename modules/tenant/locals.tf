@@ -1342,8 +1342,8 @@ locals {
 
   schemas = {
     for k, v in var.schemas : k => {
-      primary_template = v.primary_template != null ? v.primary_template : local.folder_tenant
-      tenant           = v.tenant != null ? v.tenant : local.folder_tenant
+      primary_template = v.primary_template != null ? v.primary_template : local.first_tenant
+      tenant           = v.tenant != null ? v.tenant : local.first_tenant
       templates        = v.templates
     }
   }
@@ -1351,7 +1351,7 @@ locals {
   schema_templates_loop = flatten([
     for key, value in local.schemas : [
       for k, v in value.templates : {
-        name             = v.name != null ? v.name : local.folder_tenant
+        name             = v.name != null ? v.name : local.first_tenant
         primary_template = value.primary_template
         schema           = key
         sites            = v.sites

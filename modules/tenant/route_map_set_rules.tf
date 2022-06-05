@@ -35,7 +35,7 @@ variable "route_map_set_rules" {
         },
       ]
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant = local.folder_tenant
+      tenant = local.first_tenant
       */
     }
   }

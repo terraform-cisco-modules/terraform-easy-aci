@@ -15,7 +15,7 @@ variable "policies_endpoint_retention" {
       move_frequency                 = 256
       remote_endpoint_aging_interval = 300
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                         = local.folder_tenant
+      tenant                         = local.first_tenant
       */
     }
   }
@@ -31,7 +31,7 @@ variable "policies_endpoint_retention" {
     * local_endpoint_aging_interval: (default: 900) — The aging interval for all local endpoints learned in this bridge domain. When 75% of the interval is reached, 3 ARP requests are sent to verify the existence of the endpoint. If no response is received, the endpoint is deleted. Allowed value range is 0,120-65535. "0" is treated as special value here. Providing interval as "0" is treated as infinite interval.
     * move_frequency: (default: 256) — A maximum allowed number of endpoint moves per second. If the move frequency is exceeded, the hold interval is triggered, and new endpoint learn events will not be honored until after the hold interval expires. Allowed value range is 0-65535.
     * remote_endpoint_aging_interval: (default: 300) — The aging interval for all remote endpoints learned in this bridge domain.Allowed value range is "120" - "0xffff". Default is "900". "0" is treated as special value here. Providing interval as "0" is treated as infinite interval.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

@@ -16,7 +16,7 @@ variable "policies_bfd_interface" {
       minimum_recieve_interval          = 50
       minimum_transmit_interval         = 50
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                            = local.folder_tenant
+      tenant                            = local.first_tenant
       */
     }
   }
@@ -37,7 +37,7 @@ variable "policies_bfd_interface" {
       - true
     * minimum_recieve_interval: (default: 50) — Required minimum rx interval for boject BFD Interface Policy. Range: 50-999.
     * minimum_transmit_interval: (default: 50) — Desired minimum tx interval for object BFD Interface Policy. Range: 50-999.
-    * tenant: (default: local.folder_tenant) — Name of parent tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent tenant object.
   EOT
   type = map(object(
     {

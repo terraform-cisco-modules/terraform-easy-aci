@@ -19,7 +19,7 @@ variable "policies_hsrp_group" {
       timeout                           = 0
       type                              = "simple_authentication"
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                            = local.folder_tenant
+      tenant                            = local.first_tenant
       */
     }
   }
@@ -38,7 +38,7 @@ variable "policies_hsrp_group" {
     * preemption_delay_after_reboot: (default: 0) — The delay time for the preemptive action after the active HSRP leaf is reloaded.  This is disabled by default by setting the value to 0.
     * priority: (default: 100) — Sets the priority in HSRP to define the active router and the standby router. This is used to exchanged HSRP hello messages.  The level range is from 0 to 255.
     * tenant: Name of parent Tenant object.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
     * timeout: (optional) — Configures MD5 authentication for HSRP on this interface. You can use a key chain or key string. If you use a key string, you can optionally set the timeout for when HSRP will only accept a new key.  The range is from 0 to 32767 seconds.
     * type: (optional) — Type of authentication.
       * md5_authentication

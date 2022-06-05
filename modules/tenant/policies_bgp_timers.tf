@@ -15,7 +15,7 @@ variable "policies_bgp_timers" {
       name                    = "default"
       stale_interval          = 300
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                  = local.folder_tenant
+      tenant                  = local.first_tenant
       */
     }
   }
@@ -31,7 +31,7 @@ variable "policies_bgp_timers" {
     * maximum_as_limit: (default: 0) — Maximum AS limit for bgp timers object. Range of allowed values is 0 to 2000. Default value is 0.
     * name: (required) — Name of bgp timers object.
     * stale_interval: (default: 300) — Stale interval for routes advertised by peer for bgp timers object. Range of allowed values is 1 to 3600. Default value is 300.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

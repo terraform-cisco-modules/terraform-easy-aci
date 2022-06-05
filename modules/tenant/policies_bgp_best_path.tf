@@ -10,7 +10,7 @@ variable "policies_bgp_best_path" {
       description               = ""
       relax_as_path_restriction = false
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                    = local.folder_tenant
+      tenant                    = local.first_tenant
       */
     }
   }
@@ -21,7 +21,7 @@ variable "policies_bgp_best_path" {
     * relax_as_path_restriction: (optional) — The control state.  Allowed values:
       - false: (default)
       - true
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

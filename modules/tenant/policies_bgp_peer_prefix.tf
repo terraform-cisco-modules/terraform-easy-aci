@@ -13,7 +13,7 @@ variable "policies_bgp_peer_prefix" {
       restart_time               = 65535
       threshold                  = 75
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant                     = local.folder_tenant
+      tenant                     = local.first_tenant
       */
     }
   }
@@ -28,7 +28,7 @@ variable "policies_bgp_peer_prefix" {
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
     * maximum_number_of_prefixes: (default: 20000) — Maximum number of prefixes allowed from the peer for BGP peer prefix object.  Range is 1-300000.
     * restart_time: (default: 65535) — The period of time in minutes before restarting the peer when the prefix limit is reached for BGP peer prefix object. Range is 1-65535.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
     * threshold: (default: 75) — Threshold percentage of the maximum number of prefixes before a warning is issued for BGP peer prefix object. Range is 1-100.
   EOT
   type = map(object(

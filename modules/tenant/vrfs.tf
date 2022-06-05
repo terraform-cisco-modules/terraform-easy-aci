@@ -36,9 +36,9 @@ variable "vrfs" {
       template                       = ""
       transit_route_tag_policy       = ""
       /*  If undefined the variable of local.first_tenant will be used for:
-      policy_source_tenant           = local.folder_tenant
-      schema                         = local.folder_tenant
-      tenant                         = local.folder_tenant
+      policy_source_tenant           = local.first_tenant
+      schema                         = local.first_tenant
+      tenant                         = local.first_tenant
       */
     }
   }
@@ -65,7 +65,7 @@ variable "vrfs" {
     * layer3_multicast               = true
     * policy_enforcement_preference  = "enforced" # unenforced
     * preferred_group                = false
-    * tenant                         = "local.folder_tenant"
+    * tenant                         = "local.first_tenant"
     APIC Specific Attributes:
     * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
@@ -90,7 +90,7 @@ variable "vrfs" {
     * ospf_timers_per_address_family = []
           address_family = optional(string)
           policy         = string
-    * policy_source_tenant           = local.folder_tenant
+    * policy_source_tenant           = local.first_tenant
     * policy_enforcement_direction   = "ingress"  # "egress"
     * transit_route_tag_policy       = ""
     Nexus Dashboard Orchestrator Specific Attributes:

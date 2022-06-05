@@ -44,7 +44,7 @@ variable "bridge_domains" {
           type                          = "regular"
           vrf                           = "default"
           /* If undefined the variable of local.first_tenant will be used
-          vrf_tenant                    = local.folder_tenant
+          vrf_tenant                    = local.first_tenant
           */
         }
       ]
@@ -55,7 +55,7 @@ variable "bridge_domains" {
               l3out         = "default"
               route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
               /* If undefined the variable of local.first_tenant will be used
-              tenant        = local.folder_tenant
+              tenant        = local.first_tenant
               */
             }
           ]
@@ -89,10 +89,10 @@ variable "bridge_domains" {
       ]
       sites = []
       /* If undefined the variable of local.first_tenant will be used for:
-      policy_source_tenant = local.folder_tenant
-      schema               = local.folder_tenant
-      tenant               = local.folder_tenant
-      template             = local.folder_tenant
+      policy_source_tenant = local.first_tenant
+      schema               = local.first_tenant
+      tenant               = local.first_tenant
+      template             = local.first_tenant
       */
     }
   }
@@ -144,15 +144,15 @@ variable "bridge_domains" {
           name_alias                    = ""
           pim                           = false
           pimv6                         = false
-          tenant                        = "local.folder_tenant"
+          tenant                        = "local.first_tenant"
           type                          = "regular"
           vrf                           = "default"
-          vrf_tenant                    = "local.folder_tenant"
+          vrf_tenant                    = "local.first_tenant"
       l3_configurations = [
           associated_l3outs = [
               l3out         = "default"
               route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
-              tenant        = "local.folder_tenant"
+              tenant        = "local.first_tenant"
           custom_mac_address      = ""
           ep_move_detection_mode  = false
           link_local_ipv6_address = "::"
@@ -171,7 +171,7 @@ variable "bridge_domains" {
               treat_as_virtual_ip_address = false
           unicast_routing     = true
           virtual_mac_address = ""
-      policy_source_tenant = "local.folder_tenant"
+      policy_source_tenant = "local.first_tenant"
       schema               = ""
       sites                = []
       template             = ""

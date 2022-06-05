@@ -20,7 +20,7 @@ variable "l3outs" {
           contracts = [
             {
               contract_name   = "default"
-              contract_tenant = local.folder_tenant
+              contract_tenant = local.first_tenant
               contract_type   = "consumer" # consumer|interface|intra_epg|provider|taboo
               qos_class       = "unspecified"
             }

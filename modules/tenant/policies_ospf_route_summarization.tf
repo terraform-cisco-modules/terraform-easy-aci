@@ -11,7 +11,7 @@ variable "policies_ospf_route_summarization" {
       description        = ""
       inter_area_enabled = false
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant             = local.folder_tenant
+      tenant             = local.first_tenant
       */
     }
   }
@@ -24,7 +24,7 @@ variable "policies_ospf_route_summarization" {
       - false: (default)
       - true
     * tag: (default: 0) — The color of a policy label.
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

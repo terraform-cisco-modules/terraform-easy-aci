@@ -17,7 +17,7 @@ variable "policies_hsrp_interface" {
       delay        = 0
       reload_delay = 0
       /*  If undefined the variable of local.first_tenant will be used for:
-      tenant            = local.folder_tenant
+      tenant            = local.first_tenant
       */
     }
   }
@@ -30,7 +30,7 @@ variable "policies_hsrp_interface" {
       - use_burnt_in_mac_address_of_the_interface: (default: false)
     * delay: (default: 0) — Administrative port delay for HSRP interface policy object.Range: "0-10000".
     * reload_delay: (default: 0) — Reload delay for HSRP interface policy object.Range: "0-10000".
-    * tenant: (default: local.folder_tenant) — Name of parent Tenant object.
+    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {

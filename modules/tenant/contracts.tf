@@ -34,9 +34,9 @@ variable "contracts" {
       tags                = []
       target_dscp         = "unspecified"
       /* If undefined the variable of local.first_tenant will be used for:
-      schema              = local.folder_tenant
-      template            = local.folder_tenant
-      tenant              = local.folder_tenant
+      schema              = local.first_tenant
+      template            = local.first_tenant
+      tenant              = local.first_tenant
       */
     }
   }
