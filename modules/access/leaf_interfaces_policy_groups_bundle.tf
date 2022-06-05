@@ -165,7 +165,7 @@ resource "aci_leaf_access_bundle_policy_group" "leaf_interfaces_policy_groups_bu
   ) > 0 ? "uni/infra/mcpIfP-${each.value.mcp_interface_policy}" : ""
   # class: monFabricPol
   relation_infra_rs_mon_if_infra_pol = length(compact([each.value.monitoring_policy])
-  ) > 0 ? "uni/fabric/monfab-${each.value.monitoring_policy}" : ""
+  ) > 0 ? "uni/fabric/moninfra-${each.value.monitoring_policy}" : ""
   # class: netflowMonitorPol
   dynamic "relation_infra_rs_netflow_monitor_pol" {
     for_each = each.value.netflow_monitor_policies
