@@ -18,11 +18,11 @@ variable "l3out_logical_node_profiles" {
           auto_state                  = "disabled"
           color_tag                   = "yellow-green"
           custom_qos_policy           = ""
+          data_plane_policing_egress  = ""
+          data_plane_policing_ingress = ""
           description                 = ""
-          egress_data_plane_policing  = ""
-          encapsulation_scope         = "local"
-          encapsulation_vlan          = 1
-          ingress_data_plane_policing = ""
+          encap_scope                 = "local"
+          encap_vlan                  = 1
           hsrp_interface_profiles     = []
           /* example
           hsrp_interface_profiles = [
@@ -60,7 +60,7 @@ variable "l3out_logical_node_profiles" {
           mtu                       = "inherit" # 576 to 9216
           name                      = "default"
           nd_policy                 = ""
-          netflow_policies          = []
+          netflow_monitor_policies  = []
           nodes                     = [201]
           ospf_interface_profiles   = []
           /* Example
@@ -209,11 +209,11 @@ variable "l3out_logical_node_profiles" {
           auto_state                  = optional(string)
           color_tag                   = optional(string)
           custom_qos_policy           = optional(string)
+          data_plane_policing_egress  = optional(string)
+          data_plane_policing_ingress = optional(string)
           description                 = optional(string)
-          egress_data_plane_policing  = optional(string)
-          encapsulation_scope         = optional(string)
-          encapsulation_vlan          = optional(number)
-          ingress_data_plane_policing = optional(string)
+          encap_scope                 = optional(string)
+          encap_vlan                  = optional(number)
           hsrp_interface_profile = optional(map(object(
             {
               alias       = optional(string)
@@ -249,8 +249,13 @@ variable "l3out_logical_node_profiles" {
           mtu                       = optional(string)
           name                      = string
           nd_policy                 = optional(string)
-          netflow_policies          = optional(list(string))
-          nodes                     = optional(list(string))
+          netflow_monitor_policies = optional(list(object(
+            {
+              filter_type    = optional(string)
+              netflow_policy = string
+            }
+          )))
+          nodes = optional(list(string))
           ospf_interface_profile = optional(list(object(
             {
               description           = optional(string)
@@ -451,27 +456,28 @@ resource "aci_logical_interface_profile" "l3out_interface_profiles" {
   annotation              = each.value.annotation != "" ? each.value.annotation : var.annotation
   description             = each.value.description
   name                    = each.value.name
-  name_alias              = ""
   prio                    = each.value.qos_class
   tag                     = each.value.color_tag
   relation_l3ext_rs_arp_if_pol = length(regexall(
     "[[:alnum:]]+", each.value.arp_policy)
   ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/arpifpol-${each.value.arp_policy}" : ""
   relation_l3ext_rs_egress_qos_dpp_pol = length(regexall(
-    "[[:alnum:]]+", each.value.egress_data_plane_policing)
-  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.egress_data_plane_policing}" : ""
+    "[[:alnum:]]+", each.value.data_plane_policing_egress)
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.data_plane_policing_egress}" : ""
   relation_l3ext_rs_ingress_qos_dpp_pol = length(regexall(
-    "[[:alnum:]]+", each.value.ingress_data_plane_policing)
-  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.ingress_data_plane_policing}" : ""
+    "[[:alnum:]]+", each.value.data_plane_policing_ingress)
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qosdpppol-${each.value.data_plane_policing_ingress}" : ""
   relation_l3ext_rs_l_if_p_cust_qos_pol = length(regexall(
     "[[:alnum:]]+", each.value.custom_qos_policy)
   ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qoscustom-${each.value.custom_qos_policy}" : ""
-  relation_l3ext_rs_nd_if_pol = each.value.nd_policy
+  relation_l3ext_rs_nd_if_pol = length(regexall(
+    "[[:alnum:]]+", each.value.each.value.nd_policy)
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ndifpol-${each.value.each.value.nd_policy}" : ""
   dynamic "relation_l3ext_rs_l_if_p_to_netflow_monitor_pol" {
-    for_each = each.value.netflow_policies
+    for_each = each.value.netflow_monitor_policies
     content {
-      tn_netflow_monitor_pol_name = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy
       flt_type                    = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.filter_type # ipv4|ipv6|ce
+      tn_netflow_monitor_pol_name = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy
     }
   }
 }
@@ -511,9 +517,9 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   addr        = each.value.interface_type != "ext-svi" ? each.value.preferred_address : ""
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : "disabled"
-  encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encapsulation_vlan}" : "unknown"
+  encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encap_vlan}" : "unknown"
   mode        = each.value.mode == "trunk" ? "regular" : "native"
-  encap_scope = each.value.interface_type != "l3-port" ? each.value.encapsulation_scope : "local"
+  encap_scope = each.value.interface_type != "l3-port" ? each.value.encap_scope : "local"
   ipv6_dad    = each.value.ipv6_dad
   ll_addr     = each.value.interface_type != "ext-svi" ? each.value.link_local_address : "::"
   mac         = each.value.mac_address

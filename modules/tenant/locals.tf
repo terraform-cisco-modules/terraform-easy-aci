@@ -703,16 +703,17 @@ locals {
   interface_profiles_loop = flatten([
     for key, value in local.l3out_node_profiles : [
       for k, v in value.interface_profiles : {
-        annotation                 = value.annotation
-        arp_policy                 = v.arp_policy != null ? v.arp_policy : ""
-        auto_state                 = v.auto_state != null ? v.auto_state : "disabled"
-        color_tag                  = value.color_tag
-        controller_type            = value.controller_type
-        custom_qos_policy          = v.custom_qos_policy != null ? v.custom_qos_policy : ""
-        description                = v.description != null ? v.description : ""
-        egress_data_plane_policing = v.egress_data_plane_policing != null ? v.egress_data_plane_policing : ""
-        encapsulation_scope        = v.encapsulation_scope != null ? v.encapsulation_scope : "local"
-        encapsulation_vlan         = v.encapsulation_vlan != null ? v.encapsulation_vlan : 1
+        annotation                  = value.annotation
+        arp_policy                  = v.arp_policy != null ? v.arp_policy : ""
+        auto_state                  = v.auto_state != null ? v.auto_state : "disabled"
+        color_tag                   = value.color_tag
+        controller_type             = value.controller_type
+        custom_qos_policy           = v.custom_qos_policy != null ? v.custom_qos_policy : ""
+        description                 = v.description != null ? v.description : ""
+        data_plane_policing_egress  = v.data_plane_policing_egress != null ? v.data_plane_policing_egress : ""
+        data_plane_policing_ingress = v.data_plane_policing_ingress != null ? v.data_plane_policing_ingress : ""
+        encap_scope                 = v.encap_scope != null ? v.encap_scope : "local"
+        encap_vlan                  = v.encap_vlan != null ? v.encap_vlan : 1
         hsrp_interface_profile = v.hsrp_interface_profile != null ? [
           for s in v.hsrp_interface_profile : {
             alias       = s.alias != null ? s.alias : ""
@@ -739,20 +740,24 @@ locals {
             version               = s.version != null ? s.version : "v1"
           }
         ] : []
-        ingress_data_plane_policing = v.ingress_data_plane_policing != null ? v.ingress_data_plane_policing : ""
-        interface_or_policy_group   = v.interface_or_policy_group != null ? v.interface_or_policy_group : "eth1/1"
-        interface_type              = v.interface_type != null ? v.interface_type : "l3-port"
-        ipv6_dad                    = v.ipv6_dad != null ? v.ipv6_dad : "enabled"
-        l3out                       = value.l3out
-        link_local_address          = v.link_local_address != null ? v.link_local_address : "::"
-        mac_address                 = v.mac_address != null ? v.mac_address : "00:22:BD:F8:19:FF"
-        mode                        = v.mode != null ? v.mode : "regular"
-        mtu                         = v.mtu != null ? v.mtu : "inherit" # 576 to 9216
-        name                        = v.name != null ? v.name : "default"
-        nd_policy                   = v.nd_policy != null ? v.nd_policy : ""
-        netflow_policies            = v.netflow_policies != null ? v.netflow_policies : []
-        node_profile                = key
-        nodes                       = v.nodes != null ? v.nodes : [201]
+        interface_or_policy_group = v.interface_or_policy_group != null ? v.interface_or_policy_group : "eth1/1"
+        interface_type            = v.interface_type != null ? v.interface_type : "l3-port"
+        ipv6_dad                  = v.ipv6_dad != null ? v.ipv6_dad : "enabled"
+        l3out                     = value.l3out
+        link_local_address        = v.link_local_address != null ? v.link_local_address : "::"
+        mac_address               = v.mac_address != null ? v.mac_address : "00:22:BD:F8:19:FF"
+        mode                      = v.mode != null ? v.mode : "regular"
+        mtu                       = v.mtu != null ? v.mtu : "inherit" # 576 to 9216
+        name                      = v.name != null ? v.name : "default"
+        nd_policy                 = v.nd_policy != null ? v.nd_policy : ""
+        netflow_monitor_policies = v.netflow_monitor_policies != null ? [
+          for s in v.netflow_monitor_policies : {
+            filter_type    = s.filter_type != null ? s.filter_type : "ipv4"
+            netflow_policy = s.netflow_policy
+          }
+        ] : []
+        node_profile = key
+        nodes        = v.nodes != null ? v.nodes : [201]
         ospf_interface_profile = v.ospf_interface_profile != null ? [
           for s in v.ospf_interface_profile : {
             description           = s.description != null ? s.description : ""
@@ -1460,7 +1465,7 @@ locals {
       alias                          = v.alias != null ? v.alias : ""
       ospf_timers_per_address_family = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
       ospf_timers                    = v.ospf_timers != null ? v.ospf_timers : "default"
-      policy_source_tenant           = v.policy_source_tenant != null ? v.policy_source_tenant : "default"
+      policy_source_tenant           = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
       policy_enforcement_direction   = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
       policy_enforcement_preference  = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
       preferred_group                = v.preferred_group != null ? v.preferred_group : false
