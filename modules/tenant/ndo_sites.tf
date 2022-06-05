@@ -17,7 +17,7 @@ data "mso_site" "ndo_sites" {
 }
 
 output "ndo_sites" {
-  value = var.ndo_sites != {} ? { for v in sort(
+  value = var.ndo_sites != [] ? { for v in sort(
     keys(data.mso_site.ndo_sites)
   ) : v => data.mso_site.ndo_sites[v].id } : {}
 }

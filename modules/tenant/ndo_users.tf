@@ -17,7 +17,7 @@ data "mso_user" "ndo_users" {
 }
 
 output "ndo_users" {
-  value = var.ndo_users != {} ? { for v in sort(
+  value = var.ndo_users != [] ? { for v in sort(
     keys(data.mso_user.ndo_users)
   ) : v => data.mso_user.ndo_users[v].id } : {}
 }

@@ -31,7 +31,6 @@ variable "contracts" {
       qos_class           = "unspecified"
       provider_match_type = "AtleastOne"
       scope               = "context" # application-profile|context|global|tenant
-      tags                = []
       target_dscp         = "unspecified"
       /* If undefined the variable of local.first_tenant will be used for:
       schema              = local.first_tenant
@@ -84,15 +83,9 @@ variable "contracts" {
       schema              = optional(string)
       scope               = optional(string)
       qos_class           = optional(string)
-      tags = optional(list(object(
-        {
-          key   = string
-          value = string
-        }
-      )))
-      target_dscp = optional(string)
-      template    = optional(string)
-      tenant      = optional(string)
+      target_dscp         = optional(string)
+      template            = optional(string)
+      tenant              = optional(string)
     }
   ))
 }

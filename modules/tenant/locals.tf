@@ -361,6 +361,7 @@ locals {
     for k, v in var.contracts : k => {
       alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
+      annotations           = v.annotations != null ? v.annotations : []
       apply_both_directions = v.apply_both_directions != null ? v.apply_both_directions : true
       consumer_match_type   = v.consumer_match_type != null ? v.consumer_match_type : "AtleastOne"
       contract_type         = v.contract_type != null ? v.contract_type : "standard"
@@ -372,7 +373,6 @@ locals {
       provider_match_type   = v.provider_match_type != null ? v.provider_match_type : "AtleastOne"
       schema                = v.schema != null ? v.schema : local.first_tenant
       scope                 = v.scope != null ? v.scope : "context"
-      tags                  = v.tags != null ? v.tags : []
       target_dscp           = v.target_dscp != null ? v.target_dscp : "unspecified"
       template              = v.template != null ? v.template : local.first_tenant
       tenant                = v.tenant != null ? v.tenant : local.first_tenant
@@ -406,6 +406,7 @@ locals {
   contract_subjects = {
     for k, v in local.contracts : k => {
       annotation            = v.annotation
+      annotations           = v.annotations
       apply_both_directions = v.apply_both_directions
       contract_type         = v.contract_type
       consumer_match_type   = v.consumer_match_type
@@ -417,16 +418,15 @@ locals {
       provider_match_type   = v.provider_match_type
       schema                = v.schema
       scope                 = v.scope
-      tags                  = v.tags
       target_dscp           = v.target_dscp
       template              = v.template
       tenant                = v.tenant
     }
   }
 
-  contract_tags_loop = flatten([
-    for key, value in local.vrfs : [
-      for k, v in value.tags : {
+  contract_annotations_loop = flatten([
+    for key, value in local.contracts : [
+      for k, v in value.annotations : {
         key      = value.key
         value    = v.value
         type     = value.type
@@ -434,7 +434,7 @@ locals {
       }
     ]
   ])
-  contract_tags = { for k, v in local.contract_tags_loop : "${v.contract}_${v.key}" => v }
+  contract_annotations = { for k, v in local.contract_annotations_loop : "${v.contract}_${v.key}" => v }
 
 
   #__________________________________________________________
@@ -1387,6 +1387,7 @@ locals {
       annotations       = v.annotations != null ? v.annotations : []
       controller_type   = v.controller_type != null ? v.controller_type : "apic"
       description       = v.description != null ? v.description : ""
+      global_alias      = v.global_alias != null ? v.global_alias : ""
       monitoring_policy = v.monitoring_policy != null ? v.monitoring_policy : "default"
       sites = v.sites != null ? [
         for key, value in v.sites : {
@@ -1452,6 +1453,7 @@ locals {
           match_type = "AtleastOne"
         }
       ]
+      global_alias                   = v.global_alias != null ? v.global_alias : ""
       ip_data_plane_learning         = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
       layer3_multicast               = v.layer3_multicast != null ? v.layer3_multicast : true
       monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
