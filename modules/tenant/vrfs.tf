@@ -295,7 +295,7 @@ resource "mso_schema_site_vrf" "vrfs" {
     aci_tenant.tenants,
     mso_schema.schemas
   ]
-  for_each      = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" && v.level == "site" }
+  for_each      = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" }
   template_name = each.value.template
   schema_id     = mso_schema.schemas[each.value.schema].id
   site_id       = data.mso_site.sites[each.value.site].id
@@ -308,7 +308,7 @@ resource "mso_schema_template_vrf" "vrfs" {
     aci_tenant.tenants,
     mso_schema.schemas
   ]
-  for_each         = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" && v.level == "template" }
+  for_each         = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" }
   schema_id        = mso_schema.schemas[each.value.schema].id
   template         = each.value.template
   name             = each.key
