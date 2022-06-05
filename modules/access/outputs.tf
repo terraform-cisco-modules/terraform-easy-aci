@@ -29,8 +29,8 @@ output "global_attachable_access_entity_profiles" {
 
 output "global_error_disabled_recovery_policy" {
   value = local.global_error_disabled_recovery_policy != {} ? { for v in sort(
-    keys(aci_attachable_access_entity_profile.global_error_disabled_recovery_policy)
-  ) : v => aci_attachable_access_entity_profile.global_error_disabled_recovery_policy[v].id } : {}
+    keys(aci_error_disable_recovery.global_error_disabled_recovery_policy)
+  ) : v => aci_error_disable_recovery.global_error_disabled_recovery_policy[v].id } : {}
 }
 
 output "global_mcp_instance_policy" {
