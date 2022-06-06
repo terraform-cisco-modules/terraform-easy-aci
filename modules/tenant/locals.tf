@@ -843,7 +843,7 @@ locals {
   # L3Outs - Logical Node Profiles - Logical Interface Profiles - BGP Peers
   #=======================================================================================
 
-  bgp_peers_loop = flatten([
+  bgp_peer_connectivity_profiles_loop = flatten([
     for key, value in local.l3out_interface_profiles : [
       for k, v in value.bgp_peers : {
         address_type_controls = v.address_type_controls != null ? [
@@ -887,6 +887,7 @@ locals {
         local_as_number        = v.local_as_number != null ? v.local_as_number : null
         local_as_number_config = v.local_as_number_config != null ? v.local_as_number_config : "none"
         password               = v.password != null ? v.password : 0
+        path_profile           = "${key}"
         peer_address           = v.peer_address != null ? v.peer_address : "**REQUIRED**"
         peer_asn               = v.peer_asn
         peer_controls = v.peer_controls != null ? [
@@ -915,12 +916,18 @@ locals {
             replace_private_as_with_local_as = false
           }
         ]
+        route_control_profiles = v.route_control_profiles != null ? [
+          for s in v.route_control_profiles : {
+            direction = s.direction
+            route_map = s.route_map
+          }
+        ] : []
         weight_for_routes_from_neighbor = v.weight_for_routes_from_neighbor != null ? v.weight_for_routes_from_neighbor : 0
       }
     ]
   ])
   bgp_peer_connectivity_profiles = {
-    for k, v in local.bgp_peer_connectivity_profiles_loop : "${v.interface_profile}_${v.peer_address}" => v
+    for k, v in local.bgp_peer_connectivity_profiles_loop : "${v.path_profile}_${v.peer_address}" => v
   }
 
 
