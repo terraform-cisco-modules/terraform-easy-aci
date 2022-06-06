@@ -6,32 +6,32 @@ ________________________________________________________________________________
 variable "contracts" {
   default = {
     "default" = {
-      alias                 = ""
-      annotation            = ""
-      annotations           = []
-      apply_both_directions = true
-      consumer_match_type   = "AtleastOne"
-      contract_type         = "standard" # oob|taboo
-      controller_type       = "apic"
-      description           = ""
-      filters = [
+      alias           = ""
+      annotation      = ""
+      annotations     = []
+      contract_type   = "standard" # oob|taboo
+      controller_type = "apic"
+      description     = ""
+      global_alias    = ""
+      qos_class       = "unspecified"
+      scope           = "context" # application-profile|context|global|tenant
+      subjects = [
         {
-          action = "permit"
+          action                = "permit"
+          apply_both_directions = true
           directives = [
             {
               enable_policy_compression = false
               log                       = false
             }
           ]
-          name = "default"
+          filters     = []
+          match_type  = "AtleastOne"
+          qos_class   = "unspecified"
+          target_dscp = "unspecified"
         }
       ]
-      global_alias        = ""
-      log                 = false
-      qos_class           = "unspecified"
-      provider_match_type = "AtleastOne"
-      scope               = "context" # application-profile|context|global|tenant
-      target_dscp         = "unspecified"
+      target_dscp = "unspecified"
       /* If undefined the variable of local.first_tenant will be used for:
       schema              = local.first_tenant
       template            = local.first_tenant
@@ -60,34 +60,39 @@ variable "contracts" {
         }
       )))
       apply_both_directions = optional(bool)
-      consumer_match_type   = optional(string)
       contract_type         = optional(string)
       controller_type       = optional(string)
       description           = optional(string)
-      filters = optional(list(object(
+      global_alias          = optional(string)
+      log                   = optional(bool)
+      qos_class             = optional(string)
+      schema                = optional(string)
+      scope                 = optional(string)
+      subjects = optional(list(object(
         {
-          action = optional(string)
+          action                = optional(string)
+          apply_both_directions = optional(bool)
           directives = optional(list(object(
             {
-              enable_policy_compression = bool
-              log                       = bool
+              enable_policy_compression = optional(bool)
+              log                       = optional(bool)
             }
           )))
-          name = optional(string)
+          filters     = list(string)
+          match_type  = optional(string)
+          qos_class   = optional(string)
+          target_dscp = optional(string)
         }
       )))
-      global_alias        = optional(string)
-      log                 = optional(bool)
-      provider_match_type = optional(string)
-      qos_class           = optional(string)
-      schema              = optional(string)
-      scope               = optional(string)
-      qos_class           = optional(string)
-      target_dscp         = optional(string)
-      template            = optional(string)
-      tenant              = optional(string)
+      qos_class   = optional(string)
+      target_dscp = optional(string)
+      template    = optional(string)
+      tenant      = optional(string)
     }
   ))
+}
+output "local_contracts" {
+  value = local.contracts
 }
 
 #------------------------------------------
@@ -187,37 +192,22 @@ resource "mso_schema_template_contract" "contracts" {
   filter_type   = each.value.apply_both_directions == true ? "bothWay" : "oneWay"
   scope         = each.value.scope
   dynamic "filter_relationship" {
-    for_each = each.value.filters
+    for_each = toset(each.value.filters)
     content {
       filter_schema_id     = mso_schema.schemas[each.value.schema].id
-      filter_template_name = filter_relationship.value.template
-      filter_name          = filter_relationship.value.name
+      filter_template_name = each.value.template
+      filter_name          = filter_relationship.value
     }
   }
   directives = each.value.log == true ? ["log"] : ["none"]
 }
 /*_____________________________________________________________________________________________________________________
 
-# Out-of-Band Contract Subjects
-API Information:
- - Class: "vzSubj"
- - Distinguished Name: "uni/tn-{tenant}/oobbrc-{contract}/subj-{subject}"
-GUI Locations:
- - Tenants > mgmt > Contracts > Out-Of-Band Contracts: {contract} > {subject}
-
-# Standard Contract Subjects
 API Information:
  - Class: "vzSubj"
  - Distinguished Name: "uni/tn-{tenant}/brc-{contract}/subj-{subject}"
 GUI Locations:
  - Tenants > mgmt > Contracts > Standard: {contract} > {subject}
-
-# Taboo Contract Subjects
-API Information:
- - Class: "vzSubj"
- - Distinguished Name: "uni/tn-{tenant}/taboo-{contract}/subj-{subject}"
-GUI Location:
- - Tenants > mgmt > Contracts > Taboos: {contract} > {subject}
 _______________________________________________________________________________________________________________________
 */
 resource "aci_contract_subject" "contract_subjects" {
@@ -227,15 +217,15 @@ resource "aci_contract_subject" "contract_subjects" {
     aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
   ]
-  for_each   = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" && v.contract_type == "standard" }
-  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  contract_dn = aci_contract.contracts[each.key].id
-  cons_match_t  = each.value.consumer_match_type
+  for_each      = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" && v.contract_type == "standard" }
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
+  contract_dn   = aci_contract.contracts[each.key].id
+  cons_match_t  = each.value.match_type
   description   = each.value.description
   name          = each.key
   name_alias    = each.value.alias
   prio          = each.value.qos_class
-  prov_match_t  = each.value.provider_match_type
+  prov_match_t  = each.value.match_type
   rev_flt_ports = each.value.apply_both_directions == true ? "yes" : "no"
   target_dscp   = each.value.target_dscp
 }
@@ -257,12 +247,12 @@ resource "aci_rest_managed" "oob_contract_subjects" {
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.key}"
   class_name = "vzSubj"
   content = {
-    consMatchT  = each.value.consumer_match_type
+    consMatchT  = each.value.match_type
     descr       = each.value.description
     name        = each.key
     nameAlias   = each.value.alias
     prio        = each.value.qos_priority
-    provMatchT  = each.value.provider_match_type
+    provMatchT  = each.value.match_type
     revFltPorts = each.value.apply_both_directions
     targetDscp  = each.value.target_dscp
   }
@@ -286,9 +276,9 @@ resource "aci_rest_managed" "taboo_contract_subjects" {
   dn         = "${aci_taboo_contract.contracts[each.key].id}/tsubj-${each.key}"
   class_name = "vzTSubj"
   content = {
-    descr       = each.value.description
-    name        = each.key
-    nameAlias   = each.value.alias
+    descr     = each.value.description
+    name      = each.key
+    nameAlias = each.value.alias
   }
 }
 
@@ -307,8 +297,8 @@ resource "aci_rest_managed" "contract_subject_filter_atrributes" {
     aci_rest_managed.oob_contract_subjects,
     aci_rest_managed.taboo_contract_subjects,
   ]
-  for_each   = local.apic_contract_filters
-  dn         = "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.contract}/rssubjFiltAtt-${each.value.name}"
+  for_each   = local.subject_filters
+  dn         = "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}"
   class_name = "vzRsSubjFiltAtt"
   content = {
     action = each.value.action
@@ -319,12 +309,8 @@ resource "aci_rest_managed" "contract_subject_filter_atrributes" {
         length(regexall(true, each.value.directives[0].log)) > 0 ? "log" : ""]
     )), ","), ",,", ",") : "none"
     # tDn            = each.value.filter
-    tnVzFilterName = each.value.name
+    tnVzFilterName = each.value.filter
   }
-}
-
-output "local_contracts" {
-  value = local.contracts
 }
 
 output "contracts" {
