@@ -389,6 +389,8 @@ locals {
         action                = v.action != null ? v.action : "permit"
         apply_both_directions = v.apply_both_directions != null ? v.apply_both_directions : true
         contract              = key
+        contract_type         = value.contract_type
+        description           = v.description != null ? v.description : ""
         directives            = v.directives != null ? v.directives : []
         filters               = v.filters
         match_type            = v.match_type != null ? v.match_type : "AtleastOne"
@@ -404,21 +406,22 @@ locals {
   subject_filters_loop = flatten([
     for k, v in local.contract_subjects : [
       for s in v.filters : {
-        action   = v.action
-        contract = v.contract
+        action        = v.action
+        contract      = v.contract
+        contract_type = v.contract_type
         directives = length(v.directives) > 0 ? [
-          {
-            enable_policy_compression = v.enable_policy_compression != null ? v.enable_policy_compression : false
-            log_packets               = v.log_packets != null ? v.log_packets : false
+          for i in v.directives : {
+            enable_policy_compression = i.enable_policy_compression != null ? i.enable_policy_compression : false
+            log                       = i.log != null ? i.log : false
           }
           ] : [
           {
             enable_policy_compression = false
-            log_packets               = false
+            log                       = false
           }
         ]
         directives = v.directives
-        filter     = "uni/tn-${v.tenant}/flt-${s}"
+        filter     = s
         subject    = v.name
         tenant     = v.tenant
       }

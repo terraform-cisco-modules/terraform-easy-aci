@@ -19,6 +19,7 @@ variable "contracts" {
         {
           action                = "permit"
           apply_both_directions = true
+          description           = ""
           directives = [
             {
               enable_policy_compression = false
@@ -27,6 +28,7 @@ variable "contracts" {
           ]
           filters     = []
           match_type  = "AtleastOne"
+          name        = "**REQUIRED**"
           qos_class   = "unspecified"
           target_dscp = "unspecified"
         }
@@ -72,6 +74,7 @@ variable "contracts" {
         {
           action                = optional(string)
           apply_both_directions = optional(bool)
+          description           = optional(string)
           directives = optional(list(object(
             {
               enable_policy_compression = optional(bool)
@@ -80,6 +83,7 @@ variable "contracts" {
           )))
           filters     = list(string)
           match_type  = optional(string)
+          name        = string
           qos_class   = optional(string)
           target_dscp = optional(string)
         }
@@ -91,14 +95,11 @@ variable "contracts" {
     }
   ))
 }
-output "local_contracts" {
-  value = local.contracts
-}
+
 
 #------------------------------------------
 # Create a Standard Contract
 #------------------------------------------
-
 /*_____________________________________________________________________________________________________________________
 
 API Information:
@@ -217,13 +218,12 @@ resource "aci_contract_subject" "contract_subjects" {
     aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
   ]
-  for_each      = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" && v.contract_type == "standard" }
-  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
-  contract_dn   = aci_contract.contracts[each.key].id
+  for_each      = { for k, v in local.contract_subjects : k => v if v.contract_type == "standard" }
+  annotation    = var.annotation
+  contract_dn   = aci_contract.contracts[each.value.contract].id
   cons_match_t  = each.value.match_type
   description   = each.value.description
-  name          = each.key
-  name_alias    = each.value.alias
+  name          = each.value.name
   prio          = each.value.qos_class
   prov_match_t  = each.value.match_type
   rev_flt_ports = each.value.apply_both_directions == true ? "yes" : "no"
@@ -244,13 +244,12 @@ resource "aci_rest_managed" "oob_contract_subjects" {
     aci_rest_managed.oob_contracts
   ]
   for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "oob" }
-  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.key}"
+  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.name}"
   class_name = "vzSubj"
   content = {
     consMatchT  = each.value.match_type
     descr       = each.value.description
-    name        = each.key
-    nameAlias   = each.value.alias
+    name        = each.value.name
     prio        = each.value.qos_priority
     provMatchT  = each.value.match_type
     revFltPorts = each.value.apply_both_directions
@@ -273,12 +272,11 @@ resource "aci_rest_managed" "taboo_contract_subjects" {
     aci_rest_managed.oob_contracts
   ]
   for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "taboo" }
-  dn         = "${aci_taboo_contract.contracts[each.key].id}/tsubj-${each.key}"
+  dn         = "${aci_taboo_contract.contracts[each.value.contract].id}/tsubj-${each.value.name}"
   class_name = "vzTSubj"
   content = {
-    descr     = each.value.description
-    name      = each.key
-    nameAlias = each.value.alias
+    descr = each.value.description
+    name  = each.value.name
   }
 }
 
@@ -291,14 +289,16 @@ GUI Location:
  - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {contract}: Subjects
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "contract_subject_filter_atrributes" {
+resource "aci_rest_managed" "contract_subject_filter" {
   depends_on = [
     aci_contract_subject.contract_subjects,
     aci_rest_managed.oob_contract_subjects,
-    aci_rest_managed.taboo_contract_subjects,
   ]
-  for_each   = local.subject_filters
-  dn         = "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}"
+  for_each = { for k, v in local.subject_filters : k => v if v.contract_type != "taboo" }
+  dn = length(regexall("standard", each.value.contract_type)
+    ) > 0 ? "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}" : length(
+    regexall("oob", each.value.contract_type)
+  ) > 0 ? "${aci_rest_managed.oob_contracts[each.value.contract].id}/subj-${each.value.subject}/rssubjFiltAtt-${each.value.filter}" : ""
   class_name = "vzRsSubjFiltAtt"
   content = {
     action = each.value.action
@@ -307,7 +307,26 @@ resource "aci_rest_managed" "contract_subject_filter_atrributes" {
       ) ? replace(trim(join(",", concat([
         length(regexall(true, each.value.directives[0].enable_policy_compression)) > 0 ? "no_stats" : ""], [
         length(regexall(true, each.value.directives[0].log)) > 0 ? "log" : ""]
-    )), ","), ",,", ",") : "none"
+    )), ","), ",,", ",") : ""
+    # tDn            = each.value.filter
+    tnVzFilterName = each.value.filter
+  }
+}
+
+resource "aci_rest_managed" "taboo_subject_filter" {
+  depends_on = [
+    aci_rest_managed.taboo_contract_subjects,
+  ]
+  for_each   = { for k, v in local.subject_filters : k => v if v.contract_type == "taboo" }
+  dn         = "${aci_taboo_contract.contracts[each.value.contract].id}/tsubj-${each.value.subject}/rsdenyRule-${each.value.filter}"
+  class_name = "vzRsDenyRule"
+  content = {
+    directives = anytrue(
+      [each.value.directives[0].enable_policy_compression, each.value.directives[0].log]
+      ) ? replace(trim(join(",", concat([
+        length(regexall(true, each.value.directives[0].enable_policy_compression)) > 0 ? "no_stats" : ""], [
+        length(regexall(true, each.value.directives[0].log)) > 0 ? "log" : ""]
+    )), ","), ",,", ",") : ""
     # tDn            = each.value.filter
     tnVzFilterName = each.value.filter
   }
