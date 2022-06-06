@@ -8,7 +8,7 @@ variable "global_attachable_access_entity_profiles" {
     "default" = {
       annotation       = ""
       description      = ""
-      layer3_domains   = []
+      l3_domains       = []
       physical_domains = []
       vmm_domains      = []
     }
@@ -17,7 +17,7 @@ variable "global_attachable_access_entity_profiles" {
     Key — Name of the Attachable Access Entity Profile Policy.
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-    * layer3_domains: (optional) — A List of Layer3 Domains to Attach to this AAEP Policy.
+    * l3_domains: (optional) — A List of Layer3 Domains to Attach to this AAEP Policy.
     * physical_domains: (optional) — A List of Physical Domains to Attach to this AAEP Policy.
     * vmm_domains: (optional) — A List of Virtual Domains to Attach to this AAEP Policy.
   EOT
@@ -25,7 +25,7 @@ variable "global_attachable_access_entity_profiles" {
     {
       annotation       = optional(string)
       description      = optional(string)
-      layer3_domains   = optional(list(string))
+      l3_domains       = optional(list(string))
       physical_domains = optional(list(string))
       vmm_domains      = optional(list(string))
     }

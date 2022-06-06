@@ -17,6 +17,7 @@ locals {
       node_type         = v.node_type != null ? v.node_type : "leaf"
       ooband_addressing = v.ooband_addressing != null ? v.ooband_addressing : []
       pod_id            = v.pod_id != null ? v.pod_id : 1
+      role              = v.role != null ? v.role : "unspecified"
       serial_number     = v.serial_number
       two_slot_leaf     = v.two_slot_leaf != null ? v.two_slot_leaf : false
     }

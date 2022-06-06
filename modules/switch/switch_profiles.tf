@@ -46,6 +46,7 @@ variable "switch_profiles" {
       ] */
       policy_group  = "default"
       pod_id        = 1
+      role          = "unspecified"
       serial_number = "**REQUIRED**"
       two_slot_leaf = false
     }
@@ -73,6 +74,10 @@ variable "switch_profiles" {
       - spine
       - tier-2-leaf
     * pod_id: (default: 1) — Identifier of the pod where the node is located.  Unless you are configuring Multi-Pod, this should always be 1.
+    * role: (optional) — The role to assign to the switch.  Options are:
+      - leaf
+      - spine
+      - unspecified: (default)
     * serial_number: (required) — Manufacturing Serial Number of the Switch.
     * two_slot_leaf: (default: false) — Flag to Tell the Script this is a Leaf with more than 99 ports.  It will Name Leaf Selectors as Eth1-001 instead of Eth1-01.
   EOT
@@ -114,6 +119,7 @@ variable "switch_profiles" {
       )))
       policy_group  = optional(string)
       pod_id        = optional(number)
+      role          = optional(string)
       serial_number = string
       two_slot_leaf = optional(bool)
     }
@@ -124,8 +130,8 @@ variable "switch_profiles" {
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "fabricNode"
- - Distinguished Name: "topology/pod-{pod_id}/node-{node_id}"
+ - Class: "fabricNodeIdentP"
+ - Distinguished Name: "uni/controller/nodeidentpol/nodep-{serial_number}"
 GUI Location:
  - Fabric > Access Policies > Inventory > Fabric Membership:[Registered Nodes or Nodes Pending Registration]
 _______________________________________________________________________________________________________________________
@@ -143,7 +149,7 @@ resource "aci_rest_managed" "fabric_membership" {
       "remote-leaf", each.value.node_type)) > 0 ? "remote-leaf-wan" : length(regexall(
     "tier-2-leaf", each.value.node_type)) > 0 ? each.value.node_type : "unspecified"
     podId  = each.value.pod_id
-    role   = each.value.node_type == "spine" ? "spine" : "leaf"
+    role   = each.value.role == "spine" ? "spine" : "leaf"
     serial = each.value.serial_number
   }
 }

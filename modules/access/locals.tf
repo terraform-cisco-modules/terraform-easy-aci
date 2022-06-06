@@ -31,7 +31,7 @@ locals {
     for k, v in var.global_attachable_access_entity_profiles : k => {
       annotation       = v.annotation != null ? v.annotation : ""
       description      = v.description != null ? v.description : ""
-      layer3_domains   = v.layer3_domains != null ? v.layer3_domains : []
+      l3_domains       = v.l3_domains != null ? v.l3_domains : []
       physical_domains = v.physical_domains != null ? v.physical_domains : []
       vmm_domains      = v.vmm_domains != null ? v.vmm_domains : []
     }
@@ -41,8 +41,8 @@ locals {
     for k, v in local.attachable_access_entity_profiles_1 : k => {
       annotation  = v.annotation
       description = v.description
-      layer3_domains = length(v.layer3_domains
-      ) > 0 ? [for s in v.layer3_domains : aci_l3_domain_profile.domains_layer3["${s}"].id] : []
+      l3_domains = length(v.l3_domains
+      ) > 0 ? [for s in v.l3_domains : aci_l3_domain_profile.domains_layer3["${s}"].id] : []
       physical_domains = length(v.physical_domains
       ) > 0 ? [for s in v.physical_domains : aci_physical_domain.domains_physical["${s}"].id] : []
       vmm_domains = length(v.vmm_domains
@@ -54,7 +54,7 @@ locals {
     for k, v in local.attachable_access_entity_profiles_2 : k => {
       annotation  = v.annotation
       description = v.description
-      domains     = compact(concat(v.layer3_domains, v.physical_domains, v.vmm_domains))
+      domains     = compact(concat(v.l3_domains, v.physical_domains, v.vmm_domains))
     }
   }
 
