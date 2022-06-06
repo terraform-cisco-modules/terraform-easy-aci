@@ -47,6 +47,6 @@ resource "aci_vpc_explicit_protection_group" "vpc_domains" {
   name                             = each.key
   switch1                          = element(each.value.switches, 0)
   switch2                          = element(each.value.switches, 1)
-  vpc_domain_policy                = "uni/fabric/vpcInst-${each.value.vpc_domain_policy}"
+  vpc_domain_policy                = each.value.vpc_domain_policy
   vpc_explicit_protection_group_id = each.value.domain_id
 }

@@ -63,7 +63,7 @@ locals {
         key1              = k
         key2              = s.interface
         module            = element(split("/", s.interface), 0)
-        name              = k
+        name              = v.name
         node_type         = v.node_type
         port              = element(split("/", s.interface), 1)
         policy_group      = s.policy_group != null ? s.policy_group : ""
