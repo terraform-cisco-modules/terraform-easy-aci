@@ -711,6 +711,7 @@ locals {
         annotation                  = value.annotation
         arp_policy                  = v.arp_policy != null ? v.arp_policy : ""
         auto_state                  = v.auto_state != null ? v.auto_state : "disabled"
+        bgp_peers                   = v.bgp_peers != null ? v.bgp_peers : []
         color_tag                   = value.color_tag
         controller_type             = value.controller_type
         custom_qos_policy           = v.custom_qos_policy != null ? v.custom_qos_policy : ""
@@ -780,10 +781,10 @@ locals {
         secondaries_keys    = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
         svi_addresses = v.svi_addresses != null ? [
           for s in v.svi_addresses : {
-            link_local_address  = s.link_local_address != null ? s.link_local_address : "::"
-            preferred_address   = s.preferred_address
-            secondary_addresses = s.secondaries != null ? s.secondaries : []
-            side                = s.side
+            link_local_address        = s.link_local_address != null ? s.link_local_address : "::"
+            primary_preferred_address = s.primary_preferred_address
+            secondary_addresses       = s.secondary_addresses != null ? s.secondary_addresses : []
+            side                      = s.side
           }
         ] : []
         target_dscp = value.target_dscp
@@ -837,6 +838,91 @@ locals {
   ])
   svi_secondaries           = { for k, v in local.secondaries_loop_2 : "${v.key1}" => v }
   l3out_paths_secondary_ips = merge(local.interface_secondaries, local.svi_secondaries)
+
+  #=======================================================================================
+  # L3Outs - Logical Node Profiles - Logical Interface Profiles - BGP Peers
+  #=======================================================================================
+
+  bgp_peers_loop = flatten([
+    for key, value in local.l3out_interface_profiles : [
+      for k, v in value.bgp_peers : {
+        address_type_controls = v.address_type_controls != null ? [
+          for s in v.address_type_controls : {
+            af_mcast = s.af_mcast != null ? s.af_mcast : false
+            af_ucast = s.af_ucast != null ? s.af_ucast : true
+          }
+          ] : [
+          {
+            af_mcast = false
+            af_ucast = true
+          }
+        ]
+        admin_state           = v.admin_state != null ? v.admin_state : "enabled"
+        allowed_self_as_count = v.allowed_self_as_count != null ? v.allowed_self_as_count : 3
+        annotation            = value.annotation
+        bgp_controls = v.bgp_controls != null ? [
+          for s in v.bgp_controls : {
+            allow_self_as           = s.allow_self_as != null ? s.allow_self_as : false
+            as_override             = s.as_override != null ? s.as_override : false
+            disable_peer_as_check   = s.disable_peer_as_check != null ? s.disable_peer_as_check : false
+            next_hop_self           = s.next_hop_self != null ? s.next_hop_self : false
+            send_community          = s.send_community != null ? s.send_community : false
+            send_domain_path        = s.send_domain_path != null ? s.send_domain_path : false
+            send_extended_community = s.send_extended_community != null ? s.send_extended_community : false
+          }
+          ] : [
+          {
+            allow_self_as           = false
+            as_override             = false
+            disable_peer_as_check   = false
+            next_hop_self           = false
+            send_community          = false
+            send_domain_path        = false
+            send_extended_community = false
+          }
+        ]
+        bgp_peer_prefix_policy = v.bgp_peer_prefix_policy != null ? v.bgp_peer_prefix_policy : ""
+        description            = v.description != null ? v.description : ""
+        ebgp_multihop_ttl      = v.ebgp_multihop_ttl != null ? v.ebgp_multihop_ttl : 1
+        local_as_number        = v.local_as_number != null ? v.local_as_number : null
+        local_as_number_config = v.local_as_number_config != null ? v.local_as_number_config : "none"
+        password               = v.password != null ? v.password : 0
+        peer_address           = v.peer_address != null ? v.peer_address : "**REQUIRED**"
+        peer_asn               = v.peer_asn
+        peer_controls = v.peer_controls != null ? [
+          for s in v.peer_controls : {
+            bidirectional_forwarding_detection = s.bidirectional_forwarding_detection != null ? s.bidirectional_forwarding_detection : false
+            disable_connected_check            = s.disable_connected_check != null ? s.disable_connected_check : false
+          }
+          ] : [
+          {
+            bidirectional_forwarding_detection = false
+            disable_connected_check            = true
+          }
+        ]
+        peer_level           = v.peer_level != null ? v.peer_level : "interface"
+        policy_source_tenant = v.policy_source_tenant != null ? v.policy_source_tenant : "common"
+        private_as_control = v.private_as_control != null ? [
+          for s in v.private_as_control : {
+            remove_all_private_as            = s.remove_all_private_as != null ? s.remove_all_private_as : false
+            remove_private_as                = s.remove_private_as != null ? s.remove_private_as : false
+            replace_private_as_with_local_as = s.replace_private_as_with_local_as != null ? s.replace_private_as_with_local_as : false
+          }
+          ] : [
+          {
+            remove_all_private_as            = false
+            remove_private_as                = false
+            replace_private_as_with_local_as = false
+          }
+        ]
+        weight_for_routes_from_neighbor = v.weight_for_routes_from_neighbor != null ? v.weight_for_routes_from_neighbor : 0
+      }
+    ]
+  ])
+  bgp_peer_connectivity_profiles = {
+    for k, v in local.bgp_peer_connectivity_profiles_loop : "${v.interface_profile}_${v.peer_address}" => v
+  }
+
 
   #=======================================================================================
   # L3Outs - Logical Node Profiles - Logical Interface Profiles - HSRP Interface Profiles

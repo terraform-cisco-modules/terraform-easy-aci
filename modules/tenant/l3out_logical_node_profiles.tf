@@ -14,8 +14,55 @@ variable "l3out_logical_node_profiles" {
       description     = ""
       interface_profiles = [
         {
-          arp_policy                  = ""
-          auto_state                  = "disabled"
+          arp_policy = ""
+          auto_state = "disabled"
+          bgp_peers = [
+            {
+              address_type_controls = [
+                {
+                  af_mcast = false
+                  af_ucast = true
+                }
+              ]
+              admin_state           = "enabled"
+              allowed_self_as_count = 3
+              bgp_controls = [
+                {
+                  allow_self_as           = false
+                  as_override             = false
+                  disable_peer_as_check   = false
+                  next_hop_self           = false
+                  send_community          = true
+                  send_domain_path        = true
+                  send_extended_community = false
+                }
+              ]
+              bgp_peer_prefix_policy = ""
+              description            = ""
+              ebgp_multihop_ttl      = 1
+              local_as_number        = null
+              local_as_number_config = "none"
+              password               = 0
+              peer_address           = "**REQUIRED**"
+              peer_asn               = null # **REQUIRED**
+              peer_controls = [
+                {
+                  bidirectional_forwarding_detection = false
+                  disable_connected_check            = false
+                }
+              ]
+              peer_level           = "interface"
+              policy_source_tenant = "common"
+              private_as_control = [
+                {
+                  remove_all_private_as            = false
+                  remove_private_as                = false
+                  replace_private_as_with_local_as = false
+                }
+              ]
+              weight_for_routes_from_neighbor = 0
+            }
+          ]
           color_tag                   = "yellow-green"
           custom_qos_policy           = ""
           data_plane_policing_egress  = ""
@@ -205,8 +252,55 @@ variable "l3out_logical_node_profiles" {
       description     = optional(string)
       interface_profiles = optional(list(object(
         {
-          arp_policy                  = optional(string)
-          auto_state                  = optional(string)
+          arp_policy = optional(string)
+          auto_state = optional(string)
+          bgp_peers = optional(list(object(
+            {
+              address_type_controls = optional(list(object(
+                {
+                  af_mcast = optional(bool)
+                  af_ucast = optional(bool)
+                }
+              )))
+              admin_state           = optional(string)
+              allowed_self_as_count = optional(number)
+              bgp_controls = optional(list(object(
+                {
+                  allow_self_as           = optional(bool)
+                  as_override             = optional(bool)
+                  disable_peer_as_check   = optional(bool)
+                  next_hop_self           = optional(bool)
+                  send_community          = optional(bool)
+                  send_domain_path        = optional(bool)
+                  send_extended_community = optional(bool)
+                }
+              )))
+              bgp_peer_prefix_policy = optional(string)
+              description            = optional(string)
+              ebgp_multihop_ttl      = optional(number)
+              local_as_number        = optional(number)
+              local_as_number_config = optional(string)
+              password               = optional(number)
+              peer_address           = string
+              peer_asn               = number
+              peer_controls = optional(list(object(
+                {
+                  bidirectional_forwarding_detection = optional(bool)
+                  disable_connected_check            = optional(bool)
+                }
+              )))
+              peer_level           = string
+              policy_source_tenant = optional(string)
+              private_as_control = optional(list(object(
+                {
+                  remove_all_private_as            = optional(bool)
+                  remove_private_as                = optional(bool)
+                  replace_private_as_with_local_as = optional(bool)
+                }
+              )))
+              weight_for_routes_from_neighbor = optional(number)
+            }
+          )))
           color_tag                   = optional(string)
           custom_qos_policy           = optional(string)
           data_plane_policing_egress  = optional(string)
@@ -545,7 +639,7 @@ resource "aci_l3out_vpc_member" "l3out_vpc_member" {
     aci_l3out_path_attachment.l3out_path_attachments
   ]
   for_each     = local.l3out_paths_svi_addressing
-  addr         = each.value.preferred_address
+  addr         = each.value.primary_preferred_address
   annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = ""
   ipv6_dad     = each.value.ipv6_dad
@@ -598,49 +692,91 @@ ________________________________________________________________________________
 #------------------------------------------------
 # Create a BGP Peer Connectivity Profile
 #------------------------------------------------
-# resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
-#   depends_on = [
-#     aci_logical_node_profile.l3out_node_profiles,
-#     aci_logical_interface_profile.l3out_interface_profiles,
-#     aci_bgp_peer_prefix.policies_bgp_peer_prefix
-#   ]
-#   for_each            = local.bgp_peer_connectivity_profiles
-#   addr                = each.value.bgp_peer
-#   addr_t_ctrl         = each.value.address_type_controls
-#   allowed_self_as_cnt = each.value.allowed_self_as_count
-#   as_number           = each.value.remote_as
-#   ctrl                = each.value.bgp_controlls
-#   description         = each.value.description
-#   logical_node_profile_dn = length(
-#     regexall("interface", each.value.peer_level)
-#     ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
-#     regexall("loopback", each.value.peer_level)
-#   ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
-#   password = length(
-#     regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
-#     regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
-#     regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
-#     regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
-#   regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
-#   peer_ctrl           = each.value.peer_controls
-#   private_a_sctrl     = each.value.private_as_control
-#   ttl                 = each.value.ebgp_multihop_ttl
-#   weight              = each.value.weight_for_routes_from_neighbor
-#   local_asn           = each.value.local_as_number
-#   local_asn_propagate = each.value.local_as_number_config
-#   relation_bgp_rs_peer_pfx_pol = length(
-#     regexall(each.value.prefix_tenant == each.value.tenant)
-#     ) > 0 ? aci_bgp_peer_prefix.policies_bgp_peer_prefix[each.value.bgp_peer_prefix_policy].id : length(
-#     regexall("[:alnum:]", each.value.prefix_tenant)
-#   ) > 0 ? "rs_bgp_peer_prefix_policy.policies_bgp_peer_prefix[each.value.bgp_peer_prefix_policy].id" : ""
-#   dynamic "relation_bgp_rs_peer_to_profile" {
-#     for_each = each.value.route_control_profiles
-#     content {
-#       direction = relation_bgp_rs_peer_to_profile.value.direction
-#       target_dn = "uni/tn-${relation_bgp_rs_peer_to_profile.value.tenant}/prof-${relation_bgp_rs_peer_to_profile.value.route_map}"
-#     }
-#   }
-# }
+resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
+  depends_on = [
+    aci_logical_node_profile.l3out_node_profiles,
+    aci_logical_interface_profile.l3out_interface_profiles,
+    aci_bgp_peer_prefix.policies_bgp_peer_prefix
+  ]
+  for_each = local.bgp_peer_connectivity_profiles
+  addr     = each.value.peer_address
+  addr_t_ctrl = anytrue(
+    [
+      each.value.address_type_controls[0].af_mcast,
+      each.value.address_type_controls[0].af_ucast
+    ]
+    ) ? replace(trim(join(",", concat([
+      length(regexall(true, each.value.address_type_controls[0].af_mcast)) > 0 ? "af-mcast" : ""], [
+      length(regexall(true, each.value.address_type_controls[0].af_ucast)) > 0 ? "af-ucast" : ""]
+  )), ","), ",,", ",") : ""
+  admin_state         = each.value.admin_state
+  allowed_self_as_cnt = each.value.allowed_self_as_count
+  as_number           = each.value.remote_as
+  ctrl = anytrue(
+    [
+      each.value.bgp_controls[0].allow_self_as,
+      each.value.bgp_controls[0].as_override,
+      each.value.bgp_controls[0].disable_peer_as_check,
+      each.value.bgp_controls[0].next_hop_self,
+      each.value.bgp_controls[0].send_community,
+      each.value.bgp_controls[0].send_domain_path,
+      each.value.bgp_controls[0].send_extended_community
+    ]
+    ) ? compact(concat([
+      length(regexall(true, each.value.bgp_controls[0].allow_self_as)) > 0 ? "allow-self-as" : ""], [
+      length(regexall(true, each.value.bgp_controls[0].as_override)) > 0 ? "as-override" : ""], [
+      length(regexall(true, each.value.bgp_controls[0].disable_peer_as_check)) > 0 ? "dis-peer-as-check" : ""], [
+      length(regexall(true, each.value.bgp_controls[0].next_hop_self)) > 0 ? "nh-self" : ""], [
+      length(regexall(true, each.value.bgp_controls[0].send_community)) > 0 ? "send-com" : ""], [
+      # Missing Attribute: Bug ID
+      # length(regexall(true, each.value.bgp_controls[0].send_domain_path)) > 0 ? "" : ""], [
+      length(regexall(true, each.value.bgp_controls[0].send_extended_community)) > 0 ? "send-ext-com" : ""]
+  )) : ["unspecified"]
+  description = each.value.description
+  parent_dn = length(
+    regexall("interface", each.value.peer_level)
+    ) > 0 ? aci_logical_interface_profile.l3out_interface_profiles[each.value.interface_profile].id : length(
+    regexall("loopback", each.value.peer_level)
+  ) > 0 ? aci_logical_node_profile.l3out_node_profiles[each.value.node_profile].id : ""
+  password = length(
+    regexall(5, each.value.bgp_password)) > 0 ? var.bgp_password_5 : length(
+    regexall(4, each.value.bgp_password)) > 0 ? var.bgp_password_4 : length(
+    regexall(3, each.value.bgp_password)) > 0 ? var.bgp_password_3 : length(
+    regexall(2, each.value.bgp_password)) > 0 ? var.bgp_password_2 : length(
+  regexall(1, each.value.bgp_password)) > 0 ? var.bgp_password_1 : ""
+  peer_ctrl = anytrue(
+    [
+      each.value.peer_controls[0].bidirectional_forwarding_detection,
+      each.value.peer_controls[0].disable_connected_check
+    ]
+    ) ? compact(concat([
+      length(regexall(true, each.value.peer_controls[0].bidirectional_forwarding_detection)) > 0 ? "bfd" : ""], [
+      length(regexall(true, each.value.peer_controls[0].disable_connected_check)) > 0 ? "dis-conn-check" : ""]
+  )) : ["unspecified"]
+  private_a_sctrl = anytrue(
+    [
+      each.value.private_as_control[0].remove_all_private_as,
+      each.value.private_as_control[0].remove_private_as,
+      each.value.private_as_control[0].replace_private_as_with_local_as
+    ]
+    ) ? compact(concat([
+      length(regexall(true, each.value.private_as_control[0].remove_all_private_as)) > 0 ? "remove-all" : ""], [
+      length(regexall(true, each.value.private_as_control[0].remove_private_as)) > 0 ? "remove-exclusive" : ""], [
+      length(regexall(true, each.value.private_as_control[0].replace_private_as_with_local_as)) > 0 ? "replace-as" : ""]
+  )) : ["unspecified"]
+  ttl                          = each.value.ebgp_multihop_ttl
+  weight                       = each.value.weight_for_routes_from_neighbor
+  local_asn                    = each.value.local_as_number
+  local_asn_propagate          = each.value.local_as_number_config
+  relation_bgp_rs_peer_pfx_pol = " uni/tn-${each.value.policy_source_tenant}/bgpPfxP-${each.value.bgp_peer_prefix_policy}"
+  dynamic "relation_bgp_rs_peer_to_profile" {
+    for_each = each.value.route_control_profiles
+    content {
+      direction = relation_bgp_rs_peer_to_profile.value.direction
+      target_dn = "uni/tn-${relation_bgp_rs_peer_to_profile.value.policy_source_tenant}/prof-${relation_bgp_rs_peer_to_profile.value.route_map}"
+    }
+  }
+}
 
 /*_____________________________________________________________________________________________________________________
 
