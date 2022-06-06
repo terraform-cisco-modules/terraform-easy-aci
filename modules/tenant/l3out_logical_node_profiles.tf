@@ -16,6 +16,8 @@ variable "l3out_logical_node_profiles" {
         {
           arp_policy = ""
           auto_state = "disabled"
+          bgp_peers  = []
+          /* Example BGP Peer
           bgp_peers = [
             {
               address_type_controls = [
@@ -63,6 +65,7 @@ variable "l3out_logical_node_profiles" {
               weight_for_routes_from_neighbor = 0
             }
           ]
+          */
           color_tag                   = "yellow-green"
           custom_qos_policy           = ""
           data_plane_policing_egress  = ""
@@ -71,7 +74,7 @@ variable "l3out_logical_node_profiles" {
           encap_scope                 = "local"
           encap_vlan                  = 1
           hsrp_interface_profiles     = []
-          /* example
+          /* Example HSRP Interface Profile
           hsrp_interface_profiles = [
             {
               alias       = ""
