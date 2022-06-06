@@ -442,7 +442,7 @@ resource "mso_schema_site_bd" "bridge_domains" {
   schema_id     = mso_schema.schemas[each.value.schema].id
   bd_name       = each.key
   template_name = each.value.template
-  site_id       = data.mso_site.sites[each.value.site].id
+  site_id       = data.mso_site.ndo_sites[each.value.site].id
   host_route    = each.value.advertise_host_routes
 }
 

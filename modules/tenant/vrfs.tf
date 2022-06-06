@@ -298,7 +298,7 @@ resource "mso_schema_site_vrf" "vrfs" {
   for_each      = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" }
   template_name = each.value.template
   schema_id     = mso_schema.schemas[each.value.schema].id
-  site_id       = data.mso_site.sites[each.value.site].id
+  site_id       = data.mso_site.ndo_sites[each.value.site].id
   vrf_name      = each.key
 }
 

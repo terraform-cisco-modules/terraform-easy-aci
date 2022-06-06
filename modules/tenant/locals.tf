@@ -362,30 +362,51 @@ locals {
       alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
       annotations           = v.annotations != null ? v.annotations : []
-      apply_both_directions = v.apply_both_directions != null ? v.apply_both_directions : true
-      consumer_match_type   = v.consumer_match_type != null ? v.consumer_match_type : "AtleastOne"
+      apply_both_directions = coalesce(v.subjects[0]["apply_both_directions"], false)
       contract_type         = v.contract_type != null ? v.contract_type : "standard"
       controller_type       = v.controller_type != null ? v.controller_type : "apic"
       description           = v.description != null ? v.description : ""
-      filters               = v.filters != null ? v.filters : []
-      global_alias          = v.global_alias != null ? v.global_alias : ""
-      qos_class             = v.qos_class != null ? v.qos_class : "unspecified"
-      provider_match_type   = v.provider_match_type != null ? v.provider_match_type : "AtleastOne"
-      schema                = v.schema != null ? v.schema : local.first_tenant
-      scope                 = v.scope != null ? v.scope : "context"
-      target_dscp           = v.target_dscp != null ? v.target_dscp : "unspecified"
-      template              = v.template != null ? v.template : local.first_tenant
-      tenant                = v.tenant != null ? v.tenant : local.first_tenant
+      filters = v.subjects != null ? flatten([
+        for s in v.subjects : [
+          s.filters
+        ]
+      ]) : []
+      global_alias = v.global_alias != null ? v.global_alias : ""
+      qos_class    = v.qos_class != null ? v.qos_class : "unspecified"
+      schema       = v.schema != null ? v.schema : local.first_tenant
+      subjects     = v.subjects != null ? v.subjects : []
+      scope        = v.scope != null ? v.scope : "context"
+      target_dscp  = v.target_dscp != null ? v.target_dscp : "unspecified"
+      template     = v.template != null ? v.template : local.first_tenant
+      tenant       = v.tenant != null ? v.tenant : local.first_tenant
     }
   }
 
 
-  apic_contract_filters_loop = flatten([
+  contract_subjects_loop = flatten([
     for key, value in local.contracts : [
-      for k, v in value.filters : {
-        action   = v.action != null ? v.action : "permit"
-        contract = key
-        directives = v.directives != null ? [
+      for k, v in value.subjects : {
+        action                = v.action != null ? v.action : "permit"
+        apply_both_directions = v.apply_both_directions != null ? v.apply_both_directions : true
+        contract              = key
+        directives            = v.directives != null ? v.directives : []
+        filters               = v.filters
+        match_type            = v.match_type != null ? v.match_type : "AtleastOne"
+        name                  = v.name
+        qos_class             = v.qos_class != null ? v.qos_class : value.qos_class
+        target_dscp           = v.target_dscp != null ? v.target_dscp : value.qos_class
+        tenant                = value.tenant
+      }
+    ] if value.controller_type == "apic"
+  ])
+  contract_subjects = { for k, v in local.contract_subjects_loop : "${v.contract}_${v.name}" => v }
+
+  subject_filters_loop = flatten([
+    for k, v in local.contract_subjects : [
+      for s in v.filters : {
+        action   = v.action
+        contract = v.contract
+        directives = length(v.directives) > 0 ? [
           {
             enable_policy_compression = v.enable_policy_compression != null ? v.enable_policy_compression : false
             log_packets               = v.log_packets != null ? v.log_packets : false
@@ -396,33 +417,14 @@ locals {
             log_packets               = false
           }
         ]
-        filter = "uni/tn-${value.tenant}/flt-${v.name}"
-        name   = v.name
+        directives = v.directives
+        filter     = "uni/tn-${v.tenant}/flt-${s}"
+        subject    = v.name
+        tenant     = v.tenant
       }
-    ] if value.controller_type == "apic"
+    ]
   ])
-  apic_contract_filters = { for k, v in local.apic_contract_filters_loop : "${v.contract}_${k}_${v.name}" => v }
-
-  contract_subjects = {
-    for k, v in local.contracts : k => {
-      annotation            = v.annotation
-      annotations           = v.annotations
-      apply_both_directions = v.apply_both_directions
-      contract_type         = v.contract_type
-      consumer_match_type   = v.consumer_match_type
-      controller_type       = v.controller_type
-      description           = v.description
-      filters               = [for key, value in local.apic_contract_filters : value.filter if value.contract == k]
-      alias                 = v.alias
-      qos_class             = v.qos_class
-      provider_match_type   = v.provider_match_type
-      schema                = v.schema
-      scope                 = v.scope
-      target_dscp           = v.target_dscp
-      template              = v.template
-      tenant                = v.tenant
-    }
-  }
+  subject_filters = { for k, v in local.subject_filters_loop : "${v.contract}_${v.subject}_${v.filter}" => v }
 
   contract_annotations_loop = flatten([
     for key, value in local.contracts : [
