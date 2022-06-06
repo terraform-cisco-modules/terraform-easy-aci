@@ -447,13 +447,18 @@ resource "aci_rest_managed" "spine_interface_selectors" {
       name     = each.value.interface_name
     }
   }
-  child {
-    rn         = "rsspAccGrp"
-    class_name = "infraRsSpAccGrp"
-    content = {
-      tDn = length(compact([each.value.policy_group])
-      ) > 0 ? "uni/infra/funcprof/spaccportgrp-${each.value.policy_group}" : ""
-    }
+}
+
+resource "aci_rest_managed" "spine_interface_policy_group" {
+  depends_on = [
+    aci_spine_interface_profile.spine_interface_profiles
+  ]
+  for_each   = { for k, v in local.interface_selectors : k => v if v.node_type == "spine" && v.policy_group != "" }
+  dn         = "uni/infra/spaccportprof-${each.value.name}/shports-${each.value.interface_name}-typ-range/rsspAccGrp"
+  class_name = "infraRsSpAccGrp"
+  content = {
+    tDn = length(compact([each.value.policy_group])
+    ) > 0 ? "uni/infra/funcprof/spaccportgrp-${each.value.policy_group}" : ""
   }
 }
 
