@@ -98,26 +98,26 @@ locals {
         delimiter                = v.delimiter != null ? v.delimiter : ""
         domain                   = v.domain
         domain_type              = v.domain_type != null ? v.domain_type : "physical"
-        domain_vendor            = v.domain_vendor != null ? v.domain_vendor : "VMware"
         number_of_ports          = v.number_of_ports != null ? v.number_of_ports : 0
         port_allocation          = v.port_allocation != null ? v.port_allocation : "none"
         port_binding             = v.port_binding != null ? v.port_binding : "none"
         resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "pre-provision"
-        security = v.security != null ? {
-          for keys, values in v.security : keys => {
-            allow_promiscuous = v.allow_promiscuous != null ? v.allow_promiscuous : "reject"
-            forged_transmits  = v.forged_transmits != null ? v.forged_transmits : "reject"
-            mac_changes       = v.mac_changes != null ? v.mac_changes : "reject"
+        security = v.security != null ? [
+          for s in v.security : {
+            allow_promiscuous = s.allow_promiscuous != null ? s.allow_promiscuous : "reject"
+            forged_transmits  = s.forged_transmits != null ? s.forged_transmits : "reject"
+            mac_changes       = s.mac_changes != null ? s.mac_changes : "reject"
           }
-          } : [
+          ] : [
           {
             allow_promiscuous = "reject"
             forged_transmits  = "reject"
             mac_changes       = "reject"
           }
         ]
-        vlan_mode = v.vlan_mode != null ? v.vlan_mode : "dynamic"
-        vlans     = v.vlans != null ? v.vlans : []
+        vlan_mode  = v.vlan_mode != null ? v.vlan_mode : "dynamic"
+        vlans      = v.vlans != null ? v.vlans : []
+        vmm_vendor = v.vmm_vendor != null ? v.vmm_vendor : "VMware"
       }
     ]
   ])
