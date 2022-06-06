@@ -54,7 +54,7 @@ variable "l3out_logical_node_profiles" {
           interface_or_policy_group = "eth1/1"
           interface_type            = "l3-port" # ext-svi|l3-port|sub-interface
           ipv6_dad                  = "enabled"
-          link_local_addresses      = "::"
+          link_local_address        = "::"
           mac_address               = "00:22:BD:F8:19:FF"
           mode                      = "regular"
           mtu                       = "inherit" # 576 to 9216
@@ -75,21 +75,21 @@ variable "l3out_logical_node_profiles" {
             }
           ]
           */
-          primary_preferred_addresses = "198.18.1.1/24"
-          qos_class                   = "unspecified"
-          secondary_addresses         = [] # "198.18.3.1/24"
-          svi_addresses               = []
+          primary_preferred_address = "198.18.1.1/24"
+          qos_class                 = "unspecified"
+          secondary_addresses       = []
+          svi_addresses             = []
           /* Example
           svi_addresses               = [
             {
               link_local_address  = "::"
-              preferred_address   = "198.18.1.1/24"
+              primary_preferred_address   = "198.18.1.1/24"
               secondary_addresses = []
               side                = "A"
             },
             {
               link_local_address  = "::"
-              preferred_address   = "198.18.1.2/24"
+              primary_preferred_address   = "198.18.1.2/24"
               secondary_addresses = []
               side                = "B"
             }
@@ -271,10 +271,10 @@ variable "l3out_logical_node_profiles" {
           secondary_addresses = optional(list(string))
           svi_addresses = optional(list(object(
             {
-              link_local_address  = optional(string)
-              preferred_address   = string
-              secondary_addresses = optional(list(string))
-              side                = string
+              link_local_address        = optional(string)
+              primary_preferred_address = string
+              secondary_addresses       = optional(list(string))
+              side                      = string
             },
           )))
         }
@@ -516,7 +516,7 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
   if_inst_t   = each.value.interface_type
   addr        = each.value.interface_type != "ext-svi" ? each.value.preferred_address : ""
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  autostate   = each.value.interface_type != "ext-svi" ? each.value.auto_state : "disabled"
+  autostate   = each.value.interface_type == "ext-svi" ? each.value.auto_state : "disabled"
   encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encap_vlan}" : "unknown"
   mode        = each.value.mode == "trunk" ? "regular" : "native"
   encap_scope = each.value.interface_type != "l3-port" ? each.value.encap_scope : "local"

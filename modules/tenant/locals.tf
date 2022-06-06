@@ -560,7 +560,7 @@ locals {
         match_type             = v.match_type != null ? v.match_type : "AtleastOne"
         name                   = v.name != null ? v.name : "default"
         alias                  = v.alias != null ? v.alias : ""
-        preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : "exclude"
+        preferred_group_member = v.preferred_group_member != null ? v.preferred_group_member : false
         qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
         subnets                = v.subnets != null ? v.subnets : []
         target_dscp            = v.target_dscp != null ? v.target_dscp : "unspecified"
@@ -796,15 +796,15 @@ locals {
   svi_addressing_loop = flatten([
     for key, value in local.l3out_interface_profiles : [
       for s in value.svi_addresses : {
-        annotation          = value.annotation
-        ipv6_dad            = value.ipv6_dad
-        link_local_address  = s.link_local_address
-        path                = key
-        preferred_address   = s.preferred_address
-        secondary_addresses = s.secondary_addresses
-        secondaries_keys    = s.secondary_addresses != null ? range(length(s.secondary_addresses)) : []
-        side                = s.side
-        interface_type      = value.interface_type
+        annotation                = value.annotation
+        ipv6_dad                  = value.ipv6_dad
+        link_local_address        = s.link_local_address
+        path                      = key
+        primary_preferred_address = s.primary_preferred_address
+        secondary_addresses       = s.secondary_addresses
+        secondaries_keys          = s.secondary_addresses != null ? range(length(s.secondary_addresses)) : []
+        side                      = s.side
+        interface_type            = value.interface_type
       }
     ] if value.interface_type == "ext-svi"
   ])

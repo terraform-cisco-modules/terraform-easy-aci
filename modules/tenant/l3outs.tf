@@ -301,6 +301,9 @@ GUI Location:
  - tenants > {tenant} > Networking > L3Outs > {l3out} > External EPGs > {Ext_EPG}
 _______________________________________________________________________________________________________________________
 */
+output "ext_epgs" {
+  value = local.l3out_external_epgs
+}
 resource "aci_external_network_instance_profile" "l3out_external_epgs" {
   depends_on = [
     aci_l3_outside.l3outs
