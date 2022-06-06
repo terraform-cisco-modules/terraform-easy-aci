@@ -277,7 +277,7 @@ resource "aci_vrf" "vrfs" {
         "uni\\/tn\\-", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
         ) > 0 ? relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy : length(regexall(
         "[[:alnum:]]", relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy)
-      ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ospfCtxAfP-${relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy}" : ""
+      ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/ospfCtxP-${relation_fv_rs_ctx_to_ospf_ctx_pol.value.policy}" : ""
     }
   }
   relation_fv_rs_ctx_to_ext_route_tag_pol = length(regexall(

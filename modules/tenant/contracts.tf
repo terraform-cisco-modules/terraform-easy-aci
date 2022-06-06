@@ -227,15 +227,9 @@ resource "aci_contract_subject" "contract_subjects" {
     aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
   ]
-  for_each   = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" }
+  for_each   = { for k, v in local.contract_subjects : k => v if v.controller_type == "apic" && v.contract_type == "standard" }
   annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  contract_dn = length(regexall(
-    "oob", each.value.contract_type)
-    ) > 0 ? aci_rest_managed.oob_contracts[each.key].id : length(regexall(
-    "standard", each.value.contract_type)
-    ) > 0 ? aci_contract.contracts[each.key].id : length(regexall(
-    "taboo", each.value.contract_type)
-  ) > 0 ? aci_taboo_contract.contracts[each.key].id : ""
+  contract_dn = aci_contract.contracts[each.key].id
   cons_match_t  = each.value.consumer_match_type
   description   = each.value.description
   name          = each.key
@@ -249,6 +243,58 @@ resource "aci_contract_subject" "contract_subjects" {
 /*_____________________________________________________________________________________________________________________
 
 API Information:
+ - Class: "vzSubj"
+ - Distinguished Name: "uni/tn-{tenant}/taboo-{Name}/subj-{subject}"
+GUI Location:
+ - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {name}: Subjects
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "oob_contract_subjects" {
+  depends_on = [
+    aci_rest_managed.oob_contracts
+  ]
+  for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "oob" }
+  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.key}"
+  class_name = "vzSubj"
+  content = {
+    consMatchT  = each.value.consumer_match_type
+    descr       = each.value.description
+    name        = each.key
+    nameAlias   = each.value.alias
+    prio        = each.value.qos_priority
+    provMatchT  = each.value.provider_match_type
+    revFltPorts = each.value.apply_both_directions
+    targetDscp  = each.value.target_dscp
+  }
+}
+
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "vzTSubj"
+ - Distinguished Name: "uni/tn-{tenant}/taboo-{Name}/subj-{subject}"
+GUI Location:
+ - Tenants > {tenant} > Contracts > Taboo Contracts: {name}: Subjects
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "taboo_contract_subjects" {
+  depends_on = [
+    aci_rest_managed.oob_contracts
+  ]
+  for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "taboo" }
+  dn         = "${aci_taboo_contract.contracts[each.key].id}/tsubj-${each.key}"
+  class_name = "vzTSubj"
+  content = {
+    descr       = each.value.description
+    name        = each.key
+    nameAlias   = each.value.alias
+  }
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
  - Class: "vzRsSubjFiltAtt"
  - Distinguished Name: "uni/tn-{tenant}/oobbrc-{name}/subj-{subject}/rssubjFiltAtt-{filter}"
 GUI Location:
@@ -257,7 +303,9 @@ ________________________________________________________________________________
 */
 resource "aci_rest_managed" "contract_subject_filter_atrributes" {
   depends_on = [
-    aci_contract_subject.contract_subjects
+    aci_contract_subject.contract_subjects,
+    aci_rest_managed.oob_contract_subjects,
+    aci_rest_managed.taboo_contract_subjects,
   ]
   for_each   = local.apic_contract_filters
   dn         = "${aci_contract.contracts[each.value.contract].id}/subj-${each.value.contract}/rssubjFiltAtt-${each.value.name}"
@@ -275,34 +323,8 @@ resource "aci_rest_managed" "contract_subject_filter_atrributes" {
   }
 }
 
-
-
-/*_____________________________________________________________________________________________________________________
-
-API Information:
- - Class: "vzSubj"
- - Distinguished Name: "uni/tn-{tenant}/oobbrc-{Name}/subj-{subject}"
-GUI Location:
- - Tenants > {tenant} > Contracts > Out-Of-Band Contracts: {name}: Subjects
-_______________________________________________________________________________________________________________________
-*/
-resource "aci_rest_managed" "oob_contract_subjects" {
-  depends_on = [
-    aci_rest_managed.oob_contracts
-  ]
-  for_each   = { for k, v in local.contract_subjects : k => v if v.contract_type == "oob" }
-  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.subject}"
-  class_name = "vzSubj"
-  content = {
-    consMatchT  = each.value.consumer_match_type
-    descr       = each.value.description
-    name        = each.value.name
-    nameAlias   = each.value.alias
-    prio        = each.value.qos_priority
-    provMatchT  = each.value.provider_match_type
-    revFltPorts = each.value.apply_both_directions
-    targetDscp  = each.value.target_dscp
-  }
+output "local_contracts" {
+  value = local.contracts
 }
 
 output "contracts" {

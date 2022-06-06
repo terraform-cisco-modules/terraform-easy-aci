@@ -265,7 +265,6 @@ resource "aci_application_epg" "application_epgs" {
   prio                         = each.value.qos_class
   shutdown                     = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
   relation_fv_rs_bd            = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
-  relation_fv_rs_path_att      = length(each.value.static_paths) > 0 ? each.value.static_paths : []
   relation_fv_rs_sec_inherited = each.value.epg_contract_master
   relation_fv_rs_cust_qos_pol  = each.value.custom_qos
   relation_fv_rs_dpp_pol       = each.value.data_plane_policer
@@ -382,7 +381,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "disabled" : "disabled"
   instr_imedcy = each.value.deploy_immediacy == "on-demand" ? "lazy" : each.value.deploy_immediacy
-  lag_policy_name = length(
+  enhanced_lag_policy = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.enhanced_lag_policy : ""
   netflow_dir = length(
