@@ -84,6 +84,7 @@ locals {
       template              = v.template != null ? v.template : local.first_tenant
       tenant                = v.tenant != null ? v.tenant : local.first_tenant
       useg_epg              = v.useg_epg != null ? v.useg_epg : false
+      vlan                  = v.vlan != null ? v.vlan : null
       vrf                   = v.vrf != null ? v.vrf : "default"
       vrf_schema            = v.vrf_schema != null ? v.vrf_schema : local.first_tenant
       vrf_template          = v.vrf_template != null ? v.vrf_template : local.first_tenant
