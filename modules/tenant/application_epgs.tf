@@ -327,12 +327,12 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   depends_on = [
     aci_bridge_domain.bridge_domains,
   ]
-  for_each                 = { for k, v in local.application_epgs : k => v if length(regexall("band", v.epg_type)) > 0 && v.controller_type == "apic" }
+  for_each                 = { for k, v in local.application_epgs : k => v if length(regexall("(inb|oob)", v.epg_type)) > 0 && v.controller_type == "apic" }
   management_profile_dn    = "uni/tn-mgmt/mgmtp-default"
   name                     = each.key
   annotation               = each.value.annotation != "" ? each.value.annotation : var.annotation
   encap                    = each.value.epg_type == "inb" ? "vlan-${each.value.vlan}" : ""
-  match_t                  = each.value.epg_type == "inb" ? each.value.label_match_criteria : ""
+  match_t                  = each.value.epg_type == "inb" ? each.value.label_match_criteria : "AtleastOne"
   name_alias               = each.value.alias
   pref_gr_memb             = "exclude"
   prio                     = each.value.qos_class
