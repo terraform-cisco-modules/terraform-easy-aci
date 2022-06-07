@@ -34,6 +34,7 @@ locals {
 
   application_epgs = {
     for k, v in var.application_epgs : k => {
+      alias                  = v.alias != null ? v.alias : ""
       annotation             = v.annotation != null ? v.annotation : ""
       application_profile    = v.application_profile != null ? v.application_profile : "default"
       bd_schema              = v.bd_schema != null ? v.bd_schema : local.first_tenant
@@ -43,12 +44,12 @@ locals {
       contract_exception_tag = v.contract_exception_tag != null ? v.contract_exception_tag : ""
       contracts              = v.contracts != null ? v.contracts : []
       controller_type        = v.controller_type != null ? v.controller_type : "apic"
-      custom_qos             = v.custom_qos != null ? v.custom_qos : ""
+      custom_qos_policy      = v.custom_qos_policy != null ? v.custom_qos_policy : ""
       data_plane_policer     = v.data_plane_policer != null ? v.data_plane_policer : ""
       description            = v.description != null ? v.description : ""
       domains                = v.domains != null ? v.domains : []
       epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
-      epg_contract_master    = v.epg_contract_master != null ? v.epg_contract_master : ""
+      epg_contract_masters   = v.epg_contract_masters != null ? v.epg_contract_masters : []
       epg_to_aaeps = v.epg_to_aaeps != null ? [
         for s in v.epg_to_aaeps : {
           aaep                      = s.aaep
@@ -60,10 +61,12 @@ locals {
       epg_type                 = v.epg_type != null ? v.epg_type : "standard"
       fhs_trust_control_policy = v.fhs_trust_control_policy != null ? v.fhs_trust_control_policy : ""
       flood_in_encapsulation   = v.flood_in_encapsulation != null ? v.flood_in_encapsulation : "disabled"
+      global_alias             = v.global_alias != null ? v.global_alias : ""
       has_multicast_source     = v.has_multicast_source != null ? v.has_multicast_source : false
-      label_match_criteria     = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
-      alias                    = v.alias != null ? v.alias : ""
       intra_epg_isolation      = v.intra_epg_isolation != null ? v.intra_epg_isolation : "unenforced"
+      label_match_criteria     = v.label_match_criteria != null ? v.label_match_criteria : "AtleastOne"
+      monitoring_policy        = v.monitoring_policy != null ? v.monitoring_policy : "default"
+      policy_source_tenant     = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
       preferred_group_member   = v.preferred_group_member != null ? v.preferred_group_member : false
       qos_class                = v.qos_class != null ? v.qos_class : "unspecified"
       schema                   = v.schema != null ? v.schema : local.first_tenant
@@ -98,10 +101,11 @@ locals {
         delimiter                = v.delimiter != null ? v.delimiter : ""
         domain                   = v.domain
         domain_type              = v.domain_type != null ? v.domain_type : "physical"
+        enhanced_lag_policy      = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
         number_of_ports          = v.number_of_ports != null ? v.number_of_ports : 0
         port_allocation          = v.port_allocation != null ? v.port_allocation : "none"
         port_binding             = v.port_binding != null ? v.port_binding : "none"
-        resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "pre-provision"
+        resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "lazy"
         security = v.security != null ? [
           for s in v.security : {
             allow_promiscuous = s.allow_promiscuous != null ? s.allow_promiscuous : "reject"

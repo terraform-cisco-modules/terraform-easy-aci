@@ -19,7 +19,7 @@ variable "application_epgs" {
       contract_exception_tag = null
       contracts              = []
       controller_type        = "apic"
-      custom_qos             = ""
+      custom_qos_policy      = ""
       data_plane_policer     = ""
       description            = ""
       domains                = []
@@ -48,9 +48,9 @@ variable "application_epgs" {
         }
       ]
       */
-      epg_admin_state     = "admin_up"
-      epg_contract_master = ""
-      epg_to_aaeps        = []
+      epg_admin_state      = "admin_up"
+      epg_contract_masters = []
+      epg_to_aaeps         = []
       /*
       epg_to_aaeps = [
         {
@@ -68,6 +68,7 @@ variable "application_epgs" {
       has_multicast_source     = false
       label_match_criteria     = "AtleastOne"
       intra_epg_isolation      = "unenforced"
+      monitoring_policy        = "default"
       preferred_group_member   = false
       qos_class                = "unspecified"
       sites                    = []
@@ -89,11 +90,12 @@ variable "application_epgs" {
       vlan     = null # This is just used for the Inband Management EPG
       vrf      = "default"
       /* If undefined the variable of local.first_tenant will be used for:
-      schema       = local.first_tenant
-      template     = local.first_tenant
-      tenant       = local.first_tenant
-      vrf_schema   = local.first_tenant
-      vrf_template = local.first_tenant
+      policy_source_tenant = local.first_tenant
+      schema               = local.first_tenant
+      template             = local.first_tenant
+      tenant               = local.first_tenant
+      vrf_schema           = local.first_tenant
+      vrf_template         = local.first_tenant
       */
       vzGraphCont = ""
     }
@@ -110,7 +112,7 @@ variable "application_epgs" {
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
     * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
     Nexus Dashboard Orchestrator Specific Attributes:
     * schema: (default: local.first_tenant) — Schema Name.
@@ -164,7 +166,7 @@ variable "application_epgs" {
         }
       )))
       controller_type    = optional(string)
-      custom_qos         = optional(string)
+      custom_qos_policy  = optional(string)
       data_plane_policer = optional(string)
       description        = optional(string)
       domains = optional(list(object(
@@ -174,6 +176,7 @@ variable "application_epgs" {
           delimiter                = optional(string)
           domain                   = string
           domain_type              = optional(string)
+          enhanced_lag_policy      = optional(string)
           number_of_ports          = optional(string)
           port_allocation          = optional(string)
           port_binding             = optional(string)
@@ -190,8 +193,8 @@ variable "application_epgs" {
           vmm_vendor = optional(string)
         }
       )))
-      epg_admin_state     = optional(string)
-      epg_contract_master = optional(string)
+      epg_admin_state      = optional(string)
+      epg_contract_masters = optional(list(string))
       epg_to_aaeps = optional(list(object(
         {
           aaep                      = string
@@ -207,6 +210,8 @@ variable "application_epgs" {
       has_multicast_source     = optional(bool)
       label_match_criteria     = optional(string)
       intra_epg_isolation      = optional(string)
+      monitoring_policy        = optional(string)
+      policy_source_tenant     = optional(string)
       preferred_group_member   = optional(bool)
       qos_class                = optional(string)
       schema                   = optional(string)
@@ -265,11 +270,14 @@ resource "aci_application_epg" "application_epgs" {
   prio                         = each.value.qos_class
   shutdown                     = each.value.epg_admin_state == "admin_shut" ? "yes" : "no"
   relation_fv_rs_bd            = "uni/tn-${each.value.bd_tenant}/BD-${each.value.bridge_domain}"
-  relation_fv_rs_sec_inherited = each.value.epg_contract_master
-  relation_fv_rs_cust_qos_pol  = each.value.custom_qos
-  relation_fv_rs_dpp_pol       = each.value.data_plane_policer
-  relation_fv_rs_aepg_mon_pol  = each.value.monitoring_policy
-  relation_fv_rs_trust_ctrl    = each.value.fhs_trust_control_policy
+  relation_fv_rs_sec_inherited = each.value.epg_contract_masters
+  relation_fv_rs_cust_qos_pol = length(compact([each.value.custom_qos_policy])
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/qoscustom-${each.value.custom_qos_policy}" : ""
+  relation_fv_rs_dpp_pol = each.value.data_plane_policer
+  relation_fv_rs_aepg_mon_pol = length(compact([each.value.monitoring_policy])
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/monepg-${each.value.monitoring_policy}" : ""
+  relation_fv_rs_trust_ctrl = length(compact([each.value.fhs_trust_control_policy])
+  ) > 0 ? "uni/tn-${each.value.policy_source_tenant}/trustctrlpol-${each.value.fhs_trust_control_policy}" : ""
   # relation_fv_rs_graph_def     = each.value.vzGraphCont
 }
 
@@ -380,7 +388,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   epg_cos_pref = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "disabled" : "disabled"
-  instr_imedcy = each.value.deploy_immediacy == "on-demand" ? "lazy" : each.value.deploy_immediacy
+  instr_imedcy = each.value.resolution_immediacy == "on-demand" ? "lazy" : each.value.resolution_immediacy
   enhanced_lag_policy = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.enhanced_lag_policy : ""
@@ -541,7 +549,7 @@ resource "aci_epgs_using_function" "epg_to_aaeps" {
   for_each          = local.epg_to_aaeps
   access_generic_dn = "uni/infra/attentp-${each.value.aaep}/gen-default"
   encap             = length(each.value.vlans) > 0 ? "vlan-${element(each.value.vlans, 0)}" : "unknown"
-  instr_imedcy      = each.value.instrumentation_immediacy
+  instr_imedcy      = each.value.instrumentation_immediacy == "on-demand" ? "lazy" : each.value.instrumentation_immediacy
   mode              = each.value.mode == "trunk" ? "regular" : each.value.mode == "access" ? "untagged" : "native"
   primary_encap     = length(each.value.vlans) > 1 ? "vlan-${element(each.value.vlans, 1)}" : "unknown"
   tdn               = aci_application_epg.application_epgs[each.value.epg].id

@@ -29,7 +29,7 @@ variable "tenants" {
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
     Nexus Dashboard Orchestrator Specific Attributes:
     * sites: (required when controller_type is ndo) — When using Nexus Dashboard Orchestrator the sites attribute is used to distinguish the site and cloud types.  Options are:
       - aws_access_key_id: (optional) — AWS Access Key Id. It must be provided if the AWS account is not trusted. This parameter will only have effect with vendor = aws.

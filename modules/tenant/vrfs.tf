@@ -85,7 +85,7 @@ variable "vrfs" {
           policy         = string
     * endpoint_retention_policy       = "default"
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
     * ospf_timers                    = "default"
     * ospf_timers_per_address_family = []
           address_family = optional(string)

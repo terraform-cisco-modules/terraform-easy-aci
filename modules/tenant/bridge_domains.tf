@@ -107,7 +107,7 @@ variable "bridge_domains" {
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_poicy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
     * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
     NDO Specific Attributes:
     * schema: (required) — Schema Name.
@@ -259,6 +259,7 @@ variable "bridge_domains" {
       policy_source_tenant = optional(string)
       schema               = optional(string)
       sites                = optional(list(string))
+      tenant               = optional(string)
       template             = optional(string)
     }
   ))
