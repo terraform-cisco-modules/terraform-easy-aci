@@ -145,7 +145,7 @@ resource "aci_rest_managed" "oob_contracts" {
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.key}"
   class_name = "vzOOBBrCP"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     name       = each.key
     nameAlias  = each.value.alias
