@@ -99,13 +99,14 @@ locals {
         application_epg          = key
         controller_type          = value.controller_type
         delimiter                = v.delimiter != null ? v.delimiter : ""
+        deploy_immediacy         = v.deploy_immediacy != null ? v.deploy_immediacy : "on-demand"
         domain                   = v.domain
         domain_type              = v.domain_type != null ? v.domain_type : "physical"
         enhanced_lag_policy      = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
         number_of_ports          = v.number_of_ports != null ? v.number_of_ports : 0
         port_allocation          = v.port_allocation != null ? v.port_allocation : "none"
         port_binding             = v.port_binding != null ? v.port_binding : "none"
-        resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "lazy"
+        resolution_immediacy     = v.resolution_immediacy != null ? v.resolution_immediacy : "on-demand"
         security = v.security != null ? [
           for s in v.security : {
             allow_promiscuous = s.allow_promiscuous != null ? s.allow_promiscuous : "reject"

@@ -174,6 +174,7 @@ variable "application_epgs" {
           annotation               = optional(string)
           allow_micro_segmentation = optional(bool)
           delimiter                = optional(string)
+          deploy_immediacy         = optional(string)
           domain                   = string
           domain_type              = optional(string)
           enhanced_lag_policy      = optional(string)
@@ -388,7 +389,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   epg_cos_pref = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "disabled" : "disabled"
-  instr_imedcy = each.value.resolution_immediacy == "on-demand" ? "lazy" : each.value.resolution_immediacy
+  instr_imedcy = each.value.deploy_immediacy == "on-demand" ? "lazy" : each.value.deploy_immediacy
   enhanced_lag_policy = length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? each.value.enhanced_lag_policy : ""
