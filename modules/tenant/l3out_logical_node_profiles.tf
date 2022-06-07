@@ -933,7 +933,6 @@ resource "aci_l3out_ospf_interface_profile" "l3out_ospf_interface_profiles" {
   relation_ospf_rs_if_pol      = "uni/tn-${each.value.policy_source_tenant}/ospfIfPol-${each.value.ospf_interface_policy}"
 }
 
-
 /*_____________________________________________________________________________________________________________________
 
 API Information:

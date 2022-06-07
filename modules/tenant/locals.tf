@@ -1019,25 +1019,7 @@ locals {
       }
     ]
   ])
-  ospf_interface_profiles = { for k, v in local.ospf_profiles_loop : "${v.interface_profile}_${v.name}" => v }
-
-  ospf_profiles_loop_2 = flatten([
-    for key, value in local.ospf_interface_profiles : [
-      for k, v in local.l3out_interface_profiles : {
-        annotation            = value.annotation
-        authentication_type   = value.authentication_type
-        description           = value.description
-        interface_profile     = k
-        name                  = value.name
-        ospf_key              = value.ospf_key
-        ospf_interface_policy = value.ospf_interface_policy
-        policy_source_tenant  = value.policy_source_tenant
-        tenant                = v.tenant
-        type                  = value.type
-      } if value.name == v.ospf_interface_profile
-    ]
-  ])
-  l3out_ospf_interface_profiles = { for k, v in local.ospf_profiles_loop_2 : "${v.interface_profile}_${v.name}" => v }
+  l3out_ospf_interface_profiles = { for k, v in local.ospf_profiles_loop : "${v.interface_profile}_${v.name}" => v }
 
 
   #__________________________________________________________

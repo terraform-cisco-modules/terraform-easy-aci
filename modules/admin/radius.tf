@@ -268,6 +268,3 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_radius" {
     "(radius|rsa)", each.value.type)
   ) > 0 ? aci_radius_provider_group.radius_provider_groups[each.value.key1].id : ""
 }
-output "radius_hosts" {
-  value = local.radius_hosts
-}

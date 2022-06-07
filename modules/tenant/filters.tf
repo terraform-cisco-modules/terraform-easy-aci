@@ -202,13 +202,19 @@ resource "aci_filter_entry" "filter_entries" {
   d_to_port     = each.value.destination_port_to
   stateful      = each.value.stateful == true ? "yes" : "no"
   tcp_rules = anytrue(
-    [each.value.tcp_ack, each.value.tcp_est, each.value.tcp_fin, each.value.tcp_rst, each.value.tcp_syn]
+    [
+      each.value.tcp_session_rules[0].acknowledgement,
+      each.value.tcp_session_rules[0].established,
+      each.value.tcp_session_rules[0].finish,
+      each.value.tcp_session_rules[0].reset,
+      each.value.tcp_session_rules[0].synchronize
+    ]
     ) ? compact(concat([
-      length(regexall(true, each.value.tcp_ack)) > 0 ? "ack" : ""], [
-      length(regexall(true, each.value.tcp_est)) > 0 ? "est" : ""], [
-      length(regexall(true, each.value.tcp_fin)) > 0 ? "fin" : ""], [
-      length(regexall(true, each.value.tcp_rst)) > 0 ? "rst" : ""], [
-      length(regexall(true, each.value.tcp_syn)) > 0 ? "syn" : ""]
+      length(regexall(true, each.value.tcp_session_rules[0].acknowledgement)) > 0 ? "acknowledgement" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].established)) > 0 ? "established" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].finish)) > 0 ? "finish" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].reset)) > 0 ? "reset" : ""], [
+      length(regexall(true, each.value.tcp_session_rules[0].synchronize)) > 0 ? "synchronize" : ""]
   )) : ["unspecified"]
 }
 
