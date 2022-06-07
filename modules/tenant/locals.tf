@@ -103,6 +103,7 @@ locals {
         domain                   = v.domain
         domain_type              = v.domain_type != null ? v.domain_type : "physical"
         enhanced_lag_policy      = v.enhanced_lag_policy != null ? v.enhanced_lag_policy : ""
+        epg_type                 = value.epg_type
         number_of_ports          = v.number_of_ports != null ? v.number_of_ports : 0
         port_allocation          = v.port_allocation != null ? v.port_allocation : "none"
         port_binding             = v.port_binding != null ? v.port_binding : "none"

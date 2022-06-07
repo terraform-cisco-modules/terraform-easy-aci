@@ -357,7 +357,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
   depends_on = [
     aci_application_epg.application_epgs
   ]
-  for_each           = { for k, v in local.epg_to_domains : k => v if v.controller_type == "apic" }
+  for_each           = { for k, v in local.epg_to_domains : k => v if v.controller_type == "apic" && v.epg_type == "standard" }
   application_epg_dn = aci_application_epg.application_epgs[each.value.application_epg].id
   tdn = length(
     regexall("physical", each.value.domain_type)

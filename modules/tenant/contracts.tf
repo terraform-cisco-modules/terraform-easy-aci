@@ -142,7 +142,7 @@ resource "aci_rest_managed" "oob_contracts" {
     aci_tenant.tenants
   ]
   for_each   = { for k, v in local.contracts : k => v if v.controller_type == "apic" && v.contract_type == "oob" }
-  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}"
+  dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.key}"
   class_name = "vzOOBBrCP"
   content = {
     annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -250,9 +250,9 @@ resource "aci_rest_managed" "oob_contract_subjects" {
     consMatchT  = each.value.match_type
     descr       = each.value.description
     name        = each.value.name
-    prio        = each.value.qos_priority
+    prio        = each.value.qos_class
     provMatchT  = each.value.match_type
-    revFltPorts = each.value.apply_both_directions
+    revFltPorts = each.value.apply_both_directions == true ? "yes" : "no"
     targetDscp  = each.value.target_dscp
   }
 }
