@@ -246,6 +246,7 @@ resource "aci_login_domain" "login_domain" {
   annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = "${each.key} Login Domain."
   name           = each.key
+  provider_group = each.key
   realm          = each.value.type == "rsa" ? "rsa" : "radius"
   realm_sub_type = each.value.type == "duo" ? "duo" : "default"
 }
@@ -253,7 +254,8 @@ resource "aci_login_domain" "login_domain" {
 resource "aci_login_domain_provider" "aci_login_domain_provider_radius" {
   depends_on = [
     aci_login_domain.login_domain,
-    aci_radius_provider_group.radius_provider_groups
+    aci_radius_provider_group.radius_provider_groups,
+    aci_duo_provider_group.duo_provider_groups
   ]
   for_each    = local.radius_hosts
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
@@ -265,4 +267,7 @@ resource "aci_login_domain_provider" "aci_login_domain_provider_radius" {
     ) > 0 ? aci_duo_provider_group.duo_provider_groups[each.value.key1].id : length(regexall(
     "(radius|rsa)", each.value.type)
   ) > 0 ? aci_radius_provider_group.radius_provider_groups[each.value.key1].id : ""
+}
+output "radius_hosts" {
+  value = local.radius_hosts
 }

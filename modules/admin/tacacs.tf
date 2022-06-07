@@ -291,6 +291,7 @@ resource "aci_login_domain" "login_domain_tacacs" {
   annotation     = each.value.annotation != "" ? each.value.annotation : var.annotation
   description    = "${each.key} Login Domain."
   name           = each.key
+  provider_group = each.key
   realm          = "tacacs"
   realm_sub_type = "default"
 }
