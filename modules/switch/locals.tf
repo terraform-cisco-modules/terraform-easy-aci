@@ -97,7 +97,7 @@ locals {
 
   ooband_loop = flatten([
     for k, v in local.switch_profiles : [
-      for s in v.inband_addressing : {
+      for s in v.ooband_addressing : {
         annotation          = v.annotation != null ? v.annotation : ""
         ipv4_address        = s.ipv4_address != null ? s.ipv4_address : ""
         ipv4_gateway        = s.ipv4_gateway != null ? s.ipv4_gateway : ""
@@ -112,7 +112,7 @@ locals {
   ])
   ooband = { for k, v in local.ooband_loop : "${v.node_id}_${v.management_epg_type}" => v }
 
-  static_node_mgmt_addresses = merge(local.inband, local.inband)
+  static_node_mgmt_addresses = merge(local.inband, local.ooband)
 
   #__________________________________________________________
   #
