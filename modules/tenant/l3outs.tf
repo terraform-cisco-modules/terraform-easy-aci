@@ -11,6 +11,7 @@ variable "l3outs" {
       annotations     = []
       controller_type = "apic"
       description     = ""
+      enable_bgp      = false
       external_epgs = [
         {
           alias                  = ""
@@ -155,6 +156,7 @@ variable "l3outs" {
       )))
       controller_type = optional(string)
       description     = optional(string)
+      enable_bgp      = optional(bool)
       external_epgs = optional(list(object(
         {
           alias                  = optional(string)
@@ -291,6 +293,16 @@ resource "aci_l3_outside" "l3outs" {
   # relation_l3ext_rs_interleak_pol = "{route_profile_for_interleak}"
   # relation_l3ext_rs_out_to_bd_public_subnet_holder = ["{fvBDPublicSubnetHolder}"]
 }
+
+resource "aci_l3out_bgp_external_policy" "external_bgp" {
+  depends_on = [
+    aci_l3_outside.l3outs
+  ]
+  for_each      = { for k, v in local.l3outs : k => v if v.controller_type == "apic" && v.enable_bgp == true }
+  l3_outside_dn = aci_l3_outside.l3outs[each.key].id
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
+}
+
 
 /*_____________________________________________________________________________________________________________________
 

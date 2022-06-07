@@ -528,6 +528,7 @@ locals {
       annotations           = v.annotations != null ? v.annotations : []
       controller_type       = v.controller_type != null ? v.controller_type : "apic"
       description           = v.description != null ? v.description : ""
+      enable_bgp            = v.enable_bgp != null ? v.enable_bgp : false
       external_epgs         = v.external_epgs != null ? v.external_epgs : []
       import                = coalesce(v.route_control_enforcement[0].import, false)
       l3_domain             = v.l3_domain != null ? v.l3_domain : ""
@@ -768,7 +769,7 @@ locals {
           }
         ] : []
         node_profile = key
-        nodes        = v.nodes != null ? v.nodes : [201]
+        nodes        = [for keys, values in value.nodes : value.nodes[keys]["node_id"]]
         ospf_interface_profile = v.ospf_interface_profile != null ? [
           for s in v.ospf_interface_profile : {
             description           = s.description != null ? s.description : ""
