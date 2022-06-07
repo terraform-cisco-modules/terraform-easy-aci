@@ -780,7 +780,7 @@ resource "aci_bgp_peer_connectivity_profile" "bgp_peer_connectivity_profiles" {
   weight    = each.value.weight_for_routes_from_neighbor
   local_asn = each.value.local_as_number
   # Submit Bug
-  # local_asn_propagate          = "none" # each.value.local_as_number_config
+  local_asn_propagate          = each.value.local_as_number != null ? each.value.local_as_number_config : null
   relation_bgp_rs_peer_pfx_pol = "uni/tn-${each.value.policy_source_tenant}/bgpPfxP-${each.value.bgp_peer_prefix_policy}"
   dynamic "relation_bgp_rs_peer_to_profile" {
     for_each = each.value.route_control_profiles
