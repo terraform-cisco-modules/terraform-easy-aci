@@ -149,6 +149,7 @@ variable "l3out_logical_node_profiles" {
         }
       ]
       l3out = "**REQUIRED**"
+      name  = "**REQUIRED**"
       nodes = [
         {
           node_id                   = 201
@@ -370,9 +371,9 @@ variable "l3out_logical_node_profiles" {
               policy_source_tenant  = optional(string)
             }
           )))
-          preferred_address   = optional(string)
-          qos_class           = optional(string)
-          secondary_addresses = optional(list(string))
+          primary_preferred_address = optional(string)
+          qos_class                 = optional(string)
+          secondary_addresses       = optional(list(string))
           svi_addresses = optional(list(object(
             {
               link_local_address        = optional(string)
@@ -384,6 +385,7 @@ variable "l3out_logical_node_profiles" {
         }
       )))
       l3out = string
+      name  = string
       nodes = list(object(
         {
           node_id                   = optional(number)
@@ -508,7 +510,7 @@ resource "aci_logical_node_profile" "l3out_node_profiles" {
   l3_outside_dn = aci_l3_outside.l3outs[each.value.l3out].id
   annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
   description   = each.value.description
-  name          = each.key
+  name          = each.value.name
   name_alias    = each.value.alias
   tag           = each.value.color_tag
   target_dscp   = each.value.target_dscp
@@ -618,7 +620,7 @@ resource "aci_l3out_path_attachment" "l3out_path_attachments" {
     "[[:alnum:]]+", each.value.interface_type)
   ) > 0 ? "topology/pod-${each.value.pod_id}/paths-${element(each.value.nodes, 0)}/pathep-[${each.value.interface_or_policy_group}]" : ""
   if_inst_t   = each.value.interface_type
-  addr        = each.value.interface_type != "ext-svi" ? each.value.preferred_address : ""
+  addr        = each.value.interface_type != "ext-svi" ? each.value.primary_preferred_address : ""
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   autostate   = each.value.interface_type == "ext-svi" ? each.value.auto_state : "disabled"
   encap       = each.value.interface_type != "l3-port" ? "vlan-${each.value.encap_vlan}" : "unknown"

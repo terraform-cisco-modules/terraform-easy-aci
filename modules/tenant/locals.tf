@@ -683,6 +683,7 @@ locals {
       description        = v.description != null ? v.description : ""
       interface_profiles = v.interface_profiles != null ? v.interface_profiles : []
       l3out              = v.l3out
+      name               = v.name
       nodes              = v.nodes != null ? v.nodes : []
       pod_id             = v.pod_id != null ? v.pod_id : 1
       target_dscp        = v.target_dscp != null ? v.target_dscp : "unspecified"
@@ -780,11 +781,11 @@ locals {
             policy_source_tenant  = s.policy_source_tenant != null ? s.policy_source_tenant : value.tenant
           }
         ] : []
-        pod_id              = value.pod_id
-        preferred_address   = v.preferred_address != null ? v.preferred_address : "198.18.1.1/24"
-        qos_class           = v.qos_class != null ? v.qos_class : "unspecified"
-        secondary_addresses = v.secondary_addresses != null ? v.secondary_addresses : []
-        secondaries_keys    = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
+        pod_id                    = value.pod_id
+        primary_preferred_address = v.primary_preferred_address != null ? v.primary_preferred_address : "198.18.1.1/24"
+        qos_class                 = v.qos_class != null ? v.qos_class : "unspecified"
+        secondary_addresses       = v.secondary_addresses != null ? v.secondary_addresses : []
+        secondaries_keys          = v.secondary_addresses != null ? range(length(v.secondary_addresses)) : []
         svi_addresses = v.svi_addresses != null ? [
           for s in v.svi_addresses : {
             link_local_address        = s.link_local_address != null ? s.link_local_address : "::"
@@ -1004,18 +1005,19 @@ locals {
       for k, v in value.ospf_interface_profile : {
         annotation            = value.annotation
         authentication_type   = v.authentication_type != null ? v.authentication_type : "none"
+        controller_type       = value.controller_type
         description           = v.description != null ? v.description : ""
+        interface_profile     = key
         l3out                 = value.l3out
         name                  = v.name != null ? v.name : "default"
         ospf_key              = v.ospf_key != null ? v.ospf_key : 0
         ospf_interface_policy = v.ospf_interface_policy != null ? v.ospf_interface_policy : "default"
         policy_source_tenant  = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
         tenant                = value.tenant
-        type                  = value.type
       }
     ]
   ])
-  ospf_interface_profiles = { for k, v in local.ospf_profiles_loop : "${v.l3out}_${v.name}" => v }
+  ospf_interface_profiles = { for k, v in local.ospf_profiles_loop : "${v.interface_profile}_${v.name}" => v }
 
   ospf_profiles_loop_2 = flatten([
     for key, value in local.ospf_interface_profiles : [
