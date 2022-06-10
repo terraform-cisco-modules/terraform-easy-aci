@@ -7,34 +7,34 @@
 ### Access Policies - modules/access
 
 * Domains
- - Access Domains
- - l3Out Domains
- - Physical Domains
+  * Access Domains
+  * l3Out Domains
+  * Physical Domains
 
 * Global Polices
- - Attachable Access Entity (AEP) Policies
- - Error Disable Recovery
- - MCP Instance Policy
- - QoS Class
+  * Attachable Access Entity (AEP) Policies
+  * Error Disable Recovery
+  * MCP Instance Policy
+  * QoS Class
 
 * Interface Policies
-  - CDP Interface
-  - Fibre-Channel Interface
-  - L2 Interface
-  - Link Level
-  - LLDP Interface
-  - MisCabling Protocol (MCP) Interface
-  - Port-Channel Interface
-  - Port Security
-  - Spanning Tree Interface
+  * CDP Interface
+  * Fibre-Channel Interface
+  * L2 Interface
+  * Link Level
+  * LLDP Interface
+  * MisCabling Protocol (MCP) Interface
+  * Port-Channel Interface
+  * Port Security
+  * Spanning Tree Interface
 
 * Leaf
-  - Interface Policy Groups (Access/VPC/PC)
-  - Switch Policy Groups
+  * Interface Policy Groups (Access/VPC/PC)
+  * Switch Policy Groups
 
 * Spine
-  - Interface Policy Groups
-  - Switch Policy Groups
+  * Interface Policy Groups
+  * Switch Policy Groups
 
 * VLAN Pools
 
