@@ -2,7 +2,7 @@
 
 ## Use Cases
 
-* Deploy New ACI Fabrics using Terraform
+* Deploy New ACI Fabrics using Terraform or Add to an existing Fabric.
 
 ### Access Policies - modules/access
 
@@ -13,41 +13,58 @@
 
 * Global Polices
  - Attachable Access Entity (AEP) Policies
+ - Error Disable Recovery
+ - MCP Instance Policy
+ - QoS Class
 
 * Interface Policies
-  - CDP Interface Policies
-  - Fibre-Channel Interface Policies
-  - Layer2 Interface Policies
-  - LACP (Port-Channel) Interface Policies
-  - Link Level Policies
-  - LLDP Interface Policies
-  - MisCabling Protocol (MCP) Interface Policies
-  - Port Security Policies
-  - Spanning Tree Interface Policies
+  - CDP Interface
+  - Fibre-Channel Interface
+  - L2 Interface
+  - Link Level
+  - LLDP Interface
+  - MisCabling Protocol (MCP) Interface
+  - Port-Channel Interface
+  - Port Security
+  - Spanning Tree Interface
 
 * Leaf
-  - Fabric Membership
-  - Interface Profiles
-  - Interface Selectors
-  - Switch Profiles
+  - Interface Policy Groups (Access/VPC/PC)
   - Switch Policy Groups
 
 * Spine
-  - Fabric Membership
-  - Interface Profiles
-  - Interface Selectors
-  - Switch Profiles
+  - Interface Policy Groups
   - Switch Policy Groups
 
 * VLAN Pools
 
 ### Admin Policies - modules/admin
 
-* Maintenance Groups
+* Authentication Settings
+* Configuration backups (Schedulers|Import/Export Policies)
+* Firmware/Maintenance Groups
+* Global Security Settings
+* RADIUS
+* TACACS+
 
 ### Fabric Policies - modules/fabric
 
-* bgp_asn
+* Date and Time
+* DNS Profiles
+* Fabric Node Controls
+* L3 Interface
+* Pod Profiles
+* Smart CallHome
+* SNMP Policies
+* Syslog Policies
+
+### Switches - module/switch
+
+* Fabric Membership
+* Interface Policy Groups (Access/VPC/PC)
+* Interface Profiles
+* Interface Selectors
+* Switch Profiles
 
 ### Tenants - module/tenants
 
@@ -84,22 +101,38 @@
 
 ### APIC Variables
 
+* apicHostname - Hostname for the APIC.
+* apicUser
+
+Note: for Remote Credentials use the following format: "apic:{login_domain}\\\\{user}"
+
 For Certificate based Authentication
 
-* apicUser - Must be a local user.
 * privateKey
 * certName
 
 For User Based Authentication
 
-* apicUser
-* apicPass
+* apicPass - User Password
 
-Note: for authentication with non-Local Credentials use the following format for the user: "apic:{login_domain}\\\\{user}"
+### Nexus Dashboard Orchestrator Variables
+
+For User Based Authentication
+
+* ndoDomain - Login Domain for the User - Default is local.
+* ndoHostname - Hostname for the Nexus Dashboard Orchestrator.
+* ndoPass - NDO User Password.
+* ndoUser - NDO User.
 
 ### Import the Variables into your Environment before Running the Terraform Cloud Provider module(s) in this directory
 
-Modify the terraform.tfvars file to the unique attributes of your environment for your domain and server profiles and policies.
+In the Examples folder is a file Empty_variable_maps.auto.tfvars.  Copy this into the Directory for the module.  Then remove any variables you plan to define and create a {variable}.auto.tfvars for each of the variables you want to use in the module.  For example to create a cdp interface policy remove the following from Empty_variable_maps.auto.tfvars:
+
+```bash
+policies_cdp_interface = {}
+```
+
+Then create a new file policies_cdp_interface.auto.tfvars and fill out the attributes for the variable from the policies_cdp_interface.tf
 
 Once finished with the modification commit the changes to your repository.
 
