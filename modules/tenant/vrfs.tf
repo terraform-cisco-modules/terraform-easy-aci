@@ -368,9 +368,10 @@ resource "aci_rest_managed" "vzany_provider_contracts" {
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToProv-${each.value.contract}"
   class_name = "vzRsAnyToProv"
   content = {
-    tDn    = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
-    matchT = each.value.match_type
-    prio   = each.value.qos_class
+    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    matchT       = each.value.match_type
+    prio         = each.value.qos_class
+    tnVzBrCPName = each.value.contract
   }
 }
 
@@ -387,8 +388,9 @@ resource "aci_rest_managed" "vzany_contracts" {
     "interface", each.value.contract_type)
   ) > 0 ? "vzRsAnyToConsIf" : ""
   content = {
-    tDn  = "uni/tn-${each.value.contract_tenant}/brc-${each.value.contract}"
-    prio = each.value.qos_class
+    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    prio         = each.value.qos_class
+    tnVzBrCPName = each.value.contract
   }
 }
 
@@ -425,9 +427,10 @@ resource "aci_any" "vz_any" {
     aci_vrf.vrfs
   ]
   for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" }
+  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = each.value.description
-  pref_gr_memb = each.value.preferred_group
-  match_t = each.value.epg_esg_collection_for_vrfs[0].match_type
+  pref_gr_memb = each.value.preferred_group == true ? "enabled" : "disabled"
+  match_t      = each.value.epg_esg_collection_for_vrfs[0].match_type
   vrf_dn       = aci_vrf.vrfs[each.key].id
 }
 

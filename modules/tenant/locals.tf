@@ -169,20 +169,28 @@ locals {
         application_epg     = key
         application_profile = value.application_profile
         contract            = v.name
-        contract_class = length(regexall("consumed", v.contract_type)) > 0 ? "fvRsCons" : length(regexall(
+        contract_class = length(regexall(
+          "consumed", v.contract_type)) > 0 ? "fvRsCons" : length(regexall(
           "contract_interface", v.contract_type)) > 0 ? "fvRsConsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "fvRsIntraEpg" : length(regexall(
+          "provided", v.contract_type)) > 0 && length(regexall(
+          "ooband", value.epg_type)) > 0 ? "mgmtRsOoBProv" : length(regexall(
           "provided", v.contract_type)) > 0 ? "fvRsProv" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "fvRsProtBy" : ""
-        contract_dn = length(regexall("consumed", v.contract_type)) > 0 ? "rscons" : length(regexall(
+        contract_dn = length(regexall(
+          "consumed", v.contract_type)) > 0 ? "rscons" : length(regexall(
           "contract_interface", v.contract_type)) > 0 ? "rsconsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "rsintraEpg" : length(regexall(
+          "provided", v.contract_type)) > 0 && length(regexall(
+          "ooband", value.epg_type)) > 0 ? "rsooBProv" : length(regexall(
           "provided", v.contract_type)) > 0 ? "rsprov" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "rsprotBy" : ""
         contract_tdn    = length(regexall("taboo", v.contract_type)) > 0 ? "taboo" : "brc"
-        contract_tenant = v.contract_tenant != null ? v.contract_tenant : value.tenant
+        contract_tenant = v.tenant != null ? v.tenant : value.tenant
+        contract_type   = v.contract_type
+        epg_type        = value.epg_type
         qos_class       = v.qos_class != null ? v.qos_class : "unspecified"
         tenant          = value.tenant
       }
@@ -572,6 +580,7 @@ locals {
         qos_class              = v.qos_class != null ? v.qos_class : "unspecified"
         subnets                = v.subnets != null ? v.subnets : []
         target_dscp            = v.target_dscp != null ? v.target_dscp : "unspecified"
+        tenant                 = value.tenant
         epg_type               = v.epg_type != null ? v.epg_type : "default"
         route_control_profiles = v.route_control_profiles != null ? [
           for s in v.route_control_profiles : {
@@ -589,14 +598,14 @@ locals {
     for key, value in local.l3out_external_epgs : [
       for k, v in value.contracts : {
         annotation      = value.annotation
-        contract        = v.contract_name
-        contract_tenant = v.contract_tenant != null ? v.contract_tenant : local.first_tenant
+        contract        = v.name
+        contract_tenant = v.tenant != null ? v.tenant : value.tenant
         contract_type   = v.contract_type != null ? v.contract_type : "consumer"
         controller_type = value.controller_type
         epg             = value.name
         l3out           = value.l3out
         qos_class       = v.qos_class
-        tenant          = value.tenant
+        tenant          = v.tenant != null ? v.tenant : value.tenant
       }
     ]
   ])

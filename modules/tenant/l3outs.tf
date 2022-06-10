@@ -165,10 +165,12 @@ variable "l3outs" {
           contract_exception_tag = optional(number)
           contracts = optional(list(object(
             {
-              contract_name   = string
-              contract_tenant = optional(string)
-              contract_type   = optional(string)
-              qos_class       = optional(string)
+              contract_type = optional(string)
+              name          = string
+              qos_class     = optional(string)
+              schema        = optional(string)
+              template      = optional(string)
+              tenant        = optional(string)
             }
           )))
           description            = optional(string)

@@ -158,7 +158,7 @@ variable "application_epgs" {
       contract_exception_tag = optional(number)
       contracts = optional(list(object(
         {
-          contract_type = optional(string) # consumer|contract_interface|intra_epg|provider|taboo
+          contract_type = string # consumed|contract_interface|intra_epg|provided|taboo
           name          = string
           qos_class     = optional(string)
           schema        = optional(string)
@@ -340,9 +340,6 @@ resource "aci_node_mgmt_epg" "mgmt_epgs" {
   prio                     = each.value.qos_class
   type                     = each.value.epg_type == "inb" ? "in_band" : "out_of_band"
   relation_mgmt_rs_mgmt_bd = each.value.epg_type == "inb" ? "uni/tn-mgmt/BD-${each.value.bridge_domain}" : ""
-  relation_mgmt_rs_oo_b_prov = each.value.epg_type == "oob" && length(
-    each.value.contracts
-  ) > 0 ? [for k, v in each.value.contracts : "uni/tn-${v.contract_tenant}/oobbrc-${v.contract}"] : []
 }
 
 
@@ -366,7 +363,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     ) > 0 ? "uni/phys-${each.value.domain}" : length(
     regexall("vmm", each.value.domain_type)
   ) > 0 ? "uni/vmmp-${each.value.vmm_vendor}/dom-${each.value.domain}" : ""
-  annotation = each.value.annotation
+  annotation = each.value.annotation != null ? each.value.annotation : var.annotation
   binding_type = length(
     regexall("physical", each.value.domain_type)
     ) > 0 ? "none" : length(regexall(
@@ -470,13 +467,29 @@ ________________________________________________________________________________
 resource "aci_rest_managed" "contract_to_epgs" {
   depends_on = [
     aci_contract.contracts,
-    aci_rest_managed.oob_contracts,
     aci_taboo_contract.contracts,
   ]
-  for_each   = local.contract_to_epgs
+  for_each   = { for k, v in local.contract_to_epgs : k => v if v.epg_type == "standard" }
   dn         = "uni/tn-${each.value.tenant}/ap-${each.value.application_profile}/epg-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
   class_name = each.value.contract_class
   content = {
+    annotation = each.value.annotation != null ? each.value.annotation : var.annotation
+    # matchT = each.value.match_type
+    prio = each.value.qos_class
+  }
+}
+
+resource "aci_rest_managed" "contract_to_oob_epgs" {
+  depends_on = [
+    aci_contract.contracts,
+    aci_rest_managed.oob_contracts,
+    aci_taboo_contract.contracts,
+  ]
+  for_each   = { for k, v in local.contract_to_epgs : k => v if v.epg_type == "oob" && v.contract_type == "provided" }
+  dn         = "uni/tn-${each.value.tenant}/oob-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
+  class_name = each.value.contract_class
+  content = {
+    annotation = each.value.annotation != null ? each.value.annotation : var.annotation
     # matchT = each.value.match_type
     prio = each.value.qos_class
   }
@@ -506,6 +519,7 @@ resource "aci_rest_managed" "epg_to_static_paths" {
   ) > 0 ? "${aci_application_epg.application_epgs[each.value.epg].id}/rspathAtt-[topology/pod-${each.value.pod}/protpaths-${element(each.value.nodes, 0)}-${element(each.value.nodes, 1)}/pathep-[${each.value.name}]]" : ""
   class_name = "fvRsPathAtt"
   content = {
+    annotation = each.value.annotation != null ? each.value.annotation : var.annotation
     encap = length(
       regexall("micro_seg", each.value.encapsulation_type)
       ) > 0 ? "vlan-${element(each.value.vlans, 0)}" : length(
