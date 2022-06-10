@@ -168,17 +168,17 @@ locals {
       for k, v in value.contracts : {
         application_epg     = key
         application_profile = value.application_profile
-        contract            = v.contract
-        contract_class = length(regexall("consumer", v.contract_type)) > 0 ? "fvRsCons" : length(regexall(
+        contract            = v.name
+        contract_class = length(regexall("consumed", v.contract_type)) > 0 ? "fvRsCons" : length(regexall(
           "contract_interface", v.contract_type)) > 0 ? "fvRsConsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "fvRsIntraEpg" : length(regexall(
-          "provider", v.contract_type)) > 0 ? "fvRsProv" : length(regexall(
+          "provided", v.contract_type)) > 0 ? "fvRsProv" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "fvRsProtBy" : ""
-        contract_dn = length(regexall("consumer", v.contract_type)) > 0 ? "rscons" : length(regexall(
+        contract_dn = length(regexall("consumed", v.contract_type)) > 0 ? "rscons" : length(regexall(
           "contract_interface", v.contract_type)) > 0 ? "rsconsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "rsintraEpg" : length(regexall(
-          "provider", v.contract_type)) > 0 ? "rsprov" : length(regexall(
+          "provided", v.contract_type)) > 0 ? "rsprov" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "rsprotBy" : ""
         contract_tdn    = length(regexall("taboo", v.contract_type)) > 0 ? "taboo" : "brc"
@@ -1595,8 +1595,8 @@ locals {
     for key, value in local.vrfs : [
       for k, v in value.epg_esg_collection_for_vrfs[0].contracts : {
         annotation        = value.annotation
-        contract          = v.name != null ? v.name : ""
-        contract_type     = v.type != null ? v.type : "consumer" # interface|provider
+        contract          = v.name
+        contract_type     = v.contract_type != null ? v.contract_type : "consumed" # interface|provider
         contract_schema   = v.schema != null ? v.schema : value.schema
         contract_tenant   = v.tenant != null ? v.tenant : value.tenant
         contract_template = v.template != null ? v.template : value.template

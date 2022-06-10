@@ -158,10 +158,12 @@ variable "application_epgs" {
       contract_exception_tag = optional(number)
       contracts = optional(list(object(
         {
-          contract        = string
-          contract_tenant = optional(string)
-          contract_type   = optional(string) # consumer|contract_interface|intra_epg|provider|taboo
-          qos_class       = optional(string)
+          contract_type = optional(string) # consumer|contract_interface|intra_epg|provider|taboo
+          name          = string
+          qos_class     = optional(string)
+          schema        = optional(string)
+          template      = optional(string)
+          tenant        = optional(string)
 
         }
       )))

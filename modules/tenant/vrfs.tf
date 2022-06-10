@@ -135,12 +135,12 @@ variable "vrfs" {
         {
           contracts = optional(list(object(
             {
-              name      = string
-              qos_class = optional(string)
-              schema    = optional(string)
-              template  = optional(string)
-              tenant    = string
-              type      = string
+              contract_type = string
+              name          = string
+              qos_class     = optional(string)
+              schema        = optional(string)
+              template      = optional(string)
+              tenant        = string
             }
           )))
           match_type = optional(string)
@@ -364,7 +364,7 @@ GUI Location:
 _______________________________________________________________________________________________________________________
 */
 resource "aci_rest_managed" "vzany_provider_contracts" {
-  for_each   = { for k, v in local.vzany_contracts : k => v if v.controller_type == "apic" && v.contract_type == "provider" }
+  for_each   = { for k, v in local.vzany_contracts : k => v if v.controller_type == "apic" && v.contract_type == "provided" }
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToProv-${each.value.contract}"
   class_name = "vzRsAnyToProv"
   content = {
@@ -375,14 +375,14 @@ resource "aci_rest_managed" "vzany_provider_contracts" {
 }
 
 resource "aci_rest_managed" "vzany_contracts" {
-  for_each = { for k, v in local.vzany_contracts : k => v if v.controller_type == "apic" && v.contract_type != "provider" }
+  for_each = { for k, v in local.vzany_contracts : k => v if v.controller_type == "apic" && v.contract_type != "provided" }
   dn = length(regexall(
-    "consumer", each.value.contract_type)
+    "consumed", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToCons-${each.value.contract}" : length(regexall(
     "interface", each.value.contract_type)
   ) > 0 ? "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToConsif-${each.value.contract}" : ""
   class_name = length(regexall(
-    "consumer", each.value.contract_type)
+    "consumed", each.value.contract_type)
     ) > 0 ? "vzRsAnyToCons" : length(regexall(
     "interface", each.value.contract_type)
   ) > 0 ? "vzRsAnyToConsIf" : ""
@@ -412,17 +412,22 @@ resource "mso_schema_template_vrf_contract" "vzany_contracts" {
 
 /*_____________________________________________________________________________________________________________________
 
+API Information:
+ - Class: "snmpCtxP"
+ - Distinguished Name: "uni/tn-{tenant}/ctx-{vrf}/any"
 GUI Location:
  - Tenants > {tenant} > Networking > VRFs > {vrf}: Policy >  Preferred Group
+ - Tenants > {tenant} > Networking > VRFs > {vrf} > EPG|ESG Collection for VRF
 _______________________________________________________________________________________________________________________
 */
-resource "aci_any" "vrf_preferred_group" {
+resource "aci_any" "vz_any" {
   depends_on = [
     aci_vrf.vrfs
   ]
-  for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" && v.preferred_group == true }
+  for_each     = { for k, v in local.vrfs : k => v if v.controller_type == "apic" }
   description  = each.value.description
-  pref_gr_memb = "enabled"
+  pref_gr_memb = each.value.preferred_group
+  match_t = each.value.epg_esg_collection_for_vrfs[0].match_type
   vrf_dn       = aci_vrf.vrfs[each.key].id
 }
 

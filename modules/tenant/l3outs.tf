@@ -20,10 +20,12 @@ variable "l3outs" {
           /* Example Contract
           contracts = [
             {
-              contract_name   = "default"
-              contract_tenant = local.first_tenant
-              contract_type   = "consumer" # consumer|interface|intra_epg|provider|taboo
-              qos_class       = "unspecified"
+              name          = "default"
+              contract_type = "consumed" # consumed|interface|intra_epg|provided|taboo
+              qos_class     = "unspecified"
+              schema        = ""
+              template      = ""
+              tenant        = local.first_tenant
             }
           ]
           */
@@ -419,20 +421,20 @@ resource "aci_rest_managed" "external_epg_contracts" {
   ]
   for_each = { for k, v in local.l3out_ext_epg_contracts : k => v if v.controller_type == "apic" && v.contract_type != "intra_epg" }
   dn = length(regexall(
-    "consumer", each.value.contract_type)
+    "consumed", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rscons-${each.value.contract}" : length(regexall(
     "interface", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsconsIf-${each.value.contract}" : length(regexall(
-    "provider", each.value.contract_type)
+    "provided", each.value.contract_type)
     ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsprov-${each.value.contract}" : length(regexall(
     "taboo", each.value.contract_type)
   ) > 0 ? "uni/tn-${each.value.tenant}/out-${each.value.l3out}/instP-${each.value.epg}/rsprotBy-${each.value.contract}" : ""
   class_name = length(regexall(
-    "consumer", each.value.contract_type)
+    "consumed", each.value.contract_type)
     ) > 0 ? "fvRsCons" : length(regexall(
     "interface", each.value.contract_type)
     ) > 0 ? "vzRsAnyToConsIf" : length(regexall(
-    "provider", each.value.contract_type)
+    "provided", each.value.contract_type)
     ) > 0 ? "fvRsProv" : length(regexall(
     "taboo", each.value.contract_type)
   ) > 0 ? "fvRsProtBy" : ""
