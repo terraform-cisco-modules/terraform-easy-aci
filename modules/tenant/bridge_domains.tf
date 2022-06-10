@@ -98,22 +98,7 @@ variable "bridge_domains" {
   }
   description = <<-EOT
     Key — Name of the Bridge Domain.
-    * controller_type: (optional) — The type of controller.  Options are:
-      - apic: (default)
-      - ndo
-    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-    APIC Specific Attributes:
-    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
-    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
-    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
-    NDO Specific Attributes:
-    * schema: (required) — Schema Name.
-    * sites: (optional) — List of Site Names to assign site specific attributes.
-    * template: (required) — The Template name to create the object within.
-      advanced_troubleshooting = [
+    * advanced_troubleshooting = [
           disable_ip_data_plane_learning_for_pbr = false
           endpoint_clear                         = false
           first_hop_security_policy              = ""
@@ -123,14 +108,16 @@ variable "bridge_domains" {
           netflow_monitor_policies               = []
           optimize_wan_bandwidth                 = false
           rogue_coop_exception_list              = []
-      controller_type = "apic"
-      general = [
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    * general = [
           advertise_host_routes         = false
           alias                         = ""
           annotation                    = ""
           annotations                   = []
           arp_flooding                  = false
-          description                   = ""
+          * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
           endpoint_retention_policy     = ""
           global_alias                  = ""
           igmp_interface_policy         = ""
@@ -148,7 +135,7 @@ variable "bridge_domains" {
           type                          = "regular"
           vrf                           = "default"
           vrf_tenant                    = "local.first_tenant"
-      l3_configurations = [
+    * l3_configurations = [
           associated_l3outs = [
               l3out         = "default"
               route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
@@ -172,9 +159,17 @@ variable "bridge_domains" {
           unicast_routing     = true
           virtual_mac_address = ""
       policy_source_tenant = "local.first_tenant"
-      schema               = ""
-      sites                = []
-      template             = ""
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    NDO Specific Attributes:
+    * schema: (required) — Schema Name.
+    * sites: (optional) — List of Site Names to assign site specific attributes.
+    * template: (required) — The Template name to create the object within.
   EOT
   type = map(object(
     {

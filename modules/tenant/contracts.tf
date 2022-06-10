@@ -45,7 +45,6 @@ variable "contracts" {
   Key: Name of the Contract.
   * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
   * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * bgp_context_per_address_family: 
   * controller_type: What is the type of controller.  Options are:
     - apic: For APIC Controllers
     - ndo: For Nexus Dashboard Orchestrator

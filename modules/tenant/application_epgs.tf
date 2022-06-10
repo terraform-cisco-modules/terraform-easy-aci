@@ -102,24 +102,60 @@ variable "application_epgs" {
   }
   description = <<-EOT
     Key — Name of the Application EPG.
+    * bd_tenant: (default: epg tenant) — The name of the tenant the Bridge Domain.
+    * bridge_domain: (required) — Name of the Bridge Domain to assign to the EPG.
+    * contract_exception_tag: (optional) — 
+    * contracts: (optional) — List of Contracts and their attributes to assign to the EPG.
+      - contract_type: (required) — The Type of Contract.  Options are:
+        * consumed
+        * contract_interface
+        * intra_epg
+        * provided
+        * taboo
+      - name: (required) — Name of the Contract to assign to the EPG.
+      - tenant: (optional: epg tenant) — The Name of the Tenant to assign to the EPG.
     * controller_type: (optional) — The type of controller.  Options are:
       - apic: (default)
       - ndo
+    * custom_qos_policy: (optional) — Name of a Custom QoS Policy to assign to the EPG.
+    * data_plane_policer: (optional) — Name of a Data Plane Policer Policy to assign to the EPG.
     * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
     * tenant: (default: local.first_tenant) — The name of the tenant to for the Application EPG.
-    APIC Specific Attributes:
-    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
-    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
-    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
-    Nexus Dashboard Orchestrator Specific Attributes:
-    * schema: (default: local.first_tenant) — Schema Name.
-    * sites: (default: local.first_tenant) — List of Site Names to assign site specific attributes.
-    * template: (default: local.first_tenant) — The Template name to create the object within.
-
-
+    * domains = optional(list(object(
+      - annotation               = optional(string)
+      - allow_micro_segmentation = optional(bool)
+      - delimiter                = optional(string)
+      - deploy_immediacy         = optional(string)
+      - domain                   = string
+      - domain_type              = optional(string)
+      - enhanced_lag_policy      = optional(string)
+      - number_of_ports          = optional(string)
+      - port_allocation          = optional(string)
+      - port_binding             = optional(string)
+      - resolution_immediacy     = optional(string)
+      - security = optional(list(object(
+        * allow_promiscuous = string
+        * forged_transmits  = string
+        * mac_changes       = string
+      - vlan_mode  = optional(string)
+      - vlans      = optional(list(number))
+      - vmm_vendor = optional(string)
+    * epg_admin_state      = optional(string)
+    * epg_contract_masters = optional(list(string))
+    * epg_to_aaeps = optional(list(object(
+      - aaep                      = string
+      - instrumentation_immediacy = optional(string)
+      - mode                      = optional(string)
+      - vlans                     = list(number)
+    * epg_type                 = optional(string)
+    * fhs_trust_control_policy: (optional) — Name of a Custom QoS Policy to assign to the EPG.
+    * flood_in_encapsulation   = optional(string)
+    * has_multicast_source     = optional(bool)
+    * label_match_criteria: (optional) — Name of a Custom QoS Policy to assign to the EPG.
+    * intra_epg_isolation: (optional) — Name of a Custom QoS Policy to assign to the EPG.
+    * monitoring_policy: (optional) — Name of a Custom QoS Policy to assign to the EPG.
+    * policy_source_tenant: (default: epg tenant) — Name of a source tenant for policies.
+    * preferred_group_member   = optional(bool)
     * static_paths: List of Paths to assign to the EPG.
       - encapsulation_type: The Type of Encapsulation to use on the Interface
         * micro_seg: 
@@ -139,6 +175,24 @@ variable "application_epgs" {
         * vpc: Path Type is Virtual-Port-Channel
       - pod: Identifier for the Pod the Nodes are assigned to for the static path.  Default value is 1.
       - vlans: For VLAN and VXLAN this is a list of 1.  For micro_seg and qinq this is a list of 2.
+    APIC Specific Attributes:
+    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
+    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    Nexus Dashboard Orchestrator Specific Attributes:
+    * bd_schema: (default: epg schema) — Name of the Schema containing the Bridge Domain.
+    * bd_template: (default: epg template) — The Template name containing the Bridge Domain.
+    * contracts:
+      - schema: (default: epg schema) — Name of the Schema containing the Contract.
+      - template: (default: epg template) — The Template name containing the Contract.
+    * schema: (default: local.first_tenant) — Schema Name.
+    * sites: (default: local.first_tenant) — List of Site Names to assign site specific attributes.
+    * template: (default: local.first_tenant) — The Template name to create the object within.
+
+
   EOT
   type = map(object(
     {
@@ -486,7 +540,23 @@ resource "aci_rest_managed" "contract_to_oob_epgs" {
     aci_taboo_contract.contracts,
   ]
   for_each   = { for k, v in local.contract_to_epgs : k => v if v.epg_type == "oob" && v.contract_type == "provided" }
-  dn         = "uni/tn-${each.value.tenant}/oob-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
+  dn         = "uni/tn-${each.value.tenant}/mgmtp-default/oob-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
+  class_name = each.value.contract_class
+  content = {
+    annotation = each.value.annotation != null ? each.value.annotation : var.annotation
+    # matchT = each.value.match_type
+    prio = each.value.qos_class
+  }
+}
+
+resource "aci_rest_managed" "contract_to_inb_epgs" {
+  depends_on = [
+    aci_contract.contracts,
+    aci_rest_managed.oob_contracts,
+    aci_taboo_contract.contracts,
+  ]
+  for_each   = { for k, v in local.contract_to_epgs : k => v if v.epg_type == "inb" }
+  dn         = "uni/tn-${each.value.tenant}/mgmtp-default/inb-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
   class_name = each.value.contract_class
   content = {
     annotation = each.value.annotation != null ? each.value.annotation : var.annotation

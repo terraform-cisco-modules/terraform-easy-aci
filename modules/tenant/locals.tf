@@ -166,6 +166,7 @@ locals {
   contract_to_epgs_loop = flatten([
     for key, value in local.application_epgs : [
       for k, v in value.contracts : {
+        annotation          = value.annotation
         application_epg     = key
         application_profile = value.application_profile
         contract            = v.name
@@ -174,7 +175,7 @@ locals {
           "contract_interface", v.contract_type)) > 0 ? "fvRsConsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "fvRsIntraEpg" : length(regexall(
           "provided", v.contract_type)) > 0 && length(regexall(
-          "ooband", value.epg_type)) > 0 ? "mgmtRsOoBProv" : length(regexall(
+          "oob", value.epg_type)) > 0 ? "mgmtRsOoBProv" : length(regexall(
           "provided", v.contract_type)) > 0 ? "fvRsProv" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "fvRsProtBy" : ""
@@ -183,7 +184,7 @@ locals {
           "contract_interface", v.contract_type)) > 0 ? "rsconsIf" : length(regexall(
           "intra_epg", v.contract_type)) > 0 ? "rsintraEpg" : length(regexall(
           "provided", v.contract_type)) > 0 && length(regexall(
-          "ooband", value.epg_type)) > 0 ? "rsooBProv" : length(regexall(
+          "oob", value.epg_type)) > 0 ? "rsooBProv" : length(regexall(
           "provided", v.contract_type)) > 0 ? "rsprov" : length(regexall(
           "taboo", v.contract_type)
         ) > 0 ? "rsprotBy" : ""
