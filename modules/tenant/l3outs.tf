@@ -124,10 +124,6 @@ variable "l3outs" {
     * type: What is the type of controller.  Options are:
       - apic: For APIC Controllers
       - ndo: For Nexus Dashboard Orchestrator
-    * vendor: When using Nexus Dashboard Orchestrator the vendor attribute is used to distinguish the cloud types.  Options are:
-      - aws
-      - azure
-      - cisco (Default)
     # Argument Reference
     # addr: (optional) — Peer address for L3out floating SVI object. Default value: "0.0.0.0".
     # annotation: (optional) — Annotation for L3out floating SVI object.
