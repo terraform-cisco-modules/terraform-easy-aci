@@ -13,6 +13,7 @@ variable "contracts" {
       controller_type = "apic"
       description     = ""
       global_alias    = ""
+      log             = false
       qos_class       = "unspecified"
       scope           = "context" # application-profile|context|global|tenant
       subjects = [
@@ -42,13 +43,119 @@ variable "contracts" {
     }
   }
   description = <<-EOT
-  Key: Name of the Contract.
-  * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
-  * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-  * controller_type: What is the type of controller.  Options are:
-    - apic: For APIC Controllers
-    - ndo: For Nexus Dashboard Orchestrator
-  * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
+    Key: Name of the Contract.
+    * contract_type: (required) — Select the Contract Type.  Note: intra_epg and taboo are not valid for target_type VRF.  Options are:
+      - oob
+      - standard
+      - taboo
+    * controller_type: (optional) — The type of controller.  Options are:
+      - apic: (default)
+      - ndo
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * qos_class: (optional) — The priority class identifier. Allowed values are:
+      - level1
+      - level2
+      - level3
+      - level4
+      - level5
+      - level6
+      - unspecified: (default)
+    * scope: (optional) — The Scope of the contract, if the contract is of Type Standard or Out-of-Band.  Options are:
+      - application-profile
+      - context: (default)
+      - global
+      - tenant
+      - Note:  Ignored for Taboo Contracts.
+    * subjects: (optional) — 
+      - action: (optional) — You can set the following actions for the filter:
+        * deny
+        * permit: (default)
+      - apply_both_directions: (optional) — Sets the contract filter to apply on both ingress and egress traffic directions.  Options are:
+        * false
+        * true: (default)
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - directives: (optional) — Some features, such as statistics, will be unavailable while Policy Compression is active. Filters containing prio, qos and markDscp are not considered for compression.
+        * enable_policy_compression: (optional) — Enables contract data storage optimization.
+          - false: (default)
+          - true
+        * log: (optional) — Enables contract permit and deny logging.
+          - false: (default)
+          - true
+      - filters: (optional) — List of Filters to add to the Subject.
+      - match_type: (optional) — The Match criteria can be:
+        * All
+        * AtleastOne
+        * AtmostOne
+        * None
+      - name: (required) — The Name for the Subject/Filter.
+      - qos_class: (optional) — The priority class identifier. Allowed values are:
+        * level1
+        * level2
+        * level3
+        * level4
+        * level5
+        * level6
+        * unspecified: (default)
+      - target_dscp: (optional) — The target differentiated services code point (DSCP) of the lsubject. The options are as follows:
+        * AF11 — low drop Priority
+        * AF12 — medium drop Priority
+        * AF13 — high drop Priority
+        * AF21 — low drop Immediate
+        * AF22 — medium drop Immediate
+        * AF23 — high drop Immediate
+        * AF31 — low drop Flash
+        * AF32 — medium drop Flash
+        * AF33 — high drop Flash
+        * AF41 — low drop—Flash Override
+        * AF42 — medium drop Flash Override
+        * AF43 — high drop Flash Override
+        * CS0 — class of service level 0
+        * CS1 — class of service level 1
+        * CS2 — class of service level 2
+        * CS3 — class of service level 3
+        * CS4 — class of service level 4
+        * CS5 — class of service level 5
+        * CS6 — class of service level 6
+        * CS7 — class of service level 7
+        * EF — Expedited Forwarding Critical
+        * VA — Voice Admit
+        * unspecified: (default)
+    * target_dscp: (optional) — The target differentiated services code point (DSCP) of the lsubject. The options are as follows:
+      - AF11 — low drop Priority
+      - AF12 — medium drop Priority
+      - AF13 — high drop Priority
+      - AF21 — low drop Immediate
+      - AF22 — medium drop Immediate
+      - AF23 — high drop Immediate
+      - AF31 — low drop Flash
+      - AF32 — medium drop Flash
+      - AF33 — high drop Flash
+      - AF41 — low drop—Flash Override
+      - AF42 — medium drop Flash Override
+      - AF43 — high drop Flash Override
+      - CS0 — class of service level 0
+      - CS1 — class of service level 1
+      - CS2 — class of service level 2
+      - CS3 — class of service level 3
+      - CS4 — class of service level 4
+      - CS5 — class of service level 5
+      - CS6 — class of service level 6
+      - CS7 — class of service level 7
+      - EF — Expedited Forwarding Critical
+      - VA — Voice Admit
+      - unspecified: (default)
+    * tenant: (default: local.tenant) — The Name of the Tenant to create the Bridge Domain within.
+    APIC Specific Attributes:
+    * alias: (optional) — A changeable name for a given object. While the name of an object, once created, cannot be changed, the alias is a field that can be changed.
+    * annotation: (optional) — A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
+    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+      - key — Key string.
+      - value — Value string.
+    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+    Nexus Dashboard Orchestrator Specific Attributes:
+    * schema: (required) — Schema Name.
+    * sites: (optional) — List of Site Names to assign site specific attributes.
+    * template: (required) — The Template name to create the object within.
   EOT
   type = map(object(
     {
@@ -60,15 +167,14 @@ variable "contracts" {
           value = string
         }
       )))
-      apply_both_directions = optional(bool)
-      contract_type         = optional(string)
-      controller_type       = optional(string)
-      description           = optional(string)
-      global_alias          = optional(string)
-      log                   = optional(bool)
-      qos_class             = optional(string)
-      schema                = optional(string)
-      scope                 = optional(string)
+      contract_type   = optional(string)
+      controller_type = optional(string)
+      description     = optional(string)
+      global_alias    = optional(string)
+      log             = optional(bool)
+      qos_class       = optional(string)
+      schema          = optional(string)
+      scope           = optional(string)
       subjects = optional(list(object(
         {
           action                = optional(string)
@@ -87,7 +193,6 @@ variable "contracts" {
           target_dscp = optional(string)
         }
       )))
-      qos_class   = optional(string)
       target_dscp = optional(string)
       template    = optional(string)
       tenant      = optional(string)

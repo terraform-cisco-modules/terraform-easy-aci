@@ -34,7 +34,14 @@ variable "application_profiles" {
     * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
     * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are:
+      - level1
+      - level2
+      - level3
+      - level4
+      - level5
+      - level6
+      - unspecified
     NDO Specific Attributes:
     * schema: (required) - Schema Name.
     * sites: (optional) — List of Site Names to assign site specific attributes.

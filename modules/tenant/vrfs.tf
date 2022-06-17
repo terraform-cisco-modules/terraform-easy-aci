@@ -23,18 +23,18 @@ variable "vrfs" {
           match_type = "AtleastOne"
         }
       ]
-      global_alias                   = ""
-      ip_data_plane_learning         = "enabled"
-      layer3_multicast               = true
-      monitoring_policy              = ""
-      ospf_timers                    = "default"
-      ospf_timers_per_address_family = []
-      policy_enforcement_direction   = "ingress"  # "egress"
-      policy_enforcement_preference  = "enforced" # unenforced
-      preferred_group                = false
-      sites                          = []
-      template                       = ""
-      transit_route_tag_policy       = ""
+      global_alias                          = ""
+      ip_data_plane_learning                = "enabled"
+      layer3_multicast                      = true
+      monitoring_policy                     = ""
+      ospf_timers                           = "default"
+      ospf_timers_per_address_family        = []
+      policy_control_enforcement_direction  = "ingress"  # "egress"
+      policy_control_enforcement_preference = "enforced" # unenforced
+      preferred_group                       = false
+      sites                                 = []
+      template                              = ""
+      transit_route_tag_policy              = ""
       /*  If undefined the variable of local.first_tenant will be used for:
       policy_source_tenant           = local.first_tenant
       schema                         = local.first_tenant
@@ -48,50 +48,75 @@ variable "vrfs" {
       - apic: (default)
       - ndo
     SHARED (APIC & NDO) Attributes:
-    * description: Description to add to the Object.  The description can be up to 128 characters.
-    * epg_esg_collection_for_vrfs = [
-        {
-          contracts  = []
-              name      = string
-              qos_class = optional(string)
-              schema    = optional(string)
-              template  = optional(string)
-              tenant    = string
-              type      = string
-          match_type = "AtleastOne"
-        }
-      ]
-    * ip_data_plane_learning         = "enabled"
-    * layer3_multicast               = true
-    * policy_enforcement_preference  = "enforced" # unenforced
-    * preferred_group                = false
-    * tenant                         = "local.first_tenant"
+    * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * epg_esg_collection_for_vrfs: (optional) — VzAny Contract List of Objects to assign to the VRF.
+      - contracts: (optional) — List of Contracts and Attributes to assign to the EPG|ESG Collection for a VRF. aka VzAny.
+        * name: (required) — The Name of the contract to assign.
+        * qos_class: (optional) — The priority class identifier. Allowed values are:
+          - level1
+          - level2
+          - level3
+          - level4
+          - level5
+          - level6
+          - unspecified: (default)
+        * schema: (optional) — The Name of the Schema that contains the contract for controller_type: ndo.
+        * template: (optional) — The Name of the Template that contains the contract for controller_type: ndo.
+        * tenant: (default: VRF Tenant) — The Name of the tenant the contract was created in.
+        * contract_type: (required) — The type of contract to be assigned.  Options are:
+          - consumed
+          - contract_interface
+          - provided
+      - match_type: (optional) — Represents the provider label match criteria. The options are:
+        * All
+        * AtleastOne: (default)
+        * AtmostOne
+        * None
+    * ip_data_plane_learning: (default: enabled) — Defines if IP addresses are learned through dataplane packets for the VRF.  When disabled, IP addresses are not learned from the dataplane. Local and remote MAC addresses are still learned, but local IP addresses are not. Remote IP addresses are not learned from unicast packets but are learned from multicast packets.  Note:  Regardless if this parameter is enabled or disabled, local IP addresses can still be learned from ARP, GARP, and ND. 
+    * layer3_multicast: (optional) — Flag to enable or disable Layer 3 Multicast in the VRF.
+      - false: (default)
+      - true
+    * policy_control_enforcement_preference: (optional) — Should Contracts be enforced or unenforced within the VRF. The policy enforcement can be:
+      - enforced: (default) — Security rules (contracts) will be enforced.
+      - unenforced — Security rules (contracts) will not be enforced.
+    * preferred_group: (optional) — Enable the Preferred Group feature to allow preferred group members in the VRF to communicate with each other without requiring a contract between them.
+      - false: (default) — Contracts are required for EPGs in the VRF to communicate with each other.
+      - true — For EPGs that are preferred group members in the VRF, contracts are not required to communicate with each other.
+    * tenant: (default: local.tenant) — The Name of the Tenant to create the VRF within.
     APIC Specific Attributes:
     * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
     * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
-    * bd_enforcement_status: (optional) — 
+    * bd_enforcement_status: (optional) — Set the BD Enforcement Status to “true” to enable this condition: Only allow endpoints to ping their bridge domain gateways.  Ping from hosts on different bridge domains cannot ping other gateways.  You can then create a global exception list of IP addresses which can ping any subnet gateway.
       - false: default
       - true
-    * bgp_timers: (default: default) — 
-    * bgp_timers_per_address_family: (optional) — 
-          address_family = optional(string)
-          policy         = string
-    * communities                     = []
-          community_variable = number
-          description        = optional(string)
-    * eigrp_timers_per_address_family = []
-          address_family = optional(string)
-          policy         = string
-    * endpoint_retention_policy       = "default"
+    * bgp_timers: (default: default) — Assign a BGP Timers policies to the VRF. 
+    * bgp_timers_per_address_family: (optional) — Assign a BGP Timers policy for the VRF to the IPv4 and IPv6 Address Families.  “fvRsCtxToBgpCtxAfPol” is the API Class Name.
+      - address_family: (optional) — Options are:
+        * ipv4: (default)
+        * ipv6
+      - policy: (required) — Name of the BGP Timers Policy to assign to the Address Family.
+    * communities: (optional) — A list of Communities to Assign to the VRF.  This Section is only necessary if you want a "SNMP Context Community" Defined. Note: a Community can only be used within the context (VRF) when assigned to it.  But a Fabric Wide SNMP Community can be used for an SNMP Context when qualified with the Context.
+          community_variable: (required) — A value between 1 to 5 that will point to the snmp_community_{value} variable.
+          description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+    * eigrp_timers_per_address_family: (optional) — Assign an EIGRP Timers policy for the VRF to the IPv4 and IPv6 Address Families.  “fvRsCtxToEigrpCtxAfPol” is the API Class Name.
+      - address_family: (optional) — Options are:
+        * ipv4: (default)
+        * ipv6
+      - policy: (required) — Name of the EIGRP Timers Policy to assign to the Address Family.
+    * endpoint_retention_policy: (default: default) — Name of the Endpoint Retention Policy to assign to the VRF.
     * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
     * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-    * ospf_timers                    = "default"
-    * ospf_timers_per_address_family = []
-          address_family = optional(string)
-          policy         = string
-    * policy_source_tenant           = local.first_tenant
-    * policy_enforcement_direction   = "ingress"  # "egress"
+    * ospf_timers: (default: default) — Assign an OSPF timers policies to the VRF.  “ospfCtxPol” is the API Class Name.
+    * ospf_timers_per_address_family: (optional) — Assign an OSPF Timers policy for the VRF to the IPv4 and IPv6 Address Families.  “ospfCtxPol” is the API Class Name.
+      - address_family: (optional) — Options are:
+        * ipv4: (default)
+        * ipv6
+      - policy: (required) — Name of the OSPF Timers Policy to assign to the Address Family.
+    * policy_source_tenant: (default: local.first_tenant) — Name of the tenant that contains the policies to assign to the VRF.
+    * policy_control_enforcement_direction: (optional) — Defines the policy enforcement direction coming to or from a Layer 3 Outside connection (L3Out). The direction can be:
+      - ingress: (default) — Policy is enforced on ingress traffic.
+      - egress — Policy is enforced on egress traffic.
     * transit_route_tag_policy       = ""
     Nexus Dashboard Orchestrator Specific Attributes:
     * schema: (required) — Schema Name.
@@ -140,7 +165,7 @@ variable "vrfs" {
               qos_class     = optional(string)
               schema        = optional(string)
               template      = optional(string)
-              tenant        = string
+              tenant        = optional(string)
             }
           )))
           match_type = optional(string)
@@ -157,15 +182,15 @@ variable "vrfs" {
           policy         = string
         }
       )))
-      policy_source_tenant          = optional(string)
-      policy_enforcement_direction  = optional(string)
-      policy_enforcement_preference = optional(string)
-      preferred_group               = optional(bool)
-      schema                        = optional(string)
-      sites                         = optional(list(string))
-      template                      = optional(string)
-      tenant                        = optional(string)
-      transit_route_tag_policy      = optional(string)
+      policy_source_tenant                  = optional(string)
+      policy_control_enforcement_direction  = optional(string)
+      policy_control_enforcement_preference = optional(string)
+      preferred_group                       = optional(bool)
+      schema                                = optional(string)
+      sites                                 = optional(list(string))
+      template                              = optional(string)
+      tenant                                = optional(string)
+      transit_route_tag_policy              = optional(string)
     }
   ))
 }
@@ -227,8 +252,8 @@ resource "aci_vrf" "vrfs" {
   knw_mcast_act          = each.value.layer3_multicast == true ? "permit" : "deny"
   name                   = each.key
   name_alias             = each.value.alias
-  pc_enf_dir             = each.value.policy_enforcement_direction
-  pc_enf_pref            = each.value.policy_enforcement_preference
+  pc_enf_dir             = each.value.policy_control_enforcement_direction
+  pc_enf_pref            = each.value.policy_control_enforcement_preference
   # relation_fv_rs_ctx_to_ep_ret = length(regexall(
   #   "[[:alnum:]]", each.value.endpoint_retention_policy)
   # ) > 0 ? aci_end_point_retention_policy.endpoint_retention_policies[each.value.endpoint_retention_policy].id : ""

@@ -177,12 +177,9 @@ variable "l3out_logical_node_profiles" {
           track_policy      = ""
         }
       ]
-      sites       = []
       target_dscp = "unspecified"
       /* If undefined the variable of local.first_tenant will be used for:
       policy_source_tenant = local.first_tenant
-      schema               = local.first_tenant
-      template             = local.first_tenant
       tenant               = local.first_tenant
       */
     }
@@ -412,9 +409,7 @@ variable "l3out_logical_node_profiles" {
           track_policy      = optional(string)
         }
       )))
-      sites       = optional(list(string))
       target_dscp = optional(string)
-      template    = optional(string)
       tenant      = optional(string)
     }
   ))

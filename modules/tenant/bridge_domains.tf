@@ -38,13 +38,12 @@ variable "bridge_domains" {
           limit_ip_learn_to_subnets     = true
           mld_snoop_policy              = ""
           multi_destination_flooding    = "bd-flood"
-          name_alias                    = ""
           pim                           = false
           pimv6                         = false
           type                          = "regular"
           vrf                           = "default"
-          /* If undefined the variable of local.first_tenant will be used
-          vrf_tenant                    = local.first_tenant
+          /* If undefined the Bridge Domain Tenant will be used
+          vrf_tenant                    = bd.tenant
           */
         }
       ]
@@ -54,8 +53,8 @@ variable "bridge_domains" {
             {
               l3out         = "default"
               route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
-              /* If undefined the variable of local.first_tenant will be used
-              tenant        = local.first_tenant
+              /* If undefined the Bridge Domain Tenant will be used
+              tenant        = bd.tenant
               */
             }
           ]
@@ -98,74 +97,137 @@ variable "bridge_domains" {
   }
   description = <<-EOT
     Key — Name of the Bridge Domain.
-    * advanced_troubleshooting = [
-          disable_ip_data_plane_learning_for_pbr = false
-          endpoint_clear                         = false
-          first_hop_security_policy              = ""
-          intersite_bum_traffic_allow            = false
-          intersite_l2_stretch                   = false
-          monitoring_policy                      = ""
-          netflow_monitor_policies               = []
-          optimize_wan_bandwidth                 = false
-          rogue_coop_exception_list              = []
+    * advanced_troubleshooting: (optional) — Map of Advanced/Troubleshooting Configuration Parameters for the Bridge Domain.
+      - disable_ip_data_plane_learning_for_pbr: (optional) — Controls whether the remote leaf switch should update the IP-to-VTEP information with the source VTEP of traffic coming from this bridge domain. The options are:
+        * false: (default)
+        * true - Change this setting to true, only if the bridge domain is to be associated with policy-based redirect (PBR) enabled endpoint groups.
+        * Note: Use caution when changing the default setting for this field. Setting this option to no can cause suboptimal traffic forwarding for non-PBR scenarios.   Options are:
+      - endpoint_clear: (optional) — Set this to Clear the Endpoint Table on the Bridge Domain.  Options are:
+        * false: (default)
+        * true
+      - first_hop_security_policy: (optional) — The name of a First Hop Security Policy to Associate.
+      - intersite_bum_traffic_allow: (optional) — When extending the bridge domain between sites this option is to permit broadcast unknown multicast (BUM) traffic between the sites.  Options are:
+        * false: (default)
+        * true
+      - intersite_l2_stretch: (optional) — Extend the Bridge Domain between ACI Fabrics.  Options are:
+        * false: (default)
+        * true
+      - monitoring_policy: (APIC Only) (optional) — The name of a Monitoring Policy to Associate.
+      - netflow_monitor_policies: (optional) — A NetFlow Monitor Policy identifies packet flows for ingress IP packets and provides statistics based on these packet flows.
+        * filter_type: (optional) — The Type of IP Traffic to provide statistics for.  Options are:
+          - ce
+          - ipv4: (default)
+          - ipv6
+        * netflow_policy: (required) - Name of a Netflow Policy to assign to the Bridge Domain.
+      - optimize_wan_bandwidth: (optional) — Any defined bridge domain is associated with a multicast group address (or a set of multicast addresses), usually referred to as the GIPo address. Depending on the number of configured bridge domains, the same GIPo address may be associated with different bridge domains. Thus, when flooding for one of those bridge domains is enabled across sites, BUM traffic for the other bridge domains using the same GIPo address is also sent across the sites and will then be dropped on the received spine nodes. This behavior can increase the bandwidth utilization in the intersite network.  Because of this behavior, when a bridge domain is configured as stretched with BUM flooding enabled from the Cisco Multi-Site Orchestrator GUI, by default a GIPo address is assigned from a separate range of multicast addresses. This is reflected in the GUI by the “OPTIMIZE WAN BANDWIDTH”.  Options are:
+        * false: (default)
+        * true
+      - rogue_coop_exception_list: (optional) — A list of MAC addresses for which you want to have a higher tolerance for endpoint movement with rogue endpoint control before the endpoints get marked as rogue. Endpoints in the rogue/COOP exception list get marked as rogue only if they move 3000 or more times within 10 minutes. After an endpoint is marked as rogue, the endpoint is kept static so that learning is prevented and the traffic to and from the endpoint is dropped. The rogue endpoint is deleted after 30 seconds.
     * controller_type: (optional) — The type of controller.  Options are:
       - apic: (default)
       - ndo
-    * general = [
-          advertise_host_routes         = false
-          alias                         = ""
-          annotation                    = ""
-          annotations                   = []
-          arp_flooding                  = false
-          * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
-          endpoint_retention_policy     = ""
-          global_alias                  = ""
-          igmp_interface_policy         = ""
-          igmp_snooping_policy          = ""
-          ipv6_l3_unknown_multicast     = "flood"
-          l2_unknown_unicast            = "flood"
-          l3_unknown_multicast_flooding = "flood"
-          limit_ip_learn_to_subnets     = true
-          mld_snoop_policy              = ""
-          multi_destination_flooding    = "bd-flood"
-          name_alias                    = ""
-          pim                           = false
-          pimv6                         = false
-          tenant                        = "local.first_tenant"
-          type                          = "regular"
-          vrf                           = "default"
-          vrf_tenant                    = "local.first_tenant"
-    * l3_configurations = [
-          associated_l3outs = [
-              l3out         = "default"
-              route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
-              tenant        = "local.first_tenant"
-          custom_mac_address      = ""
-          ep_move_detection_mode  = false
-          link_local_ipv6_address = "::"
-          subnets = {
-            "198.18.5.1/24" = {
-              description                  = ""
-              ip_data_plane_learning       = "enabled"
-              make_this_ip_address_primary = false
-              scope = [
-                  advertise_externally = false
-                  shared_between_vrfs  = false
-              subnet_control = [
-                  neighbor_discovery     = true
-                  no_default_svi_gateway = false
-                  querier_ip             = false
-              treat_as_virtual_ip_address = false
-          unicast_routing     = true
-          virtual_mac_address = ""
-      policy_source_tenant = "local.first_tenant"
-    APIC Specific Attributes:
-    * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
-    * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
-    * annotations: (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
-    * global_alias: (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
-    * monitoring_policy: (default: default) — To keep it simple the monitoring policy must be in the common Tenant.
-    * qos_class: (default: unspecified) — The priority class identifier. Allowed values are "unspecified", "level1", "level2", "level3", "level4", "level5" and "level6".
+    * general: (optional) — Map of General Configuration Parameters for the Bridge Domain.
+      - advertise_host_routes: (optional) — .  Options are:
+        * false: (default)
+        * true
+      - alias: (APIC Only) (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
+      - annotation: (APIC Only) (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.
+      - annotations: (APIC Only) (optional) — You can add arbitrary key:value pairs of metadata to an object as annotations (tagAnnotation). Annotations are provided for the user's custom purposes, such as descriptions, markers for personal scripting or API calls, or flags for monitoring tools or orchestration applications such as Cisco Multi-Site Orchestrator (MSO). Because APIC ignores these annotations and merely stores them with other object data, there are no format or content restrictions imposed by APIC.
+      - arp_flooding: (optional) — .  Options are:
+        * false: (default)
+        * true
+      - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+      - endpoint_retention_policy: (APIC Only) (optional) — Provides the parameters for the lifecycle of the endpoint group in the bridge domain.  This will assign the policy to the BD.
+      - igmp_interface_policy: (APIC Only) (optional) — Name of the IGMP Interface Policy to assign to the Bridge Domain.
+      - igmp_snooping_policy: (APIC Only) (optional) — Name of the IGMP Snooping Policy to assign to the Bridge Domain.  IGMP snooping is the process of listening to Internet Group Management Protocol (IGMP) network traffic. The feature allows a network switch to listen in on the IGMP conversation between hosts and routers and filter multicasts links that do not need them, thus controlling which ports receive specific multicast traffic.
+      - ipv6_l3_unknown_multicast: (optional) — The node forwarding parameter for Layer 3 unknown Multicast destinations. The value can be:
+        * flood: (default) — Send the data to the front panel ports if a router port exists on any bridge domain or send the data to the fabric if the data is in transit.
+        * opt-flood — Send the data only to router ports in the fabric.
+      - l2_unknown_unicast: (optional) — By default, unicast traffic is flooded to all Layer 2 ports. If enabled, unicast traffic flooding is blocked at a specific port, only permitting egress traffic with MAC addresses that are known to exist on the port. The method can be:
+        * flood
+        * proxy: (default)
+        * NOTE: When the BD has L2 Unknown Unicast set to Flood, if an endpoint is deleted the system deletes it from both the local leaf switches as well as the remote leaf switches where the BD is deployed, by selecting Clear Remote MAC Entries. Without this feature, the remote leaf continues to have this endpoint learned until the timer expires.
+        * CAUTION:  Modifying the L2 Unknown Unicast setting causes traffic to bounce (go down and up) on interfaces to devices attached to EPGs associated with this bridge domain.
+      - l3_unknown_multicast_flooding: (optional) — The node forwarding parameter for Layer 3 unknown Multicast destinations. The value can be:
+        * flood: (default) — Send the data to the front panel ports if a router port exists on any bridge domain or send the data to the fabric if the data is in transit.
+        * opt-flood — Send the data only to router ports in the fabric.
+      - limit_ip_learn_to_subnets: (APIC Only) (optional) — .  Options are:
+        * false
+        * true: (default)
+      - mld_snoop_policy: (APIC Only) (optional) — Name of the MLD Snooping Policy to assign to the Bridge Domain.  The Multicast Listener Discovery (MLD) Snooping policy enables the efficient distribution of IPv6 multicast traffic between hosts and routers. It is a Layer 2 feature that restricts IPv6 multicast traffic within a bridge domain to a subset of ports that have transmitted or received MLD queries or reports.
+      - multi_destination_flooding: (optional) — The multiple destination forwarding method for L2 Multicast, Broadcast, and Link Layer traffic types. The method can be:
+        * bd-flood: (default) — Sends the data to all ports on the same bridge domain.
+        * drop — Drops Packet. Never sends the data to any other ports.
+        * encap-flood — Sends the data to the ports on the same VLAN within the bridge domain regardless of the EPG, with the exception that data for the following protocols is flooded to the entire bridge domain:
+          - ARP/GARP
+          - BGP
+          - EIGRP
+          - IGMP
+          - IS-IS
+          - OSPF/OSPFv6
+          - ND
+          - PIM
+      - global_alias: (APIC Only) (optional) — The Global Alias feature simplifies querying a specific object in the API. When querying an object, you must specify a unique object identifier, which is typically the object's DN. As an alternative, this feature allows you to assign to an object a label that is unique within the fabric.
+      - pim: (APIC Only) (optional) — Enables the Protocol Independent Multicast (PIM) protocol.  Options are:
+        * false: (default)
+        * true
+      - pimv6: (APIC Only) (optional) — Enables the Protocol Independent Multicast (PIM) IPv6 protocol.  Options are:
+        * false: (default)
+        * true
+      - type: (APIC Only) (optional) — The Type of bridge domain to create.  Options are:
+        * fc
+        * regular: (default)
+      - vrf: (default: default) — Name of the VRF to Assign to the Bridge Domain.
+      - vrf_tenant                    = "local.first_tenant"
+    * l3_configurations: (optional) — Map of Layer 3 Configuration Parameters for the Bridge Domain.
+      - associated_l3outs: (optional) — List of L3Outs to Associate to the Bridge Domain.
+        * l3out: (optional) — Name of the L3Out to Associate.
+        * route_profile: (optional) — Name of a Route Profile to associate to the L3Out.
+          - **Note: Only one L3out can have a route_profile associated to it for the BD
+        * tenant: (default: bd.tenant) —  The Name of the tenant for the L3Out.  If Undefined the Bridge Domain tenant will be utilized.
+      - custom_mac_address: (SVI MAC Address in NDO) (optional) — The MAC address of the bridge domain (BD) or switched virtual interface (SVI). By default, a BD takes the fabric wide default MAC address of 00:22:BD:F8:19:FF. Configure this property to override the default address.
+      - ep_move_detection_mode: (optional) — When the GARP based detection option is enabled, Cisco ACI will trigger an endpoint move based on GARP packets if the move occurs on the same interface and same EPG.  The Default is "false", but it is a best practice to set to "true", if ARP Flooding is enabled.
+        * false: (default)
+        * true
+        * Note: This can only be used when ARP Flooding is enabled.
+      - link_local_ipv6_address: (optional) — Link-Local IPv6 address (LLA) for the bridge domain.
+      - subnets: (optional) — List of Subnets and their Settings to Assign to the Bridge Domain.
+        * Key: (required) — Subnet to Add. "X.X.X.X/Prefix" is the format.
+        * description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
+        * ip_data_plane_learning: (APIC Only) (optional) — Choose whether to enable or disable IP address learning for this subnet. The possible values are:
+          - disabled — Disables IP address learning for this subnet.
+          - enabled: (default) — Enables IP address learning for this subnet.
+        * make_this_ip_address_primary: (optional) — Indicates if the subnet is the primary IP address for the bridge domain (preferred over the available alternatives).
+          - false: (default)
+          - true
+        * scope: (optional) — The network visibility of the subnet. The scope can be:
+          - advertise_externally: (optional) — The subnet can be exported to a routed connection.  Options are:
+            * false: (default)
+            * true
+          - shared_between_vrfs: (optional) — The subnet can be shared with and exported to multiple contexts (VRFs) in the same tenant or across tenants as part of a shared service. An example of a shared service is a routed connection to an EPG present in another context (VRF) in a different tenant. This enables traffic to pass in both directions across contexts (VRFs). An EPG that provides a shared service must have its subnet configured under that EPG (not under a bridge domain), and its scope must be set to advertised externally, and shared between VRFs.
+            * false: (default)
+            * true
+            * Note: Shared subnets must be unique across the contexts (VRF) involved in the communication. When a subnet under an EPG provides a Layer 3 external network shared service, such a subnet must be globally unique within the entire ACI fabric.
+        * subnet_control: (optional) — 
+          - neighbor_discovery: (APIC Only) (optional) — Enables Neighbor Discovery on the subnet. Options are:
+            * false
+            * true: (default)
+          - no_default_svi_gateway: (optional) — When using Cisco ACI Multi-Site with this APIC fabric domain (site), indicates that the VRF, EPG, or BD using this subnet are mirrored from another site, which has a relationship to this site through a contract. Do not modify or delete the mirrored objects. Options are:
+            * false: (default)
+            * true
+          - querier_ip: (optional) — Enables IGMP Snooping on the subnet.  Options are:
+            * false: (default)
+            * true
+        * treat_as_virtual_ip_address: (optional) — An IP address that doesn't correspond to an actual physical network interface, that is shared by multiple devices.  This is typically used for the Common Pervasive Gateway use case. For more information, see Common Pervasive Gateway in Cisco APIC Layer 3 Configuration Guide.   Options are:
+          - false: (default)
+          - true
+      - unicast_routing: (APIC Only) (optional) — Enable or disable unicast routing on the Bridge Domain.   Options are:
+        * false
+        * true: (default)
+        * Note: We recommend disabling, if you have not configured a subnet on the BD.
+      - virtual_mac_address: (optional) — The Bridge Domain Virtual MAC address.  The BD virtual MAC address and the subnet virutal IP address must be the same for all ACI fabrics for that bridge domain. Multiple bridge domains can be configured to communicate across connected ACI fabrics. The virtual MAC address and the virtual IP address can be shared across bridge domains.
+    * policy_source_tenant: (default: local.first_tenant) — Name of the tenant that contains the policies to assign to the Bridge Domain.
+    * tenant: (default: local.tenant) — The Name of the Tenant to create the Bridge Domain within.
     NDO Specific Attributes:
     * schema: (required) — Schema Name.
     * sites: (optional) — List of Site Names to assign site specific attributes.
@@ -181,9 +243,14 @@ variable "bridge_domains" {
           intersite_bum_traffic_allow            = optional(bool)
           intersite_l2_stretch                   = optional(bool)
           monitoring_policy                      = optional(string)
-          netflow_monitor_policies               = optional(list(string))
-          optimize_wan_bandwidth                 = optional(bool)
-          rogue_coop_exception_list              = optional(list(string))
+          netflow_monitor_policies = optional(list(object(
+            {
+              filter_type    = optional(string)
+              netflow_policy = string
+            }
+          )))
+          optimize_wan_bandwidth    = optional(bool)
+          rogue_coop_exception_list = optional(list(string))
         }
       )))
       controller_type = optional(string)
@@ -205,10 +272,8 @@ variable "bridge_domains" {
           limit_ip_learn_to_subnets     = optional(bool)
           mld_snoop_policy              = optional(string)
           multi_destination_flooding    = optional(string)
-          name_alias                    = optional(string)
           pim                           = optional(bool)
           pimv6                         = optional(bool)
-          tenant                        = optional(string)
           type                          = optional(string)
           vrf                           = optional(string)
           vrf_tenant                    = optional(string)
@@ -274,7 +339,7 @@ resource "aci_bridge_domain" "bridge_domains" {
     aci_vrf.vrfs,
     # aci_l3_outside.l3outs
   ]
-  for_each = local.bridge_domains
+  for_each = { for k, v in local.bridge_domains : k => v if controller_type == "apic" }
   # General
   annotation                = each.value.general[0].annotation != "" ? each.value.general[0].annotation : var.annotation
   arp_flood                 = each.value.general[0].arp_flooding == true ? "yes" : "no"
@@ -331,8 +396,8 @@ resource "aci_bridge_domain" "bridge_domains" {
   dynamic "relation_fv_rs_bd_to_netflow_monitor_pol" {
     for_each = each.value.advanced_troubleshooting[0].netflow_monitor_policies
     content {
-      tn_netflow_monitor_pol_name = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy
       flt_type                    = relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.filter_type # ipv4|ipv6|ce
+      tn_netflow_monitor_pol_name = "uni/tn-${each.value.policy_source_tenant}/monitorpol-${relation_l3ext_rs_l_if_p_to_netflow_monitor_pol.value.netflow_policy}"
     }
   }
   # class: fhsBDPol

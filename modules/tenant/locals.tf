@@ -49,7 +49,12 @@ locals {
       description            = v.description != null ? v.description : ""
       domains                = v.domains != null ? v.domains : []
       epg_admin_state        = v.epg_admin_state != null ? v.epg_admin_state : "admin_up"
-      epg_contract_masters   = v.epg_contract_masters != null ? v.epg_contract_masters : []
+      epg_contract_masters = v.epg_contract_masters != null ? [
+        for s in v.epg_contract_masters : {
+          application_profile = s.application_profile != null ? s.application_profile : v.application_profile
+          application_epg     = s.application_epg
+        }
+      ] : []
       epg_to_aaeps = v.epg_to_aaeps != null ? [
         for s in v.epg_to_aaeps : {
           aaep                      = s.aaep
@@ -70,16 +75,16 @@ locals {
       preferred_group_member   = v.preferred_group_member != null ? v.preferred_group_member : false
       qos_class                = v.qos_class != null ? v.qos_class : "unspecified"
       schema                   = v.schema != null ? v.schema : local.first_tenant
-      static_paths = v.static_paths != null ? compact(flatten([
-        for s in v.static_paths : [
-          length(regexall("vpc", s.path_type)
-            ) > 0 ? "topology/pod-${s.pod}/protpaths-${element(s.nodes, 0)}-${element(s.nodes, 1)}/pathep-[${s.name}]" : length(
-            regexall("pc", s.path_type)
-            ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[${s.name}]" : length(
-            regexall("port", s.path_type)
-          ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[eth${s.name}]" : ""
-        ]
-      ])) : []
+      # static_paths = v.static_paths != null ? compact(flatten([
+      #   for s in v.static_paths : [
+      #     length(regexall("vpc", s.path_type)
+      #       ) > 0 ? "topology/pod-${s.pod}/protpaths-${element(s.nodes, 0)}-${element(s.nodes, 1)}/pathep-[${s.name}]" : length(
+      #       regexall("pc", s.path_type)
+      #       ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[${s.name}]" : length(
+      #       regexall("port", s.path_type)
+      #     ) > 0 ? "topology/pod-${s.pod}/paths-${element(s.nodes, 0)}/pathep-[eth${s.name}]" : ""
+      #   ]
+      # ])) : []
       static_paths_for_loop = v.static_paths != null ? v.static_paths : []
       template              = v.template != null ? v.template : local.first_tenant
       tenant                = v.tenant != null ? v.tenant : local.first_tenant
@@ -122,9 +127,9 @@ locals {
             mac_changes       = "reject"
           }
         ]
-        vlan_mode  = v.vlan_mode != null ? v.vlan_mode : "dynamic"
-        vlans      = v.vlans != null ? v.vlans : []
-        vmm_vendor = v.vmm_vendor != null ? v.vmm_vendor : "VMware"
+        switch_provider = v.switch_provider != null ? v.switch_provider : "VMware"
+        vlan_mode       = v.vlan_mode != null ? v.vlan_mode : "dynamic"
+        vlans           = v.vlans != null ? v.vlans : []
       }
     ]
   ])
@@ -134,15 +139,16 @@ locals {
   epg_to_static_paths_loop = flatten([
     for key, value in local.application_epgs : [
       for k, v in value.static_paths_for_loop : {
+        annotation         = value.annotation
         epg                = key
         key1               = k
         encapsulation_type = v.encapsulation_type != null ? v.encapsulation_type : "vlan"
         mode               = v.mode != null ? v.mode : "trunk"
-        name               = v.name != null ? v.name : "1/1"
-        nodes              = v.nodes != null ? v.nodes : [201]
+        name               = v.name
+        nodes              = v.nodes
         path_type          = v.path_type != null ? v.path_type : "port"
         pod                = v.pod != null ? v.pod : 1
-        vlans              = v.vlans != null ? v.vlans : [1]
+        vlans              = v.vlans
       }
     ]
   ])
@@ -154,7 +160,7 @@ locals {
       for k, v in value.epg_to_aaeps : {
         epg                       = key
         aaep                      = v.aaep
-        instrumentation_immediacy = v.instrumentation_immediacy != null ? v.instrumentation_immediacy : "immediate"
+        instrumentation_immediacy = v.instrumentation_immediacy != null ? v.instrumentation_immediacy : "on-demand"
         mode                      = v.mode != null ? v.mode : "regular"
         vlans                     = v.vlans
       }
@@ -216,8 +222,13 @@ locals {
           disable_ip_data_plane_learning_for_pbr = v.disable_ip_data_plane_learning_for_pbr != null ? v.disable_ip_data_plane_learning_for_pbr : false
           first_hop_security_policy              = v.first_hop_security_policy != null ? v.first_hop_security_policy : ""
           monitoring_policy                      = v.monitoring_policy != null ? v.monitoring_policy : "default"
-          netflow_monitor_policies               = v.netflow_monitor_policies != null ? v.netflow_monitor_policies : []
-          rogue_coop_exception_list              = v.rogue_coop_exception_list != null ? v.rogue_coop_exception_list : []
+          netflow_monitor_policies = v.netflow_monitor_policies != null ? [
+            for s in v.netflow_monitor_policies : {
+              filter_type    = s.filter_type != null ? s.filter_type : "ipv4"
+              netflow_policy = s.netflow_policy
+            }
+          ] : []
+          rogue_coop_exception_list = v.rogue_coop_exception_list != null ? v.rogue_coop_exception_list : []
         }
         ] : [
         {
@@ -249,7 +260,7 @@ locals {
           global_alias                  = v.global_alias != null ? v.global_alias : ""
           igmp_snooping_policy          = v.igmp_snooping_policy != null ? v.igmp_snooping_policy : ""
           ipv6_l3_unknown_multicast     = v.ipv6_l3_unknown_multicast != null ? v.ipv6_l3_unknown_multicast : "flood"
-          l2_unknown_unicast            = v.l2_unknown_unicast != null ? v.l2_unknown_unicast : "flood"
+          l2_unknown_unicast            = v.l2_unknown_unicast != null ? v.l2_unknown_unicast : "proxy"
           l3_unknown_multicast_flooding = v.l3_unknown_multicast_flooding != null ? v.l3_unknown_multicast_flooding : "flood"
           limit_ip_learn_to_subnets     = v.limit_ip_learn_to_subnets != null ? v.limit_ip_learn_to_subnets : true
           mld_snoop_policy              = v.mld_snoop_policy != null ? v.mld_snoop_policy : ""
@@ -259,7 +270,7 @@ locals {
           tenant                        = value.tenant
           type                          = v.type != null ? v.type : "regular"
           vrf                           = v.vrf != null ? v.vrf : "default"
-          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : v.tenant
+          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : value.tenant
         }
         ] : [
         {
@@ -279,10 +290,10 @@ locals {
           multi_destination_flooding    = "bd-flood"
           pim                           = false
           pimv6                         = false
-          tenant                        = local.first_tenant
+          tenant                        = value.tenant
           type                          = "regular"
           vrf                           = "default"
-          vrf_tenant                    = local.first_tenant
+          vrf_tenant                    = value.tenant
         }
       ]
       l3_configurations = value.l3_configurations != null ? [
@@ -290,8 +301,8 @@ locals {
           associated_l3outs = v.associated_l3outs != null ? [
             for s in v.associated_l3outs : {
               l3out         = s.l3out
-              tenant        = s.tenant != null ? s.tenant : value.tenant
               route_profile = s.route_profile != null ? s.route_profile : ""
+              tenant        = s.tenant != null ? s.tenant : value.tenant
             }
           ] : []
           ep_move_detection_mode  = v.ep_move_detection_mode != null ? v.ep_move_detection_mode : false
@@ -388,6 +399,7 @@ locals {
         ]
       ]) : []
       global_alias = v.global_alias != null ? v.global_alias : ""
+      log          = v.log != null ? v.log : false
       qos_class    = v.qos_class != null ? v.qos_class : "unspecified"
       schema       = v.schema != null ? v.schema : local.first_tenant
       subjects     = v.subjects != null ? v.subjects : []
@@ -1558,22 +1570,22 @@ locals {
           match_type = "AtleastOne"
         }
       ]
-      global_alias                   = v.global_alias != null ? v.global_alias : ""
-      ip_data_plane_learning         = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
-      layer3_multicast               = v.layer3_multicast != null ? v.layer3_multicast : true
-      monitoring_policy              = v.monitoring_policy != null ? v.monitoring_policy : ""
-      alias                          = v.alias != null ? v.alias : ""
-      ospf_timers_per_address_family = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
-      ospf_timers                    = v.ospf_timers != null ? v.ospf_timers : "default"
-      policy_source_tenant           = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
-      policy_enforcement_direction   = v.policy_enforcement_direction != null ? v.policy_enforcement_direction : "ingress"
-      policy_enforcement_preference  = v.policy_enforcement_preference != null ? v.policy_enforcement_preference : "enforced"
-      preferred_group                = v.preferred_group != null ? v.preferred_group : false
-      sites                          = v.sites != null ? v.sites : []
-      schema                         = v.schema != null ? v.schema : local.first_tenant
-      template                       = v.template != null ? v.template : ""
-      tenant                         = v.tenant != null ? v.tenant : local.first_tenant
-      transit_route_tag_policy       = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
+      global_alias                          = v.global_alias != null ? v.global_alias : ""
+      ip_data_plane_learning                = v.ip_data_plane_learning != null ? v.ip_data_plane_learning : "enabled"
+      layer3_multicast                      = v.layer3_multicast != null ? v.layer3_multicast : false
+      monitoring_policy                     = v.monitoring_policy != null ? v.monitoring_policy : ""
+      alias                                 = v.alias != null ? v.alias : ""
+      ospf_timers_per_address_family        = v.ospf_timers_per_address_family != null ? v.ospf_timers_per_address_family : []
+      ospf_timers                           = v.ospf_timers != null ? v.ospf_timers : "default"
+      policy_source_tenant                  = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
+      policy_control_enforcement_direction  = v.policy_control_enforcement_direction != null ? v.policy_control_enforcement_direction : "ingress"
+      policy_control_enforcement_preference = v.policy_control_enforcement_preference != null ? v.policy_control_enforcement_preference : "enforced"
+      preferred_group                       = v.preferred_group != null ? v.preferred_group : false
+      sites                                 = v.sites != null ? v.sites : []
+      schema                                = v.schema != null ? v.schema : local.first_tenant
+      template                              = v.template != null ? v.template : ""
+      tenant                                = v.tenant != null ? v.tenant : local.first_tenant
+      transit_route_tag_policy              = v.transit_route_tag_policy != null ? v.transit_route_tag_policy : ""
     }
   }
 
@@ -1606,7 +1618,7 @@ locals {
       for k, v in value.epg_esg_collection_for_vrfs[0].contracts : {
         annotation        = value.annotation
         contract          = v.name
-        contract_type     = v.contract_type != null ? v.contract_type : "consumed" # interface|provider
+        contract_type     = v.contract_type
         contract_schema   = v.schema != null ? v.schema : value.schema
         contract_tenant   = v.tenant != null ? v.tenant : value.tenant
         contract_template = v.template != null ? v.template : value.template

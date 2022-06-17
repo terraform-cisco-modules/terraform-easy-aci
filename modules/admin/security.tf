@@ -37,7 +37,7 @@ variable "security" {
       - lockout_duration: (default: 60) — Duration in minutes for which login should be blocked.Duration in minutes for which future logins should be blocked Allowed range is 1-1440.
       - max_failed_attempts: (default: 5) — Maximum continuous failed logins before blocking user.max failed login attempts before blocking user login Allowed range is 1-15.
       - max_failed_attempts_window: (default: 5) — Time period for maximum continuous failed logins.times in minutes for max login failures to occur before blocking the user Allowed range is 1-720.
-    * maximum_validity_period: (default: 24) — Maximum Validity Period in hours.The maximum validity period for a webt oken. Allowed range is 4-24.
+    * maximum_validity_period: (default: 24) — Maximum Validity Period in hours.The maximum validity period for a web token. Allowed range is 4-24.
     * no_change_interval: (default: 24) — No Password Change Interval in Hours.A minimum period after a password change before the user can change the password again. Allowed range is 0-745.
     * password_change_interval_enforce: (optional) — he change count/change interval policy selector. This property enables you to select an option for enforcing password change. Allowed values are:
       - disable

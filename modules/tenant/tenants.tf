@@ -33,7 +33,7 @@ variable "tenants" {
     Nexus Dashboard Orchestrator Specific Attributes:
     * sites: (required when controller_type is ndo) — When using Nexus Dashboard Orchestrator the sites attribute is used to distinguish the site and cloud types.  Options are:
       - aws_access_key_id: (optional) — AWS Access Key Id. It must be provided if the AWS account is not trusted. This parameter will only have effect with vendor = aws.
-      - aws_account_id: (optional) — Id of AWS account. It's required when vendor is set to aws. This parameter will only have effect with vendor = aws
+      - aws_account_id: (optional) — Id of AWS account. It's required when vendor is set to aws. This parameter will only have effect with vendor = aws.
       - azure_access_type: (optional) — Type of Azure Account Configuration. Allowed values are managed, shared and credentials. Other Credentials are not required if azure_access_type is set to managed. This parameter will only have effect with vendor = azure.
         * credentials
         * managed: (default)
@@ -42,7 +42,7 @@ variable "tenants" {
       - azure_application_id: (optional) — Azure Application Id. It must be provided when azure_access_type to credentials. This parameter will only have effect with vendor = azure.
       - azure_shared_account_id: (optional) — Azure shared account Id. It must be provided when azure_access_type to shared. This parameter will only have effect with vendor = azure.
       - azure_subscription_id: (optional) — Azure subscription id. It's required when vendor is set to azure. This parameter will only have effect with vendor = azure.
-      - is_aws_account_trusted: (optional) — Azure Access Key ID.
+      - is_aws_account_trusted: (otpional) — Flag to Set the AWS Account to trusted.
       - site: (required) - Name of the Site to Associate to the Parent Tenant Object.
       - vendor: (optional) — The type of vendor to apply the tenant to.
         * aws
