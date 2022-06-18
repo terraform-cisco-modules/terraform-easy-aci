@@ -27,11 +27,11 @@ variable "contracts" {
               log                       = false
             }
           ]
-          filters     = []
-          match_type  = "AtleastOne"
-          name        = "**REQUIRED**"
-          qos_class   = "unspecified"
-          target_dscp = "unspecified"
+          filters              = []
+          label_match_criteria = "AtleastOne"
+          name                 = "**REQUIRED**"
+          qos_class            = "unspecified"
+          target_dscp          = "unspecified"
         }
       ]
       target_dscp = "unspecified"
@@ -82,9 +82,9 @@ variable "contracts" {
           - false: (default)
           - true
       - filters: (optional) — List of Filters to add to the Subject.
-      - match_type: (optional) — The Match criteria can be:
+      - label_match_criteria: (optional) — The Match criteria can be:
         * All
-        * AtleastOne
+        * AtleastOne: (default)
         * AtmostOne
         * None
       - name: (required) — The Name for the Subject/Filter.
@@ -96,7 +96,7 @@ variable "contracts" {
         * level5
         * level6
         * unspecified: (default)
-      - target_dscp: (optional) — The target differentiated services code point (DSCP) of the lsubject. The options are as follows:
+      - target_dscp: (optional) — The target differentiated services code point (DSCP). The options are as follows:
         * AF11 — low drop Priority
         * AF12 — medium drop Priority
         * AF13 — high drop Priority
@@ -120,7 +120,7 @@ variable "contracts" {
         * EF — Expedited Forwarding Critical
         * VA — Voice Admit
         * unspecified: (default)
-    * target_dscp: (optional) — The target differentiated services code point (DSCP) of the lsubject. The options are as follows:
+    * target_dscp: (optional) — The target differentiated services code point (DSCP). The options are as follows:
       - AF11 — low drop Priority
       - AF12 — medium drop Priority
       - AF13 — high drop Priority
@@ -186,11 +186,11 @@ variable "contracts" {
               log                       = optional(bool)
             }
           )))
-          filters     = list(string)
-          match_type  = optional(string)
-          name        = string
-          qos_class   = optional(string)
-          target_dscp = optional(string)
+          filters              = list(string)
+          label_match_criteria = optional(string)
+          name                 = string
+          qos_class            = optional(string)
+          target_dscp          = optional(string)
         }
       )))
       target_dscp = optional(string)
@@ -325,11 +325,11 @@ resource "aci_contract_subject" "contract_subjects" {
   for_each      = { for k, v in local.contract_subjects : k => v if v.contract_type == "standard" }
   annotation    = var.annotation
   contract_dn   = aci_contract.contracts[each.value.contract].id
-  cons_match_t  = each.value.match_type
+  cons_match_t  = each.value.label_match_criteria
   description   = each.value.description
   name          = each.value.name
   prio          = each.value.qos_class
-  prov_match_t  = each.value.match_type
+  prov_match_t  = each.value.label_match_criteria
   rev_flt_ports = each.value.apply_both_directions == true ? "yes" : "no"
   target_dscp   = each.value.target_dscp
 }
@@ -351,11 +351,11 @@ resource "aci_rest_managed" "oob_contract_subjects" {
   dn         = "uni/tn-${each.value.tenant}/oobbrc-${each.value.contract}/subj-${each.value.name}"
   class_name = "vzSubj"
   content = {
-    consMatchT  = each.value.match_type
+    consMatchT  = each.value.label_match_criteria
     descr       = each.value.description
     name        = each.value.name
     prio        = each.value.qos_class
-    provMatchT  = each.value.match_type
+    provMatchT  = each.value.label_match_criteria
     revFltPorts = each.value.apply_both_directions == true ? "yes" : "no"
     targetDscp  = each.value.target_dscp
   }

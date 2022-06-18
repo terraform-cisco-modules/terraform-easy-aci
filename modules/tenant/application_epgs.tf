@@ -198,9 +198,9 @@ variable "application_epgs" {
       - disabled: (default)
       - enabled
     * has_multicast_source: (optional) — 
-    * label_match_criteria: (optional) — The Match criteria can be:
+    * label_match_criteria: (optional) — The provider label match criteria.  Options are:
       - All
-      - AtleastOne
+      - AtleastOne: (default)
       - AtmostOne
       - None
     * intra_epg_isolation: (optional) — Name of a Custom QoS Policy to assign to the EPG.
@@ -226,7 +226,7 @@ variable "application_epgs" {
         * vpc — Path Type is Virtual-Port-Channel
       - pod: (default: 1) — Identifier for the Pod the Nodes are assigned to for the static path.
       - vlans: For VLAN and VXLAN this is a list of One.  For micro_seg and qinq this is a list of Two.
-    * tenant: (default: local.first_tenant) — The name of the tenant to for the Application EPG.
+    * tenant: (default: local.first_tenant) — The name of the tenant for the Application EPG.
     APIC Specific Attributes:
     * alias: (optional) — The Name Alias feature (or simply "Alias" where the setting appears in the GUI) changes the displayed name of objects in the APIC GUI. While the underlying object name cannot be changed, the administrator can override the displayed name by entering the desired name in the Alias field of the object properties menu. In the GUI, the alias name then appears along with the actual object name in parentheses, as name_alias (object_name).
     * annotation: (optional) — An annotation will mark an Object in the GUI with a small blue circle, signifying that it has been modified by  an external source/tool.  Like Nexus Dashboard Orchestrator or in this instance Terraform.

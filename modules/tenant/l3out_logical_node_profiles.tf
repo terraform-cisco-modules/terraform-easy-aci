@@ -6,12 +6,11 @@ ________________________________________________________________________________
 variable "l3out_logical_node_profiles" {
   default = {
     "default" = {
-      alias           = ""
-      annotation      = ""
-      annotations     = []
-      color_tag       = "yellow-green"
-      controller_type = "apic"
-      description     = ""
+      alias       = ""
+      annotation  = ""
+      annotations = []
+      color_tag   = "yellow-green"
+      description = ""
       interface_profiles = [
         {
           arp_policy = ""
@@ -188,10 +187,6 @@ variable "l3out_logical_node_profiles" {
     Key: Name of the L3Out Logical Node Profile.
     * alias: A changeable name for a given object. While the name of an object, once created, cannot be changed, the name_alias is a field that can be changed.
     * annotation: A search keyword or term that is assigned to the Object. Tags allow you to group multiple objects by descriptive names. You can assign the same tag name to multiple objects and you can assign one or more tag names to a single object.
-    * controller_type: What is the type of controller.  Options are:
-      - apic: For APIC Controllers
-      - ndo: For Nexus Dashboard Orchestrator
-    * description: Description to add to the Object.  The description can be up to 128 alphanumeric characters.
     hsrp_interface_profiles - Group of Objects to add as an HSRP interface profile
     * alias: (optional) — Name name_alias for object L3-out HSRP interface profile.
     * annotation: (optional) — Annotation for object L3-out HSRP interface profile.
@@ -238,6 +233,23 @@ variable "l3out_logical_node_profiles" {
           - next_hop_type: (optional) — Component type.
           - Allowed values: "none", "prefix". Default value: "prefix".
           - preference: (optional) — Administrative preference value for this route. Range: "1" to "255" Allowed values: "unspecified". Default value: "unspecified".
+    # Argument Reference
+    # addr: (optional) — Peer address for L3out floating SVI object. Default value: "0.0.0.0".
+    # annotation: (optional) — Annotation for L3out floating SVI object.
+    # autostate: (optional) — Autostate for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "disabled".
+    # description: (optional) — Description for L3out floating SVI object.
+    # encap: (required) — Port encapsulation for L3out floating SVI object.
+    # encap_scope: (optional) — Encap scope for L3out floating SVI object. Allowed values are "ctx" and "local". Default value is "local".
+    # if_inst_t: (optional) — Interface type for L3out floating SVI object. Allowed values are "ext-svi", "l3-port", "sub-interface" and "unspecified". Default value is "unspecified".
+    # ipv6_dad: (optional) — IPv6 dad for L3out floating SVI object. Allowed values are "disabled" and "enabled". Default value is "enabled".
+    # ll_addr: (optional) — Link local address for L3out floating SVI object. Default value: "::".
+    # logical_interface_profile_dn: (required) — Distinguished name of parent logical interface profile object.
+    # mac: (optional) — MAC address for L3out floating SVI object.
+    # mode: (optional) — BGP domain mode for L3out floating SVI object. Allowed values are "native", "regular" and "untagged". Default value is "regular".
+    # mtu: (optional) — Administrative MTU port on the aggregated interface for L3out floating SVI object. Range of allowed values is "576" to "9216". Default value is "inherit".
+    # node_dn: (required) — Distinguished name of the node for L3out floating SVI object.
+    # relation_l3ext_rs_dyn_path_att: (optional) — Relation to class infraDomP. Cardinality - N_TO_M. Type - Set of String.
+    # target_dscp: (optional) — Target DSCP for L3out floating SVI object. Allowed values are "AF11", "AF12", "AF13", "AF21", "AF22", "AF23", "AF31", "AF32", "AF33", "AF41", "AF42", "AF43", "CS0", "CS1", "CS2", "CS3", "CS4", "CS5", "CS6", "CS7", "EF", "VA" and "unspecified". Default value is "unspecified".
   EOT
   type = map(object(
     {
@@ -249,9 +261,8 @@ variable "l3out_logical_node_profiles" {
           value = string
         }
       )))
-      color_tag       = optional(string)
-      controller_type = optional(string)
-      description     = optional(string)
+      color_tag   = optional(string)
+      description = optional(string)
       interface_profiles = optional(list(object(
         {
           arp_policy = optional(string)

@@ -19,8 +19,8 @@ variable "vrfs" {
       endpoint_retention_policy       = "default"
       epg_esg_collection_for_vrfs = [
         {
-          contracts  = []
-          match_type = "AtleastOne"
+          contracts            = []
+          label_match_criteria = "AtleastOne"
         }
       ]
       global_alias                          = ""
@@ -67,7 +67,7 @@ variable "vrfs" {
           - consumed
           - contract_interface
           - provided
-      - match_type: (optional) — Represents the provider label match criteria. The options are:
+      - label_match_criteria: (optional) — Represents the provider label match criteria. The options are:
         * All
         * AtleastOne: (default)
         * AtmostOne
@@ -168,7 +168,7 @@ variable "vrfs" {
               tenant        = optional(string)
             }
           )))
-          match_type = optional(string)
+          label_match_criteria = optional(string)
         }
       )))
       global_alias           = optional(string)
@@ -394,7 +394,7 @@ resource "aci_rest_managed" "vzany_provider_contracts" {
   class_name = "vzRsAnyToProv"
   content = {
     annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
-    matchT       = each.value.match_type
+    matchT       = each.value.label_match_criteria
     prio         = each.value.qos_class
     tnVzBrCPName = each.value.contract
   }
@@ -455,7 +455,7 @@ resource "aci_any" "vz_any" {
   annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = each.value.description
   pref_gr_memb = each.value.preferred_group == true ? "enabled" : "disabled"
-  match_t      = each.value.epg_esg_collection_for_vrfs[0].match_type
+  match_t      = each.value.epg_esg_collection_for_vrfs[0].label_match_criteria
   vrf_dn       = aci_vrf.vrfs[each.key].id
 }
 
