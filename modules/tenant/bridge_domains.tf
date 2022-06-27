@@ -339,7 +339,7 @@ resource "aci_bridge_domain" "bridge_domains" {
     aci_vrf.vrfs,
     # aci_l3_outside.l3outs
   ]
-  for_each = { for k, v in local.bridge_domains : k => v if controller_type == "apic" }
+  for_each = { for k, v in local.bridge_domains : k => v if v.controller_type == "apic" }
   # General
   annotation                = each.value.general[0].annotation != "" ? each.value.general[0].annotation : var.annotation
   arp_flood                 = each.value.general[0].arp_flooding == true ? "yes" : "no"

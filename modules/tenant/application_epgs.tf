@@ -480,7 +480,7 @@ resource "aci_epg_to_domain" "epg_to_domains" {
     regexall("physical", each.value.domain_type)
     ) > 0 ? "uni/phys-${each.value.domain}" : length(
     regexall("vmm", each.value.domain_type)
-  ) > 0 ? "uni/vmmp-${each.value.vmm_vendor}/dom-${each.value.domain}" : ""
+  ) > 0 ? "uni/vmmp-${each.value.switch_provider}/dom-${each.value.domain}" : ""
   annotation = each.value.annotation != null ? each.value.annotation : var.annotation
   binding_type = length(
     regexall("physical", each.value.domain_type)
