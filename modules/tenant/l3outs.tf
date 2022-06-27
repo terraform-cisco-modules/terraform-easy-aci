@@ -79,6 +79,7 @@ variable "l3outs" {
       l3_domain             = ""
       pim                   = false
       pimv6                 = false
+      provider_label        = ""
       ospf_external_profile = []
       /* Example
       ospf_external_profile = [
@@ -256,6 +257,7 @@ variable "l3outs" {
     * pimv6: (optional) — ** Not supported with VPC L3Out Node Profiles.  Enables or disables PIMv6 (multicast) on the L3Out.  Enabling PIMv6 is the equivalent of navigating to tenant > Networking > VRFs > vrf > Multicast IPv6 and selecting this L3Out in the Multicast IPv6 window.
       - false: (default)
       - true
+    * provider_label: (optional) — The contract provider label for this policy. Any tenant that uses this Layer 3 EVPN routed connection must specify this label as its consumer label.
     * policy_source_tenant: (default: l3out tenant) — Name of a source tenant for policies.
     * ospf_external_profile: (optional) — 
       - ospf_area_cost: (default: 1) — The OSPF area cost. The range is from 0 to 16777215.
@@ -330,6 +332,7 @@ variable "l3outs" {
           value = string
         }
       )))
+      consumer_label  = optional(string)
       controller_type = optional(string)
       description     = optional(string)
       enable_bgp      = optional(bool)
@@ -365,6 +368,7 @@ variable "l3outs" {
               aggregate = optional(list(object(
                 {
                   aggregate_export        = optional(bool)
+                  aggregate_import        = optional(bool)
                   aggregate_shared_routes = optional(bool)
                 }
               )))
@@ -406,6 +410,7 @@ variable "l3outs" {
       pim                  = optional(bool)
       pimv6                = optional(bool)
       policy_source_tenant = optional(string)
+      provider_label        = optional(string)
       ospf_external_profile = optional(list(object(
         {
           ospf_area_cost = optional(number)

@@ -549,6 +549,7 @@ locals {
       alias                 = v.alias != null ? v.alias : ""
       annotation            = v.annotation != null ? v.annotation : ""
       annotations           = v.annotations != null ? v.annotations : []
+      consumer_label        = v.consumer_label != null ? v.consumer_label : ""
       controller_type       = v.controller_type != null ? v.controller_type : "apic"
       description           = v.description != null ? v.description : ""
       enable_bgp            = v.enable_bgp != null ? v.enable_bgp : false
@@ -560,6 +561,7 @@ locals {
       pimv6                 = v.pimv6 != null ? v.pimv6 : false
       ospf_external_profile = v.ospf_external_profile != null ? v.ospf_external_profile : []
       policy_source_tenant  = v.policy_source_tenant != null ? v.policy_source_tenant : local.first_tenant
+      provider_label        = v.provider_label != null ? v.provider_label : ""
       route_control_for_dampening = v.route_control_for_dampening != null ? [
         for s in v.route_control_for_dampening : {
           address_family = s.address_family != null ? s.address_family : "ipv4"
@@ -684,6 +686,7 @@ locals {
     for k, v in local.external_epg_subnets_loop_2 : [
       for s in v.subnets : {
         aggregate_export                  = v.aggregate_export
+        aggregate_import                  = v.aggregate_import
         aggregate_shared_routes           = v.aggregate_shared_routes
         annotation                        = v.annotation
         controller_type                   = v.controller_type
@@ -692,9 +695,10 @@ locals {
         ext_epg                           = v.ext_epg
         route_control_profiles            = v.route_control_profiles
         route_summarization_policy        = v.route_summarization_policy
-        external_subnets_for_external_epg = v.external_subnets_for_external_epg
-        shared_security_import_subnet     = v.shared_security_import_subnet
         export_route_control_subnet       = v.export_route_control_subnet
+        external_subnets_for_external_epg = v.external_subnets_for_external_epg
+        import_route_control_subnet       = v.import_route_control_subnet
+        shared_security_import_subnet     = v.shared_security_import_subnet
         shared_route_control_subnet       = v.shared_route_control_subnet
         subnet                            = s
       }
