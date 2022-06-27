@@ -156,9 +156,9 @@ variable "l3outs" {
           - level5
           - level6
           - unspecified: (default)
-        * schema: (optional) — 
-        * template: (optional) — 
-        * tenant: (optional) — 
+        * schema: (optional) — The Schema name that contains the Contract.  If Undefined then the L3Out Schema will be used.
+        * template: (optional) — The Template name that contains the Contract.  If Undefined then the L3Out Template will be used.
+        * tenant: (optional) — The Name of the Tenant for the Contract.  If Undefined then the L3Out Tenant will be used.
       - description: (optional) — Description to add to the Object.  The description can be up to 128 characters.
       - epg_type: (optional) — The type of External EPG to create.  Options are:
         * oob

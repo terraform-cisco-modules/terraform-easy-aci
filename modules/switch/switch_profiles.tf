@@ -149,7 +149,7 @@ resource "aci_rest_managed" "fabric_membership" {
       "remote-leaf", each.value.node_type)) > 0 ? "remote-leaf-wan" : length(regexall(
     "tier-2-leaf", each.value.node_type)) > 0 ? each.value.node_type : "unspecified"
     podId  = each.value.pod_id
-    role   = each.value.role == "spine" ? "spine" : "leaf"
+    role   = each.value.role != null ? each.value.role : "unspecified"
     serial = each.value.serial_number
   }
 }
