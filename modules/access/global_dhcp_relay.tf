@@ -1,9 +1,9 @@
 /*_____________________________________________________________________________________________________________________
 
-Tenant — Policies — DHCP Relay — Variables
+Fabric — Access Policies — Global - DHCP Relay — Variables
 _______________________________________________________________________________________________________________________
 */
-variable "policies_dhcp_relay" {
+variable "global_dhcp_relay" {
   default = {
     "default" = {
       annotation  = ""
@@ -15,13 +15,10 @@ variable "policies_dhcp_relay" {
           epg                 = "default"
           epg_type            = "application_epg"
           l3out               = ""
-          tenant              = ""
+          tenant              = "common"
         }
       ]
-      mode  = "visible"
-      /*  If undefined the variable of local.first_tenant will be used for:
-      tenant = local.first_tenant
-      */
+      mode = "visible"
     }
   }
   description = <<-EOT
@@ -40,7 +37,6 @@ variable "policies_dhcp_relay" {
     * mode: (optional) — DHCP relay policy mode. Allowed Values are:
       - visible: (default)
       - not-visible
-    * tenant: (default: local.first_tenant) — Name of parent Tenant object.
   EOT
   type = map(object(
     {
@@ -56,8 +52,7 @@ variable "policies_dhcp_relay" {
           tenant              = string
         }
       )))
-      mode   = optional(string)
-      tenant = optional(string)
+      mode = optional(string)
     }
   ))
 }
@@ -67,31 +62,36 @@ variable "policies_dhcp_relay" {
 
 API Information:
  - Class: "dhcpRelayPol"
- - Distinguised Name: "uni/tn-{name}/relayp-{name}"
+ - Distinguised Name: "uni/infra-{name}/relayp-{name}"
 GUI Location:
- - Tenants > {tenant} > Policies > Protocol > DHCP > Relay Policies > {name}
+ - Fabric > Access Policies > Policies > Global > DHCP Relay > {name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_dhcp_relay_policy" "policies_dhcp_relay" {
-  depends_on = [
-    aci_tenant.tenants
-  ]
-  for_each    = local.policies_dhcp_relay
-  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
-  description = each.value.description
-  mode        = each.value.mode
-  name        = each.key
-  owner       = "tenant"
-  tenant_dn   = aci_tenant.tenants[each.value.tenant].id
-  dynamic "relation_dhcp_rs_prov" {
-    for_each = each.value.dhcp_relay_providers
-    content {
-      addr = relation_dhcp_rs_prov.value.address
-      tdn = length(
-        regexall("external_epg", relation_dhcp_rs_prov.value.epg_type)
-        ) > 0 ? "uni/tn-${relation_dhcp_rs_prov.value.tenant}/out-${relation_dhcp_rs_prov.value.l3out}/instP-${relation_dhcp_rs_prov.value.epg}" : length(
-        regexall("application_epg", relation_dhcp_rs_prov.value.epg_type)
-      ) > 0 ? "uni/tn-${relation_dhcp_rs_prov.value.tenant}/ap-${relation_dhcp_rs_prov.value.application_profile}/epg-${relation_dhcp_rs_prov.value.epg}" : ""
+resource "aci_rest_managed" "global_dhcp_relay" {
+  for_each   = local.global_dhcp_relay
+  class_name = "dhcpRelayP"
+  dn         = "uni/infra/relayp-${each.key}"
+  content = {
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    descr      = each.value.description
+    mode       = each.value.mode
+    name       = each.key
+    owner      = "infra"
+  }
+  child {
+    rn = length(
+        regexall("external_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+        ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/out-${each.value.dhcp_relay_providers[0]["l3out"]}/instP-${each.value.dhcp_relay_providers[0]["epg"]}]" : length(
+        regexall("application_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+      ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/ap-${each.value.dhcp_relay_providers[0]["application_profile"]}/epg-${each.value.dhcp_relay_providers[0]["epg"]}]" : ""
+    class_name = "dhcpRsProv"
+    content = {
+      addr = each.value.dhcp_relay_providers[0]["address"]
+      tDn = length(
+        regexall("external_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+        ) > 0 ? "uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/out-${each.value.dhcp_relay_providers[0]["l3out"]}/instP-${each.value.dhcp_relay_providers[0]["epg"]}" : length(
+        regexall("application_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+      ) > 0 ? "uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/ap-${each.value.dhcp_relay_providers[0]["application_profile"]}/epg-${each.value.dhcp_relay_providers[0]["epg"]}" : ""
     }
   }
 }

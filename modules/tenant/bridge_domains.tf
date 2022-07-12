@@ -19,7 +19,17 @@ variable "bridge_domains" {
           rogue_coop_exception_list              = []
         }
       ]
-      controller_type = "apic"
+      controller_type   = "apic"
+      dhcp_relay_labels = []
+      /* example dhcp_relay_labels
+      dhcp_relay_labels = [
+        {
+          dhcp_option_policy = ""
+          names = ["default"]
+          scope = "infra"
+        }
+      ]
+      */
       general = [
         {
           advertise_host_routes         = false
@@ -126,6 +136,12 @@ variable "bridge_domains" {
     * controller_type: (optional) — The type of controller.  Options are:
       - apic: (default)
       - ndo
+    * dhcp_relay_labels: (optional) — DHCP Relay Policies to assign to the bridge domain.
+      - dhcp_option_policy: (optional) — Name of the DHCP option policy to assign to the relay labels.
+      - names: (required) — List of DHCP Relay Policies to assign to the bridge domain
+      - scope: (default: infra) —  The owner of the target relay. The DHCP relay is any host that forwards DHCP packets between clients and servers. The relays are used to forward requests and replies between clients and servers when they are not on the same physical subnet. The relay owner can be:
+        * infra — The owner is the infrastructure
+        * tenant — The owner is the tenant
     * general: (optional) — Map of General Configuration Parameters for the Bridge Domain.
       - advertise_host_routes: (optional) — .  Options are:
         * false: (default)
@@ -254,6 +270,13 @@ variable "bridge_domains" {
         }
       )))
       controller_type = optional(string)
+      dhcp_relay_labels = optional(list(object(
+        {
+          dhcp_option_policy = optional(string)
+          names              = list(string)
+          scope              = optional(string)
+        }
+      )))
       general = list(object(
         {
           advertise_host_routes         = optional(bool)
@@ -404,6 +427,50 @@ resource "aci_bridge_domain" "bridge_domains" {
   relation_fv_rs_bd_to_fhs = each.value.advanced_troubleshooting[0
     ].first_hop_security_policy != "" ? "uni/tn-${each.value.policy_source_tenant}/bdpol-${each.value.advanced_troubleshooting[0
   ].first_hop_security_policy}" : ""
+  # class: dhcpRelayP
+  # dynamic "relation_fv_rs_bd_to_relay_p" {
+  #   for_each = each.value.dhcp_relay_labels
+  #   content {
+  #     owner = relation_fv_rs_bd_to_relay_p.value.owner
+  #     name = relation_fv_rs_bd_to_relay_p.value.name
+  #   }
+  # }
+}
+
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "fvSubnet"
+ - Distinguished Name: "/uni/tn-{Tenant}/BD-{bridge_domain}/subnet-[{subnet}]"
+GUI Location:
+ - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Subnets
+_______________________________________________________________________________________________________________________
+*/
+resource "aci_rest_managed" "bridge_domain_dhcp_relay_labels" {
+  depends_on = [
+    aci_bridge_domain.bridge_domains,
+  ]
+  for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
+  class_name = "dhcpLbl"
+  dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}"
+  content = {
+    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    name       = each.value.name
+    owner      = each.value.scope
+  }
+}
+
+resource "aci_rest_managed" "bridge_domain_dhcp_relay_options" {
+  depends_on = [
+    aci_bridge_domain.bridge_domains,
+    aci_rest_managed.bridge_domain_dhcp_relay_labels
+  ]
+  for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" && v.dhcp_option_policy != "" }
+  class_name = "dhcpRsDhcpOptionPol"
+  dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}/rsdhcpOptionPol"
+  content = {
+    tDn = "uni/tn-${each.value.tenant}/dhcpoptpol-${each.value.dhcp_option_policy}"
+  }
 }
 
 

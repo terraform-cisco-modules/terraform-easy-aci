@@ -60,6 +60,29 @@ locals {
 
 
   #===================================
+  # Global - DHCP Relay 
+  #===================================
+
+  global_dhcp_relay = {
+    for k, v in var.global_dhcp_relay : k => {
+      annotation  = v.annotation != null ? v.annotation : ""
+      description = v.description != null ? v.description : ""
+      dhcp_relay_providers = v.dhcp_relay_providers != null ? { for key, value in v.dhcp_relay_providers : key =>
+        {
+          address             = value.address
+          application_profile = value.application_profile != null ? value.application_profile : "default"
+          epg                 = value.epg != null ? value.epg : "default"
+          epg_type            = value.epg_type != null ? value.epg_type : "application_epg"
+          l3out               = value.l3out != null ? value.l3out : ""
+          tenant              = value.tenant != null ? value.tenant : "common"
+        }
+      } : {}
+      mode = v.mode != null ? v.mode : "visible"
+    }
+  }
+
+
+  #===================================
   # Error Disable Recovery Policy
   #===================================
 

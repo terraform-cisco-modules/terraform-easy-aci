@@ -1189,14 +1189,13 @@ locals {
         {
           address             = value.address
           application_profile = value.application_profile != null ? value.application_profile : "default"
-          epg                 = value.epg != null ? v.epg : "default"
-          epg_type            = value.epg_type != null ? v.epg_type : "application_epg"
-          l3out               = value.l3out != null ? v.l3out : ""
-          tenant              = value.tenant != null ? v.tenant : local.first_tenant
+          epg                 = value.epg != null ? value.epg : "default"
+          epg_type            = value.epg_type != null ? value.epg_type : "application_epg"
+          l3out               = value.l3out != null ? value.l3out : ""
+          tenant              = value.tenant != null ? value.tenant : local.first_tenant
         }
       } : {}
       mode   = v.mode != null ? v.mode : "visible"
-      owner  = v.owner != null ? v.owner : "infra"
       tenant = v.tenant != null ? v.tenant : local.first_tenant
     }
   }

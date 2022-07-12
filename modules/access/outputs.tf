@@ -27,6 +27,12 @@ output "global_attachable_access_entity_profiles" {
   ) : v => aci_attachable_access_entity_profile.global_attachable_access_entity_profiles[v].id } : {}
 }
 
+output "global_dhcp_relay" {
+  value = local.global_dhcp_relay != {} ? { for v in sort(
+    keys(aci_rest_managed.global_dhcp_relay)
+  ) : v => aci_rest_managed.global_dhcp_relay[v].id } : {}
+}
+
 output "global_error_disabled_recovery_policy" {
   value = local.global_error_disabled_recovery_policy != {} ? { for v in sort(
     keys(aci_error_disable_recovery.global_error_disabled_recovery_policy)

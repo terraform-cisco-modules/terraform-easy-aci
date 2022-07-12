@@ -6,6 +6,7 @@ You can copy this file into the access directory and modify the list according t
 domains_layer3                           = {}
 domains_physical                         = {}
 global_attachable_access_entity_profiles = {}
+global_dhcp_relay                        = {}
 global_error_disabled_recovery_policy    = {}
 global_mcp_instance_policy_default       = {}
 global_qos_class                         = {}
