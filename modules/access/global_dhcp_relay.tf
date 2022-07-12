@@ -80,10 +80,10 @@ resource "aci_rest_managed" "global_dhcp_relay" {
   }
   child {
     rn = length(
-        regexall("external_epg", each.value.dhcp_relay_providers[0]["epg_type"])
-        ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/out-${each.value.dhcp_relay_providers[0]["l3out"]}/instP-${each.value.dhcp_relay_providers[0]["epg"]}]" : length(
-        regexall("application_epg", each.value.dhcp_relay_providers[0]["epg_type"])
-      ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/ap-${each.value.dhcp_relay_providers[0]["application_profile"]}/epg-${each.value.dhcp_relay_providers[0]["epg"]}]" : ""
+      regexall("external_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+      ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/out-${each.value.dhcp_relay_providers[0]["l3out"]}/instP-${each.value.dhcp_relay_providers[0]["epg"]}]" : length(
+      regexall("application_epg", each.value.dhcp_relay_providers[0]["epg_type"])
+    ) > 0 ? "rsprov-[uni/tn-${each.value.dhcp_relay_providers[0]["tenant"]}/ap-${each.value.dhcp_relay_providers[0]["application_profile"]}/epg-${each.value.dhcp_relay_providers[0]["epg"]}]" : ""
     class_name = "dhcpRsProv"
     content = {
       addr = each.value.dhcp_relay_providers[0]["address"]

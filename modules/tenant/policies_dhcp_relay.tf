@@ -18,7 +18,7 @@ variable "policies_dhcp_relay" {
           tenant              = ""
         }
       ]
-      mode  = "visible"
+      mode = "visible"
       /*  If undefined the variable of local.first_tenant will be used for:
       tenant = local.first_tenant
       */

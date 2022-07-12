@@ -1233,7 +1233,6 @@ locals {
         }
       } : {}
       mode   = v.mode != null ? v.mode : "visible"
-      owner  = v.owner != null ? v.owner : "infra"
       tenant = v.tenant != null ? v.tenant : local.first_tenant
     }
   }

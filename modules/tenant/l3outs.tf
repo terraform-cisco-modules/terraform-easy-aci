@@ -410,7 +410,7 @@ variable "l3outs" {
       pim                  = optional(bool)
       pimv6                = optional(bool)
       policy_source_tenant = optional(string)
-      provider_label        = optional(string)
+      provider_label       = optional(string)
       ospf_external_profile = optional(list(object(
         {
           ospf_area_cost = optional(number)
