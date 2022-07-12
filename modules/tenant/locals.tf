@@ -1190,7 +1190,7 @@ locals {
           address             = value.address
           application_profile = value.application_profile != null ? value.application_profile : "default"
           epg                 = value.epg != null ? v.epg : "default"
-          epg_type            = value.epg_type != null ? v.epg_type : "epg"
+          epg_type            = value.epg_type != null ? v.epg_type : "application_epg"
           l3out               = value.l3out != null ? v.l3out : ""
           tenant              = value.tenant != null ? v.tenant : local.first_tenant
         }

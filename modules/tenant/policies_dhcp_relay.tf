@@ -13,7 +13,7 @@ variable "policies_dhcp_relay" {
           address             = "198.18.10.1"
           application_profile = "default"
           epg                 = "default"
-          epg_type            = "epg"
+          epg_type            = "application_epg"
           l3out               = ""
           tenant              = ""
         }
@@ -34,9 +34,9 @@ variable "policies_dhcp_relay" {
       - application_profile: (required if epg_type is epg) — Name of parent Application Profile object.
       - epg: (default: default) — Name of the EPG/External-EPG Object.
       - epg_type: (optional) — The Type of EPG to assign to the DHCP relay Provider.
-        * epg: (default)
-        * ext_epg
-      - l3out: (required if epg_type is ext_epg) — Name of parent L3Out object.
+        * application_epg: (default)
+        * external_epg
+      - l3out: (required if epg_type is external_epg) — Name of parent L3Out object.
       - tenant: (required) — Name of parent Tenant object.
     * mode: (optional) — DHCP relay policy mode. Allowed Values are:
       - visible: (default)
@@ -93,9 +93,9 @@ resource "aci_dhcp_relay_policy" "policies_dhcp_relay" {
     content {
       addr = relation_dhcp_rs_prov.value.address
       tdn = length(
-        regexall("ext_epg", relation_dhcp_rs_prov.value.epg_type)
+        regexall("external_epg", relation_dhcp_rs_prov.value.epg_type)
         ) > 0 ? "uni/tn-${relation_dhcp_rs_prov.value.tenant}/out-${relation_dhcp_rs_prov.value.l3out}/instP-${relation_dhcp_rs_prov.value.epg}" : length(
-        regexall("epg", relation_dhcp_rs_prov.value.epg_type)
+        regexall("application_epg", relation_dhcp_rs_prov.value.epg_type)
       ) > 0 ? "uni/tn-${relation_dhcp_rs_prov.value.tenant}/ap-${relation_dhcp_rs_prov.value.appication_profile}/epg-${relation_dhcp_rs_prov.value.epg}" : ""
     }
   }
