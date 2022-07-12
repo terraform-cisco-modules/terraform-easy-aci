@@ -243,7 +243,14 @@ locals {
           rogue_coop_exception_list              = []
         }
       ]
-      controller_type      = value.controller_type != null ? value.controller_type : "apic"
+      controller_type = value.controller_type != null ? value.controller_type : "apic"
+      dhcp_relay_labels = value.dhcp_relay_labels != null ? [
+        for k, v in value.dhcp_relay_labels : {
+          dhcp_option_policy = v.dhcp_option_policy != null ? v.dhcp_option_policy : ""
+          scope              = v.scope != null ? v.scope : "infra"
+          names              = v.names
+        }
+      ] : []
       policy_source_tenant = value.policy_source_tenant != null ? value.policy_source_tenant : local.first_tenant
       schema               = value.schema != null ? value.schema : local.first_tenant
       sites                = value.sites != null ? value.sites : []
@@ -325,6 +332,36 @@ locals {
       ]
     }
   }
+
+  bd_dhcp_relay_labels_loop = flatten([
+    for key, value in local.bridge_domains : [
+      for k, v in value.dhcp_relay_labels : {
+        annotation         = value.general[0].annotation
+        bridge_domain      = key
+        controller_type    = value.controller_type
+        dhcp_option_policy = v.dhcp_option_policy
+        names              = v.names
+        scope              = v.scope
+        tenant             = value.tenant
+      }
+    ]
+  ])
+  bridge_domain_labels = { for k, v in local.bd_dhcp_relay_labels_loop : "${v.bridge_domain}_dhcp_labels" => v }
+
+  dhcp_relay_labels_loop = flatten([
+    for k, v in local.bridge_domain_labels : [
+      for s in v.names : {
+        annotation         = v.annotation
+        bridge_domain      = v.bridge_domain
+        controller_type    = v.controller_type
+        dhcp_option_policy = v.dhcp_option_policy
+        name               = s
+        scope              = v.scope
+        tenant             = v.tenant
+      }
+    ]
+  ])
+  bridge_domain_dhcp_relay_labels = { for k, v in local.dhcp_relay_labels_loop : "${v.bridge_domain}_${v.name}" => v }
 
   bridge_domain_subnets_loop = flatten([
     for key, value in local.bridge_domains : [
@@ -1190,12 +1227,13 @@ locals {
           address             = value.address
           application_profile = value.application_profile != null ? value.application_profile : "default"
           epg                 = value.epg != null ? value.epg : "default"
-          epg_type            = value.epg_type != null ? value.epg_type : "application_epg"
+          epg_type            = value.epg_type != null ? value.epg_type : "epg"
           l3out               = value.l3out != null ? value.l3out : ""
           tenant              = value.tenant != null ? value.tenant : local.first_tenant
         }
       } : {}
       mode   = v.mode != null ? v.mode : "visible"
+      owner  = v.owner != null ? v.owner : "infra"
       tenant = v.tenant != null ? v.tenant : local.first_tenant
     }
   }
