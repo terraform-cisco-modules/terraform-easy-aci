@@ -393,7 +393,7 @@ resource "aci_rest_managed" "vzany_provider_contracts" {
   dn         = "uni/tn-${each.value.tenant}/ctx-${each.value.vrf}/any/rsanyToProv-${each.value.contract}"
   class_name = "vzRsAnyToProv"
   content = {
-    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     matchT       = each.value.label_match_criteria
     prio         = each.value.qos_class
     tnVzBrCPName = each.value.contract
@@ -413,7 +413,7 @@ resource "aci_rest_managed" "vzany_contracts" {
     "interface", each.value.contract_type)
   ) > 0 ? "vzRsAnyToConsIf" : ""
   content = {
-    annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
     prio         = each.value.qos_class
     tnVzBrCPName = each.value.contract
   }

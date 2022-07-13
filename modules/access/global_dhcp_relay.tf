@@ -72,7 +72,7 @@ resource "aci_rest_managed" "global_dhcp_relay" {
   class_name = "dhcpRelayP"
   dn         = "uni/infra/relayp-${each.key}"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     descr      = each.value.description
     mode       = each.value.mode
     name       = each.key
