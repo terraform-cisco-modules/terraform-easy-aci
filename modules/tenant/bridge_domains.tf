@@ -454,7 +454,7 @@ resource "aci_rest_managed" "bridge_domain_dhcp_relay_labels" {
   class_name = "dhcpLbl"
   dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}"
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     name       = each.value.name
     owner      = each.value.scope
   }

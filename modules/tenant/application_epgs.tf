@@ -610,7 +610,7 @@ resource "aci_rest_managed" "contract_to_oob_epgs" {
   dn         = "uni/tn-${each.value.tenant}/mgmtp-default/oob-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
   class_name = each.value.contract_class
   content = {
-    annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
     # matchT = each.value.match_type
     prio = each.value.qos_class
   }
@@ -626,7 +626,7 @@ resource "aci_rest_managed" "contract_to_inb_epgs" {
   dn         = "uni/tn-${each.value.tenant}/mgmtp-default/inb-${each.value.application_epg}/${each.value.contract_dn}-${each.value.contract}"
   class_name = each.value.contract_class
   content = {
-    annotation = each.value.annotation != null ? each.value.annotation : var.annotation
+    # annotation = each.value.annotation != null ? each.value.annotation : var.annotation
     # matchT = each.value.match_type
     prio = each.value.qos_class
   }
