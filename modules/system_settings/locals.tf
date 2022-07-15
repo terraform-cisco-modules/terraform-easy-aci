@@ -156,4 +156,25 @@ locals {
     }
   }
 
+
+  #__________________________________________________________
+  #
+  # PTP and Latency Measurement Variables
+  #__________________________________________________________
+
+  ptp_and_latency_measurement = {
+    for k, v in var.ptp_and_latency_measurement : k => {
+      annotation              = v.annotation != null ? v.annotation : ""
+      announce_interval       = v.announce_interval != null ? v.announce_interval : "1"
+      announce_timeout        = v.announce_timeout != null ? v.announce_timeout : 3
+      delay_request_interval  = v.delay_request_interval != null ? v.delay_request_interval : "-2"
+      global_domain           = v.global_domain != null ? v.global_domain : 0
+      global_priority_1       = v.global_priority_1 != null ? v.global_priority_1 : 255
+      global_priority_2       = v.global_priority_2 != null ? v.global_priority_2 : 255
+      precision_time_protocol = v.precision_time_protocol != null ? v.precision_time_protocol : "enabled"
+      ptp_profile             = v.ptp_profile != null ? v.ptp_profile : "AES67-2015"
+      sync_interval           = v.sync_interval != null ? v.sync_interval : "-3"
+    }
+  }
+
 }
