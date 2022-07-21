@@ -88,7 +88,10 @@ resource "aci_rest_managed" "ptp_and_latency_measurement" {
     fabAnnounceIntvl   = each.value.announce_interval
     fabAnnounceTimeout = each.value.announce_timeout
     fabDelayIntvl      = each.value.delay_request_interval
-    fabProfileTemplate = each.value.ptp_profile
+    fabProfileTemplate = length(
+      regexall("AES67-2015", each.value.ptp_profile)) > 0 ? "aes67" : length(
+      regexall("Default", each.value.ptp_profile)) > 0 ? "default" : length(
+      regexall("SMPTE-2059-2", each.value.ptp_profile)) > 0 ? "smtpe" : ""
     fabSyncIntvl       = each.value.sync_interval
     globalDomain       = each.value.global_domain
     prio1              = each.value.global_priority_1
