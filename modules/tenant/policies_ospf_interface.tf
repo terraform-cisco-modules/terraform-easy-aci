@@ -89,13 +89,12 @@ resource "aci_ospf_interface_policy" "policies_ospf_interface" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each  = local.policies_ospf_interface
-  tenant_dn = aci_tenant.tenants[each.value.tenant].id
-  # annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each    = local.policies_ospf_interface
+  tenant_dn   = aci_tenant.tenants[each.value.tenant].id
+  annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name        = each.key
   cost        = each.value.cost_of_interface == 0 ? "unspecified" : each.value.cost_of_interface
-  # Bug 805 Submitted
   ctrl = anytrue(
     [
       each.value.interface_controls[0].advertise_subnet,

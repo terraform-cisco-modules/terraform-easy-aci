@@ -440,45 +440,60 @@ resource "aci_bridge_domain" "bridge_domains" {
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "fvSubnet"
- - Distinguished Name: "/uni/tn-{Tenant}/BD-{bridge_domain}/subnet-[{subnet}]"
+ - Class: "dhcpLbl"
+ - Distinguished Name: "/uni/tn-{tenant}/BD-{bridge_domain}/dhcplbl-{name}"
 GUI Location:
- - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Subnets
+ - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > DHCP Relay > {name}
 _______________________________________________________________________________________________________________________
 */
-resource "aci_rest_managed" "bridge_domain_dhcp_relay_labels" {
+resource "aci_bd_dhcp_label" "bridge_domain_dhcp_relay_labels" {
   depends_on = [
     aci_bridge_domain.bridge_domains,
   ]
-  for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
-  class_name = "dhcpLbl"
-  dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}"
-  content = {
-    # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-    name  = each.value.name
-    owner = each.value.scope
-  }
+  for_each         = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
+  bridge_domain_dn = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}"
+  annotation       = each.value.annotation != "" ? each.value.annotation : var.annotation
+  name             = each.value.name
+  owner            = each.value.scope
+  relation_dhcp_rs_dhcp_option_pol = length(compact([each.value.dhcp_option_policy])
+  ) > 0 ? "uni/tn-${each.value.tenant}/dhcpoptpol-${each.value.dhcp_option_policy}" : ""
+  # description      = each.value.description
+  # tag              = each.value.tag
 }
 
-resource "aci_rest_managed" "bridge_domain_dhcp_relay_options" {
-  depends_on = [
-    aci_bridge_domain.bridge_domains,
-    aci_rest_managed.bridge_domain_dhcp_relay_labels
-  ]
-  for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" && v.dhcp_option_policy != "" }
-  class_name = "dhcpRsDhcpOptionPol"
-  dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}/rsdhcpOptionPol"
-  content = {
-    tDn = "uni/tn-${each.value.tenant}/dhcpoptpol-${each.value.dhcp_option_policy}"
-  }
-}
+# resource "aci_rest_managed" "bridge_domain_dhcp_relay_labels" {
+#   depends_on = [
+#     aci_bridge_domain.bridge_domains,
+#   ]
+#   for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
+#   class_name = "dhcpLbl"
+#   dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}"
+#   content = {
+#     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+#     name  = each.value.name
+#     owner = each.value.scope
+#   }
+# }
+# 
+# resource "aci_rest_managed" "bridge_domain_dhcp_relay_options" {
+#   depends_on = [
+#     aci_bridge_domain.bridge_domains,
+#     aci_rest_managed.bridge_domain_dhcp_relay_labels
+#   ]
+#   for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" && v.dhcp_option_policy != "" }
+#   class_name = "dhcpRsDhcpOptionPol"
+#   dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}/rsdhcpOptionPol"
+#   content = {
+#     tDn = "uni/tn-${each.value.tenant}/dhcpoptpol-${each.value.dhcp_option_policy}"
+#   }
+# }
 
 
 /*_____________________________________________________________________________________________________________________
 
 API Information:
  - Class: "fvSubnet"
- - Distinguished Name: "/uni/tn-{Tenant}/BD-{bridge_domain}/subnet-[{subnet}]"
+ - Distinguished Name: "/uni/tn-{tenant}/BD-{bridge_domain}/subnet-[{subnet}]"
 GUI Location:
  - Tenants > {tenant} > Networking > Bridge Domains > {bridge_domain} > Subnets
 _______________________________________________________________________________________________________________________

@@ -62,8 +62,8 @@ resource "aci_bgp_timers" "policies_bgp_timers" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.policies_bgp_timers
-  # annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each     = local.policies_bgp_timers
+  annotation   = each.value.annotation != "" ? each.value.annotation : var.annotation
   description  = each.value.description
   gr_ctrl      = each.value.graceful_restart_helper == true ? "helper" : "none"
   hold_intvl   = each.value.hold_interval

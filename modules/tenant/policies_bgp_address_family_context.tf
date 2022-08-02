@@ -66,10 +66,9 @@ resource "aci_bgp_address_family_context" "policies_bgp_address_family_context" 
     aci_tenant.tenants
   ]
   # Missing Local Max ECMP
-  for_each = local.policies_bgp_address_family_context
-  # annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
-  # Bug 804 Submitted
-  # ctrl          = each.value.enable_host_route_leak == true ? "host-rt-leak" : "none"
+  for_each      = local.policies_bgp_address_family_context
+  annotation    = each.value.annotation != "" ? each.value.annotation : var.annotation
+  ctrl          = each.value.enable_host_route_leak == true ? "host-rt-leak" : "none"
   description   = each.value.description
   e_dist        = each.value.ebgp_distance
   i_dist        = each.value.ibgp_distance

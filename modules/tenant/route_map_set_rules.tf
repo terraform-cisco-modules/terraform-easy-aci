@@ -267,24 +267,10 @@ resource "aci_rest_managed" "route_map_rules_set_preference" {
   dn         = "uni/tn-${each.value.tenant}/attr-${each.value.set_rule}/spref"
   class_name = "rtctrlSetPref"
   content = {
-    localPref = each.value.preference # 
+    localPref = each.value.preference
     type      = "local-pref"
   }
 }
-
-# resource "aci_l3out_route_tag_policy" "example" {
-#   depends_on = [
-#     aci_rest_managed.route_map_set_rules
-#   ]
-#   for_each = { for k, v in local.set_rule_rules : k => v }
-#   # for_each   = { for k, v in local.set_rule_rules : k => v if v.type == "set_route_tag" }
-#   tenant_dn   = aci_tenant.tenants[each.value.tenant].id
-#   annotation  = "example"
-#   description = "from terraform"
-#   name        = "example"
-#   name_alias  = "example"
-#   tag         = 1
-# }
 
 resource "aci_rest_managed" "route_map_rules_set_route_tag" {
   depends_on = [

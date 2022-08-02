@@ -62,8 +62,8 @@ resource "aci_end_point_retention_policy" "policies_endpoint_retention" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.policies_endpoint_retention
-  # annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each            = local.policies_endpoint_retention
+  annotation          = each.value.annotation != "" ? each.value.annotation : var.annotation
   bounce_age_intvl    = each.value.bounce_entry_aging_interval
   bounce_trig         = each.value.bounce_trigger
   description         = each.value.description

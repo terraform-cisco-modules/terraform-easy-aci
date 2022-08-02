@@ -51,8 +51,8 @@ resource "aci_ospf_route_summarization" "policies_ospf_route_summarization" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.policies_ospf_route_summarization
-  # annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each           = local.policies_ospf_route_summarization
+  annotation         = each.value.annotation != "" ? each.value.annotation : var.annotation
   cost               = each.value.cost == 0 ? "unspecified" : each.value.cost # 0 to 16777215
   description        = each.value.description
   inter_area_enabled = each.value.inter_area_enabled == true ? "yes" : "no"

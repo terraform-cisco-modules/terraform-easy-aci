@@ -33,6 +33,7 @@ No modules.
 | [aci_any.vz_any](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/any) | resource |
 | [aci_application_epg.application_epgs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/application_epg) | resource |
 | [aci_application_profile.application_profiles](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/application_profile) | resource |
+| [aci_bd_dhcp_label.bridge_domain_dhcp_relay_labels](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/bd_dhcp_label) | resource |
 | [aci_bfd_interface_policy.policies_bfd_interface](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/bfd_interface_policy) | resource |
 | [aci_bgp_address_family_context.policies_bgp_address_family_context](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/bgp_address_family_context) | resource |
 | [aci_bgp_best_path_policy.policies_bgp_best_path](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/bgp_best_path_policy) | resource |
@@ -73,8 +74,6 @@ No modules.
 | [aci_ospf_interface_policy.policies_ospf_interface](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/ospf_interface_policy) | resource |
 | [aci_ospf_route_summarization.policies_ospf_route_summarization](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/ospf_route_summarization) | resource |
 | [aci_ospf_timers.policies_ospf_timers](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/ospf_timers) | resource |
-| [aci_rest_managed.bridge_domain_dhcp_relay_labels](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
-| [aci_rest_managed.bridge_domain_dhcp_relay_options](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.contract_subject_filter](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.contract_to_epgs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |
 | [aci_rest_managed.contract_to_inb_epgs](https://registry.terraform.io/providers/CiscoDevNet/aci/latest/docs/resources/rest_managed) | resource |

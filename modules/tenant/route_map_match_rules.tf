@@ -108,15 +108,22 @@ resource "aci_rest_managed" "route_map_rules_match_regex_community" {
   }
 }
 
+/*_____________________________________________________________________________________________________________________
+
+API Information:
+ - Class: "rtctrlMatchRtDest"
+ - Distinguished Name: "/uni/tn-{tenant}/subj-{match_rule}/dest-[{network}]"
+GUI Location:
+ - Tenants > {tenant} > Networking > Policies > Protocol > Match Rules > {name}
+_______________________________________________________________________________________________________________________
+*/
 resource "aci_match_route_destination_rule" "route_map_rules_match_prefix" {
-  # dn         = "uni/tn-${each.value.tenant}/subj-${each.value.match_rule}/dest-[${each.value.network}]"
-  # class_name = "rtctrlMatchRtDest"
   depends_on = [
     aci_match_rule.route_map_match_rules
   ]
-  for_each  = { for k, v in local.match_rule_rules : k => v if v.type == "match_prefix" }
-  aggregate = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
-  # annotation        = each.value.annotation != "" ? each.value.annotation : var.annotation
+  for_each          = { for k, v in local.match_rule_rules : k => v if v.type == "match_prefix" }
+  aggregate         = each.value.greater_than == 0 && each.value.less_than == 0 ? "no" : "yes"
+  annotation        = each.value.annotation != "" ? each.value.annotation : var.annotation
   match_rule_dn     = aci_match_rule.route_map_match_rules[each.value.match_rule].id
   greater_than_mask = each.value.greater_than
   ip                = each.value.network

@@ -125,9 +125,9 @@ resource "aci_ospf_timers" "policies_ospf_timers" {
   depends_on = [
     aci_tenant.tenants
   ]
-  for_each = local.policies_ospf_timers
-  # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-  bw_ref = each.value.bandwidth_reference
+  for_each   = local.policies_ospf_timers
+  annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
+  bw_ref     = each.value.bandwidth_reference
   ctrl = anytrue(
     [
       each.value.control_knobs[0].enable_name_lookup_for_router_ids,
