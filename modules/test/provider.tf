@@ -9,9 +9,9 @@ terraform {
 }
 
 provider "aci" {
-  password    = var.apicPass
-  url         = "https://${var.apicHostname}"
-  username    = var.apicUser
-  insecure    = true
+  password = var.apicPass
+  url      = "https://${var.apicHostname}"
+  username = var.apicUser
+  insecure = true
 }
 

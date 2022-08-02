@@ -195,35 +195,35 @@ variable "vrfs" {
   ))
 }
 
-variable "snmp_community_1" {
+variable "vrf_snmp_community_1" {
   default     = ""
   description = "SNMP Community 1."
   sensitive   = true
   type        = string
 }
 
-variable "snmp_community_2" {
+variable "vrf_snmp_community_2" {
   default     = ""
   description = "SNMP Community 2."
   sensitive   = true
   type        = string
 }
 
-variable "snmp_community_3" {
+variable "vrf_snmp_community_3" {
   default     = ""
   description = "SNMP Community 3."
   sensitive   = true
   type        = string
 }
 
-variable "snmp_community_4" {
+variable "vrf_snmp_community_4" {
   default     = ""
   description = "SNMP Community 4."
   sensitive   = true
   type        = string
 }
 
-variable "snmp_community_5" {
+variable "vrf_snmp_community_5" {
   default     = ""
   description = "SNMP Community 5."
   sensitive   = true
@@ -376,10 +376,10 @@ resource "aci_snmp_community" "vrf_communities" {
   annotation  = each.value.annotation != "" ? each.value.annotation : var.annotation
   description = each.value.description
   name = length(regexall(
-    5, each.value.community_variable)) > 0 ? var.snmp_community_5 : length(regexall(
-    4, each.value.community_variable)) > 0 ? var.snmp_community_4 : length(regexall(
-    3, each.value.community_variable)) > 0 ? var.snmp_community_3 : length(regexall(
-  2, each.value.community_variable)) > 0 ? var.snmp_community_2 : var.snmp_community_1
+    5, each.value.community_variable)) > 0 ? var.vrf_snmp_community_5 : length(regexall(
+    4, each.value.community_variable)) > 0 ? var.vrf_snmp_community_4 : length(regexall(
+    3, each.value.community_variable)) > 0 ? var.vrf_snmp_community_3 : length(regexall(
+  2, each.value.community_variable)) > 0 ? var.vrf_snmp_community_2 : var.vrf_snmp_community_1
   parent_dn = aci_vrf_snmp_context.vrf_snmp_contexts[each.value.vrf].id
 }
 /*_____________________________________________________________________________________________________________________
