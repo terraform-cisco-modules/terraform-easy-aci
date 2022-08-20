@@ -66,6 +66,12 @@ variable "ndoUser" {
   type        = string
 }
 
+variable "ndo_version" {
+  default     = "5.2(1g)"
+  description = "The Version of Nexus Dashboard Orchestrator Running in the Environment."
+  type        = string
+}
+
 variable "privateKey" {
   default     = ""
   description = "Cisco ACI Private Key for SSL Based Authentication."

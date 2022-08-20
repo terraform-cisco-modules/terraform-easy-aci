@@ -59,7 +59,7 @@ locals {
         for s in v.epg_to_aaeps : {
           aaep                      = s.aaep
           instrumentation_immediacy = s.instrumentation_immediacy != null ? s.instrumentation_immediacy : "on-demand"
-          mode                      = s.mode != null ? s.mode : "regular"
+          mode                      = s.mode != null ? s.mode : "trunk"
           vlans                     = s.vlans != null ? s.vlans : []
         }
       ] : []
@@ -161,7 +161,7 @@ locals {
         epg                       = key
         aaep                      = v.aaep
         instrumentation_immediacy = v.instrumentation_immediacy != null ? v.instrumentation_immediacy : "on-demand"
-        mode                      = v.mode != null ? v.mode : "regular"
+        mode                      = v.mode != null ? v.mode : "trunk"
         vlans                     = v.vlans
       }
     ]
@@ -274,10 +274,10 @@ locals {
           multi_destination_flooding    = v.multi_destination_flooding != null ? v.multi_destination_flooding : "bd-flood"
           pim                           = v.pim != null ? v.pim : false
           pimv6                         = v.pimv6 != null ? v.pimv6 : false
-          tenant                        = value.tenant
+          tenant                        = value.tenant != null ? value.tenant : local.first_tenant
           type                          = v.type != null ? v.type : "regular"
           vrf                           = v.vrf != null ? v.vrf : "default"
-          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : value.tenant
+          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : value.tenant != null ? value.tenant : local.first_tenant
         }
         ] : [
         {
@@ -297,10 +297,10 @@ locals {
           multi_destination_flooding    = "bd-flood"
           pim                           = false
           pimv6                         = false
-          tenant                        = value.tenant
+          tenant                        = value.tenant != null ? value.tenant : local.first_tenant
           type                          = "regular"
           vrf                           = "default"
-          vrf_tenant                    = value.tenant
+          vrf_tenant                    = value.tenant != null ? value.tenant : local.first_tenant
         }
       ]
       l3_configurations = value.l3_configurations != null ? [

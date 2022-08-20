@@ -172,6 +172,7 @@ resource "mso_tenant" "tenants" {
     data.mso_user.ndo_users
   ]
   for_each     = { for k, v in local.tenants : k => v if v.controller_type == "ndo" }
+  description  = each.value.description
   name         = each.key
   display_name = each.key
   dynamic "site_associations" {
