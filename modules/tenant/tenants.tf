@@ -165,6 +165,18 @@ resource "aci_rest_managed" "tenants_global_alias" {
 Nexus Dashboard — Tenants
 _______________________________________________________________________________________________________________________
 */
+data "mso_site" "ndo_sites" {
+  provider = mso
+  for_each = toset(local.ndo_sites)
+  name     = each.key
+}
+
+data "mso_user" "ndo_users" {
+  provider = mso
+  for_each = toset(local.ndo_users)
+  username = each.key
+}
+
 resource "mso_tenant" "tenants" {
   provider = mso
   depends_on = [
