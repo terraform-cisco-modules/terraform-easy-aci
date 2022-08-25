@@ -61,7 +61,7 @@ variable "bridge_domains" {
         {
           associated_l3outs = [
             {
-              l3out         = "default"
+              l3out         = ["default"]
               route_profile = "" # Only one L3out can have a route_profile associated to it for the BD
               /* If undefined the Bridge Domain Tenant will be used
               tenant        = bd.tenant
@@ -197,7 +197,7 @@ variable "bridge_domains" {
       - vrf_tenant                    = "local.first_tenant"
     * l3_configurations: (optional) — Map of Layer 3 Configuration Parameters for the Bridge Domain.
       - associated_l3outs: (optional) — List of L3Outs to Associate to the Bridge Domain.
-        * l3out: (optional) — Name of the L3Out to Associate.
+        * l3out: (optional) — Names of the L3Outs to Associate. One L3Out with APIC, One per site for Nexus Dashboard Orchestrator
         * route_profile: (optional) — Name of a Route Profile to associate to the L3Out.
           - **Note: Only one L3out can have a route_profile associated to it for the BD
         * tenant: (default: bd.tenant) —  The Name of the tenant for the L3Out.  If Undefined the Bridge Domain tenant will be utilized.
@@ -306,7 +306,7 @@ variable "bridge_domains" {
         {
           associated_l3outs = optional(list(object(
             {
-              l3out         = string
+              l3out         = list(string)
               route_profile = optional(string)
               tenant        = optional(string)
             }
@@ -393,11 +393,11 @@ resource "aci_bridge_domain" "bridge_domains" {
   mac                 = each.value.l3_configurations[0].custom_mac_address
   # class: l3extOut
   relation_fv_rs_bd_to_out = length(each.value.l3_configurations[0].associated_l3outs
-  ) > 0 ? [for k, v in each.value.l3_configurations[0].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out}"] : []
+  ) > 0 ? [for k, v in each.value.l3_configurations[0].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out[0]}"] : []
   # class: rtctrlProfile
   relation_fv_rs_bd_to_profile = join(",", [
     for k, v in each.value.l3_configurations[0
-    ].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out}/prof-${v.route_profile}" if v.route_profile != ""
+    ].associated_l3outs : "uni/tn-${v.tenant}/out-${v.l3out[0]}/prof-${v.route_profile}" if v.route_profile != ""
   ])
   # class: monEPGPol
   # relation_fv_rs_bd_to_nd_p = length(
@@ -451,8 +451,8 @@ resource "aci_bd_dhcp_label" "bridge_domain_dhcp_relay_labels" {
     aci_bridge_domain.bridge_domains,
   ]
   for_each         = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
-  bridge_domain_dn = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}"
   annotation       = each.value.annotation != "" ? each.value.annotation : var.annotation
+  bridge_domain_dn = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}"
   name             = each.value.name
   owner            = each.value.scope
   relation_dhcp_rs_dhcp_option_pol = length(compact([each.value.dhcp_option_policy])

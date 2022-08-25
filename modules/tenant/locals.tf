@@ -1590,7 +1590,7 @@ locals {
 
   ndo_sites = flatten([
     for s in local.tenants : [
-      for k, v in s.sites : [ v.site ]
+      for k, v in s.sites : [v.site]
     ]
   ])
 
