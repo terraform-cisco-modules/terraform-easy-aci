@@ -26,6 +26,22 @@ locals {
     }
   }
 
+  application_sites = flatten([
+    for k, v in local.application_profiles : [
+      for s in v.sites : {
+        application_profile = k
+        controller_type     = v.controller_type
+        schema              = v.schema
+        site                = s
+        template            = v.template
+      }
+    ] if v.controller_type == "ndo"
+  ])
+
+  application_profile_sites = {
+    for k, v in local.application_sites : "${v.application_profile}_${v.site}" => v
+  }
+
 
   #__________________________________________________________
   #
@@ -251,11 +267,6 @@ locals {
           names              = v.names
         }
       ] : []
-      policy_source_tenant = value.policy_source_tenant != null ? value.policy_source_tenant : local.first_tenant
-      schema               = value.schema != null ? value.schema : local.first_tenant
-      sites                = value.sites != null ? value.sites : []
-      template             = value.template != null ? value.template : local.first_tenant
-      tenant               = value.tenant != null ? value.tenant : local.first_tenant
       general = value.general != null ? [
         for k, v in value.general : {
           advertise_host_routes         = v.advertise_host_routes != null ? v.advertise_host_routes : false
@@ -277,7 +288,9 @@ locals {
           tenant                        = value.tenant
           type                          = v.type != null ? v.type : "regular"
           vrf                           = v.vrf != null ? v.vrf : "default"
-          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : value.tenant
+          vrf_schema                    = v.vrf_schema != null ? v.vrf_schema : null
+          vrf_template                  = v.vrf_template != null ? v.vrf_template : null
+          vrf_tenant                    = v.vrf_tenant != null ? v.vrf_tenant : value.tenant != null ? value.tenant : local.first_tenant
         }
         ] : [
         {
@@ -297,10 +310,12 @@ locals {
           multi_destination_flooding    = "bd-flood"
           pim                           = false
           pimv6                         = false
-          tenant                        = value.tenant
+          tenant                        = value.tenant != null ? value.tenant : local.first_tenant
           type                          = "regular"
           vrf                           = "default"
-          vrf_tenant                    = value.tenant
+          vrf_schema                    = value.tenant != null ? value.tenant : local.first_tenant
+          vrf_template                  = value.tenant != null ? value.tenant : local.first_tenant
+          vrf_tenant                    = value.tenant != null ? value.tenant : local.first_tenant
         }
       ]
       l3_configurations = value.l3_configurations != null ? [
@@ -330,8 +345,29 @@ locals {
           virtual_mac_address     = "not-applicable"
         }
       ]
+      policy_source_tenant = value.policy_source_tenant != null ? value.policy_source_tenant : local.first_tenant
+      schema               = value.schema != null ? value.schema : local.first_tenant
+      sites                = value.sites != null ? value.sites : []
+      site_length          = value.sites != null ? range(length(value.sites)) : null
+      template             = value.template != null ? value.template : local.first_tenant
+      tenant               = value.tenant != null ? value.tenant : local.first_tenant
     }
   }
+
+  bridge_domain_loop = flatten([
+    for k, v in local.bridge_domains : [
+      for s in v.site_length : {
+        advertise_host_routes = s == 1 ? false : v.general[0].advertise_host_routes
+        bridge_domain         = k
+        controller_type       = v.controller_type
+        l3out                 = element(v.l3_configurations[0].associated_l3outs[0].l3out, s)
+        schema                = v.schema
+        site                  = element(v.sites, s)
+        template              = v.template
+      }
+    ] if v.controller_type == "ndo"
+  ])
+  bridge_domain_sites = { for k, v in local.bridge_domain_loop : "${v.bridge_domain}_${v.site}" => v }
 
   bd_dhcp_relay_labels_loop = flatten([
     for key, value in local.bridge_domains : [
@@ -1524,7 +1560,7 @@ locals {
   schemas = {
     for k, v in var.schemas : k => {
       primary_template = v.primary_template != null ? v.primary_template : local.first_tenant
-      tenant           = v.tenant != null ? v.tenant : local.first_tenant
+      tenant           = v.schema_tenant != null ? v.schema_tenant : local.first_tenant
       templates        = v.templates
     }
   }
@@ -1538,7 +1574,7 @@ locals {
         sites            = v.sites
         tenant           = value.tenant
       }
-    ]
+    ] if value.tenant == local.first_tenant
   ])
   schema_templates = { for k, v in local.schema_templates_loop : "${v.schema}_${v.name}" => v }
 
@@ -1547,13 +1583,12 @@ locals {
     for k, v in local.schema_templates : [
       for s in v.sites : {
         name   = v.name
-        key1   = v.key1
         schema = v.schema
         site   = s
       }
-    ]
+    ] if v.tenant == local.first_tenant
   ])
-  template_sites = { for k, v in local.templates_sites_loop : "${v.key1}_${v.site}" => v }
+  template_sites = { for k, v in local.templates_sites_loop : "${v.schema}_${v.site}" => v }
 
 
   #__________________________________________________________
