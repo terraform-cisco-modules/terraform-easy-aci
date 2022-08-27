@@ -558,21 +558,21 @@ resource "mso_schema_template_bd" "bridge_domains" {
   name                            = each.key
   intersite_bum_traffic           = each.value.advanced_troubleshooting[0].intersite_bum_traffic_allow
   ipv6_unknown_multicast_flooding = each.value.general[0].ipv6_l3_unknown_multicast
-  multi_destination_flooding      = length(regexall(
+  multi_destination_flooding = length(regexall(
     each.value.general[0].multi_destination_flooding, "bd-flood")
     ) > 0 ? "flood_in_bd" : length(regexall(
     each.value.general[0].multi_destination_flooding, "encap-flood")
-    ) > 0 ? "flood_in_encap" : "drop"
-  layer2_unknown_unicast          = each.value.general[0].l2_unknown_unicast
-  layer2_stretch                  = each.value.advanced_troubleshooting[0].intersite_l2_stretch
-  layer3_multicast                = each.value.general[0].pim
-  optimize_wan_bandwidth          = each.value.advanced_troubleshooting[0].optimize_wan_bandwidth
-  schema_id                       = mso_schema.schemas[each.value.schema].id
-  template_name                   = each.value.template
-  unknown_multicast_flooding      = each.value.general[0].l3_unknown_multicast_flooding
-  unicast_routing                 = each.value.l3_configurations[0].unicast_routing
-  virtual_mac_address             = each.value.l3_configurations[0].virtual_mac_address
-  vrf_name                        = each.value.general[0].vrf
+  ) > 0 ? "flood_in_encap" : "drop"
+  layer2_unknown_unicast     = each.value.general[0].l2_unknown_unicast
+  layer2_stretch             = each.value.advanced_troubleshooting[0].intersite_l2_stretch
+  layer3_multicast           = each.value.general[0].pim
+  optimize_wan_bandwidth     = each.value.advanced_troubleshooting[0].optimize_wan_bandwidth
+  schema_id                  = mso_schema.schemas[each.value.schema].id
+  template_name              = each.value.template
+  unknown_multicast_flooding = each.value.general[0].l3_unknown_multicast_flooding
+  unicast_routing            = each.value.l3_configurations[0].unicast_routing
+  virtual_mac_address        = each.value.l3_configurations[0].virtual_mac_address
+  vrf_name                   = each.value.general[0].vrf
   vrf_schema_id = each.value.general[0].vrf != "" && length(compact(
     [each.value.general[0].vrf_schema])
     ) > 0 ? data.mso_schema.schemas[each.value.general[0].vrf_schema].id : length(compact(
@@ -622,12 +622,12 @@ resource "mso_schema_template_bd_subnet" "bridge_domain_subnets" {
   bd_name            = each.value.bridge_domain
   description        = each.value.description
   ip                 = each.value.gateway_ip
-  no_default_gateway = each.value.subnet_control["no_default_svi_gateway"]
+  no_default_gateway = each.value.subnet_control[0]["no_default_svi_gateway"]
   schema_id          = mso_schema.schemas[each.value.schema].id
-  scope              = each.value.scope["advertise_externally"] == true ? "public" : "private"
+  scope              = each.value.scope[0]["advertise_externally"] == true ? "public" : "private"
   template_name      = each.value.template
-  shared             = each.value.scope["shared_between_vrfs"]
-  querier            = each.value.subnet_control["querier_ip"]
+  shared             = each.value.scope[0]["shared_between_vrfs"]
+  querier            = each.value.subnet_control[0]["querier_ip"]
 }
 
 

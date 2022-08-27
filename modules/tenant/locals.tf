@@ -434,6 +434,7 @@ locals {
             querier_ip             = false
           }
         ]
+        template                    = value.template
         treat_as_virtual_ip_address = v.treat_as_virtual_ip_address != null ? v.treat_as_virtual_ip_address : false
       }
     ]

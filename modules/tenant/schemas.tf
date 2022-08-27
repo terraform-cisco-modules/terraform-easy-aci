@@ -43,7 +43,7 @@ resource "mso_schema" "schemas" {
   depends_on = [
     mso_tenant.tenants
   ]
-  for_each      = { for k, v in local.schemas: k => v if v.tenant == local.first_tenant }
+  for_each      = { for k, v in local.schemas : k => v if v.tenant == local.first_tenant }
   name          = each.key
   tenant_id     = mso_tenant.tenants[each.value.tenant].id
   template_name = each.value.primary_template
