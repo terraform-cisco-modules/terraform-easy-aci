@@ -229,7 +229,11 @@ resource "mso_tenant" "tenants" {
     }
   }
   dynamic "site_associations" {
-    for_each = { for k, v in each.value.sites : k => v if v.vendor == "cisco" }
+    for_each = {
+      for k, v in each.value.sites : k => v if v.vendor == "cisco" && length(
+        regexall("^(common|infra)$", each.key)
+      ) == 0
+    }
     content {
       site_id = data.mso_site.ndo_sites[site_associations.value.site].id
     }

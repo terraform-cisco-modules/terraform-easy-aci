@@ -332,7 +332,7 @@ locals {
           custom_mac_address      = v.custom_mac_address != null ? v.custom_mac_address : ""
           link_local_ipv6_address = v.link_local_ipv6_address != null ? v.link_local_ipv6_address : "::"
           subnets                 = v.subnets != null ? v.subnets : {}
-          virtual_mac_address     = v.virtual_mac_address != null ? v.virtual_mac_address : "not-applicable"
+          virtual_mac_address     = v.virtual_mac_address != null ? v.virtual_mac_address : ""
         }
         ] : [
         {
@@ -1560,22 +1560,26 @@ locals {
 
   schemas = {
     for k, v in var.schemas : k => {
-      primary_template = v.primary_template != null ? v.primary_template : local.first_tenant
-      tenant           = v.schema_tenant != null ? v.schema_tenant : local.first_tenant
-      templates        = v.templates
+      templates = v.templates != null ? [
+        for key, value in v.templates : {
+          name   = value.name != null ? value.name : local.first_tenant
+          schema = k
+          sites  = value.sites
+          tenant = value.tenant != null ? value.tenant : local.first_tenant
+        }
+      ] : []
     }
   }
 
   schema_templates_loop = flatten([
     for key, value in local.schemas : [
       for k, v in value.templates : {
-        name             = v.name != null ? v.name : local.first_tenant
-        primary_template = value.primary_template
-        schema           = key
-        sites            = v.sites
-        tenant           = value.tenant
+        name   = v.name
+        schema = key
+        sites  = v.sites
+        tenant = v.tenant
       }
-    ] if value.tenant == local.first_tenant
+    ]
   ])
   schema_templates = { for k, v in local.schema_templates_loop : "${v.schema}_${v.name}" => v }
 
@@ -1589,7 +1593,7 @@ locals {
       }
     ] if v.tenant == local.first_tenant
   ])
-  template_sites = { for k, v in local.templates_sites_loop : "${v.schema}_${v.site}" => v }
+  template_sites = { for k, v in local.templates_sites_loop : "${v.schema}_${v.name}_${v.site}" => v }
 
 
   #__________________________________________________________
@@ -1751,5 +1755,18 @@ locals {
       global_alias = v.global_alias
     } if v.global_alias != ""
   }
+
+  vrf_sites_loop = flatten([
+    for k, v in local.vrfs : [
+      for s in v.sites : {
+        controller_type = v.controller_type
+        schema          = v.schema
+        site            = s
+        template        = v.template
+        vrf             = k
+      }
+    ] if v.controller_type == "ndo"
+  ])
+  vrf_sites = { for k, v in local.vrf_sites_loop : "${v.vrf}_${v.site}" => v }
 
 }

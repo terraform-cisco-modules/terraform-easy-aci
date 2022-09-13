@@ -314,19 +314,6 @@ resource "aci_vrf" "vrfs" {
   tenant_dn = aci_tenant.tenants[each.value.tenant].id
 }
 
-resource "mso_schema_site_vrf" "vrfs" {
-  provider = mso
-  depends_on = [
-    aci_tenant.tenants,
-    mso_schema.schemas
-  ]
-  for_each      = { for k, v in local.vrfs : k => v if v.controller_type == "ndo" }
-  template_name = each.value.template
-  schema_id     = mso_schema.schemas[each.value.schema].id
-  site_id       = data.mso_site.ndo_sites[each.value.site].id
-  vrf_name      = each.key
-}
-
 resource "mso_schema_template_vrf" "vrfs" {
   provider = mso
   depends_on = [
@@ -339,7 +326,20 @@ resource "mso_schema_template_vrf" "vrfs" {
   name             = each.key
   display_name     = each.key
   layer3_multicast = each.value.layer3_multicast
-  vzany            = length(each.value.contracts) > 0 ? true : false
+  vzany            = length(each.value.epg_esg_collection_for_vrfs[0].contracts) > 0 ? true : false
+}
+
+resource "mso_schema_site_vrf" "vrfs" {
+  provider = mso
+  depends_on = [
+    aci_tenant.tenants,
+    mso_schema.schemas
+  ]
+  for_each      = { for k, v in local.vrf_sites : k => v if v.controller_type == "ndo" }
+  schema_id     = mso_schema.schemas[each.value.schema].id
+  site_id       = data.mso_site.ndo_sites[each.value.site].id
+  template_name = each.value.template
+  vrf_name      = each.value.vrf
 }
 
 /*_____________________________________________________________________________________________________________________
@@ -433,7 +433,7 @@ resource "mso_schema_template_vrf_contract" "vzany_contracts" {
     each.value.tenant, each.value.contract_tenant)
     ) > 0 ? mso_schema.schemas[each.value.contract_schema].id : length(regexall(
     "[[:alnum:]]+", each.value.contract_tenant)
-  ) > 0 ? local.schemas[each.value.contract_schema].id : ""
+  ) > 0 ? data.mso_schema.schemas[each.value.contract_schema].id : ""
   contract_template_name = each.value.contract_template
 }
 

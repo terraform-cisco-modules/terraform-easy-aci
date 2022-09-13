@@ -406,7 +406,7 @@ resource "aci_application_epg" "application_epgs" {
 resource "mso_schema_template_anp_epg" "application_epgs" {
   provider = mso
   depends_on = [
-    mso_tenant.tenants
+    mso_schema_template_anp.application_profiles
   ]
   for_each                   = { for k, v in local.application_epgs : k => v if v.controller_type == "ndo" }
   anp_name                   = each.value.application_profile

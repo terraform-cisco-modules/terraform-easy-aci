@@ -96,7 +96,7 @@ resource "mso_schema_template_anp" "application_profiles" {
   provider = mso
   depends_on = [
     mso_schema.schemas,
-    mso_schema_template.templates
+    mso_schema_site.sites
   ]
   for_each     = { for k, v in local.application_profiles : k => v if v.controller_type == "ndo" }
   display_name = each.key
@@ -108,8 +108,7 @@ resource "mso_schema_template_anp" "application_profiles" {
 resource "mso_schema_site_anp" "application_profiles" {
   provider = mso
   depends_on = [
-    mso_schema.schemas,
-    mso_schema_template.templates
+    mso_schema_template_anp.application_profiles
   ]
   for_each      = { for k, v in local.application_profile_sites : k => v if v.controller_type == "ndo" }
   anp_name      = each.value.application_profile

@@ -467,34 +467,6 @@ resource "aci_bd_dhcp_label" "bridge_domain_dhcp_relay_labels" {
   # tag              = each.value.tag
 }
 
-# resource "aci_rest_managed" "bridge_domain_dhcp_relay_labels" {
-#   depends_on = [
-#     aci_bridge_domain.bridge_domains,
-#   ]
-#   for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" }
-#   class_name = "dhcpLbl"
-#   dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}"
-#   content = {
-#     # annotation = each.value.annotation != "" ? each.value.annotation : var.annotation
-#     name  = each.value.name
-#     owner = each.value.scope
-#   }
-# }
-# 
-# resource "aci_rest_managed" "bridge_domain_dhcp_relay_options" {
-#   depends_on = [
-#     aci_bridge_domain.bridge_domains,
-#     aci_rest_managed.bridge_domain_dhcp_relay_labels
-#   ]
-#   for_each   = { for k, v in local.bridge_domain_dhcp_relay_labels : k => v if v.controller_type == "apic" && v.dhcp_option_policy != "" }
-#   class_name = "dhcpRsDhcpOptionPol"
-#   dn         = "uni/tn-${each.value.tenant}/BD-${each.value.bridge_domain}/dhcplbl-${each.value.name}/rsdhcpOptionPol"
-#   content = {
-#     tDn = "uni/tn-${each.value.tenant}/dhcpoptpol-${each.value.dhcp_option_policy}"
-#   }
-# }
-
-
 /*_____________________________________________________________________________________________________________________
 
 API Information:
@@ -541,7 +513,7 @@ resource "mso_schema_template_bd" "bridge_domains" {
   provider = mso
   depends_on = [
     mso_schema.schemas,
-    mso_schema_template.templates
+    mso_schema_site.sites
   ]
   for_each     = { for k, v in local.bridge_domains : k => v if v.controller_type == "ndo" }
   arp_flooding = each.value.general[0].arp_flooding
@@ -588,8 +560,7 @@ resource "mso_schema_template_bd" "bridge_domains" {
 resource "mso_schema_site_bd" "bridge_domains" {
   provider = mso
   depends_on = [
-    mso_schema.schemas,
-    mso_schema_template.templates
+    mso_schema_template_bd.bridge_domains
   ]
   for_each      = { for k, v in local.bridge_domain_sites : k => v if v.controller_type == "ndo" }
   bd_name       = each.value.bridge_domain
@@ -602,8 +573,7 @@ resource "mso_schema_site_bd" "bridge_domains" {
 resource "mso_schema_site_bd_l3out" "bridge_domain_l3outs" {
   provider = mso
   depends_on = [
-    mso_schema.schemas,
-    mso_schema_template.templates
+    mso_schema_site_bd.bridge_domains
   ]
   for_each      = { for k, v in local.bridge_domain_sites : k => v if v.controller_type == "ndo" }
   bd_name       = each.key
