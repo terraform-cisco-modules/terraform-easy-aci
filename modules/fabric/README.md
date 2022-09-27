@@ -55,7 +55,7 @@ This module will create the following Access Policies in an APIC Controller:
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 | <a name="requirement_aci"></a> [aci](#requirement\_aci) | >= 2.1.0 |
 | <a name="requirement_mso"></a> [mso](#requirement\_mso) | >= 0.6.0 |
 

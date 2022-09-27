@@ -1,7 +1,3 @@
-terraform {
-  experiments = [module_variable_optional_attrs]
-}
-
 variable "annotation" {
   default     = ""
   description = "workspace tag value."
