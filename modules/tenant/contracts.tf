@@ -266,7 +266,7 @@ resource "aci_rest_managed" "oob_contracts" {
 /*_____________________________________________________________________________________________________________________
 
 API Information:
- - Class: "vzBrCP"
+ - Class: "vzTaboo"
  - Distinguished Name: "uni/tn-{tenant}/taboo-{contract}"
 GUI Location:
  - Tenants > {tenant} > Contracts > Taboos: {contract}
