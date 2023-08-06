@@ -1,3 +1,13 @@
+# Archived
+
+This module is superseeded by a newer more simplified Easy ACI based on a YAML Schema Model.
+
+## ![Easy ACI](https://github.com/terraform-cisco-modules/easy-aci)
+
+This Module will be archived in September as I am no longer maintaining it.  It is surperseeded above.
+
+The two models were so different I didn't merge them here.
+
 # ACI Module - Easy ACI
 
 ## Use Cases
